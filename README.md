@@ -24,3 +24,6 @@ Copy paste the following code where you want the app:
 ###Advanced
 
 ##The server (if you don't want to use the public server)
+
+How to help
+===========
