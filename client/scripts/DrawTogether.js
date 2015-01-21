@@ -3,11 +3,6 @@ function DrawTogether (container, settings) {
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
-	// Set tool values
-	this.current_tool = this.TOOLS.BRUSH;
-	this.current_color = [125, 125, 125];
-	this.current_size = 5;
-
 	// Connect to the server and bind socket events
 	this.socket = io(this.settings.server);
 	this.bindSocketHandlers(this.socket);
@@ -18,22 +13,33 @@ function DrawTogether (container, settings) {
 
 DrawTogether.prototype.defaultSettings = {
 	server: "http://127.0.0.1:8080",       // Server to connect to, best to add http://
-	mode: "public"                         // Mode: public, private, invite, game
+	mode: "public",                        // Mode: public, private, invite, game
 	room: "main",                          // Room to join at startup
 	locked_room: false                     // Is the user allowed to change the room?
 	                                       // If the room is full it retries after 45sec
 };
 
-DrawTogheter.prototype.TOOLS = {
-	"GRAB": 0,
-	"LINE": 1,
-	"BRUSH": 2,
-	"BLOCK": 3
-};
-
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
 	// Bind all socket events
-	socket.on();
+	socket.on("connec", function () {
+		console.log("Connected!");
+	});
+};
+
+DrawTogether.prototype.sendMessage = function sendMessage () {
+
+};
+
+DrawTogether.prototype.changeRoom = function changeRoom () {
+
+};
+
+DrawTogether.prototype.changeMode = function changeMode () {
+
+};
+
+DrawTogether.prototype.changeName = function changeName () {
+	
 };
 
 DrawTogether.prototype.initDom = function initDom () {
@@ -45,60 +51,37 @@ DrawTogether.prototype.initDom = function initDom () {
 
 DrawTogether.prototype.createChat = function createChat () {
 	var chatContainer = this.container.appendChild(document.createElement("div"));
-
+	chatContainer.className = "drawtogether-chat-container";
+	this.chat = new Chat(chatContainer, this.sendMessage.bind(this));
 };
 
 DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	var drawContainer = this.container.appendChild(document.createElement("div"));
+	drawContainer.className = "drawtogether-paint-container";
+	this.paint = new Paint(drawContainer);
+	this.paint.addEventListener("drawing", function (event) {
+		this.sendDrawing(event.drawing, function () {
+			event.removeDrawing();
+		});
+	}.bind(this));
 };
 
 DrawTogether.prototype.createControls = function createControls () {
 	var controlContainer = this.container.appendChild(document.createElement("div"));
-	var controls = this.createControlArray();
-	this.controls = new Controls(controls, this.container).controls;
+	controlContainer.className = "drawtogether-control-container";
+	this.controls = new Controls(controlContainer, this.createControlArray());
+};
+
+DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
+	this.socket.emit("drawing", callback)
 };
 
 DrawTogether.prototype.createControlArray = function createControlArray () {
 	return [{
-		name: "grab",
-		type: "button",
-		image: "images/icons/grab.png",
-		title: "Change tool to grab",
-		value: "GRAB",
-		action: this.changeTool.bind(this)
-	}, {
-		name: "line",
-		type: "button",
-		image: "images/icons/line.png",
-		title: "Change tool to line",
-		value: "LINE",
-		action: this.changeTool.bind(this)
-	}, {
-		name: "brush",
-		type: "button",
-		image: "images/icons/brush.png",
-		title: "Change tool to brush",
-		value: "BRUSH",
-		action: this.changeTool.bind(this)
-	}, {
-		name: "block",
-		type: "button",
-		image: "images/icons/block.png",
-		title: "Change tool to block",
-		value: "BLOCK",
-		action: this.changeTool.bind(this)
-	}, {
-		name: "tool-size",
-		type: "integer",
-		min: 1,
-		max: 50,
-		value: 5,
-		title: "Change the size of the tool",
-		action: this.changeToolSize.bind(this)
-	}, {
 		name: "room",
 		type: "text",
 		value: "",
+		placeholder: "room",
 		title: "Change the room",
 		button: "Change room",
 		action: this.changeRoom.bind(this)
@@ -113,19 +96,19 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "private",
 		type: "button",
 		text: "Random one-on-one",
-		value: "private"
+		value: "private",
 		action: this.changeMode.bind(this)
 	}, {
 		name: "invite",
 		type: "button",
 		text: "Friend room",
-		value: "invite"
+		value: "invite",
 		action: this.changeMode.bind(this)
 	}, {
 		name: "game",
 		type: "button",
 		text: "Play game",
-		value: "game"
+		value: "game",
 		action: this.changeMode.bind(this)
 	}];
 };

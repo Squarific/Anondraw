@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html style="padding:0; margin:0; height:100%;">
+	<head>
+		<link rel="stylesheet" href="DrawTogether.min.css">
+		<title>DrawTogether</title>
+		<meta name="viewport" content="width=device-width">
+		<meta name="description" content="Draw together with other people online">
+	</head>
+	<body style="position:relative; padding:0; margin:0; min-height: 100%;">
+		<div id="fullscreen" style="position:absolute; left:0; right:0; top:0; bottom:0;"></div>
+		<script src="jquery.js"></script>
+		<script src="DrawTogether.min.js"></script>
+		<script type="text/javascript">
+			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
+				server: "http://drawtogether.squarific.com"
+			});
+		</script>
+	</body>
+</html>

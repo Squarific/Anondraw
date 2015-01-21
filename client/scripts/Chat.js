@@ -3,7 +3,7 @@ function Chat (container, onmessage) {
 	this.messagesDom.classList.add("messagecontainer");
 
 	this.inputContainerDom = container.appendChild(document.createElement("div"));
-	this.inputContainerDom.classList.add("inputcontainer-poll");
+	this.inputContainerDom.classList.add("inputcontainer");
 
 	this.input = this.inputContainerDom.appendChild(document.createElement("input"));
 	this.input.placeholder = "Chatmessage here...";
@@ -16,7 +16,6 @@ function Chat (container, onmessage) {
 
 	button = this.inputContainerDom.appendChild(document.createElement("div"));
 	button.classList.add("button-small");
-	button.classList.add("voteoption");
 
 	button.appendChild(document.createTextNode("Send"));
 	button.addEventListener("click", this.sendChat.bind(this));
@@ -27,7 +26,6 @@ function Chat (container, onmessage) {
 Chat.prototype.addMessage = function addMessage (user, message) {
 		max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 		old_scroll = Math.ceil(this.messagesDom.scrollTop);
-		console.log(max_scroll, old_scroll);
 		
 		messageDom = this.messagesDom.appendChild(document.createElement("div"));
 		messageDom.classList.add("chat-message");
