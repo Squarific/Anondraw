@@ -30,7 +30,7 @@ function rebuildJs () {
 
 		var minimizedFile = "";
 		for (var fKey = 0; fKey < files.length; fKey++) {
-			minimizedFile += fs.readFileSync("client/scripts/" + files[fKey], {encoding: "utf-8"});
+			minimizedFile += fs.readFileSync("client/scripts/" + files[fKey], {encoding: "utf-8"}) + "\n";
 		}
 
 		fs.writeFile("client/DrawTogether.min.js", minimizedFile, function (err) {
@@ -46,7 +46,7 @@ function rebuildCss () {
 
 		var minimizedFile = "";
 		for (var fKey = 0; fKey < files.length; fKey++) {
-			minimizedFile += fs.readFileSync("client/css/" + files[fKey], {encoding: "utf-8"});
+			minimizedFile += fs.readFileSync("client/css/" + files[fKey], {encoding: "utf-8"}) + "\n";
 		}
 
 		fs.writeFile("client/DrawTogether.min.css", minimizedFile, function (err) {
