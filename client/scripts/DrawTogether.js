@@ -3,12 +3,12 @@ function DrawTogether (container, settings) {
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
+	// Initialize the dom elements
+	this.initDom();
+
 	// Connect to the server and bind socket events
 	this.socket = io(this.settings.server);
 	this.bindSocketHandlers(this.socket);
-
-	// Initialize the dom elements
-	this.initDom();
 }
 
 DrawTogether.prototype.defaultSettings = {
@@ -19,27 +19,98 @@ DrawTogether.prototype.defaultSettings = {
 	                                       // If the room is full it retries after 45sec
 };
 
+DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
+DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
+
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
 	// Bind all socket events
-	socket.on("connec", function () {
-		console.log("Connected!");
+
+	socket.on("connect", function () {
+		this.chat.addMessage("CLIENT", "Connected to " + this.settings.server);
+
+		if (!localStorage.getItem("drawtogether-name"))
+			this.changeName("changeroom", localStorage.getItem("drawtogether-name"));
+	});
+
+	socket.on("drawings", function (data) {
+		this.setRoom(data.room);
+		this.paint.clear();
+		this.paint.drawDrawings(this.decodeDrawings(data.drawings));
+	});
+
+	socket.on("drawing", function (drawing) {
+		this.paint.drawDrawing(this.decodeDrawing(drawing));
+	})
+
+	socket.on("initname", function (name) {
+		// Server gave us a guest name, set name only
+		// if we didn't ask for a different one
+		if (!localStorage.getItem("drawtogether-name")) {
+			this.setName(name);
+		}
+	});
+
+	socket.on("forcename", this.setName)
+
+	socket.on("chatmessage", function (data) {
+		var data = data || {};
+		this.chat.addMessage(data.user, data.message);
 	});
 };
 
-DrawTogether.prototype.sendMessage = function sendMessage () {
-
+DrawTogether.prototype.sendMessage = function sendMessage (message) {
+	socket.emit("chatmessage", message);
 };
 
-DrawTogether.prototype.changeRoom = function changeRoom () {
-
+DrawTogether.prototype.changeRoom = function changeRoom (room) {
+	socket.emit("changeroom", room);
 };
 
-DrawTogether.prototype.changeMode = function changeMode () {
-
+DrawTogether.prototype.changeMode = function changeMode (mode) {
+	socket.emit("changemode", mode);
 };
 
-DrawTogether.prototype.changeName = function changeName () {
-	
+DrawTogether.prototype.changeName = function changeName (name) {
+	socket.emit("changename", name);
+	localStorage.setItem("drawtogether-name", name);
+};
+
+DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
+	socket.emit("drawing", this.encodeDrawing(drawing), callback);
+};
+
+DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
+	var newDrawing = [this.drawingTypesByName[drawing.type], drawing.x, drawing.y, drawing.size, drawing.color];
+	if (drawing.x1) newDrawing.push(drawing.x1);
+	if (drawing.y1) newDrawing.push(drawing.y1);
+	return newDrawing; 
+};
+
+DrawTogether.prototype.decodeDrawing = function decodeDrawing (drawing) {
+	var newDrawing = {
+		type: drawing[0],
+		x: drawing[1],
+		y: drawing[2],
+		size: drawing[3],
+		color: drawing[4]
+	};
+
+	if (drawing[5]) newDrawing.x1 = drawing[5];
+	if (drawing[6]) newDrawing.y1 = drawing[6];
+};
+
+DrawTogether.prototype.decodeDrawings = function decodeDrawings (drawings) {
+	for (var dKey = 0; dKey < drawings.length; dKey++) {
+		this.decodeDrawing(drawings[dKey]);
+	}
+	return drawings[dKey];
+};
+
+DrawTogether.prototype.setName = function setName (name) {
+	// Set the input field to our username, mention in chat and save to storage
+	this.controls.byName.name.input.value = name;
+	this.chat.addMessage("CLIENT", "Name set to '" + name + "'");
+	localStorage.setItem("drawtogether-name", name);
 };
 
 DrawTogether.prototype.initDom = function initDom () {
@@ -60,6 +131,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	drawContainer.className = "drawtogether-paint-container";
 	this.paint = new Paint(drawContainer);
 	this.paint.addEventListener("drawing", function (event) {
+		console.log(event);
 		this.sendDrawing(event.drawing, function () {
 			event.removeDrawing();
 		});
@@ -88,7 +160,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 	}, {
 		name: "name",
 		type: "text",
-		value: "",
+		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
 		button: "Change name",
 		action: this.changeName.bind(this)
