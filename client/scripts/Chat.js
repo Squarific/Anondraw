@@ -7,6 +7,7 @@ function Chat (container, onmessage) {
 
 	this.input = this.inputContainerDom.appendChild(document.createElement("input"));
 	this.input.placeholder = "Chatmessage here...";
+	this.input.className = "drawtogheter-chat-input"
 	this.input.addEventListener("keypress", function (event) {
 		if (event.keyCode == 13) {
 			this.sendChat();

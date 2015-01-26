@@ -1,4 +1,97 @@
+.drawtogether-chat-container {
+	position:absolute;
+	right:0;
+	top:0;
+	bottom:0;
+	min-width:300px;
+	width:20%;
+	background:gray;
+}
 
+.drawtogether-paint-container {
+	position:absolute;
+	top:50px;
+	left:0;
+	bottom:0;
+	width:80%;
+	min-width:300px;
+}
+
+.drawtogether-control-container {
+	box-sizing:border-box;
+	width:80%;
+	height:50px;
+	background:black;
+}
+
+.control-button {
+	display:inline-block;
+	box-sizing:border-box;
+	background:gray;
+	height:50px;
+	line-height:50px;
+	text-align:center;
+	vertical-align:middle;
+	padding:3px;
+	margin-left:5px;
+	margin-right:5px;
+	color:white;
+}
+
+.control-text-input {
+	margin-left:10px;
+	margin-right:10px;
+	font-size:24px;
+}
+
+.inputcontainer {
+	position:absolute;
+	bottom:0;
+	left:0;
+	height:50px;
+	width:100%;
+}
+
+.drawtogheter-chat-input {
+	position:absolute;
+	top:0;
+	left:0;
+
+	box-sizing:border-box;
+	font-size:24px;
+	height:50px;
+	width:80%;
+	margin:0;
+}
+
+.messagecontainer {
+	height:calc(100% - 50px);
+}
+
+.button-small {
+	display:inline-block;
+	background:black;
+	text-align:center;
+	color:white;
+
+	position:absolute;
+	top:0;
+	right:0;
+
+	box-sizing:border-box;
+	height:50px;
+	width:20%;
+	line-height:50px;
+}
+
+.control-integer {
+	display:inline-block;
+}
+
+.control-container {
+	display:inline-block;
+	background:rgb(84, 84, 84);
+}
 .paint-canvas {
 	display:block;
 	position:absolute;
