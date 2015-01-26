@@ -3,9 +3,8 @@
 	right:0;
 	top:0;
 	bottom:0;
-	min-width:300px;
-	width:20%;
-	background:gray;
+	width:30%;
+	background:rgb(145, 163, 173);
 }
 
 .drawtogether-paint-container {
@@ -13,29 +12,49 @@
 	top:50px;
 	left:0;
 	bottom:0;
-	width:80%;
+	width:70%;
 	min-width:300px;
 }
 
 .drawtogether-control-container {
 	box-sizing:border-box;
-	width:80%;
+	width:70%;
 	height:50px;
-	background:black;
+	background:rgb(118, 133, 141);
 }
 
 .control-button {
 	display:inline-block;
 	box-sizing:border-box;
-	background:gray;
+
 	height:50px;
 	line-height:50px;
 	text-align:center;
 	vertical-align:middle;
+
 	padding:3px;
+	padding-left:10px;
+	padding-right:10px;
+
 	margin-left:5px;
 	margin-right:5px;
+
+	background:rgb(43, 69, 91);
 	color:white;
+	cursor:pointer;
+}
+
+.control-button:hover {
+	background:rgb(36, 56, 73);
+}
+
+.drawtogether-paint-container .control-button {
+	margin:0;
+}
+
+.control-integer-input {
+	box-sizing:border-box;
+	height:50px;
 }
 
 .control-text-input {
@@ -70,7 +89,7 @@
 
 .button-small {
 	display:inline-block;
-	background:black;
+	background:rgb(43, 69, 91);
 	text-align:center;
 	color:white;
 
@@ -82,6 +101,11 @@
 	height:50px;
 	width:20%;
 	line-height:50px;
+	cursor:pointer;
+}
+
+.button-small:hover {
+	background:rgb(36, 56, 73);
 }
 
 .control-integer {
@@ -89,6 +113,22 @@
 }
 
 .control-container {
+	position:relative;
 	display:inline-block;
 	background:rgb(84, 84, 84);
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.sp-replacer {
+	box-sizing:border-box;
+	height:50px;
+}
+
+.sp-preview {
+	height:35px !important;
 }

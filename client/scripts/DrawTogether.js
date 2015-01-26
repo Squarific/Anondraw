@@ -153,13 +153,14 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "room",
 		type: "text",
 		value: "",
-		placeholder: "room",
+		placeholder: "Room",
 		title: "Change the room",
 		button: "Change room",
 		action: this.changeRoom.bind(this)
 	}, {
 		name: "name",
 		type: "text",
+		placeholder: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
 		button: "Change name",
