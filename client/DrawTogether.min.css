@@ -5,6 +5,8 @@
 	bottom:0;
 	width:30%;
 	background:rgb(145, 163, 173);
+
+	overflow:hidden;
 }
 
 .drawtogether-paint-container {
@@ -14,6 +16,8 @@
 	bottom:0;
 	width:70%;
 	min-width:300px;
+
+	overflow:hidden;
 }
 
 .drawtogether-control-container {
@@ -21,6 +25,8 @@
 	width:70%;
 	height:50px;
 	background:rgb(118, 133, 141);
+
+	overflow:hidden;
 }
 
 .control-button {
