@@ -1,4 +1,5 @@
 var mysql = require("mysql");
+var imgur = require("imgur");
 
 var database = mysql.createConnection({
 	host: "localhost",
@@ -12,4 +13,6 @@ var DrawTogether = require("./drawtogether.js");
 
 var io = require("socket.io")(8080);
 var drawTogether = new DrawTogether(database);
-var protocol = new Protocol(io, drawTogether);
+imgur.setClientId("8fd93ca8e547c10");
+
+var protocol = new Protocol(io, drawTogether, imgur);

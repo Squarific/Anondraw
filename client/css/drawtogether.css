@@ -9,6 +9,52 @@
 	overflow:hidden;
 }
 
+.drawtogether-share-url {
+	background:rgb(46, 91, 43);
+	padding:10px;
+	color:white;
+	margin-top:10px;
+	font-size:24px;
+}
+
+.drawtogether-share-url a {
+	color:white;
+}
+
+.drawtogether-preview-canvas {
+	background:white;
+	margin-top:10px;
+}
+
+.drawtogether-button {
+	display:block;
+	background:rgb(43, 69, 91);
+	margin-top:5px;
+	margin-bottom:5px;
+	padding:20px;
+	text-align:center;
+	color:white;
+	cursor:pointer;
+	text-decoration:none;
+}
+
+.drawtogether-button:hover {
+	background:rgb(55, 87, 113);
+}
+
+.drawtogether-sharewindow {
+	position:fixed;
+	right:25%;
+	top:10%;
+	left:25%;
+	text-align:center;
+	display:none;
+	background:rgba(179, 194, 202, 0.98);
+	max-height:80%;
+	overflow-y:auto;
+	border:1px solid black;
+}
+
 .drawtogether-paint-container {
 	position:absolute;
 	top:50px;

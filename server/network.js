@@ -1,6 +1,7 @@
-function Protocol (io, drawtogether) {
+function Protocol (io, drawtogether, imgur) {
 	this.io = io;
 	this.drawTogether = drawtogether;
+	this.imgur = imgur;
 	this.bindIO();
 }
 
@@ -41,6 +42,23 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
+		socket.on("uploadimage", function (base64, callback) {
+			callback = callback || function () {};
+			protocol.imgur.uploadBase64(base64)
+			.then(function (json) {
+				console.log("[IMAGE UPLOAD] " + socket.request.connection.remoteAddress + " " + json.data.link);
+				callback({
+					url: json.data.link
+				});
+			})
+			.catch(function (err) {
+				console.error("[IMAGE UPLOAD][ERROR] " + socket.request.connection.remoteAddress + " " + err.message);
+				callback({
+					error: "Something went wrong while trying to upload the file to imgur."
+				});
+			});
+		});
+
 		socket.on("changename", function (name) {
 			// Change the username
 			console.log("[NAME CHANGE] " + socket.username + " to " + name);
@@ -77,7 +95,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			// User wants to change hes room, subscribe the socket to the
 			// given room, tell the user he is subscribed and send the drawing.
 
-			console.log("[ROOM CHANGE] " + socket.room + " to " + room);
+			console.log("[ROOM CHANGE] " + socket.username + " changed from " + socket.room + " to " + room);
 
 			socket.leave(socket.room);
 			socket.join(room);
