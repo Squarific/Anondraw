@@ -30,7 +30,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.chat.addMessage("CLIENT", "Connected to " + self.settings.server);
 
 		if (!localStorage.getItem("drawtogether-name"))
-			self.changeName("changeroom", localStorage.getItem("drawtogether-name"));
+			self.changeName(localStorage.getItem("drawtogether-name"));
 
 		self.changeRoom(self.settings.room);
 	});
@@ -47,6 +47,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.setRoom(data.room);
 		self.paint.clear();
 		self.paint.drawDrawings("public", self.decodeDrawings(data.drawings));
+		self.chat.addMessage("CLIENT", "===== READY TO DRAW =====");
 	});
 
 	socket.on("drawing", function (drawing) {
@@ -110,11 +111,13 @@ DrawTogether.prototype.decodeDrawing = function decodeDrawing (drawing) {
 
 	if (drawing[5]) newDrawing.x1 = drawing[5];
 	if (drawing[6]) newDrawing.y1 = drawing[6];
+
+	return newDrawing;
 };
 
 DrawTogether.prototype.decodeDrawings = function decodeDrawings (drawings) {
 	for (var dKey = 0; dKey < drawings.length; dKey++) {
-		this.decodeDrawing(drawings[dKey]);
+		drawings[dKey] = this.decodeDrawing(drawings[dKey]);
 	}
 	return drawings;
 };
@@ -178,7 +181,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
-		button: "Change name"
+		action: function () {}
 	}, {
 		name: "name-button",
 		type: "button",
