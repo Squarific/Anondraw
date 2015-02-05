@@ -5,7 +5,7 @@ function Protocol (io, drawtogether) {
 }
 
 Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
-	console.log("[CHAT] [" + room + "]" + data.user + ": " + data.message);
+	console.log("[CHAT][" + room + "] " + data.user + ": " + data.message);
 	this.io.to(room).emit("chatmessage", data);
 };
 
@@ -22,6 +22,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.username = "Anonymouse";
 		socket.emit("initname", socket.username);
+
+		console.log("[CONNECTION] " + socket.request.connection.remoteAddress);
 
 		socket.on("chatmessage", function (message) {
 			// User is trying to send a message, if he is in a room
@@ -40,7 +42,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("changename", function (name) {
 			// Change the username
-
+			console.log("[NAME CHANGE] " + socket.username + " to " + name);
 			socket.username = name;
 		})
 
@@ -69,6 +71,8 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("changeroom", function (room) {
 			// User wants to change hes room, subscribe the socket to the
 			// given room, tell the user he is subscribed and send the drawing.
+
+			console.log("[ROOM CHANGE] " + socket.room + " to " + room);
 
 			socket.leave(socket.room);
 			socket.join(room);
