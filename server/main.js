@@ -2,11 +2,14 @@ var mysql = require("mysql");
 
 var database = mysql.createConnection({
 	host: "localhost",
-	user: "drawtogheter",
+	user: "drawtogether",
 	password: 'uf892fj389f23f9j',
-	database: "drawtogheter"
+	database: "drawtogether"
 });
 
+var Protocol = require("./network.js");
+var DrawTogether = require("./drawtogether.js");
+
 var io = require("socket.io")(8080);
-var drawTogether = new require("./drawtogether.js")(database);
-var protocol = new require("./network.js")(io, drawTogether);
+var drawTogether = new DrawTogether(database);
+var protocol = new Protocol(io, drawTogether);

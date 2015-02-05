@@ -4,10 +4,14 @@ function DrawTogether (database) {
 
 DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback) {
 	// Put the given drawing in the database for the given room, returns err if error
-	this.database.query("INSERT INTO drawings SET ?", {
-		if (!drawing || typeof drawing[4].substr !== "function")
-			return;
 
+	if (!drawing || !drawing[4] || typeof drawing[4].substr !== "function") {
+		console.log("INVALID DRAWING", drawing)
+		callback("Drawing should be an array with a string on the fourth index.");
+		return;
+	}
+
+	this.database.query("INSERT INTO drawings SET ?", {
 		room: room,
 		type: drawing[0],
 		x: drawing[1],
@@ -19,21 +23,36 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		x1: drawing[5],
 		y1: drawing[6]
 	}, function (err) {
-		callback(err);
+		if (err) {
+			callback("Something went wrong trying to write your drawing into the database, it has been removed!");
+			return;
+		}
+		callback();
 	});
 };
 
 DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
+
 	var self = this;
 	this.database.query("SELECT * FROM drawings WHERE room = ?", room, function (err, rows) {
+		if (err) {
+			console.log(err);
+			callback("Something went wrong while trying to retrieve the drawings from the database!");
+			return;
+		}
 		setTimeout(function () {
-			self.encodeDrawings(rows, callback);
+			self.encodeDrawings(rows, function (drawings) {
+				callback(undefined, drawings);
+			});
 		}, 0);
 	});
 };
 
 DrawTogether.prototype.encodeDrawings = function encodeDrawings (drawings, callback) {
+	// Turn the drawing objects from the database into arrays
+	// so they take less space when send to the client
+
 	var new_drawings = [];
 
 	for (var key = 0; key < drawings.length; key++) {
@@ -44,7 +63,10 @@ DrawTogether.prototype.encodeDrawings = function encodeDrawings (drawings, callb
 };
 
 DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
-	var newDrawing = [drawing.type, drawing.x, drawing.y, drawing.size, drawing.r.toString(16) + drawing.g.toString(16) + drawing.b.toString(16)];
+	// Turn a single drawing into an array so it takes less
+	// space when transmitting over the network
+
+	var newDrawing = [drawing.type, drawing.x, drawing.y, drawing.size, "#" + drawing.r.toString(16) + drawing.g.toString(16) + drawing.b.toString(16)];
 
 	if (drawing.x1) newDrawing.push(drawing.x1);
 	if (drawing.y1) newDrawing.push(drawing.y1);

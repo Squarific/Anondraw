@@ -25,5 +25,6 @@ Copy paste the following code where you want the app:
 
 ##The server (if you don't want to use the public server)
 
-How to help
-===========
+Protocol
+========
+

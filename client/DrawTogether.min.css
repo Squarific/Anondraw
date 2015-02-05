@@ -66,7 +66,7 @@
 .control-text-input {
 	margin-left:10px;
 	margin-right:10px;
-	font-size:24px;
+	font-size:18px;
 }
 
 .inputcontainer {
@@ -83,7 +83,7 @@
 	left:0;
 
 	box-sizing:border-box;
-	font-size:24px;
+	font-size:18px;
 	height:50px;
 	width:80%;
 	margin:0;
@@ -91,6 +91,8 @@
 
 .messagecontainer {
 	height:calc(100% - 50px);
+	color:rgb(28, 55, 62);
+	overflow-y:auto;
 }
 
 .button-small {
@@ -112,6 +114,17 @@
 
 .button-small:hover {
 	background:rgb(36, 56, 73);
+}
+
+.chat-message {
+	padding:3px;
+	font-size:18px;
+	background:rgb(179, 194, 202);
+	font-family:monospace;
+}
+
+.chat-message:nth-child(even) {
+	background:rgb(151, 165, 173);
 }
 
 .control-integer {
