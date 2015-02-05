@@ -11,6 +11,15 @@ CREATE TABLE IF NOT EXISTS drawings (
     b TINYINT UNSIGNED,
     room VARCHAR(24),
     now DATETIME,
-	PRIMARY KEY (id),
+    PRIMARY KEY (id),
     INDEX (room)
+);
+
+CREATE TABLE IF NOT EXISTS msg (
+    id INT UNSIGNED AUTO_INCREMENT,
+    room VARCHAR(24),
+    user VARCHAR(36),
+    message TEXT,
+    now DATETIME,
+    PRIMARY KEY (id)
 );

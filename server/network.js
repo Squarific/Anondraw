@@ -7,6 +7,7 @@ function Protocol (io, drawtogether) {
 Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 	console.log("[CHAT][" + room + "] " + data.user + ": " + data.message);
 	this.io.to(room).emit("chatmessage", data);
+	this.drawTogether.addChatMessage(room, data);
 };
 
 Protocol.prototype.sendDrawing = function sendDrawing (room, drawing) {
@@ -43,6 +44,10 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("changename", function (name) {
 			// Change the username
 			console.log("[NAME CHANGE] " + socket.username + " to " + name);
+			protocol.sendChatMessage(socket.room, {
+				user: "SERVER",
+				message: socket.username + " changed name to " + name
+			})
 			socket.username = name;
 		})
 

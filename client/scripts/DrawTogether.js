@@ -29,7 +29,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	socket.on("connect", function () {
 		self.chat.addMessage("CLIENT", "Connected to " + self.settings.server);
 
-		if (!localStorage.getItem("drawtogether-name"))
+		if (localStorage.getItem("drawtogether-name"))
 			self.changeName(localStorage.getItem("drawtogether-name"));
 
 		self.changeRoom(self.settings.room);

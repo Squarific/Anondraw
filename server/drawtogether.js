@@ -2,6 +2,18 @@ function DrawTogether (database) {
 	this.database = database;
 }
 
+DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {
+	this.database.query("INSERT INTO msg SET ?", {
+		room: room,
+		user: data.user,
+		message: data.message,
+		now: new Date()
+	}, function (err) {
+		if (err)
+			console.error(err);
+	});
+};
+
 DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback) {
 	// Put the given drawing in the database for the given room, returns err if error
 
@@ -21,7 +33,8 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		g: parseInt(drawing[4].substr(3, 2), 16),
 		b: parseInt(drawing[4].substr(5, 2), 16),
 		x1: drawing[5],
-		y1: drawing[6]
+		y1: drawing[6],
+		now: new Date()
 	}, function (err) {
 		if (err) {
 			callback("Something went wrong trying to write your drawing into the database, it has been removed!");
