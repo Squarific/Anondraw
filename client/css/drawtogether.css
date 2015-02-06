@@ -197,3 +197,46 @@
 .sp-preview {
 	height:35px !important;
 }
+
+@media (max-width: 1175px) {
+	#fullscreen {
+		left:auto;
+		right:auto;
+		bottom:auto;
+	}
+
+	.drawtogether-chat-container {
+		position:relative;
+		width:auto;
+		height:50%;
+		min-height:300px;
+	}
+
+	.drawtogether-paint-container {
+		position:relative;
+		top:0;
+		width:auto;
+		min-width:0;
+		height:50%;
+		height:calc(50% - 50px);
+		min-height:300px;
+	}
+
+	.drawtogether-control-container {
+		width:auto;
+		height:auto;
+	}
+
+	.messagecontainer {
+		margin-bottom:50px;
+	}
+
+	.drawtogether-sharewindow {
+		position:absolute;
+		left:0;
+		top:0;
+		bottom:0;
+		right:0;
+		max-height:none;
+	}
+}
