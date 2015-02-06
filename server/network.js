@@ -120,6 +120,13 @@ Protocol.prototype.bindIO = function bindIO () {
 				})
 			})
 		});
+
+		socket.on("disconnect", function () {
+			protocol.sendChatMessage(socket.room, {
+				user: "SERVER",
+				message: socket.username + " disconnected."
+			});
+		});
 	});
 };
 

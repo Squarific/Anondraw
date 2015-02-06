@@ -46,7 +46,8 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	socket.on("drawings", function (data) {
 		self.setRoom(data.room);
 		self.paint.clear();
-		self.paint.drawDrawings("public", self.decodeDrawings(data.drawings));
+		self.current_drawings = self.decodeDrawings(data.drawings);
+		self.paint.drawDrawings("public", self.current_drawings);
 		self.chat.addMessage("CLIENT", "===== READY TO DRAW =====");
 	});
 
