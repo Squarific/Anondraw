@@ -1,7 +1,7 @@
 DrawTogether2
 =============
 
-Source code of http://www.squarific.com/drawtogether2/
+Source code of http://www.anondraw.com
 
 How to embed on your website
 ============================
@@ -11,7 +11,7 @@ How to embed on your website
 ###Simple
 Copy paste the following code where you want the app:
 ```js
-<script src="//www.squarific.com/drawtogether2/DrawTogether.embed.min.js"></script>
+<script src="http://www.anondraw.com/DrawTogether.embed.min.js"></script>
 <div id="drawtogether2" style="min-height:250px;"></div>
 <script>
 	var container = document.getElementById("drawtogether2");
@@ -22,9 +22,12 @@ Copy paste the following code where you want the app:
 </script>
 ```
 ###Advanced
+Documentation to be added.
 
 ##The server (if you don't want to use the public server)
+You need the following npm librarys: socket.io, mysql, imgur
 
 Protocol
 ========
 
+Documentation about the protocol to be added.
