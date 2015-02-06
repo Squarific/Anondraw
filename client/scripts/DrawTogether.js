@@ -75,9 +75,18 @@ DrawTogether.prototype.sendMessage = function sendMessage (message) {
 	this.socket.emit("chatmessage", message);
 };
 
-DrawTogether.prototype.changeRoom = function changeRoom (room) {
+DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
+	// Change the room to room, if not possible try to join
+	// room + number, if not possible, raise number with one and try again
 	room = room || this.controls.byName.room.input.value;
-	this.socket.emit("changeroom", room);
+	number = number || 0;
+
+	this.socket.emit("changeroom", room, function (success) {
+		if (!success) {
+			this.changeRoom(room + (number + 1), number + 1);
+		}
+	}.bind(this));
+
 	this.chat.addMessage("CLIENT", "Changing room to '" + room + "'");
 };
 

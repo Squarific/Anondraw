@@ -15,6 +15,10 @@ Protocol.prototype.sendDrawing = function sendDrawing (room, drawing) {
 	this.io.to(room).emit("drawing", drawing);
 };
 
+Protocol.prototype.getUserCount = function getUserCount (room) {
+	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
+};
+
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
 
@@ -91,9 +95,19 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		})
 
-		socket.on("changeroom", function (room) {
+		socket.on("changeroom", function (room, callback) {
 			// User wants to change hes room, subscribe the socket to the
 			// given room, tell the user he is subscribed and send the drawing.
+			callback = callback || function () {};
+
+			if (protocol.getUserCount(room) >= 30 && socket.username !== "UberLord") {
+				socket.emit("chatmesage", {
+					user: "SERVER",
+					message: "Can't join room " + room + " too many users!"
+				});
+				callback(false);
+				return;
+			}
 
 			console.log("[ROOM CHANGE] " + socket.username + " changed from " + socket.room + " to " + room);
 
@@ -114,11 +128,19 @@ Protocol.prototype.bindIO = function bindIO () {
 					});
 					drawings = [];
 				}
+
 				socket.emit("drawings", {
 					room: socket.room,
 					drawings: drawings
-				})
-			})
+				});
+
+				protocol.sendChatMessage(socket.room, {
+					user: "SERVER",
+					message: socket.username + " joined " + socket.room
+				});
+			});
+
+			callback(true);
 		});
 
 		socket.on("disconnect", function () {
