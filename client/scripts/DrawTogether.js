@@ -187,6 +187,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint = new Paint(drawContainer);
 	this.paint.addEventListener("userdrawing", function (event) {
 		this.sendDrawing(event.drawing, function () {
+			console.log("removing drawing");
 			event.removeDrawing();
 		});
 	}.bind(this));
@@ -228,6 +229,7 @@ DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
 	urlMessage.innerHTML = 'Uploaded on imgur: <a href="' + url + '">' + url + '</a>';
 	urlMessage.className = "drawtogether-share-url";
 
+	this.shareToRedditButton.target = "_blank";
 	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?title=[DRAWING]%20Description&url=" + encodeURIComponent(url);
 };
 
@@ -316,7 +318,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 	}, {
 		name: "share-button",
 		type: "button",
-		text: "Share",
+		text: "Put on imgur/reddit",
 		action: this.openShareWindow.bind(this)
 	}/*, {
 		name: "private",
