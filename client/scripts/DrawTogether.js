@@ -6,14 +6,15 @@ function DrawTogether (container, settings) {
 	// Initialize the dom elements
 	this.initDom();
 
-	// Connect to the server and bind socket events
-	this.socket = io(this.settings.server);
-	this.bindSocketHandlers(this.socket);
+	if (this.settings.mode == "ask")
+		this.openModeSelector();
+	else
+		this.connect();
 }
 
 DrawTogether.prototype.defaultSettings = {
 	server: "http://127.0.0.1:8080",       // Server to connect to, best to add http://
-	mode: "public",                        // Mode: public, private, invite, game
+	mode: "ask",                           // Mode: public, private, invite, game, ask
 	room: "main",                          // Room to join at startup
 	locked_room: false                     // Is the user allowed to change the room?
 	                                       // If the room is full it retries after 45sec
@@ -21,6 +22,12 @@ DrawTogether.prototype.defaultSettings = {
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
 DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
+
+DrawTogether.prototype.connect = function connect () {
+	// Connect to the server and bind socket events
+	this.socket = io(this.settings.server);
+	this.bindSocketHandlers(this.socket);
+};
 
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
 	// Bind all socket events
@@ -79,15 +86,16 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	// Change the room to room, if not possible try to join
 	// room + number, if not possible, raise number with one and try again
 	room = room || this.controls.byName.room.input.value;
-	number = number || 0;
+	number = number || "";
 
-	this.socket.emit("changeroom", room, function (success) {
+	this.socket.emit("changeroom", room + number, function (success) {
 		if (!success) {
-			this.changeRoom(room + (number + 1), number + 1);
+			this.changeRoom(room, (number || 1) + 1);
 		}
 	}.bind(this));
 
-	this.chat.addMessage("CLIENT", "Changing room to '" + room + "'");
+	this.chat.addMessage("CLIENT", "Changing room to '" + room + number + "'");
+	this.chat.addMessage("CLIENT", "Give other people this url: http://www.anondraw.com/#" + room + number);
 };
 
 DrawTogether.prototype.changeName = function changeName (name) {
@@ -150,6 +158,10 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	ctx.drawImage(this.paint.public.canvas, 0, 0, this.preview.width, this.preview.height);
 };
 
+DrawTogether.prototype.openModeSelector = function openModeSelector () {
+	this.selectWindow.style.display = "block";
+};
+
 DrawTogether.prototype.closeShareWindow = function closeShareWindow () {
 	this.shareWindow.style.display = "";
 };
@@ -160,6 +172,7 @@ DrawTogether.prototype.initDom = function initDom () {
 	this.createDrawZone();
 	this.createControls();
 	this.createShareWindow();
+	this.createModeSelector();
 };
 
 DrawTogether.prototype.createChat = function createChat () {
@@ -215,7 +228,7 @@ DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
 	urlMessage.innerHTML = 'Uploaded on imgur: <a href="' + url + '">' + url + '</a>';
 	urlMessage.className = "drawtogether-share-url";
 
-	this.shareToRedditButton.href = "http://www.reddit.com/r/drawtogether/submit?title=[DRAWING]%20Description&url=" + encodeURIComponent(url);
+	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?title=[DRAWING]%20Description&url=" + encodeURIComponent(url);
 };
 
 DrawTogether.prototype.createShareWindow = function createShareWindow () {
@@ -245,6 +258,35 @@ DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	close.innerText = "Close share window";
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeShareWindow.bind(this));
+};
+
+DrawTogether.prototype.createModeSelector = function createModeSelector () {
+	var selectWindow = this.container.appendChild(document.createElement("div"));
+	selectWindow.className = "drawtogether-selectwindow";
+	this.selectWindow = selectWindow;
+
+	// var text = selectWindow.appendChild(document.createElement("div"));
+	// text.innerText = "Because of a sudden big increase of traffic the app is currently very unstable, this will hopefully be soon fixed.";
+	// text.className = "drawtogether-welcome-text";
+
+	selectWindow.appendChild(document.createElement("br"));
+
+	var publicButton = selectWindow.appendChild(document.createElement("div"));
+	publicButton.className = "drawtogether-modeselect-button";
+	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with strangers';
+	publicButton.addEventListener("click", function () {
+		this.connect();
+		this.selectWindow.style.display = "";
+	}.bind(this));
+
+	var privateButton = selectWindow.appendChild(document.createElement("div"));
+	privateButton.className = "drawtogether-modeselect-button";
+	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Alone or with friends';
+	privateButton.addEventListener("click", function () {
+		this.settings.room = Math.random().toString(36).substr(2, 5); // Random 5 letter room
+		this.connect();
+		this.selectWindow.style.display = "";
+	}.bind(this));
 };
 
 DrawTogether.prototype.createControlArray = function createControlArray () {

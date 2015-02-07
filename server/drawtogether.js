@@ -48,18 +48,17 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
 
 	var self = this;
-	this.database.query("SELECT * FROM drawings WHERE room = ?", room, function (err, rows) {
+	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 50000) AS T ORDER BY id ASC", room, function (err, rows) {
 		if (err) {
 			console.log(err);
 			callback("Something went wrong while trying to retrieve the drawings from the database!");
 			return;
 		}
-		setTimeout(function () {
-			self.encodeDrawings(rows, function (drawings) {
-				callback(undefined, drawings);
-			});
-		}, 0);
+		self.encodeDrawings(rows, function (drawings) {
+			callback(undefined, drawings);
+		});
 	});
+	// callback(undefined, [])
 };
 
 DrawTogether.prototype.encodeDrawings = function encodeDrawings (drawings, callback) {

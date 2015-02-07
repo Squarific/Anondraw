@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var imgur = require("imgur");
+//require("look").start();
 
 var database = mysql.createConnection({
 	host: "localhost",

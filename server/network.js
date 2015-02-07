@@ -1,3 +1,5 @@
+var names = require("./names.js");
+
 function Protocol (io, drawtogether, imgur) {
 	this.io = io;
 	this.drawTogether = drawtogether;
@@ -26,7 +28,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		// Give the user a name and send it to the client, then bind
 		// all events so we can answer the client when it asks something
 
-		socket.username = "Anonymouse";
+		socket.username = names[Math.floor(Math.random() * names.length)] + " " + names[Math.floor(Math.random() * names.length)];
 		socket.emit("initname", socket.username);
 
 		console.log("[CONNECTION] " + socket.request.connection.remoteAddress);
@@ -109,7 +111,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			console.log("[ROOM CHANGE] " + socket.username + " changed from " + socket.room + " to " + room);
+			console.log("[ROOM CHANGE] " + socket.username + " changed from " + socket.room + " to " + room + " there are now " + protocol.getUserCount(room) + " people here.");
 
 			socket.leave(socket.room);
 			socket.join(room);
@@ -136,7 +138,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 				protocol.sendChatMessage(socket.room, {
 					user: "SERVER",
-					message: socket.username + " joined " + socket.room
+					message: socket.username + " joined " + socket.room + " there are now " + protocol.getUserCount(room) + " people here."
 				});
 			});
 

@@ -9,6 +9,43 @@
 	overflow:hidden;
 }
 
+.drawtogether-welcome-text {
+	display:inline-block;
+	background:rgb(136, 84, 84);
+	border:5px solid rgb(76, 20, 20);
+	color:white;
+	font-size:22px;
+	margin-top:20px;
+	padding:10px;
+}
+
+.drawtogether-modeselect-button {
+	display:inline-block;
+	margin:25px;
+	margin-top:50px;
+	background:rgb(79, 108, 133);
+	padding:20px;
+	text-align:center;
+	color:white;
+	cursor:pointer;
+	text-decoration:none;
+}
+
+.drawtogether-modeselect-button:hover {
+	background:rgb(102, 131, 155);
+}
+
+.drawtogether-selectwindow {
+	position:absolute;
+	right:0;
+	top:0;
+	bottom:0;
+	left:0;
+	display:none;
+	background:rgb(179, 194, 202);
+	text-align:center;
+}
+
 .drawtogether-share-url {
 	background:rgb(46, 91, 43);
 	padding:10px;
@@ -248,6 +285,11 @@
 	top:0;
 	left:0;
 }
+
+.paint-canvas-public {
+	background-image: url("images/transparent.png");
+}
+
 /***
 Spectrum Colorpicker v1.6.0
 https://github.com/bgrins/spectrum
