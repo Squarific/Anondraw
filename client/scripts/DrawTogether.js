@@ -90,7 +90,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 
 	this.socket.emit("changeroom", room + number, function (success) {
 		if (!success) {
-			this.changeRoom(room, (number || 1) + 1);
+			this.changeRoom(room, (number || 0) + 1);
 		}
 	}.bind(this));
 
@@ -121,7 +121,7 @@ DrawTogether.prototype.decodeDrawing = function decodeDrawing (drawing) {
 		x: drawing[1],
 		y: drawing[2],
 		size: drawing[3],
-		color: drawing[4]
+		color: "#" + drawing[4]
 	};
 
 	if (drawing[5]) newDrawing.x1 = drawing[5];
@@ -197,9 +197,18 @@ DrawTogether.prototype.createControls = function createControls () {
 	var controlContainer = this.container.appendChild(document.createElement("div"));
 	controlContainer.className = "drawtogether-control-container";
 	this.controls = new Controls(controlContainer, this.createControlArray());
+
+	var sharediv = controlContainer.appendChild(document.createElement("div"));
+	sharediv.className = "addthis_sharing_toolbox";
 };
 
 DrawTogether.prototype.uploadImage = function uploadImage () {
+	// Remove the previous url
+	while (this.imgurUrl.firstChild) {
+		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
+	}
+
+	// Let the server upload the drawing to imgur and give us the url back
 	this.socket.emit("uploadimage", this.paint.public.canvas.toDataURL().split(",")[1], function (data) {
 		if (data.error) {
 			this.showShareError(data.error);

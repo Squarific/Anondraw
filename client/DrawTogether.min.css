@@ -1,3 +1,4 @@
+@import url("http://fonts.googleapis.com/css?family=Open+Sans");
 html, body {
   margin: 0;
   padding: 0; }
@@ -62,7 +63,8 @@ input, button, textarea {
   background: #456789; }
   .drawtogether-chat-container .messagecontainer {
     height: calc(100% - 3rem);
-    overflow-y: auto; }
+    overflow-y: auto; 
+	overflow-x: hidden;}
   .drawtogether-chat-container .chat-message {
     padding: .5em;
     font-family: monospace;
@@ -214,7 +216,7 @@ input, button, textarea {
     max-width: 80%;
     margin: 2em auto;
     border-radius: .3em;
-    background-color: #fff; }
+    background-image: url("images/transparent.png"); }
   .drawtogether-sharewindow .drawtogether-button {
     display: inline-block;
     margin: 0 .2em;
@@ -238,6 +240,10 @@ input, button, textarea {
     font-size: 1.5em; }
     .drawtogether-sharewindow .drawtogether-share-url a {
       color: #fff; }
+
+    .addthis_sharing_toolbox {
+    	display:inline-block;
+    }
 
 @media (max-width: 1175px) {
   #fullscreen {

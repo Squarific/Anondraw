@@ -37,10 +37,31 @@ Protocol.prototype.bindIO = function bindIO () {
 			// User is trying to send a message, if he is in a room
 			// send the message to all other users, otherwise show an error
 
-			if (!socket.room) {
-				socket.emit("chatmessage", "You can't chat unless you are in a room!");
+			if (!message) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: message
+				});
 				return;
 			}
+
+			if (!socket.room) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You can't chat when not in room."
+				});
+				return;
+			}
+
+			if (Date.now() - socket.lastMessage < 1000) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "Don't send messages too fast!."
+				});
+				return;
+			}
+
+			socket.lastMessage = Date.now()
 
 			protocol.sendChatMessage(socket.room ,{
 				user: socket.username,
@@ -90,7 +111,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					socket.emit("chatmessage", {
 						user: "SERVER",
 						message: err
-					})
+					});
 				}
 
 				callback();

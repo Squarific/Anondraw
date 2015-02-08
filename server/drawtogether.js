@@ -48,7 +48,7 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
 
 	var self = this;
-	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 50000) AS T ORDER BY id ASC", room, function (err, rows) {
+	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 10000) AS T ORDER BY id ASC", room, function (err, rows) {
 		if (err) {
 			console.log(err);
 			callback("Something went wrong while trying to retrieve the drawings from the database!");
@@ -78,7 +78,7 @@ DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
 	// Turn a single drawing into an array so it takes less
 	// space when transmitting over the network
 
-	var newDrawing = [drawing.type, drawing.x, drawing.y, drawing.size, "#" + drawing.r.toString(16) + drawing.g.toString(16) + drawing.b.toString(16)];
+	var newDrawing = [drawing.type, drawing.x, drawing.y, drawing.size, drawing.r.toString(16) + drawing.g.toString(16) + drawing.b.toString(16)];
 
 	if (drawing.x1) newDrawing.push(drawing.x1);
 	if (drawing.y1) newDrawing.push(drawing.y1);
