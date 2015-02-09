@@ -2,6 +2,11 @@ function DrawTogether (database) {
 	this.database = database;
 }
 
+DrawTogether.prototype.rgbToHex = function rgbToHex (r, g, b) {
+	var hex = ((r << 16) | (g << 8) | b).toString(16);
+	return "#" + ("000000" + hex).slice(-6);
+};
+
 DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {
 	this.database.query("INSERT INTO msg SET ?", {
 		room: room,
@@ -20,6 +25,16 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	if (!drawing || !drawing[4] || typeof drawing[4].substr !== "function") {
 		console.log("INVALID DRAWING", drawing)
 		callback("Drawing should be an array with a string on the fourth index.");
+		return;
+	}
+
+	if (drawing[3] > 100) {
+		callback("Don't try to cheat the system please!");
+		return;
+	}
+
+	if (typeof drawing[5] == "number" && typeof drawing[6] && this.sqDistance([drawing[1], drawing[2]], [drawing[5], drawing[6]]) > 9000000) {
+		callback("That's a bit long don't you think?");
 		return;
 	}
 
@@ -44,11 +59,17 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	});
 };
 
+DrawTogether.prototype.sqDistance = function sqDistance (point1, point2) {
+	var xDist = point1[0] - point2[0];
+	var yDist = point1[1] - point2[1];
+	return xDist * xDist + yDist * yDist;
+};
+
 DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
 
 	var self = this;
-	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 10000) AS T ORDER BY id ASC", room, function (err, rows) {
+	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 20000) AS T ORDER BY id ASC", room, function (err, rows) {
 		if (err) {
 			console.log(err);
 			callback("Something went wrong while trying to retrieve the drawings from the database!");
@@ -78,7 +99,7 @@ DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
 	// Turn a single drawing into an array so it takes less
 	// space when transmitting over the network
 
-	var newDrawing = [drawing.type, drawing.x, drawing.y, drawing.size, drawing.r.toString(16) + drawing.g.toString(16) + drawing.b.toString(16)];
+	var newDrawing = [drawing.type, drawing.x, drawing.y, drawing.size, this.rgbToHex(drawing.r, drawing.g, drawing.b)];
 
 	if (drawing.x1) newDrawing.push(drawing.x1);
 	if (drawing.y1) newDrawing.push(drawing.y1);

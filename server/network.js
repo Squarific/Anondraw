@@ -88,12 +88,30 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("changename", function (name) {
 			// Change the username
+			name.replace(/[^\x00-\x7F]/g, "");
+			if (name.toLowerCase().indexOf("server") !== -1) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "Don't steal my name!"
+				});
+				return;
+			}
+
+			if (Date.now() - socket.lastNameChange < 1000) {
+				socket.emit("chatemessage", {
+					user: "SERVER",
+					message: "Don't change your name so often!"
+				});
+				return;
+			}
+
 			console.log("[NAME CHANGE] " + socket.username + " to " + name);
 			protocol.sendChatMessage(socket.room, {
 				user: "SERVER",
 				message: socket.username + " changed name to " + name
 			})
 			socket.username = name;
+			socket.lastNameChange = Date.now();
 		})
 
 		socket.on("drawing", function (drawing, callback) {
