@@ -70,6 +70,21 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		}
 	});
 
+	socket.on("playerlist", function (list) {
+		while (self.playerListDom.firstChild)
+			self.playerListDom.removeChild(self.playerListDom.firstChild)
+
+		var plTitle = self.playerListDom.appendChild(document.createElement("span"));
+		plTitle.innerText = "PlayerList";
+		plTitle.className = "drawtogether-pl-title";
+
+		for (var k in list) {
+			var player = self.playerListDom.appendChild(document.createElement("div"));
+			player.innerText = list[k];
+			player.className = "drawtogether-player";
+		}
+	});
+
 	socket.on("forcename", self.setName)
 
 	socket.on("chatmessage", function (data) {
@@ -172,6 +187,7 @@ DrawTogether.prototype.closeShareWindow = function closeShareWindow () {
 DrawTogether.prototype.initDom = function initDom () {
 	// Create the chat, drawzone and controls
 	this.createChat();
+	this.createRoomInformation();
 	this.createDrawZone();
 	this.createControls();
 	this.createShareWindow();
@@ -194,6 +210,14 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			event.removeDrawing();
 		});
 	}.bind(this));
+};
+
+DrawTogether.prototype.createRoomInformation = function createRoomInformation () {
+	var infoContainer = this.container.appendChild(document.createElement("div"));
+	infoContainer.className = "drawtogether-info-container";
+
+	this.playerListDom = infoContainer.appendChild(document.createElement("div"));
+	this.playerListDom.className = "drawtogether-info-playerlist";
 };
 
 DrawTogether.prototype.createControls = function createControls () {

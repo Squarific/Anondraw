@@ -50,11 +50,46 @@ input, button, textarea {
     background-color: #bccdde; }
 
 /**
+* Room information
+*/
+
+.drawtogether-info-container {
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:70%;
+  width: 20rem;
+  overflow: hidden;
+  overflow-y: auto;
+  border-left: 0.2em solid #233445;
+  border-bottom: 0.2em solid #799ABB;
+  background: #456789;
+  font-family:monospace;
+}
+
+.drawtogether-pl-title {
+  display:inline-block;
+  width:100%;
+  color:#fff;
+  font-size:1.2em;
+  padding:.5em;
+}
+
+.drawtogether-player {
+  display:inline-block;
+  width:100%;
+  color:#fff;
+  font-size:1em;
+  padding:.4em;
+  padding-left:.8em;
+}
+
+/**
  * Sidebar containing chat
  */
 .drawtogether-chat-container {
   position: absolute;
-  top: 0;
+  top: 30%;
   bottom: 0;
   right: 0;
   width: 20rem;

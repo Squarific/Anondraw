@@ -21,6 +21,19 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
 };
 
+Protocol.prototype.getPlayerNameList = function getPlayerNameList (room) {
+	var players = [];
+	var room = this.io.nsps['/'].adapter.rooms[room];
+	for (var id in room) {
+		players.push(this.socketFromId(id).username);
+	}
+	return players;
+};
+
+Protocol.prototype.socketFromId = function socketFromId (id) {
+	return this.io.nsps['/'].connected[id];
+};
+
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
 
@@ -179,6 +192,8 @@ Protocol.prototype.bindIO = function bindIO () {
 					user: "SERVER",
 					message: socket.username + " joined " + socket.room + " there are now " + protocol.getUserCount(room) + " people here."
 				});
+
+				socket.emit("playerlist", protocol.getPlayerNameList(socket.room));
 			});
 
 			callback(true);
