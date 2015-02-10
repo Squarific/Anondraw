@@ -150,6 +150,7 @@ input, button, textarea {
   left: 0;
   width: calc(100% - 20rem); }
 
+
 /**
  * Canvas container
  */
@@ -281,6 +282,28 @@ input, button, textarea {
     .addthis_sharing_toolbox {
     	display:inline-block;
     }
+
+    .drawtogether-flashy {
+  -webkit-animation: flashy 200s infinite;
+  animation: flashy 200s infinite;
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes flashy {
+    20% {background: #456789;}
+    20.25% {background: #C59034;}
+    20.5% {background: #456789;}
+    20.75% {background: #C59034;}
+    21% {background: #456789;}
+}
+
+/* Standard syntax */
+@keyframes flashy {
+    20% {background: #456789;}
+    20.25% {background: #C59034;}
+    20.5% {background: #456789;}
+    20.75% {background: #C59034;}
+    21% {background: #456789;}
 
 @media (max-width: 1175px) {
   #fullscreen {

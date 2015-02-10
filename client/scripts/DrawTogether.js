@@ -55,7 +55,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 			self.paint.clear();
 
 		self.setRoom(data.room);
-		self.paint.drawDrawings("public", self.current_drawings);
+		self.paint.drawDrawings("public", self.decodeDrawings(data.drawings));
 		self.chat.addMessage("CLIENT", "Ready to draw.");
 	});
 
@@ -258,6 +258,8 @@ DrawTogether.prototype.createControls = function createControls () {
 
 	var sharediv = controlContainer.appendChild(document.createElement("div"));
 	sharediv.className = "addthis_sharing_toolbox";
+
+	this.controls.byName["share-button"].input.className += " drawtogether-flashy";
 };
 
 DrawTogether.prototype.uploadImage = function uploadImage () {
