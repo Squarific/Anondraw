@@ -79,11 +79,32 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		plTitle.className = "drawtogether-pl-title";
 
 		for (var k in list) {
-			var player = self.playerListDom.appendChild(document.createElement("div"));
-			player.innerText = list[k];
-			player.className = "drawtogether-player";
+			self.playerListDom.appendChild(self.createPlayerDom(list[k]));
 		}
 	});
+
+	socket.on("leave", function (player) {
+		var children = self.playerListDom.children;
+		for (var k = 0; k < children.length; k++) {
+			if (children[k].playerId == player.id) {
+				self.playerListDom.removeChild(children[k]);
+				k--; // We deleted an element thus have to lower the index
+			}
+		}
+	});
+
+	socket.on("join", function (player) {
+		// Check if we are already on the list
+		var children = self.playerListDom.children;
+		for (var k = 0; k < children.length; k++) {
+			if (children[k].playerId == player.id) {
+				return;
+			}
+		}
+
+		// We are not, lets put the player on the list
+		self.playerListDom.appendChild(self.createPlayerDom(player));
+	})
 
 	socket.on("forcename", self.setName)
 
@@ -192,6 +213,14 @@ DrawTogether.prototype.initDom = function initDom () {
 	this.createControls();
 	this.createShareWindow();
 	this.createModeSelector();
+};
+
+DrawTogether.prototype.createPlayerDom = function (player) {
+	var playerDom = document.createElement("div");
+	playerDom.playerId = player.id;
+	playerDom.innerText = player.name;
+	playerDom.className = "drawtogether-player";
+	return playerDom;
 };
 
 DrawTogether.prototype.createChat = function createChat () {

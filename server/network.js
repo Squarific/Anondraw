@@ -24,9 +24,14 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 Protocol.prototype.getPlayerNameList = function getPlayerNameList (room) {
 	var players = [];
 	var room = this.io.nsps['/'].adapter.rooms[room];
+
 	for (var id in room) {
-		players.push(this.socketFromId(id).username);
+		players.push({
+			id: id,
+			name: this.socketFromId(id).username
+		});
 	}
+
 	return players;
 };
 
@@ -123,6 +128,13 @@ Protocol.prototype.bindIO = function bindIO () {
 				user: "SERVER",
 				message: socket.username + " changed name to " + name
 			})
+
+			protocol.io.to(socket.room).emit("playernamechange", {
+				id: socket.id,
+				oldname: socket.username,
+				newname: name
+			});
+
 			socket.username = name;
 			socket.lastNameChange = Date.now();
 		})
@@ -169,6 +181,11 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.join(room);
 			socket.room = room;
 
+			protocol.io.to(socket.room).emit("join", {
+				id: socket.id,
+				name: socket.username
+			});
+			
 			socket.emit("chatmessage", {
 				user: "SERVER",
 				message: "Changed room to " + room + ", loading drawings..."
@@ -188,11 +205,6 @@ Protocol.prototype.bindIO = function bindIO () {
 					drawings: drawings
 				});
 
-				protocol.sendChatMessage(socket.room, {
-					user: "SERVER",
-					message: socket.username + " joined " + socket.room + " there are now " + protocol.getUserCount(room) + " people here."
-				});
-
 				socket.emit("playerlist", protocol.getPlayerNameList(socket.room));
 			});
 
@@ -200,10 +212,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("disconnect", function () {
-			protocol.sendChatMessage(socket.room, {
-				user: "SERVER",
-				message: socket.username + " disconnected."
-			});
+			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 		});
 	});
 };

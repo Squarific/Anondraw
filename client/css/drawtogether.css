@@ -286,6 +286,12 @@ input, button, textarea {
     right: auto;
     bottom: auto; }
 
+  .drawtogether-info-container {
+    position:relative;
+    width:auto;
+    border-top:0.2em solid #799ABB;
+  }
+
   .drawtogether-chat-container {
     position: relative;
     width: auto;
