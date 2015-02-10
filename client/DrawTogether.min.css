@@ -104,7 +104,9 @@ input, button, textarea {
     padding: .5em;
     font-family: monospace;
     font-size: 1.2em;
-    color: #fff; }
+    color: #fff; 
+    word-wrap:break-word;
+  }
     .drawtogether-chat-container .chat-message:not(:last-child) {
       border-bottom: 0.1em solid #799abb; }
     .drawtogether-chat-container .chat-message:nth-child(even) {
