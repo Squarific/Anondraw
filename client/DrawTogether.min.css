@@ -323,6 +323,10 @@ input, button, textarea {
     right: 0;
     max-height: none; } }
 
+.addthis_sharing_toolbox {
+  float:right;
+  margin:.3rem .5em 0;
+}
 .paint-canvas {
 	display:block;
 	position:absolute;
