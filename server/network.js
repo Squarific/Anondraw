@@ -14,7 +14,7 @@ Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 };
 
 Protocol.prototype.sendDrawing = function sendDrawing (room, drawing) {
-	this.io.to(room).emit("drawing", drawing);
+	this.io.to(room).emit("drawing", {drawing: drawing, id: socket.id});
 };
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
@@ -41,10 +41,13 @@ Protocol.prototype.socketFromId = function socketFromId (id) {
 
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
-
+	var manualIpBanList = [];
 	this.io.on("connection", function (socket) {
 		// Give the user a name and send it to the client, then bind
 		// all events so we can answer the client when it asks something
+
+		if (manualIpBanList.indexOf(socket.request.connection.remoteAddress) !== -1)
+			socket.disconnect();
 
 		socket.username = names[Math.floor(Math.random() * names.length)] + " " + names[Math.floor(Math.random() * names.length)];
 		socket.emit("initname", socket.username);
@@ -88,6 +91,11 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("uploadimage", function (base64, callback) {
+			if (Date.now() - socket.lastImgurUpload > 2000) {
+				return;
+			}
+			socket.lastImgurUpload = Date.now();
+
 			callback = callback || function () {};
 			protocol.imgur.uploadBase64(base64)
 			.then(function (json) {
@@ -104,9 +112,54 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
+		socket.on("login", function (data, callback) {
+			if (typeof callback !== "function")
+				callback = function () {}
+
+			protocol.drawTogether.login(data, function (err, success) {
+				if (err) {
+					callback({error: "Some error occured! [Login Check Error]"});
+					console.log("[LOGIN][ERROR] " + err);
+					return;
+				}
+
+				if (!success) {
+					protocol.drawTogether.accountExists(data.email, function (err, exists) {
+						if (err) {
+							callback({error: "Some error occured! [Login Exists Error]"});
+							console.log("[LOGIN][ERROREXISTS] " + err);
+							return;
+						}
+
+						if (!exists) {
+							callback({register: true});
+						} else {
+							callback({error: "Wrong password!"});
+						}
+					});
+					return;
+				}
+
+				callback({success: success});
+			});
+		})
+
+		socket.on("register", function (data, callback) {
+			if (typeof callback !== "function")
+				callback = function () {}
+			drawTogether.register(data, function (err) {
+				if (err) {
+					console.log("[REGISTER][ERROR]");
+				}
+			})
+		})
+
 		socket.on("changename", function (name) {
 			// Change the username
 			name.replace(/[^\x00-\x7F]/g, "");
+			if (name.length > 32)
+				name = name.substr(0, 32);
+
 			if (name.toLowerCase().indexOf("server") !== -1) {
 				socket.emit("chatmessage", {
 					user: "SERVER",

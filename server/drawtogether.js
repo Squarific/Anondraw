@@ -19,6 +19,21 @@ DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {
 	});
 };
 
+DrawTogether.prototype.getInkFromIp = function (ip, callback) {
+	// Get the ink from the given ip, callback params are err, amount
+
+	this.database.query("SELECT ink FROM ink WHERE ip = ?", [ip], function (err, rows) {
+		callback(err, rows[0]);
+	});
+};
+
+DrawTogether.prototype.changeInkFromIp = function changeInkFromIp (delta, ip, callback) {
+	// Change the ink from a given ip, 5 will lower the ink with 5
+	// Callback param is err
+
+	this.database.query("UPDATE ink SET ink = ink - ", delta, callback;
+};
+
 DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback) {
 	// Put the given drawing in the database for the given room, returns err if error
 
@@ -80,6 +95,33 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 		});
 	});
 	// callback(undefined, [])
+};
+
+DrawTogether.prototype.login = function login (data, callback) {
+	// Check if an account with data.email and data.password exists
+	
+	var self = this;
+	this.database.query("SELECT * FROM users WHERE email = ? AND password = ?", [data.email, data.password], function (err, rows) {
+		callback(err, rows.length !== 0);
+	});
+};
+
+DrawTogether.prototype.accountExists = function accountExists (email, callback) {
+	// Check if an account with the given email exists
+
+	var self = this;
+	this.database.query("SELECT * FROM users WHERE email = ?", [email], function (err, rows) {
+		callback(err, rows.length !== 0);
+	});
+};
+
+DrawTogether.prototype.register = function register (data, callback) {
+	// Add a user with the given data.email and data.password
+
+	var self = this;
+	this.database.query("INSERT INTO users SET ?", data, function (err) {
+
+	});
 };
 
 DrawTogether.prototype.encodeDrawings = function encodeDrawings (drawings, callback) {

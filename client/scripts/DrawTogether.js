@@ -59,8 +59,8 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.chat.addMessage("CLIENT", "Ready to draw.");
 	});
 
-	socket.on("drawing", function (drawing) {
-		self.paint.drawDrawing("public", self.decodeDrawing(drawing));
+	socket.on("drawing", function (data) {
+		self.paint.drawDrawing("public", self.decodeDrawing(data.drawing));
 	})
 
 	socket.on("initname", function (name) {
@@ -71,40 +71,40 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		}
 	});
 
-	socket.on("playerlist", function (list) {
-		while (self.playerListDom.firstChild)
-			self.playerListDom.removeChild(self.playerListDom.firstChild)
-
-		var plTitle = self.playerListDom.appendChild(document.createElement("span"));
-		plTitle.innerText = "PlayerList";
-		plTitle.className = "drawtogether-pl-title";
-
-		for (var k in list) {
-			self.playerListDom.appendChild(self.createPlayerDom(list[k]));
+	socket.on("playernamechange", function (data) {
+		for (var k = 0; k < self.playerList.length; k++) {
+			if (self.playerList[k].id == data.id) {
+				self.playerList[k].name = data.newname;
+			}
 		}
+		self.updatePlayerList();
+	});
+
+	socket.on("playerlist", function (list) {
+		self.playerList = list;
+		self.updatePlayerList();
 	});
 
 	socket.on("leave", function (player) {
-		var children = self.playerListDom.children;
-		for (var k = 0; k < children.length; k++) {
-			if (children[k].playerId == player.id) {
-				self.playerListDom.removeChild(children[k]);
-				k--; // We deleted an element thus have to lower the index
+		for (var k = 0; k < self.playerList.length; k++) {
+			if (self.playerList[k].id == player.id) {
+				self.playerList.splice(k, 1);
+				k--;
 			}
 		}
+
+		self.updatePlayerList();
 	});
 
 	socket.on("join", function (player) {
-		// Check if we are already on the list
-		var children = self.playerListDom.children;
-		for (var k = 0; k < children.length; k++) {
-			if (children[k].playerId == player.id) {
+		for (var k = 0; k < self.playerList.length; k++) {
+			if (self.playerList[k].id == player.id) {
 				return;
 			}
 		}
 
-		// We are not, lets put the player on the list
-		self.playerListDom.appendChild(self.createPlayerDom(player));
+		self.playerList.push(player);
+		self.updatePlayerList();
 	})
 
 	socket.on("forcename", self.setName)
@@ -139,6 +139,19 @@ DrawTogether.prototype.changeName = function changeName (name) {
 	name = name || this.controls.byName.name.input.value;
 	this.socket.emit("changename", name);
 	localStorage.setItem("drawtogether-name", name);
+};
+
+DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
+	while (this.playerListDom.firstChild)
+		this.playerListDom.removeChild(this.playerListDom.firstChild)
+
+	var plTitle = this.playerListDom.appendChild(document.createElement("span"));
+	plTitle.innerText = "PlayerList (" + this.playerList.length + ")";
+	plTitle.className = "drawtogether-pl-title";
+
+	for (var k in this.playerList) {
+		this.playerListDom.appendChild(this.createPlayerDom(this.playerList[k]));
+	}
 };
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
@@ -199,6 +212,10 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	ctx.drawImage(this.paint.public.canvas, 0, 0, this.preview.width, this.preview.height);
 };
 
+DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
+	this.accWindow.style.display = "block";
+};
+
 DrawTogether.prototype.openModeSelector = function openModeSelector () {
 	this.selectWindow.style.display = "block";
 };
@@ -207,13 +224,19 @@ DrawTogether.prototype.closeShareWindow = function closeShareWindow () {
 	this.shareWindow.style.display = "";
 };
 
+DrawTogether.prototype.closeAccountWindow = function closeAccountWindow () {
+	this.accWindow.style.display = "";
+};
+
 DrawTogether.prototype.initDom = function initDom () {
 	// Create the chat, drawzone and controls
 	this.createChat();
 	this.createRoomInformation();
 	this.createDrawZone();
 	this.createControls();
+
 	this.createShareWindow();
+	this.createAccountWindow();
 	this.createModeSelector();
 };
 
@@ -251,6 +274,67 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 	this.playerListDom.className = "drawtogether-info-playerlist";
 };
 
+DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
+	var accWindow = this.container.appendChild(document.createElement("div"));
+	accWindow.className = "drawtogether-accountwindow";
+	this.accWindow = accWindow;
+
+	this.loginMessage = accWindow.appendChild(document.createElement("div"));
+
+	var formContainer = accWindow.appendChild(document.createElement("div"));
+	formContainer.className = "drawtogether-account-formcontainer";
+
+	var emailInput = formContainer.appendChild(document.createElement("input"));
+	emailInput.type = "email";
+	emailInput.placeholder = "Email";
+	this.emailInput = emailInput;
+
+	var passInput = formContainer.appendChild(document.createElement("input"));
+	passInput.type = "password";
+	passInput.placeholder = "Password";
+	this.passInput = passInput;
+
+	var loginButton = formContainer.appendChild(document.createElement("div"));
+	loginButton.innerText = "Login";
+	loginButton.className = "drawtogether-button drawtogether-login-button";
+	loginButton.addEventListener("click", function () {
+		this.socket.emit("login", {
+			email: this.emailInput.value,
+			password: this.passInput.value
+		}, function (data) {
+			if (data.success)
+				this.closeAccountWindow();
+
+			if (data.error)
+				this.accountError(data.error);
+
+			if (data.register) {
+				while (this.loginMessage.firstChild)
+					this.loginMessage.removeChild(this.loginMessage.firstChild);
+
+				var message = this.loginMessage.appendChild(document.createElement("div"));
+				message.className = "drawtogether-message drawtogether-login-message";
+				message.innerText = "No account found with this email, do you want to register?";
+
+				this.loginMessage.appendChild(document.createElement("br"));
+
+				var registerButton = this.loginMessage.appendChild(document.createElement("div"));
+				registerButton.innerText = "Register";
+				registerButton.className = "drawtogether-button drawtogether-register-button";
+				registerButton.addEventListener("click", this.registerAccount({
+					email: this.emailInput.value,
+					password: this.passInput.value
+				}));
+			}
+		}.bind(this));
+	}.bind(this));
+
+	var close = formContainer.appendChild(document.createElement("div"));
+	close.innerText = "Close login window";
+	close.className = "drawtogether-button drawtogether-close-button";
+	close.addEventListener("click", this.closeAccountWindow.bind(this));
+};
+
 DrawTogether.prototype.createControls = function createControls () {
 	var controlContainer = this.container.appendChild(document.createElement("div"));
 	controlContainer.className = "drawtogether-control-container";
@@ -260,6 +344,25 @@ DrawTogether.prototype.createControls = function createControls () {
 	sharediv.className = "addthis_sharing_toolbox";
 
 	this.controls.byName["share-button"].input.className += " drawtogether-flashy";
+};
+
+DrawTogether.prototype.registerAccount = function registerAccount (data) {
+	this.socket.emit("register", data, function (data) {
+		if (data.error)
+			this.accountError(data.error);
+
+		if (data.success)
+			this.closeAccountWindow();
+	});
+};
+
+DrawTogether.prototype.accountError = function accountError (msg) {
+	while (this.loginMessage.firstChild)
+		this.loginMessage.removeChild(this.loginMessage.firstChild);
+
+	var err = this.loginMessage.appendChild(document.createElement("div"));
+	err.className = "drawtogether-error drawtogether-login-error";
+	err.innerText = msg;
 };
 
 DrawTogether.prototype.uploadImage = function uploadImage () {
@@ -286,7 +389,7 @@ DrawTogether.prototype.showShareError = function showShareError (error) {
 
 	var errorMessage = this.shareError.appendChild(document.createElement("div"));
 	errorMessage.innerText = error;
-	errorMessage.className = "drawtogether-share-error";
+	errorMessage.className = "drawtogether-error drawtogether-share-error";
 };
 
 DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
@@ -389,6 +492,11 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Put on imgur/reddit",
 		action: this.openShareWindow.bind(this)
+	}, {
+		name: "account",
+		type: "button",
+		text: "Account",
+		action: this.openAccountWindow.bind(this)
 	}/*, {
 		name: "private",
 		type: "button",

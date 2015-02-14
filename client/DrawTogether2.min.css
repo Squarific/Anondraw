@@ -50,64 +50,6 @@ input, button, textarea {
     background-color: #bccdde; }
 
 /**
-* Account window
-*/
-
-.drawtogether-accountwindow {
-  display: none;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2em;
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.9);
-  overflow-y: auto;
-  z-index: 200;
-}
-
-.drawtogether-accountwindow input {
-  display:block;
-  min-width:300px;
-  width:20%;
-  padding: .25em .5em;
-  height: 2.3rem;
-  line-height: 2.3rem;
-  margin: .5em;
-  border-radius: .2em;
-  background-color: #e6e6e6;
-}
-
-.drawtogether-account-formcontainer {
-  display:inline-block;
-  padding:.5em;
-  background:white;
-  border-radius:.2em;
-}
-
-.drawtogether-accountwindow .drawtogether-button {
-  padding: .5em;
-  border-bottom: 0.2em solid #233445;
-  background-color: #456789;
-  color: #fff;
-  cursor: pointer;
-  margin:.3em;
-  margin-left:.5em;
-  margin-right:.5em;
-  -webkit-transition-duration: 0.3s;
-  -moz-transition-duration: 0.3s;
-  transition-duration: 0.3s;
-  -webkit-transition-property: background-color;
-  -moz-transition-property: background-color;
-  transition-property: background-color;
-}
-
-.drawtogether-accountwindow .drawtogether-button:hover {
-  background-color: #233445;
-}
-
-/**
 * Room information
 */
 
@@ -140,12 +82,6 @@ input, button, textarea {
   font-size:1em;
   padding:.4em;
   padding-left:.8em;
-  background: #456789;
-  transition-duration:.2s;
-}
-
-.drawtogether-player:hover {
-  background:#3E5B79;
 }
 
 /**
@@ -275,6 +211,8 @@ input, button, textarea {
   -webkit-transition-property: background-color;
   -moz-transition-property: background-color;
   transition-property: background-color; }
+  .control-button:hover {
+    background-color: #233445; }
 
 .control-integer {
   display: inline-block; }
@@ -282,7 +220,6 @@ input, button, textarea {
 .control-integer-input,
 .control-text-input {
   padding: .25em .5em;
-  width:100px;
   background-color: #e6e6e6; }
 
 .sp-preview {
@@ -347,31 +284,26 @@ input, button, textarea {
     }
 
     .drawtogether-flashy {
-      transition-duration:0;
-      -webkit-animation: flashy 120s infinite;
-      animation: flashy 120s infinite;
+  -webkit-animation: flashy 200s infinite;
+  animation: flashy 200s infinite;
 }
 
 /* Chrome, Safari, Opera */
 @-webkit-keyframes flashy {
-    8% {background: #456789;}
-    9% {background: #C59034;}
-    10% {background: #456789;}
-    11% {background: #C59034;}
-    12% {background: #456789;}
+    20% {background: #456789;}
+    20.25% {background: #C59034;}
+    20.5% {background: #456789;}
+    20.75% {background: #C59034;}
+    21% {background: #456789;}
 }
 
 /* Standard syntax */
 @keyframes flashy {
-    8% {background: #456789;}
-    9% {background: #C59034;}
-    10% {background: #456789;}
-    11% {background: #C59034;}
-    12% {background: #456789;}
-}
-
-  .control-button:hover {
-    background-color: #233445; }
+    20% {background: #456789;}
+    20.25% {background: #C59034;}
+    20.5% {background: #456789;}
+    20.75% {background: #C59034;}
+    21% {background: #456789;}
 
 @media (max-width: 1175px) {
   #fullscreen {

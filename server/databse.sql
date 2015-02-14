@@ -23,3 +23,17 @@ CREATE TABLE IF NOT EXISTS msg (
     now DATETIME,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT UNSIGNED AUTO_INCREMENT,
+    email TEXT,
+    password VARCHAR(255),
+    PRIMARY KEY (id),
+    INDEX (email),
+    INDEX (email, password)
+);
+
+CREATE TABLE IF NOT EXISTS ink (
+    ip VARCHAR(16),
+    ink SMALLINT
+);
