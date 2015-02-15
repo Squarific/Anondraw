@@ -35,5 +35,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS ink (
     ip VARCHAR(16),
-    ink SMALLINT
+    ink SMALLINT,
+    PRIMARY KEY (ip),
+    INDEX (ip)
 );

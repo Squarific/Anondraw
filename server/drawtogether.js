@@ -19,19 +19,63 @@ DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {
 	});
 };
 
-DrawTogether.prototype.getInkFromIp = function (ip, callback) {
+DrawTogether.prototype.getInkFromIp = function getInkFromIp (ip, callback) {
 	// Get the ink from the given ip, callback params are err, amount
+	// If the given ip was not in the database, then it gets added and
+	// the default amount is returned
+
+	if (!ip) {
+		callback("Getting ink from no ip", -1);
+		console.error("Getting ink from no ip");
+		return;
+	}
 
 	this.database.query("SELECT ink FROM ink WHERE ip = ?", [ip], function (err, rows) {
-		callback(err, rows[0]);
-	});
+		if (err) {
+			callback(err);
+			return;
+		}
+
+		if (rows.length == 0) {
+			this.database.query("INSERT INTO ink SET ?", {ip: ip, ink: 5000});
+			callback(null, 5000);
+		} else {
+			callback(null, rows[0].ink);
+		}
+	}.bind(this));
 };
 
-DrawTogether.prototype.changeInkFromIp = function changeInkFromIp (delta, ip, callback) {
+DrawTogether.prototype.lowerInkFromIp = function changeInkFromIp (drawing, ip, callback) {
 	// Change the ink from a given ip, 5 will lower the ink with 5
 	// Callback param is err
 
-	this.database.query("UPDATE ink SET ink = ink - ", delta, callback;
+	if (!ip) {
+		callback("Lowering ink from no ip");
+		console.error("Lowering ink from no ip");
+		return;
+	}
+	this.database.query("UPDATE ink SET ink = ink - ? WHERE ip = ?", [this.inkUsageFromDrawing(drawing), ip], callback);
+};
+
+DrawTogether.prototype.raiseInkFromIp = function raiseInkFromIp (amount, ip, callback) {
+	// Raise ink with amount for given ip, caps out at 10000
+	if (!ip) {
+		callback("Raising ink from no ip");
+		console.error("Raising ink from no ip");
+		return;
+	}
+	this.database.query("UPDATE ink SET ink = LEAST(10000, ink + ?) WHERE ip = ?", [amount, ip], callback);
+};
+
+DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
+	// If its a brush the ink usage is ceil(size * size / 100)
+	// If it is a line the ink usage is ceil(size * length * 2 / 100)
+	var length = drawing[3];
+
+	if (typeof drawing[5] == "number")
+		length = this.utils.distance(drawing[1], drawing[2], drawing[5], drawing[6]) * 2;
+
+	return Math.ceil(drawing[3] * length / 100);
 };
 
 DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback) {
@@ -147,6 +191,15 @@ DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
 	if (drawing.y1) newDrawing.push(drawing.y1);
 
 	return newDrawing; 
+};
+
+DrawTogether.prototype.utils = {
+	distance: function (x1, y1, x2, y2) {
+		// Returns the distance between (x1, y1) and (x2, y2)
+		var xDis = x1 - x2,
+		    yDis = y1 - y1;
+		return Math.sqrt(xDis * xDis + yDis * yDis);
+	}
 };
 
 module.exports = DrawTogether;

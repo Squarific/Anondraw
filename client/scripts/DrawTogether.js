@@ -3,6 +3,11 @@ function DrawTogether (container, settings) {
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
+	// Set default values untill we receive them from the server
+	this.playerList = [];
+	this.ink = 5000;
+	this.lastInkWarning = Date.now();
+
 	// Initialize the dom elements
 	this.initDom();
 
@@ -33,6 +38,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	// Bind all socket events
 	var self = this;
 
+	// Connection events
 	socket.on("connect", function () {
 		self.chat.addMessage("CLIENT", "Connected to " + self.settings.server);
 
@@ -50,6 +56,18 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.chat.addMessage("CLIENT", "Reconnected to " + self.settings.server);
 	})
 
+	// Startup events
+
+	socket.on("initname", function (name) {
+		// Server gave us a guest name, set name only
+		// if we didn't ask for a different one
+		if (!localStorage.getItem("drawtogether-name")) {
+			self.setName(name);
+		}
+	});
+
+	// Room events
+
 	socket.on("drawings", function (data) {
 		if (data.room !== self.current_room)
 			self.paint.clear();
@@ -63,13 +81,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.paint.drawDrawing("public", self.decodeDrawing(data.drawing));
 	})
 
-	socket.on("initname", function (name) {
-		// Server gave us a guest name, set name only
-		// if we didn't ask for a different one
-		if (!localStorage.getItem("drawtogether-name")) {
-			self.setName(name);
-		}
-	});
+	// Player(list) events
 
 	socket.on("playernamechange", function (data) {
 		for (var k = 0; k < self.playerList.length; k++) {
@@ -107,8 +119,20 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updatePlayerList();
 	})
 
-	socket.on("forcename", self.setName)
+	// Inform events
+	socket.on("forcename", self.setName);
 
+	socket.on("setink", function (amount) {
+		self.ink = amount;
+		self.updateInk();
+	})
+
+	socket.on("changeink", function (amount) {
+		self.ink = Math.min(self.ink + amount, 10000);
+		self.updateInk();
+	});
+
+	// chat events
 	socket.on("chatmessage", function (data) {
 		var data = data || {};
 		self.chat.addMessage(data.user, data.message);
@@ -151,6 +175,21 @@ DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
 
 	for (var k in this.playerList) {
 		this.playerListDom.appendChild(this.createPlayerDom(this.playerList[k]));
+	}
+};
+
+DrawTogether.prototype.updateInk = function updateInk () {
+	this.inkDom.innerText = "Ink: " + this.ink + "/10000";
+	this.inkDom.style.width = Math.floor(this.ink / 100) + "%"; // = ink / 10000 * 100
+	if (this.ink < 1000) {
+		this.inkDom.classList.add("drawtogether-ink-low");
+		this.inkDom.classList.remove("drawtogether-ink-middle");
+	} else if (this.ink < 3000) {
+		this.inkDom.classList.add("drawtogether-ink-middle");
+		this.inkDom.classList.remove("drawtogether-ink-low");
+	} else {
+		this.inkDom.classList.remove("drawtogether-ink-middle");
+		this.inkDom.classList.remove("drawtogether-ink-low");
 	}
 };
 
@@ -200,6 +239,7 @@ DrawTogether.prototype.setName = function setName (name) {
 DrawTogether.prototype.setRoom = function setRoom (room) {
 	this.current_room = room;
 	this.controls.byName.room.input.value = room;
+	location.hash = room;
 };
 
 DrawTogether.prototype.openShareWindow = function openShareWindow () {
@@ -259,6 +299,22 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	drawContainer.className = "drawtogether-paint-container";
 	this.paint = new Paint(drawContainer);
 	this.paint.addEventListener("userdrawing", function (event) {
+		// When a drawing is made check if we have ink left
+		if (this.ink < 0) {
+			if (Date.now() - this.lastInkWarning > 5000) {
+				this.chat.addMessage("CLIENT", "No ink left! You will regain ink every 2 minutes. Tip: Small brushes use less ink.");
+				this.lastInkWarning = Date.now();
+			}
+			event.removeDrawing();
+			return;
+		}
+
+		// Lower our ink with how much it takes to draw this
+		this.ink -= this.inkUsageFromDrawing(event.drawing);
+		this.updateInk();
+
+		// Send the drawing to the server and remove from the local
+		// layer once we got a confirmation from the server
 		this.sendDrawing(event.drawing, function () {
 			console.log("removing drawing");
 			event.removeDrawing();
@@ -266,9 +322,26 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this));
 };
 
+DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
+	// If its a brush the ink usage is (size * size)
+	// If it is a line the ink usage is (size * length * 2)
+	var length = drawing.size;
+
+	if (typeof drawing.x1 == "number")
+		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1) * 2;
+
+	return Math.ceil(drawing.size * length / 100);
+};
+
 DrawTogether.prototype.createRoomInformation = function createRoomInformation () {
 	var infoContainer = this.container.appendChild(document.createElement("div"));
 	infoContainer.className = "drawtogether-info-container";
+
+	var inkContainer = infoContainer.appendChild(document.createElement("div"));
+	inkContainer.className = "drawtogether-ink-container";
+
+	this.inkDom = inkContainer.appendChild(document.createElement("div"));
+	this.inkDom.className = "drawtogether-ink";
 
 	this.playerListDom = infoContainer.appendChild(document.createElement("div"));
 	this.playerListDom.className = "drawtogether-info-playerlist";
@@ -492,12 +565,12 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Put on imgur/reddit",
 		action: this.openShareWindow.bind(this)
-	}, {
+	}, /*{
 		name: "account",
 		type: "button",
 		text: "Account",
 		action: this.openAccountWindow.bind(this)
-	}/*, {
+	}, {
 		name: "private",
 		type: "button",
 		text: "Random one-on-one",
@@ -548,5 +621,11 @@ DrawTogether.prototype.utils = {
 		}
 
 		return targetobject;
+	},
+	distance: function (x1, y1, x2, y2) {
+		// Returns the distance between (x1, y1) and (x2, y2)
+		var xDis = x1 - x2,
+		    yDis = y1 - y1;
+		return Math.sqrt(xDis * xDis + yDis * yDis);
 	}
 };

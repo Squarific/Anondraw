@@ -148,6 +148,33 @@ input, button, textarea {
   background:#3E5B79;
 }
 
+.drawtogether-ink-container {
+  position:relative;
+  margin:0.2em;
+  border:0.2em solid #233445;
+  background:#799abb;
+  text-align:center;
+}
+
+.drawtogether-ink {
+  color:white;
+  background:green;
+  font-size:1em;
+  height:1.8em;
+  line-height:1.8em;
+  white-space: nowrap;
+}
+
+.drawtogether-ink-low {
+  background:red;
+  color:white;
+}
+
+.drawtogether-ink-middle {
+  background:orange;
+  color:rgb(134, 36, 2);
+}
+
 /**
  * Sidebar containing chat
  */

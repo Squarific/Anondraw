@@ -5,6 +5,7 @@ function Protocol (io, drawtogether, imgur) {
 	this.drawTogether = drawtogether;
 	this.imgur = imgur;
 	this.bindIO();
+	setInterval(this.updateInk.bind(this),  2 * 60 * 1000);
 }
 
 Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
@@ -14,11 +15,23 @@ Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 };
 
 Protocol.prototype.sendDrawing = function sendDrawing (room, drawing) {
-	this.io.to(room).emit("drawing", {drawing: drawing, id: socket.id});
+	this.io.to(room).emit("drawing", {drawing: drawing});
 };
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
 	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
+};
+
+Protocol.prototype.updateInk = function updateInk () {
+	var amount = 5000;
+	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
+		var ip = this.io.sockets.sockets[sKey].request.connection.remoteAddress;
+		this.drawTogether.raiseInkFromIp(amount, ip, function (err) {
+			if (err)
+				console.log("[UPDATEINK][ERROR]", err);
+		});
+	}
+	this.io.emit("changeink", amount);
 };
 
 Protocol.prototype.getPlayerNameList = function getPlayerNameList (room) {
@@ -46,13 +59,13 @@ Protocol.prototype.bindIO = function bindIO () {
 		// Give the user a name and send it to the client, then bind
 		// all events so we can answer the client when it asks something
 
-		if (manualIpBanList.indexOf(socket.request.connection.remoteAddress) !== -1)
+		if (manualIpBanList.indexOf(socket.client.conn.remoteAddress) !== -1)
 			socket.disconnect();
 
 		socket.username = names[Math.floor(Math.random() * names.length)] + " " + names[Math.floor(Math.random() * names.length)];
 		socket.emit("initname", socket.username);
 
-		console.log("[CONNECTION] " + socket.request.connection.remoteAddress);
+		console.log("[CONNECTION] " + socket.client.conn.remoteAddress);
 
 		socket.on("chatmessage", function (message) {
 			// User is trying to send a message, if he is in a room
@@ -99,13 +112,13 @@ Protocol.prototype.bindIO = function bindIO () {
 			callback = callback || function () {};
 			protocol.imgur.uploadBase64(base64)
 			.then(function (json) {
-				console.log("[IMAGE UPLOAD] " + socket.request.connection.remoteAddress + " " + json.data.link);
+				console.log("[IMAGE UPLOAD] " + socket.client.conn.remoteAddress + " " + json.data.link);
 				callback({
 					url: json.data.link
 				});
 			})
 			.catch(function (err) {
-				console.error("[IMAGE UPLOAD][ERROR] " + socket.request.connection.remoteAddress + " " + err.message);
+				console.error("[IMAGE UPLOAD][ERROR] " + socket.client.conn.remoteAddress + " " + err.message);
 				callback({
 					error: "Something went wrong while trying to upload the file to imgur."
 				});
@@ -119,7 +132,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.drawTogether.login(data, function (err, success) {
 				if (err) {
 					callback({error: "Some error occured! [Login Check Error]"});
-					console.log("[LOGIN][ERROR] " + err);
+					console.log("[LOGIN][ERROR] ", err);
 					return;
 				}
 
@@ -127,7 +140,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					protocol.drawTogether.accountExists(data.email, function (err, exists) {
 						if (err) {
 							callback({error: "Some error occured! [Login Exists Error]"});
-							console.log("[LOGIN][ERROREXISTS] " + err);
+							console.log("[LOGIN][ERROREXISTS] ", err);
 							return;
 						}
 
@@ -149,7 +162,8 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback = function () {}
 			drawTogether.register(data, function (err) {
 				if (err) {
-					console.log("[REGISTER][ERROR]");
+					console.log("[REGISTER][ERROR]", err);
+					return;
 				}
 			})
 		})
@@ -200,18 +214,37 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (typeof callback !== "function")
 				callback = function () {};
 
-			protocol.drawTogether.addDrawing(socket.room, drawing, function (err) {
-				if (!err) {
-					protocol.sendDrawing(socket.room, drawing);
-				} else {
+			protocol.drawTogether.getInkFromIp(socket.client.conn.remoteAddress, function (err, amount) {
+				if (err) {
+					console.error("[DRAWING][GETINKERROR]", err);
+					return;
+				}
+				if (amount < 0) {
 					socket.emit("chatmessage", {
 						user: "SERVER",
-						message: err
+						message: "NO INK"
 					});
+					callback();
+					return;
 				}
+				protocol.drawTogether.addDrawing(socket.room, drawing, function (err) {
+					if (!err) {
+						protocol.drawTogether.lowerInkFromIp(drawing, socket.client.conn.remoteAddress, function (err) {
+							if (err)
+								console.log("[DRAWING][INKERROR]", err);
+						});
+						protocol.sendDrawing(socket.room, drawing);
+					} else {
+						socket.emit("chatmessage", {
+							user: "SERVER",
+							message: err
+						});
+					}
 
-				callback();
+					callback();
+				});
 			});
+
 		})
 
 		socket.on("changeroom", function (room, callback) {
@@ -259,6 +292,10 @@ Protocol.prototype.bindIO = function bindIO () {
 				});
 
 				socket.emit("playerlist", protocol.getPlayerNameList(socket.room));
+			});
+
+			protocol.drawTogether.getInkFromIp(socket.client.conn.remoteAddress, function (err, amount) {
+				socket.emit("setink", amount);
 			});
 
 			callback(true);
