@@ -128,7 +128,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	})
 
 	socket.on("changeink", function (amount) {
-		self.ink = Math.min(self.ink + amount, 10000);
+		self.ink = Math.min(self.ink + amount, 30000);
 		self.updateInk();
 	});
 
@@ -179,12 +179,12 @@ DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
 };
 
 DrawTogether.prototype.updateInk = function updateInk () {
-	this.inkDom.innerText = "Ink: " + this.ink + "/10000";
-	this.inkDom.style.width = Math.floor(this.ink / 100) + "%"; // = ink / 10000 * 100
-	if (this.ink < 1000) {
+	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/30000";
+	this.inkDom.style.width = Math.floor(Math.max(this.ink / 300, 0)) + "%"; // = ink / 10000 * 100
+	if (this.ink < 3000) {
 		this.inkDom.classList.add("drawtogether-ink-low");
 		this.inkDom.classList.remove("drawtogether-ink-middle");
-	} else if (this.ink < 3000) {
+	} else if (this.ink < 8000) {
 		this.inkDom.classList.add("drawtogether-ink-middle");
 		this.inkDom.classList.remove("drawtogether-ink-low");
 	} else {
@@ -292,6 +292,7 @@ DrawTogether.prototype.createChat = function createChat () {
 	var chatContainer = this.container.appendChild(document.createElement("div"));
 	chatContainer.className = "drawtogether-chat-container";
 	this.chat = new Chat(chatContainer, this.sendMessage.bind(this));
+	this.chatContainer = chatContainer;
 };
 
 DrawTogether.prototype.createDrawZone = function createDrawZone () {
@@ -336,6 +337,7 @@ DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawi
 DrawTogether.prototype.createRoomInformation = function createRoomInformation () {
 	var infoContainer = this.container.appendChild(document.createElement("div"));
 	infoContainer.className = "drawtogether-info-container";
+	this.infoContainer = infoContainer;
 
 	var inkContainer = infoContainer.appendChild(document.createElement("div"));
 	inkContainer.className = "drawtogether-ink-container";
@@ -416,7 +418,9 @@ DrawTogether.prototype.createControls = function createControls () {
 	var sharediv = controlContainer.appendChild(document.createElement("div"));
 	sharediv.className = "addthis_sharing_toolbox";
 
-	this.controls.byName["share-button"].input.className += " drawtogether-flashy";
+	this.controls.byName["share-button"].input.classList.add("drawtogether-flashy");
+	this.controls.byName["toggle-chat"].input.classList.add("drawtogether-display-on-small");
+	this.controls.byName["toggle-info"].input.classList.add("drawtogether-display-on-small");
 };
 
 DrawTogether.prototype.registerAccount = function registerAccount (data) {
@@ -478,6 +482,20 @@ DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
 	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?title=[DRAWING]%20Description&url=" + encodeURIComponent(url);
 };
 
+DrawTogether.prototype.toggleChat = function toggleChat () {
+	if (this.chatContainer.classList.contains("drawtogether-unhide-on-mobile"))
+		this.chatContainer.classList.remove("drawtogether-unhide-on-mobile");
+	else
+		this.chatContainer.classList.add("drawtogether-unhide-on-mobile");
+};
+
+DrawTogether.prototype.toggleInfo = function toggleInfo () {
+	if (this.infoContainer.classList.contains("drawtogether-unhide-on-mobile"))
+		this.infoContainer.classList.remove("drawtogether-unhide-on-mobile");
+	else
+		this.infoContainer.classList.add("drawtogether-unhide-on-mobile");
+};
+
 DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	shareWindow = this.container.appendChild(document.createElement("div"));
 	shareWindow.className = "drawtogether-sharewindow";
@@ -512,11 +530,9 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	selectWindow.className = "drawtogether-selectwindow";
 	this.selectWindow = selectWindow;
 
-	// var text = selectWindow.appendChild(document.createElement("div"));
-	// text.innerText = "Because of a sudden big increase of traffic the app is currently very unstable, this will hopefully be soon fixed.";
-	// text.className = "drawtogether-welcome-text";
-
-	selectWindow.appendChild(document.createElement("br"));
+	var text = selectWindow.appendChild(document.createElement("h1"));
+	text.innerText = "Draw online with friends and strangers.";
+	text.className = "drawtogether-welcome-text";
 
 	var publicButton = selectWindow.appendChild(document.createElement("div"));
 	publicButton.className = "drawtogether-modeselect-button";
@@ -538,11 +554,28 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 
 DrawTogether.prototype.createControlArray = function createControlArray () {
 	return [{
+		name: "toggle-chat",
+		type: "button",
+		value: "",
+		text: "Chat",
+		title: "Toggle chat",
+		action: this.toggleChat.bind(this)
+	}, {
+		name: "toggle-info",
+		type: "button",
+		value: "",
+		text: "Info",
+		title: "Toggle room info",
+		action: this.toggleInfo.bind(this)
+	}, {
 		name: "room",
 		type: "text",
 		value: "",
 		text: "Room",
-		title: "Change the room"
+		title: "Change the room",
+		action: function (event) {
+			console.log(event);
+		}
 	}, {
 		name: "room-button",
 		type: "button",
@@ -554,7 +587,9 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
-		action: function () {}
+		action: function (event) {
+			console.log(event);
+		}
 	}, {
 		name: "name-button",
 		type: "button",

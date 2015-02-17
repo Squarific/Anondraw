@@ -5,7 +5,8 @@ function Protocol (io, drawtogether, imgur) {
 	this.drawTogether = drawtogether;
 	this.imgur = imgur;
 	this.bindIO();
-	setInterval(this.updateInk.bind(this),  2 * 60 * 1000);
+	setInterval(this.updateInk.bind(this),  30 * 1000);
+	setInterval(this.updateAllPlayerLists.bind(this), 10 * 60 * 1000);
 }
 
 Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
@@ -23,9 +24,9 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 };
 
 Protocol.prototype.updateInk = function updateInk () {
-	var amount = 5000;
+	var amount = 3000;
 	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
-		var ip = this.io.sockets.sockets[sKey].request.connection.remoteAddress;
+		var ip = this.io.sockets.sockets[sKey].ip;
 		this.drawTogether.raiseInkFromIp(amount, ip, function (err) {
 			if (err)
 				console.log("[UPDATEINK][ERROR]", err);
@@ -48,24 +49,50 @@ Protocol.prototype.getPlayerNameList = function getPlayerNameList (room) {
 	return players;
 };
 
+Protocol.prototype.updateAllPlayerLists = function updateAllPlayerLists () {
+	var roomsDone = {};
+	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
+		var room = this.io.sockets.sockets[sKey].room;
+		if (!roomsDone[room]) {
+			this.io.to(room).emit("playerlist", this.getPlayerNameList(room));
+		}
+	}
+};
+
 Protocol.prototype.socketFromId = function socketFromId (id) {
 	return this.io.nsps['/'].connected[id];
 };
 
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
-	var manualIpBanList = [];
+	var manualIpBanList = ["86.24.220.131", "79.141.162.19", "62.210.94.133", "69.158.148.224"];
+	// Banned people: First two ips: Guy called himself "SERVER", annoying person, draws big brushes over others to grief
+	// Next two: Drew big red swastikas
 	this.io.on("connection", function (socket) {
 		// Give the user a name and send it to the client, then bind
 		// all events so we can answer the client when it asks something
 
-		if (manualIpBanList.indexOf(socket.client.conn.remoteAddress) !== -1)
+		socket.ip = socket.client.conn.remoteAddress;
+		if (!socket.ip) {
+			socket.emit("chatmessage", {
+				user: "SERVER",
+				message: "No ip found!"
+			});
 			socket.disconnect();
+		}
+
+		if (manualIpBanList.indexOf(socket.ip) !== -1) {
+			socket.emit("chatmessage", {
+				user: "SERVER",
+				message: "You have been banned."
+			});
+			socket.disconnect();
+		}
 
 		socket.username = names[Math.floor(Math.random() * names.length)] + " " + names[Math.floor(Math.random() * names.length)];
 		socket.emit("initname", socket.username);
 
-		console.log("[CONNECTION] " + socket.client.conn.remoteAddress);
+		console.log("[CONNECTION] " + socket.ip);
 
 		socket.on("chatmessage", function (message) {
 			// User is trying to send a message, if he is in a room
@@ -104,21 +131,22 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("uploadimage", function (base64, callback) {
-			if (Date.now() - socket.lastImgurUpload > 2000) {
+			if (Date.now() - socket.lastImgurUpload < 2000) {
 				return;
 			}
 			socket.lastImgurUpload = Date.now();
+			console.log("Imgur upload request from " + socket.ip);
 
 			callback = callback || function () {};
 			protocol.imgur.uploadBase64(base64)
 			.then(function (json) {
-				console.log("[IMAGE UPLOAD] " + socket.client.conn.remoteAddress + " " + json.data.link);
+				console.log("[IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
 				callback({
 					url: json.data.link
 				});
 			})
 			.catch(function (err) {
-				console.error("[IMAGE UPLOAD][ERROR] " + socket.client.conn.remoteAddress + " " + err.message);
+				console.error("[IMAGE UPLOAD][ERROR] " + socket.ip + " " + err.message);
 				callback({
 					error: "Something went wrong while trying to upload the file to imgur."
 				});
@@ -170,6 +198,12 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("changename", function (name) {
 			// Change the username
+			if (name == "S᠎ERVER") {
+				manualIpBanList.push(socket.ip);
+				console.log("Server guy banned, ip: " + socket.ip);
+				socket.disconnect();
+			}
+
 			name.replace(/[^\x00-\x7F]/g, "");
 			if (name.length > 32)
 				name = name.substr(0, 32);
@@ -214,7 +248,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (typeof callback !== "function")
 				callback = function () {};
 
-			protocol.drawTogether.getInkFromIp(socket.client.conn.remoteAddress, function (err, amount) {
+			protocol.drawTogether.getInkFromIp(socket.ip, function (err, amount) {
 				if (err) {
 					console.error("[DRAWING][GETINKERROR]", err);
 					return;
@@ -224,12 +258,13 @@ Protocol.prototype.bindIO = function bindIO () {
 						user: "SERVER",
 						message: "NO INK"
 					});
+					socket.emit("setink", amount);
 					callback();
 					return;
 				}
 				protocol.drawTogether.addDrawing(socket.room, drawing, function (err) {
 					if (!err) {
-						protocol.drawTogether.lowerInkFromIp(drawing, socket.client.conn.remoteAddress, function (err) {
+						protocol.drawTogether.lowerInkFromIp(drawing, socket.ip, function (err) {
 							if (err)
 								console.log("[DRAWING][INKERROR]", err);
 						});
@@ -294,7 +329,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.emit("playerlist", protocol.getPlayerNameList(socket.room));
 			});
 
-			protocol.drawTogether.getInkFromIp(socket.client.conn.remoteAddress, function (err, amount) {
+			protocol.drawTogether.getInkFromIp(socket.ip, function (err, amount) {
 				socket.emit("setink", amount);
 			});
 

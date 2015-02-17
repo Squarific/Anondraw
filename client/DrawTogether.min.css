@@ -11,6 +11,11 @@ input, button, textarea {
   border: none;
   outline: none; }
 
+h1 {
+  color:white;
+  margin-top:1em;
+}
+
 * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -399,37 +404,61 @@ input, button, textarea {
   .control-button:hover {
     background-color: #233445; }
 
+.drawtogether-display-on-small {
+  display:none;
+}
+
 @media (max-width: 1175px) {
   #fullscreen {
     left: auto;
     right: auto;
-    bottom: auto; }
+    bottom: auto; 
+    overflow-x:hidden;
+  }
 
   .drawtogether-info-container {
-    position:relative;
-    width:auto;
-    border-top:0.2em solid #799ABB;
+    position:absolute;
+    height:calc(100% - 3em);
+    width:100%;
+    right:-100%;
+    z-index:125;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    transition-duration: 0.3s;
   }
 
   .drawtogether-chat-container {
-    position: relative;
-    width: auto;
-    height: 50%;
-    min-height: 300px; }
+    position:absolute;
+    top:0;
+    right:-100%;
+    z-index:150;
+    width:100%;
+    height:calc(100% - 3em);
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+  }
+
+  .drawtogether-unhide-on-mobile {
+    right:0;
+  }
+
+  .drawtogether-display-on-small {
+    display:inline-block;
+  }
 
   .drawtogether-paint-container {
-    position: relative;
-    top: 0;
-    width: auto;
-    min-width: 0;
-    height: 50%;
-    height: calc(50% - 50px);
-    min-height: 300px; }
+    position:relative;
+    width:auto;
+    height:calc(100% - 3em);
+    top:0;
+  }
 
   .drawtogether-control-container {
-    width: 100%; 
+    width: 100%;
     height: auto;
-    }
+    background:white;
+  }
 
   .messagecontainer {
     margin-bottom: 3rem; }
@@ -440,8 +469,8 @@ input, button, textarea {
     bottom: 0;
     left: 0;
     right: 0;
-    max-height: none; } }
-
+    max-height: none; } 
+}
 .addthis_sharing_toolbox {
   float:right;
   margin:.3rem .5em 0;

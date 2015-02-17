@@ -58,13 +58,13 @@ DrawTogether.prototype.lowerInkFromIp = function changeInkFromIp (drawing, ip, c
 };
 
 DrawTogether.prototype.raiseInkFromIp = function raiseInkFromIp (amount, ip, callback) {
-	// Raise ink with amount for given ip, caps out at 10000
+	// Raise ink with amount for given ip, caps out at 30000
 	if (!ip) {
 		callback("Raising ink from no ip");
 		console.error("Raising ink from no ip");
 		return;
 	}
-	this.database.query("UPDATE ink SET ink = LEAST(10000, ink + ?) WHERE ip = ?", [amount, ip], callback);
+	this.database.query("UPDATE ink SET ink = LEAST(30000, ink + ?) WHERE ip = ?", [amount, ip], callback);
 };
 
 DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
@@ -89,6 +89,11 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 	if (drawing[3] > 100) {
 		callback("Don't try to cheat the system please!");
+		return;
+	}
+
+	if (drawing[3] < 1) {
+		callback("Nice try but that won't fly!");
 		return;
 	}
 
@@ -128,7 +133,7 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
 
 	var self = this;
-	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 20000) AS T ORDER BY id ASC", room, function (err, rows) {
+	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 35000) AS T ORDER BY id ASC", room, function (err, rows) {
 		if (err) {
 			console.log(err);
 			callback("Something went wrong while trying to retrieve the drawings from the database!");
