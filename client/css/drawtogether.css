@@ -319,6 +319,14 @@ h1 {
 .sp-preview {
   height: 100% !important; }
 
+.paint-selected-tool {
+  background:#607E9D !important;
+}
+
+.paint-selected-tool:hover {
+  background:#384D63 !important;
+}
+
 .paint-canvas {
   display: block;
   position: absolute;
