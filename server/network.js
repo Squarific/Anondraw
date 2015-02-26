@@ -15,8 +15,8 @@ Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 	this.drawTogether.addChatMessage(room, data);
 };
 
-Protocol.prototype.sendDrawing = function sendDrawing (room, drawing) {
-	this.io.to(room).emit("drawing", {drawing: drawing});
+Protocol.prototype.sendDrawing = function sendDrawing (room, userid, drawing) {
+	this.io.to(room).emit("drawing", {userid: userid, drawing: drawing});
 };
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
@@ -271,7 +271,7 @@ Protocol.prototype.bindIO = function bindIO () {
 							if (err)
 								console.log("[DRAWING][INKERROR]", err);
 						});
-						protocol.sendDrawing(socket.room, drawing);
+						protocol.sendDrawing(socket.room, socket.id, drawing);
 					} else {
 						socket.emit("chatmessage", {
 							user: "SERVER",

@@ -37,7 +37,10 @@ DrawTogether.prototype.getInkFromIp = function getInkFromIp (ip, callback) {
 		}
 
 		if (rows.length == 0) {
-			this.database.query("INSERT INTO ink SET ?", {ip: ip, ink: 5000});
+			this.database.query("INSERT INTO ink SET ?", {ip: ip, ink: 5000}, function (err) {
+				if (err)
+					console.error("[GETINKFROMIPERROR]", err);
+			});
 			callback(null, 5000);
 		} else {
 			callback(null, rows[0].ink);

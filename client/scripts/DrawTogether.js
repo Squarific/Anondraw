@@ -11,10 +11,13 @@ function DrawTogether (container, settings) {
 	// Initialize the dom elements
 	this.initDom();
 
+	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask")
 		this.openModeSelector();
 	else
 		this.connect();
+
+	requestAnimationFrame(this.drawLoop.bind(this));
 }
 
 DrawTogether.prototype.defaultSettings = {
@@ -32,6 +35,27 @@ DrawTogether.prototype.connect = function connect () {
 	// Connect to the server and bind socket events
 	this.socket = io(this.settings.server);
 	this.bindSocketHandlers(this.socket);
+};
+
+DrawTogether.prototype.drawLoop = function drawLoop () {
+	// Draw all user interactions of the last 2 seconds
+	this.userCtx.clearRect(0, 0, this.userCtx.canvas.width, this.userCtx.canvas.height);
+	for (var k = 0; k < this.playerList.length; k++) {
+		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 1500)
+			this.drawPlayerInteraction(this.playerList[k].name, this.playerList[k].lastPosition.pos);
+	}
+
+	// Recall the drawloop
+	requestAnimationFrame(this.drawLoop.bind(this));
+};
+
+DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (name, position) {
+	this.userCtx.font = "12px monospace";
+	this.userCtx.strokeStyle = 'black';
+    this.userCtx.lineWidth = 3;
+    this.userCtx.strokeText(name, position[0], position[1] - 40);
+    this.userCtx.fillStyle = 'white';
+    this.userCtx.fillText(name, position[0], position[1] - 40);
 };
 
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
@@ -78,7 +102,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	});
 
 	socket.on("drawing", function (data) {
-		self.paint.drawDrawing("public", self.decodeDrawing(data.drawing));
+		var drawing = self.decodeDrawing(data.drawing);
+		self.paint.drawDrawing("public", drawing);
+		self.setPlayerPosition(data.userid, [drawing.x, drawing.y], Date.now());
 	})
 
 	// Player(list) events
@@ -173,8 +199,18 @@ DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
 	plTitle.innerText = "PlayerList (" + this.playerList.length + ")";
 	plTitle.className = "drawtogether-pl-title";
 
-	for (var k in this.playerList) {
+	for (var k = 0; k < this.playerList.length; k++) {
 		this.playerListDom.appendChild(this.createPlayerDom(this.playerList[k]));
+	}
+};
+
+DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, position, time) {
+	for (var k = 0; k < this.playerList.length; k++) {
+		if (this.playerList[k].id == id) {
+			this.playerList[k].lastPosition = this.playerList[k].lastPosition || {};
+			this.playerList[k].lastPosition.pos = position;
+			this.playerList[k].lastPosition.time = time;
+		}
 	}
 };
 
@@ -299,6 +335,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	var drawContainer = this.container.appendChild(document.createElement("div"));
 	drawContainer.className = "drawtogether-paint-container";
 	this.paint = new Paint(drawContainer);
+	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
 	this.paint.addEventListener("userdrawing", function (event) {
 		// When a drawing is made check if we have ink left
 		if (this.ink < 0) {
