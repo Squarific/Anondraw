@@ -53,9 +53,9 @@ DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (n
 	this.userCtx.font = "12px monospace";
 	this.userCtx.strokeStyle = 'black';
     this.userCtx.lineWidth = 3;
-    this.userCtx.strokeText(name, position[0], position[1] - 40);
+    this.userCtx.strokeText(name, position[0] - this.userCtx.canvas.leftTopX, position[1] - 40 - this.userCtx.canvas.leftTopY);
     this.userCtx.fillStyle = 'white';
-    this.userCtx.fillText(name, position[0], position[1] - 40);
+    this.userCtx.fillText(name, position[0] - this.userCtx.canvas.leftTopX, position[1] - 40 - this.userCtx.canvas.leftTopY);
 };
 
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {

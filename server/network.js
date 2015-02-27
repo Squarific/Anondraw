@@ -65,12 +65,13 @@ Protocol.prototype.socketFromId = function socketFromId (id) {
 
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
-	var manualIpBanList = ["86.24.220.131", "79.141.162.19", "62.210.94.133", "69.158.148.224", "68.59.94.92", "99.9.208.208", "65.94.35.239"];
+	var manualIpBanList = ["86.24.220.131", "79.141.162.19", "62.210.94.133", "69.158.148.224", "68.59.94.92", "99.9.208.208", "65.94.35.239", "72.8.184.30"];
 	// Banned people: First two ips: Guy called himself "SERVER", annoying person, draws big brushes over others to grief
 	// Next two: Drew big red swastikas
 	// Next: Holohoax: drawing swastikas
 	// Next: The EJACULATOR: constant joining and disconnecting
 	// Next: retardchu: drawing swastikas
+	// Next: Cheesemaster: drawing swastikas, penis
 	this.io.on("connection", function (socket) {
 		// Give the user a name and send it to the client, then bind
 		// all events so we can answer the client when it asks something
