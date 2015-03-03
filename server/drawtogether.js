@@ -1,3 +1,5 @@
+var SHA256 = require("crypto-js/sha256");
+
 function DrawTogether (database) {
 	this.database = database;
 }
@@ -153,7 +155,7 @@ DrawTogether.prototype.login = function login (data, callback) {
 	// Check if an account with data.email and data.password exists
 	
 	var self = this;
-	this.database.query("SELECT * FROM users WHERE email = ? AND password = ?", [data.email, data.password], function (err, rows) {
+	this.database.query("SELECT * FROM users WHERE email = ? AND password = ?", [data.email, SHA256(data.password)], function (err, rows) {
 		callback(err, rows.length !== 0);
 	});
 };
