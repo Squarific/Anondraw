@@ -197,6 +197,7 @@ DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
 
 	var plTitle = this.playerListDom.appendChild(document.createElement("span"));
 	plTitle.innerText = "PlayerList (" + this.playerList.length + ")";
+	plTitle.textContent = "PlayerList (" + this.playerList.length + ")";
 	plTitle.className = "drawtogether-pl-title";
 
 	for (var k = 0; k < this.playerList.length; k++) {
@@ -216,6 +217,7 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 
 DrawTogether.prototype.updateInk = function updateInk () {
 	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/30000";
+	this.inkDom.textContent = "Ink: " + Math.floor(this.ink) + "/30000";
 	this.inkDom.style.width = Math.floor(Math.max(this.ink / 300, 0)) + "%"; // = ink / 10000 * 100
 	if (this.ink < 3000) {
 		this.inkDom.classList.add("drawtogether-ink-low");
@@ -320,6 +322,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	var playerDom = document.createElement("div");
 	playerDom.playerId = player.id;
 	playerDom.innerText = player.name;
+	playerDom.textContent = player.name;
 	playerDom.className = "drawtogether-player";
 	return playerDom;
 };
@@ -354,7 +357,6 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Send the drawing to the server and remove from the local
 		// layer once we got a confirmation from the server
 		this.sendDrawing(event.drawing, function () {
-			console.log("removing drawing");
 			event.removeDrawing();
 		});
 	}.bind(this));
@@ -391,10 +393,10 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	accWindow.className = "drawtogether-accountwindow";
 	this.accWindow = accWindow;
 
-	this.loginMessage = accWindow.appendChild(document.createElement("div"));
-
 	var formContainer = accWindow.appendChild(document.createElement("div"));
 	formContainer.className = "drawtogether-account-formcontainer";
+
+	this.loginMessage = formContainer.appendChild(document.createElement("div"));
 
 	var emailInput = formContainer.appendChild(document.createElement("input"));
 	emailInput.type = "email";
@@ -407,42 +409,44 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	this.passInput = passInput;
 
 	var loginButton = formContainer.appendChild(document.createElement("div"));
-	loginButton.innerText = "Login";
+	loginButton.innerText = "Login/Register";
+	loginButton.textContent = "Login/Register";
 	loginButton.className = "drawtogether-button drawtogether-login-button";
 	loginButton.addEventListener("click", function () {
 		this.socket.emit("login", {
 			email: this.emailInput.value,
-			password: this.passInput.value
+			password: CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64)
 		}, function (data) {
-			if (data.success)
-				this.closeAccountWindow();
-
 			if (data.error)
 				this.accountError(data.error);
 
-			if (data.register) {
-				while (this.loginMessage.firstChild)
-					this.loginMessage.removeChild(this.loginMessage.firstChild);
+			if (data.success)
+				this.accountSuccess(data.success);
 
-				var message = this.loginMessage.appendChild(document.createElement("div"));
-				message.className = "drawtogether-message drawtogether-login-message";
-				message.innerText = "No account found with this email, do you want to register?";
+			// if (data.register) {
+			// 	while (this.loginMessage.firstChild)
+			// 		this.loginMessage.removeChild(this.loginMessage.firstChild);
 
-				this.loginMessage.appendChild(document.createElement("br"));
+			// 	var message = this.loginMessage.appendChild(document.createElement("div"));
+			// 	message.className = "drawtogether-message drawtogether-login-message";
+			// 	message.innerText = "No account found with this email, do you want to register?";
 
-				var registerButton = this.loginMessage.appendChild(document.createElement("div"));
-				registerButton.innerText = "Register";
-				registerButton.className = "drawtogether-button drawtogether-register-button";
-				registerButton.addEventListener("click", this.registerAccount({
-					email: this.emailInput.value,
-					password: this.passInput.value
-				}));
-			}
+			// 	var registerButton = this.loginMessage.appendChild(document.createElement("div"));
+			// 	registerButton.innerText = "Register";
+			// 	registerButton.className = "drawtogether-button drawtogether-register-button";
+			// 	registerButton.addEventListener("click", function () {
+			// 		this.registerAccount({
+			// 			email: this.emailInput.value,
+			// 			password: CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64)
+			// 		})
+			// 	}.bind(this));
+			// }
 		}.bind(this));
 	}.bind(this));
 
 	var close = formContainer.appendChild(document.createElement("div"));
 	close.innerText = "Close login window";
+	close.textContent = "Close login window";
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeAccountWindow.bind(this));
 };
@@ -460,15 +464,15 @@ DrawTogether.prototype.createControls = function createControls () {
 	this.controls.byName["toggle-info"].input.classList.add("drawtogether-display-on-small");
 };
 
-DrawTogether.prototype.registerAccount = function registerAccount (data) {
-	this.socket.emit("register", data, function (data) {
-		if (data.error)
-			this.accountError(data.error);
+// DrawTogether.prototype.registerAccount = function registerAccount (data) {
+// 	this.socket.emit("register", data, function (data) {
+// 		if (data.error)
+// 			this.accountError(data.error);
 
-		if (data.success)
-			this.closeAccountWindow();
-	});
-};
+// 		if (data.success)
+// 			this.accountSuccess(data.success);
+// 	}.bind(this));
+// };
 
 DrawTogether.prototype.accountError = function accountError (msg) {
 	while (this.loginMessage.firstChild)
@@ -477,6 +481,17 @@ DrawTogether.prototype.accountError = function accountError (msg) {
 	var err = this.loginMessage.appendChild(document.createElement("div"));
 	err.className = "drawtogether-error drawtogether-login-error";
 	err.innerText = msg;
+	err.textContent = msg;
+};
+
+DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
+	while (this.loginMessage.firstChild)
+		this.loginMessage.removeChild(this.loginMessage.firstChild);
+
+	var msg = this.loginMessage.appendChild(document.createElement("div"));
+	msg.className = "drawtogether-success drawtogether-login-success";
+	msg.innerText = success;
+	msg.textContent = success;
 };
 
 DrawTogether.prototype.uploadImage = function uploadImage () {
@@ -503,6 +518,7 @@ DrawTogether.prototype.showShareError = function showShareError (error) {
 
 	var errorMessage = this.shareError.appendChild(document.createElement("div"));
 	errorMessage.innerText = error;
+	errorMessage.textContent = error;
 	errorMessage.className = "drawtogether-error drawtogether-share-error";
 };
 
@@ -548,16 +564,19 @@ DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	var upload = shareWindow.appendChild(document.createElement("div"));
 	upload.className = "drawtogether-button drawtogether-upload-button";
 	upload.innerText = "Upload image to imgur";
+	upload.textContent = "Upload image to imgur";
 	upload.addEventListener("click", this.uploadImage.bind(this));
 
 	var share = shareWindow.appendChild(document.createElement("a"));
 	share.className = "drawtogether-button drawtogether-share-button";
 	share.innerText = "Share image to reddit";
+	share.textContent = "Share image to reddit";
 	share.href = "#";
 	this.shareToRedditButton = share;
 
 	var close = shareWindow.appendChild(document.createElement("div"));
 	close.innerText = "Close share window";
+	close.textContent = "Close share window";
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeShareWindow.bind(this));
 };
@@ -569,6 +588,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 
 	var text = selectWindow.appendChild(document.createElement("h1"));
 	text.innerText = "Draw online with friends and strangers.";
+	text.textContent = "Draw online with friends and strangers.";
 	text.className = "drawtogether-welcome-text";
 
 	var publicButton = selectWindow.appendChild(document.createElement("div"));
@@ -637,12 +657,12 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Put on imgur/reddit",
 		action: this.openShareWindow.bind(this)
-	}, /*{
+	}, {
 		name: "account",
 		type: "button",
 		text: "Account",
 		action: this.openAccountWindow.bind(this)
-	}, {
+	}, /*{
 		name: "private",
 		type: "button",
 		text: "Random one-on-one",

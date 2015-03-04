@@ -138,7 +138,7 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
 
 	var self = this;
-	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 35000) AS T ORDER BY id ASC", room, function (err, rows) {
+	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 50000) AS T ORDER BY id ASC", room, function (err, rows) {
 		if (err) {
 			console.log(err);
 			callback("Something went wrong while trying to retrieve the drawings from the database!");
@@ -154,16 +154,15 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 DrawTogether.prototype.login = function login (data, callback) {
 	// Check if an account with data.email and data.password exists
 	
-	var self = this;
-	this.database.query("SELECT * FROM users WHERE email = ? AND password = ?", [data.email, SHA256(data.password)], function (err, rows) {
-		callback(err, rows.length !== 0);
+	this.database.query("SELECT id FROM users WHERE email = ? AND password = ?", [data.email, SHA256(data.password).toString()], function (err, rows) {
+		if (err) callback(err);
+		else callback(null, rows.length !== 0, (rows.length !== 0) ? rows[0].id : null);
 	});
 };
 
 DrawTogether.prototype.accountExists = function accountExists (email, callback) {
 	// Check if an account with the given email exists
 
-	var self = this;
 	this.database.query("SELECT * FROM users WHERE email = ?", [email], function (err, rows) {
 		callback(err, rows.length !== 0);
 	});
@@ -172,10 +171,10 @@ DrawTogether.prototype.accountExists = function accountExists (email, callback) 
 DrawTogether.prototype.register = function register (data, callback) {
 	// Add a user with the given data.email and data.password
 
-	var self = this;
-	this.database.query("INSERT INTO users SET ?", data, function (err) {
-
-	});
+	this.database.query("INSERT INTO users SET ?", {
+		email: data.email,
+		password: SHA256(data.password).toString()
+	}, callback);
 };
 
 DrawTogether.prototype.encodeDrawings = function encodeDrawings (drawings, callback) {

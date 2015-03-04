@@ -75,7 +75,7 @@ h1 {
 .drawtogether-accountwindow input {
   display:block;
   min-width:300px;
-  width:20%;
+  width:calc(100% - 1em);
   padding: .25em .5em;
   height: 2.3rem;
   line-height: 2.3rem;
@@ -110,6 +110,38 @@ h1 {
 
 .drawtogether-accountwindow .drawtogether-button:hover {
   background-color: #233445;
+}
+
+.drawtogether-error {
+  background:rgb(185, 85, 85);
+  color:white;
+  border:rgb(155, 69, 69) .2em solid;
+}
+
+.drawtogether-success {
+  background:rgb(68, 132, 73);
+  color:white;
+  border:rgb(22, 58, 25) .2em solid;
+}
+
+.drawtogether-login-error {
+  display:inline-block;
+  padding:.5em;
+  margin-bottom:1em;
+}
+
+.drawtogether-login-success {
+  display:inline-block;
+  padding:.5em;
+  margin-bottom:1em;
+}
+
+.drawtogether-login-message {
+  margin:.3em;
+}
+
+.drawtogether-register-button {
+  margin-bottom:1.7em !important;
 }
 
 /**

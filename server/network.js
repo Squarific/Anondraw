@@ -15,8 +15,8 @@ Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 	this.drawTogether.addChatMessage(room, data);
 };
 
-Protocol.prototype.sendDrawing = function sendDrawing (room, userid, drawing) {
-	this.io.to(room).emit("drawing", {userid: userid, drawing: drawing});
+Protocol.prototype.sendDrawing = function sendDrawing (room, socketid, drawing) {
+	this.io.to(room).emit("drawing", {socketid: socketid, drawing: drawing});
 };
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
@@ -161,7 +161,11 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (typeof callback !== "function")
 				callback = function () {}
 
-			protocol.drawTogether.login(data, function (err, success) {
+			// We are first going to try to login, if that fails we will check
+			// if the account exists.
+			// Exists? => register and log in
+			// Else => warn wrong password
+			protocol.drawTogether.login(data, function (err, success, id) {
 				if (err) {
 					callback({error: "Some error occured! [Login Check Error]"});
 					console.log("[LOGIN][ERROR] ", err);
@@ -177,7 +181,30 @@ Protocol.prototype.bindIO = function bindIO () {
 						}
 
 						if (!exists) {
-							callback({register: true});
+							protocol.drawTogether.register(data, function (err) {
+								if (err) {
+									console.log("[REGISTER][ERROR]", err, data);
+									callback({error: "An error occured while trying to register, please wait a few hours for the issue to be resolved."});
+									return;
+								}
+
+								protocol.drawTogether.login(data, function (err, success, id) {
+									if (err) {
+										callback({error: "Some error occured! [Login After Register Error]"});
+										console.log("[LOGINAFTERREGISTER][ERROR] ", err);
+										return;
+									}
+
+									if (!success) {
+										console.log("Failed to login " + data.email + " after just registering it.", data)
+										callback({error: "Unkown error. Failed to login after register."});
+										return;
+									}
+
+									callback({success: "Registered and logged in to " + data.email});
+									console.log("[REGISTER] " + socket.ip + " registered " + data.email);
+								});
+							});
 						} else {
 							callback({error: "Wrong password!"});
 						}
@@ -185,20 +212,11 @@ Protocol.prototype.bindIO = function bindIO () {
 					return;
 				}
 
-				callback({success: success});
+				callback({success: "Logged in as " + data.email});
+				console.log("[LOGIN] " + socket.ip + " logged in as " + data.email);
+				socket.userid = id;
 			});
-		})
-
-		socket.on("register", function (data, callback) {
-			if (typeof callback !== "function")
-				callback = function () {}
-			drawTogether.register(data, function (err) {
-				if (err) {
-					console.log("[REGISTER][ERROR]", err);
-					return;
-				}
-			})
-		})
+		});
 
 		socket.on("changename", function (name) {
 			// Change the username
