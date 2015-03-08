@@ -65,13 +65,15 @@ Protocol.prototype.socketFromId = function socketFromId (id) {
 
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
-	var manualIpBanList = ["86.24.220.131", "79.141.162.19", "62.210.94.133", "69.158.148.224", "68.59.94.92", "99.9.208.208", "65.94.35.239", "72.8.184.30"];
+	var manualIpBanList = ["86.24.220.131", "79.141.162.19", "62.210.94.133", "69.158.148.224", "68.59.94.92", "99.9.208.208", "65.94.35.239", "72.8.184.30", "174.59.77.94", "24.149.10.200"];
 	// Banned people: First two ips: Guy called himself "SERVER", annoying person, draws big brushes over others to grief
 	// Next two: Drew big red swastikas
 	// Next: Holohoax: drawing swastikas
 	// Next: The EJACULATOR: constant joining and disconnecting
 	// Next: retardchu: drawing swastikas
 	// Next: Cheesemaster: drawing swastikas, penis
+	// Next: Starlord: drawing swastikas, penisses and removing drawings
+	// Next: Swastika and penis
 	this.io.on("connection", function (socket) {
 		// Give the user a name and send it to the client, then bind
 		// all events so we can answer the client when it asks something
@@ -307,7 +309,17 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("changeroom", function (room, callback) {
 			// User wants to change hes room, subscribe the socket to the
 			// given room, tell the user he is subscribed and send the drawing.
+			// Return true in callback if the user is now in the room, otherwise return false
 			callback = callback || function () {};
+
+			if (socket.room == room) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You are already in room " + room + "!"
+				});
+				callback(true);
+				return;
+			}
 
 			if (protocol.getUserCount(room) >= 30 && socket.username !== "UberLord") {
 				socket.emit("chatmesage", {
