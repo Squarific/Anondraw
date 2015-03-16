@@ -337,6 +337,18 @@ Protocol.prototype.bindIO = function bindIO () {
 					user: "SERVER",
 					message: socket.username + " gave " + targetSocket.username + " positive reputation! :D"
 				});
+	
+				protocol.drawTogether.getReputationFromUserId(targetSocket.userid, function (err, reputation) {
+					if (err) {
+						console.error("[LOGIN][GETREPUTATION]", err);
+						return;
+					}
+
+					protocol.io.to(socket.room).emit("reputation", {
+						id: targetSocket.id,
+						reputation: reputation
+					});
+				});
 			});
 		});
 
