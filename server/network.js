@@ -272,6 +272,18 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback({success: "Logged in as " + data.email});
 				console.log("[LOGIN] " + socket.ip + " logged in as " + data.email + " (" + id + ")");
 				socket.userid = id;
+
+				protocol.drawTogether.getReputationFromUserId(id, function (err, reputation) {
+					if (err) {
+						console.error("[LOGIN][GETREPUTATION]", err);
+						return;
+					}
+
+					protocol.io.to(socket.room).emit("reputation", {
+						id: socket.id,
+						reputation: reputation
+					});
+				});
 			});
 		});
 
