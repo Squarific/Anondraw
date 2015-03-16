@@ -175,14 +175,29 @@ h1 {
   width:100%;
   color:#fff;
   font-size:1em;
-  padding:.4em;
   padding-left:.8em;
-  background: #456789;
+  margin-bottom:.1em;
+  background:#456789;
   transition-duration:.2s;
 }
 
 .drawtogether-player:hover {
-  background:#3E5B79;
+  background:#426283;
+}
+
+.drawtogether-upvote-button {
+  display:inline-block;
+  background:rgb(39, 56, 73);
+  padding:.4em;
+  cursor:pointer;
+}
+
+.drawtogether-upvote-button:hover {
+  background:rgb(50, 71, 91);
+}
+
+.drawtogether-player-name {
+  padding:.4em;
 }
 
 .drawtogether-ink-container {

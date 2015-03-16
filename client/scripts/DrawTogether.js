@@ -353,7 +353,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
 
-	var upvoteButton = document.createElement("div");
+	var upvoteButton = document.createElement("span");
 	upvoteButton.className = "drawtogether-upvote-button"
 
 	upvoteButton.innerText = "▲";
@@ -363,15 +363,20 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 		this.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 
+	var nameText = document.createElement("span");
+	nameText.className = "drawtogether-player-name";
+
 	if (typeof player.reputation !== "undefined") {
 		var rep = " (" + player.reputation + ")";
 	} else {
 		rep = "";
 	}
 
-	playerDom.playerId = player.id;
-	playerDom.innerText = player.name + rep;
-	playerDom.textContent = player.name + rep;
+	nameText.innerText = player.name + rep;
+	nameText.textContent = player.name + rep;
+
+	playerDom.appendChild(upvoteButton);
+	playerDom.appendChild(nameText);
 
 	return playerDom;
 };

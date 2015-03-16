@@ -30,9 +30,23 @@ DrawTogether.prototype.getReputationsFromUserIds = function getreputationsFromUs
 };
 
 DrawTogether.prototype.vote = function vote (fromid, toid, callback) {
-	this.database.query("INSERT INTO reputation (from_id, to_id) VALUES (?, ?)", [fromid, toid], function (err) {
-		callback(err, (err) ? false : true);
-	});
+	if (fromid == toid) {
+		callback("You can't vote on yourself!", false);
+		return;
+	}
+	this.database.query("SELECT id FROM reputations WHERE from_id = ? AND to_id = ?", [fromid, toid], function (err, rows) {
+		if (err) {
+			callback(err, false);
+			return;
+		}
+		if (rows.length !== 0) {
+			callback(err, false);
+			return;
+		}
+		this.database.query("INSERT INTO reputations (from_id, to_id) VALUES (?, ?)", [fromid, toid], function (err) {
+			callback(err, (err) ? false : true);
+		});
+	}.bind(this));
 };
 
 DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {

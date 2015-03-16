@@ -260,6 +260,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 									callback({success: "Registered and logged in to " + data.email});
 									console.log("[REGISTER] " + socket.ip + " registered " + data.email);
+									socket.userid = id;
 								});
 							});
 						} else {
@@ -298,6 +299,22 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (typeof targetSocket.userid !== "number") {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "Ugh, " + targetSocket.username + " isn't logged in!"
+				});
+				return;
+			}
+
+			if (socket.userid == targetSocket.userid) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You can't give yourself reputation!"
+				});
+				return;
+			}
+
 			protocol.drawTogether.vote(socket.userid, targetSocket.userid, function (err, success) {
 				if (err) {
 					console.error("[VOTE][VOTEERROR]", err);
@@ -308,9 +325,17 @@ Protocol.prototype.bindIO = function bindIO () {
 					return;
 				}
 
+				if (!success) {
+					socket.emit("chatmessage", {
+						user: "SERVER",
+						message: "You already gave " + targetSocket.username + " reputation."
+					});
+					return;
+				}
+
 				protocol.sendChatMessage(socket.room, {
 					user: "SERVER",
-					message: socket.username + " gave " + targetSocket.username + " positive reputation! :D";
+					message: socket.username + " gave " + targetSocket.username + " positive reputation! :D"
 				});
 			});
 		});
