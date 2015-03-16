@@ -74,6 +74,16 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 			self.changeName(localStorage.getItem("drawtogether-name"));
 
 		self.changeRoom(self.settings.room);
+
+		if (localStorage.getItem("drawtogether/email")) {
+			socket.emit("login", {
+				email: localStorage.getItem("drawtogether/email"),
+				password: localStorage.getItem("drawtogether/pass")
+			}, function (data) {
+				if (data.success)
+					self.chat.addMessage("ACCOUNT", data.success);
+			});
+		}
 	});
 
 	socket.on("disconnect", function () {
@@ -83,6 +93,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	socket.on("reconnect", function () {
 		self.chat.addMessage("CLIENT", "Reconnected to " + self.settings.server);
 		// TODO rejoin room
+		// TODO relog
 	})
 
 	// Startup events
@@ -467,16 +478,21 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	loginButton.textContent = "Login/Register";
 	loginButton.className = "drawtogether-button drawtogether-login-button";
 	loginButton.addEventListener("click", function () {
+		var email = this.emailInput.value;
+		var pass = CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64);
 		this.accountError(undefined);
 		this.socket.emit("login", {
-			email: this.emailInput.value,
-			password: CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64)
+			email: email,
+			password: pass
 		}, function (data) {
 			if (data.error)
 				this.accountError(data.error);
 
-			if (data.success)
+			if (data.success) {
 				this.accountSuccess(data.success);
+				localStorage.setItem("drawtogether/email", email);
+				localStorage.setItem("drawtogether/pass", pass);
+			}
 
 			// if (data.register) {
 			// 	while (this.loginMessage.firstChild)
