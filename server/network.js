@@ -287,6 +287,34 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
+		socket.on("upvote", function (socketid) {
+			var targetSocket = protocol.socketFromId(socketid);
+
+			if (typeof socket.userid !== "number") {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You can only give someone positive reputation when you are logged in!"
+				});
+				return;
+			}
+
+			protocol.drawTogether.vote(socket.userid, targetSocket.userid, function (err, success) {
+				if (err) {
+					console.error("[VOTE][VOTEERROR]", err);
+					socket.emit("chatmessage", {
+						user: "SERVER",
+						message: "An error occured while trying to vote."
+					});
+					return;
+				}
+
+				protocol.sendChatMessage(socket.room, {
+					user: "SERVER",
+					message: socket.username + " gave " + targetSocket.username + " positive reputation! :D";
+				});
+			});
+		});
+
 		socket.on("changename", function (name) {
 			// Change the username
 			if (name == "S᠎ERVER") {

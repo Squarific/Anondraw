@@ -29,6 +29,12 @@ DrawTogether.prototype.getReputationsFromUserIds = function getreputationsFromUs
 	this.database.query("SELECT to_id, COUNT(*) as reputation FROM reputations WHERE to_id IN (?) GROUP BY to_id", [userids], callback)
 };
 
+DrawTogether.prototype.vote = function vote (fromid, toid, callback) {
+	this.database.query("INSERT INTO reputation (from_id, to_id) VALUES (?, ?)", [fromid, toid], function (err) {
+		callback(err, (err) ? false : true);
+	});
+};
+
 DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {
 	this.database.query("INSERT INTO msg SET ?", {
 		room: room,

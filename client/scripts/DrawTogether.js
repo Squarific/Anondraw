@@ -159,7 +159,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 
 		self.playerList.push(player);
 		self.updatePlayerList();
-	})
+	});
 
 	socket.on("reputation", function (player) {
 		for (var k = 0; k < self.playerList.length; k++) {
@@ -351,6 +351,17 @@ DrawTogether.prototype.initDom = function initDom () {
 
 DrawTogether.prototype.createPlayerDom = function (player) {
 	var playerDom = document.createElement("div");
+	playerDom.className = "drawtogether-player";
+
+	var upvoteButton = document.createElement("div");
+	upvoteButton.className = "drawtogether-upvote-button"
+
+	upvoteButton.innerText = "▲";
+	upvoteButton.textContent = "▲";
+
+	upvoteButton.addEventListener("click", function (playerid, event) {
+		this.socket.emit("upvote", playerid);
+	}.bind(this, player.id));
 
 	if (typeof player.reputation !== "undefined") {
 		var rep = " (" + player.reputation + ")";
@@ -362,7 +373,6 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	playerDom.innerText = player.name + rep;
 	playerDom.textContent = player.name + rep;
 
-	playerDom.className = "drawtogether-player";
 	return playerDom;
 };
 
