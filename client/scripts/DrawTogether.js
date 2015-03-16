@@ -82,6 +82,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 
 	socket.on("reconnect", function () {
 		self.chat.addMessage("CLIENT", "Reconnected to " + self.settings.server);
+		// TODO rejoin room
 	})
 
 	// Startup events
@@ -123,6 +124,17 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	});
 
 	socket.on("playerlist", function (list) {
+		// If a user does not have a reputation set we should use their old value
+		// if we had no old value we should use 0
+		for (var k = 0; k < list.length; k++) {
+			if (typeof list[k].reputation == "undefined") {
+				for (var nk = 0; nk < self.playerList.length; nk++) {
+					if (self.playerList[nk].id == list[k].id) {
+						list[k].reputation = self.playerList[nk].reputation || 0;
+					}
+				}
+			}
+		}
 		self.playerList = list;
 		self.updatePlayerList();
 	});
@@ -329,9 +341,17 @@ DrawTogether.prototype.initDom = function initDom () {
 
 DrawTogether.prototype.createPlayerDom = function (player) {
 	var playerDom = document.createElement("div");
+
+	if (typeof player.reputation !== "undefined") {
+		var rep = " (" + player.reputation + ")";
+	} else {
+		rep = "";
+	}
+
 	playerDom.playerId = player.id;
-	playerDom.innerText = player.name;
-	playerDom.textContent = player.name;
+	playerDom.innerText = player.name + rep;
+	playerDom.textContent = player.name + rep;
+
 	playerDom.className = "drawtogether-player";
 	return playerDom;
 };

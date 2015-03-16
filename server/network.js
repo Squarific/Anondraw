@@ -24,6 +24,8 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 };
 
 Protocol.prototype.updateInk = function updateInk () {
+	// Add ink for all online clients
+
 	var amount = 3000;
 	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
 		var ip = this.io.sockets.sockets[sKey].ip;
@@ -35,26 +37,79 @@ Protocol.prototype.updateInk = function updateInk () {
 	this.io.emit("changeink", amount);
 };
 
-Protocol.prototype.getPlayerNameList = function getPlayerNameList (room) {
-	var players = [];
-	var room = this.io.nsps['/'].adapter.rooms[room];
+Protocol.prototype.getPlayerNameList = function getPlayerNameList (room, callback) {
+	// Callback gets err as first param, if success returns null
+	// Second argument is array of objects of the form {
+	//     id: socketid,
+	//     name: username,
+	//     reputation: accountrep //optional
+	// }
+	var sroom = this.io.nsps['/'].adapter.rooms[room];
+	var ids = [];
 
-	for (var id in room) {
-		players.push({
-			id: id,
-			name: this.socketFromId(id).username
-		});
+	for (var id in sroom) {
+		var socket = this.socketFromId(id);
+		if (typeof socket.userid == "number") ids.push(socket.userid);
 	}
 
-	return players;
+	// For the logged in sockets, get the reputation
+	this.drawTogether.getReputationsFromUserIds(ids, function (err, rows) {
+		if (typeof rows !== "object" || typeof rows.length !== "number") rows = [];
+
+		var sroom = this.io.nsps['/'].adapter.rooms[room];
+		var players = [];
+		var found_rep = false;
+
+		for (var id in sroom) {
+			var socket = this.socketFromId(id);
+			if (typeof socket.userid == "number") {
+				// User is logged in, find the reputation
+				var found_rep = false;
+				for (var k = 0; k < rows.length; k++) {
+					if (rows[k].to_id == socket.userid) {
+						players.push({
+							id: socket.id,
+							name: socket.username,
+							reputation: rows[k].reputation
+						});
+						found_rep = true;
+						break;
+					}
+				}
+				if (found_rep) continue;
+				// User is logged in but no reputation
+				players.push({
+					id: socket.id,
+					name: socket.username
+				});
+			} else {
+				players.push({
+					id: socket.id,
+					name: socket.username,
+					reputation: 0
+				});
+			}
+		}
+
+		// Return back
+		callback(null, players);
+	}.bind(this));
 };
 
 Protocol.prototype.updateAllPlayerLists = function updateAllPlayerLists () {
+	// Send all clients every player in the room every so often
+	// This helps prevent out of sync player lists
 	var roomsDone = {};
 	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
 		var room = this.io.sockets.sockets[sKey].room;
 		if (!roomsDone[room]) {
-			this.io.to(room).emit("playerlist", this.getPlayerNameList(room));
+			this.getPlayerNameList(room, function (err, list) {
+				if (err) {
+					console.error("[UPDATEALLPLAYERLIST][PLAYERLIST][ERROR]", err, socket.room);
+					return;
+				}
+				this.io.to(room).emit("playerlist", list);
+			}.bind(this));
 		}
 	}
 };
@@ -215,7 +270,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 
 				callback({success: "Logged in as " + data.email});
-				console.log("[LOGIN] " + socket.ip + " logged in as " + data.email);
+				console.log("[LOGIN] " + socket.ip + " logged in as " + data.email + " (" + id + ")");
 				socket.userid = id;
 			});
 		});
@@ -332,14 +387,36 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			console.log("[ROOM CHANGE] " + socket.username + " changed from " + socket.room + " to " + room + " there are now " + protocol.getUserCount(room) + " people here.");
 
+
+			protocol.io.to(socket.room).emit("leave", {id: socket.id});
 			socket.leave(socket.room);
 			socket.join(room);
 			socket.room = room;
 
-			protocol.io.to(socket.room).emit("join", {
-				id: socket.id,
-				name: socket.username
-			});
+			if (socket.userid) {
+				protocol.drawTogether.getReputationFromUserId(socket.userid, function (err, rep) {
+					if (err) {
+						console.log("[JOIN][REPERROR]" + err);
+						protocol.io.to(socket.room).emit("join", {
+							id: socket.id,
+							name: socket.username,
+							reputation: 0
+						});
+						return;
+					}
+					protocol.io.to(socket.room).emit("join", {
+						id: socket.id,
+						name: socket.username,
+						reputation: rep
+					});
+				});
+			} else {
+				protocol.io.to(socket.room).emit("join", {
+					id: socket.id,
+					name: socket.username,
+					reputation: 0
+				});
+			}
 			
 			socket.emit("chatmessage", {
 				user: "SERVER",
@@ -360,7 +437,14 @@ Protocol.prototype.bindIO = function bindIO () {
 					drawings: drawings
 				});
 
-				socket.emit("playerlist", protocol.getPlayerNameList(socket.room));
+				protocol.getPlayerNameList(socket.room, function (err, list) {
+					if (err) {
+						console.error("[JOIN][PLAYERLIST][ERROR]", err, socket.room);
+						socket.emit("playerlist", list);
+						return;
+					}
+					socket.emit("playerlist", list)
+				});
 			});
 
 			protocol.drawTogether.getInkFromIp(socket.ip, function (err, amount) {

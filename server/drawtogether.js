@@ -1,5 +1,7 @@
 var SHA256 = require("crypto-js/sha256");
 
+//TODO when log in send reputation
+
 function DrawTogether (database) {
 	this.database = database;
 }
@@ -7,6 +9,24 @@ function DrawTogether (database) {
 DrawTogether.prototype.rgbToHex = function rgbToHex (r, g, b) {
 	var hex = ((r << 16) | (g << 8) | b).toString(16);
 	return "#" + ("000000" + hex).slice(-6);
+};
+
+DrawTogether.prototype.getReputationFromUserId = function getReputationFromUserId (userid, callback) {
+	// Returns the amount of reputation given to the userid
+	this.database.query("SELECT COUNT(*) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
+		if (err) callback(err);
+		else callback(null, rows[0].reputation);
+	});
+};
+
+DrawTogether.prototype.getReputationsFromUserIds = function getreputationsFromUserIds (userids, callback) {
+	// Returns err as first argument, if null gives rows as second argument
+	// rows example: [{to_id: 1, reputation: 5}, ...]
+	if (typeof userids !== "object" || userids.length < 1) {
+		callback(null, []);
+		return;
+	}
+	this.database.query("SELECT to_id, COUNT(*) as reputation FROM reputations WHERE to_id IN (?) GROUP BY to_id", [userids], callback)
 };
 
 DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {
