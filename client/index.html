@@ -5,6 +5,7 @@
 		<title>AnonDraw - Draw together with friends and strangers anonymously</title>
 		<meta name="viewport" content="width=device-width">
 		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<meta property="fb:admins" content="100000842878520" />
 		<meta name="description" content="Draw with strangers or draw with friends in a public or private room.">
 		<link rel="shortcut icon" href="favicon.ico?t=220408112013"> 
@@ -20,8 +21,8 @@
 			//var server = servers[Math.floor(Math.random() * servers.length)];
 			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
 				//server: server,
-				server: "http://127.0.0.1:4958",
-				//server: "http://server1.anondraw.com:4958",
+				//server: "http://127.0.0.1:4958",
+				server: "http://server1.anondraw.com:4958",
 				room: room || "main",
 				mode: (room) ? "join" : "ask"
 			});

@@ -467,6 +467,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	loginButton.textContent = "Login/Register";
 	loginButton.className = "drawtogether-button drawtogether-login-button";
 	loginButton.addEventListener("click", function () {
+		this.accountError(undefined);
 		this.socket.emit("login", {
 			email: this.emailInput.value,
 			password: CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64)
@@ -532,6 +533,8 @@ DrawTogether.prototype.accountError = function accountError (msg) {
 	while (this.loginMessage.firstChild)
 		this.loginMessage.removeChild(this.loginMessage.firstChild);
 
+	if (!msg) return;
+
 	var err = this.loginMessage.appendChild(document.createElement("div"));
 	err.className = "drawtogether-error drawtogether-login-error";
 	err.innerText = msg;
@@ -541,6 +544,8 @@ DrawTogether.prototype.accountError = function accountError (msg) {
 DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
 	while (this.loginMessage.firstChild)
 		this.loginMessage.removeChild(this.loginMessage.firstChild);
+
+	if (!msg) return;
 
 	var msg = this.loginMessage.appendChild(document.createElement("div"));
 	msg.className = "drawtogether-success drawtogether-login-success";
