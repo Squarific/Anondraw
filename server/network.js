@@ -26,15 +26,58 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 Protocol.prototype.updateInk = function updateInk () {
 	// Add ink for all online clients
 
-	var amount = 3000;
+	var ids = []; // User ids of all logged in sockets
+	var ips = []; // Ip addresses of all the sockets
+
 	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
-		var ip = this.io.sockets.sockets[sKey].ip;
-		this.drawTogether.raiseInkFromIp(amount, ip, function (err) {
-			if (err)
-				console.log("[UPDATEINK][ERROR]", err);
-		});
+		ids.push(this.io.sockets.sockets[sKey].userid);
 	}
-	this.io.emit("changeink", amount);
+
+	// For the logged in sockets, get the reputation
+	this.drawTogether.getReputationsFromUserIds(ids, function (err, rows) {
+		var minAmount = 1000;
+		var amountPerRep = 100;
+
+		for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
+			var socket = this.io.sockets.sockets[sKey];
+			var extraAmount = 0;
+
+			// Don't allow two ips to get ink multiple times
+			if (ips.indexOf(socket.ip) !== -1) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "Multiple users are online from this ip, this means you share the same ink!"
+				});
+				socket.emit("changeink", minAmount);
+				continue;
+			}
+			ips.push(socket.ip);
+
+			// User is logged in, see how much reputation he has
+			if (socket.userid) {
+				var found = false;
+				for (var k = 0; k < rows.length; k++) {
+					if (rows[k].to_id == socket.userid) {
+						extraAmount = rows[k].reputation * amountPerRep
+						found = true;
+						break;
+					}
+				}
+
+				if (found) continue;
+			}
+
+			// User is not logged in or reputation was not found
+			this.drawTogether.raiseInkFromIp(minAmount + extraAmount, socket.ip, function (socket, amount, err) {
+				if (err) {
+					console.log("[UPDATEINK][ERROR]", err);
+					return;
+				}
+
+				socket.emit("changeink", amount);
+			}.bind(this, socket, minAmount + extraAmount));
+		}
+	}.bind(this));
 };
 
 Protocol.prototype.getPlayerNameList = function getPlayerNameList (room, callback) {
@@ -381,10 +424,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			console.log("[NAME CHANGE] " + socket.username + " to " + name);
-			protocol.sendChatMessage(socket.room, {
-				user: "SERVER",
-				message: socket.username + " changed name to " + name
-			})
+			if (typeof socket.room !== "undefined") {
+				protocol.sendChatMessage(socket.room, {
+					user: "SERVER",
+					message: socket.username + " changed name to " + name
+				});
+			}
 
 			protocol.io.to(socket.room).emit("playernamechange", {
 				id: socket.id,

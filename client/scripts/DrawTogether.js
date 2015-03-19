@@ -90,12 +90,6 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.chat.addMessage("CLIENT", "Lost connection to the server.");
 	});
 
-	socket.on("reconnect", function () {
-		self.chat.addMessage("CLIENT", "Reconnected to " + self.settings.server);
-		// TODO rejoin room
-		// TODO relog
-	})
-
 	// Startup events
 
 	socket.on("initname", function (name) {
@@ -211,11 +205,6 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	// room + number, if not possible, raise number with one and try again
 	room = room || this.controls.byName.room.input.value;
 	number = number || "";
-
-	if (this.current_room == room) {
-		this.chat.addMessage("CLIENT", "You already are in room " + room);
-		return;
-	}
 
 	this.socket.emit("changeroom", room + number, function (success) {
 		if (!success) {
@@ -561,7 +550,7 @@ DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
 	while (this.loginMessage.firstChild)
 		this.loginMessage.removeChild(this.loginMessage.firstChild);
 
-	if (!msg) return;
+	if (!success) return;
 
 	var msg = this.loginMessage.appendChild(document.createElement("div"));
 	msg.className = "drawtogether-success drawtogether-login-success";
