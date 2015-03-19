@@ -30,11 +30,21 @@ Protocol.prototype.updateInk = function updateInk () {
 	var ips = []; // Ip addresses of all the sockets
 
 	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
-		ids.push(this.io.sockets.sockets[sKey].userid);
+		if (ids.indexOf(this.io.sockets.sockets[sKey].userid) == -1)
+			ids.push(this.io.sockets.sockets[sKey].userid);
 	}
 
 	// For the logged in sockets, get the reputation
 	this.drawTogether.getReputationsFromUserIds(ids, function (err, rows) {
+		if (err) {
+			console.error("[UPDATE INK][ERROR]", err);
+			this.io.emit("chatmessage", {
+				user: "SERVER",
+				message: "Something went wrong while refilling the ink!"
+			});
+			return;
+		}
+
 		var minAmount = 1000;
 		var amountPerRep = 100;
 
@@ -63,8 +73,6 @@ Protocol.prototype.updateInk = function updateInk () {
 						break;
 					}
 				}
-
-				if (found) continue;
 			}
 
 			// User is not logged in or reputation was not found
