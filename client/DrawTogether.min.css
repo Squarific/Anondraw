@@ -55,10 +55,10 @@ h1 {
     background-color: #bccdde; }
 
 /**
-* Account window
+*   All windows
 */
 
-.drawtogether-accountwindow {
+.drawtogether-window {
   display: none;
   position: fixed;
   top: 0;
@@ -71,6 +71,40 @@ h1 {
   overflow-y: auto;
   z-index: 200;
 }
+
+.drawtogether-button {
+  padding: .5em;
+  border-bottom: 0.2em solid #233445;
+  background-color: #456789;
+  color: #fff;
+  cursor: pointer;
+  margin:.3em;
+  margin-left:.5em;
+  margin-right:.5em;
+  -webkit-transition-duration: 0.3s;
+  -moz-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: background-color;
+  -moz-transition-property: background-color;
+  transition-property: background-color;
+}
+
+.drawtogether-button:hover {
+  background-color: #233445;
+}
+
+/**
+* RoomWindow
+*/
+
+.drawtogether-roomwindow-content {
+  display:inline-block;
+  background:white;
+}
+
+/**
+* Account window
+*/
 
 .drawtogether-accountwindow input {
   display:block;
@@ -89,27 +123,6 @@ h1 {
   padding:.5em;
   background:white;
   border-radius:.2em;
-}
-
-.drawtogether-accountwindow .drawtogether-button {
-  padding: .5em;
-  border-bottom: 0.2em solid #233445;
-  background-color: #456789;
-  color: #fff;
-  cursor: pointer;
-  margin:.3em;
-  margin-left:.5em;
-  margin-right:.5em;
-  -webkit-transition-duration: 0.3s;
-  -moz-transition-duration: 0.3s;
-  transition-duration: 0.3s;
-  -webkit-transition-property: background-color;
-  -moz-transition-property: background-color;
-  transition-property: background-color;
-}
-
-.drawtogether-accountwindow .drawtogether-button:hover {
-  background-color: #233445;
 }
 
 .drawtogether-error {
@@ -437,9 +450,9 @@ h1 {
     }
 
     .drawtogether-flashy {
-      transition-duration:0;
+      /*transition-duration:0;
       -webkit-animation: flashy 120s infinite;
-      animation: flashy 120s infinite;
+      animation: flashy 120s infinite;*/
 }
 
 /* Chrome, Safari, Opera */
