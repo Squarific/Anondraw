@@ -23,6 +23,83 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
 };
 
+Protocol.prototype.getPublicRooms = function getPublicRooms () {
+	var rooms = [];
+	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
+		var found = false;
+		for (var rKey = 0; rKey < rooms.length; rKey++) {
+			if (this.io.sockets.sockets[sKey].room == rooms[rKey].room) {
+				rooms[rKey].users++;
+				found = true;
+				break;
+			}
+		}
+
+		if (found) continue;
+
+		rooms.push({
+			room: this.io.sockets.sockets[sKey].room,
+			users: 1
+		});
+	}
+
+	return rooms;
+};
+
+Protocol.prototype.addDrawing = function addDrawing (socket, drawing, callback) {
+	// Check if the socket has more than 0 ink, if so add the drawing and inform the room
+	this.drawTogether.getInkFromIp(socket.ip, function (err, amount) {
+		if (err) {
+			console.error("[DRAWING][GETINKERROR]", err);
+			return;
+		}
+
+		if (amount < 0) {
+			socket.emit("chatmessage", {
+				user: "SERVER",
+				message: "NO INK"
+			});
+			socket.emit("setink", amount);
+			callback();
+			return;
+		}
+
+		this.drawTogether.addDrawing(socket.room, drawing, function (err) {
+			if (!err) {
+				this.drawTogether.lowerInkFromIp(drawing, socket.ip, function (err) {
+					if (err)
+						console.log("[DRAWING][INKERROR]", err);
+				});
+				this.sendDrawing(socket.room, socket.id, drawing);
+			} else {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: err
+				});
+			}
+
+			callback();
+		}.bind(this));
+	}.bind(this));
+};
+
+Protocol.prototype.addDrawingNoInk = function addDrawingNoInk (socket, drawing, callback) {
+	// Add the drawing and inform the room
+
+	this.drawTogether.addDrawing(socket.room, drawing, function (err) {
+		if (!err) {
+			this.sendDrawing(socket.room, socket.id, drawing);
+		} else {
+			socket.emit("chatmessage", {
+				user: "SERVER",
+				message: err
+			});
+		}
+
+		callback();
+	}.bind(this));
+};
+
 Protocol.prototype.updateInk = function updateInk () {
 	// Add ink for all online clients
 
@@ -45,8 +122,8 @@ Protocol.prototype.updateInk = function updateInk () {
 			return;
 		}
 
-		var minAmount = 1000;
-		var amountPerRep = 100;
+		var minAmount = 1500;
+		var amountPerRep = 200;
 
 		for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
 			var socket = this.io.sockets.sockets[sKey];
@@ -265,6 +342,10 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
+		socket.on("getrooms", function () {
+			socket.emit("publicrooms", protocol.getPublicRooms());
+		});
+
 		socket.on("login", function (data, callback) {
 			if (typeof callback !== "function")
 				callback = function () {}
@@ -457,37 +538,10 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (typeof callback !== "function")
 				callback = function () {};
 
-			protocol.drawTogether.getInkFromIp(socket.ip, function (err, amount) {
-				if (err) {
-					console.error("[DRAWING][GETINKERROR]", err);
-					return;
-				}
-				if (amount < 0) {
-					socket.emit("chatmessage", {
-						user: "SERVER",
-						message: "NO INK"
-					});
-					socket.emit("setink", amount);
-					callback();
-					return;
-				}
-				protocol.drawTogether.addDrawing(socket.room, drawing, function (err) {
-					if (!err) {
-						protocol.drawTogether.lowerInkFromIp(drawing, socket.ip, function (err) {
-							if (err)
-								console.log("[DRAWING][INKERROR]", err);
-						});
-						protocol.sendDrawing(socket.room, socket.id, drawing);
-					} else {
-						socket.emit("chatmessage", {
-							user: "SERVER",
-							message: err
-						});
-					}
-
-					callback();
-				});
-			});
+			if (socket.room.indexOf("private_") == 0)
+				protocol.addDrawingNoInk(socket, drawing, callback);
+			else
+				protocol.addDrawing(socket, drawing, callback);
 
 		})
 
@@ -496,7 +550,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			// given room, tell the user he is subscribed and send the drawing.
 			// Return true in callback if the user is now in the room, otherwise return false
 			callback = callback || function () {};
-
+			console.log(protocol.io);
 			if (socket.room == room) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
