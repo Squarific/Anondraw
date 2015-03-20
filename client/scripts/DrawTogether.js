@@ -464,47 +464,18 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	passInput.placeholder = "Password";
 	this.passInput = passInput;
 
+	this.emailInput.addEventListener("keydown", function (event) {
+		if (event.keyCode == 13) this.formLogin();
+	}.bind(this));
+	this.passInput.addEventListener("keydown", function (event) {
+		if (event.keyCode == 13) this.formLogin();
+	},bind(this));
+
 	var loginButton = formContainer.appendChild(document.createElement("div"));
 	loginButton.innerText = "Login/Register";
 	loginButton.textContent = "Login/Register";
 	loginButton.className = "drawtogether-button drawtogether-login-button";
-	loginButton.addEventListener("click", function () {
-		var email = this.emailInput.value;
-		var pass = CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64);
-		this.accountError(undefined);
-		this.socket.emit("login", {
-			email: email,
-			password: pass
-		}, function (data) {
-			if (data.error)
-				this.accountError(data.error);
-
-			if (data.success) {
-				this.accountSuccess(data.success);
-				localStorage.setItem("drawtogether/email", email);
-				localStorage.setItem("drawtogether/pass", pass);
-			}
-
-			// if (data.register) {
-			// 	while (this.loginMessage.firstChild)
-			// 		this.loginMessage.removeChild(this.loginMessage.firstChild);
-
-			// 	var message = this.loginMessage.appendChild(document.createElement("div"));
-			// 	message.className = "drawtogether-message drawtogether-login-message";
-			// 	message.innerText = "No account found with this email, do you want to register?";
-
-			// 	var registerButton = this.loginMessage.appendChild(document.createElement("div"));
-			// 	registerButton.innerText = "Register";
-			// 	registerButton.className = "drawtogether-button drawtogether-register-button";
-			// 	registerButton.addEventListener("click", function () {
-			// 		this.registerAccount({
-			// 			email: this.emailInput.value,
-			// 			password: CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64)
-			// 		})
-			// 	}.bind(this));
-			// }
-		}.bind(this));
-	}.bind(this));
+	loginButton.addEventListener("click", this.formLogin.bind(this));
 
 	var close = formContainer.appendChild(document.createElement("div"));
 	close.innerText = "Close login window";
@@ -526,15 +497,27 @@ DrawTogether.prototype.createControls = function createControls () {
 	this.controls.byName["toggle-info"].input.classList.add("drawtogether-display-on-small");
 };
 
-// DrawTogether.prototype.registerAccount = function registerAccount (data) {
-// 	this.socket.emit("register", data, function (data) {
-// 		if (data.error)
-// 			this.accountError(data.error);
+DrawTogether.prototype.formLogin = function formLogin () {
+	// Login using the data of the account form
+	var email = this.emailInput.value;
+	var pass = CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64);
 
-// 		if (data.success)
-// 			this.accountSuccess(data.success);
-// 	}.bind(this));
-// };
+	// Reset account error	
+	this.accountError(undefined);
+	this.socket.emit("login", {
+		email: email,
+		password: pass
+	}, function (data) {
+		if (data.error)
+			this.accountError(data.error);
+
+		if (data.success) {
+			this.accountSuccess(data.success);
+			localStorage.setItem("drawtogether/email", email);
+			localStorage.setItem("drawtogether/pass", pass);
+		}
+	}.bind(this));
+};
 
 DrawTogether.prototype.accountError = function accountError (msg) {
 	while (this.loginMessage.firstChild)
