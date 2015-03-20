@@ -550,7 +550,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			// given room, tell the user he is subscribed and send the drawing.
 			// Return true in callback if the user is now in the room, otherwise return false
 			callback = callback || function () {};
-			console.log(protocol.io);
+
 			if (socket.room == room) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
