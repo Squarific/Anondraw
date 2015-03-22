@@ -145,7 +145,7 @@ Protocol.prototype.updateInk = function updateInk () {
 				var found = false;
 				for (var k = 0; k < rows.length; k++) {
 					if (rows[k].to_id == socket.userid) {
-						extraAmount = rows[k].reputation * amountPerRep
+						extraAmount = rows[k].reputation * amountPerRep + minAmount;
 						found = true;
 						break;
 					}
@@ -436,6 +436,12 @@ Protocol.prototype.bindIO = function bindIO () {
 					user: "SERVER",
 					message: "Ugh, " + targetSocket.username + " isn't logged in!"
 				});
+
+				targetSocket.emit("chatmessage", {
+					user: "SERVER",
+					message: socket.username + " tried giving you positive reputation but you aren't logged in :( #sadlife"
+				});
+
 				return;
 			}
 

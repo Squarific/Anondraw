@@ -683,6 +683,32 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.connect();
 		this.selectWindow.style.display = "";
 	}.bind(this));
+
+	var faq = selectWindow.appendChild(document.createElement("div"));
+	faq.className = "drawtogether-faq";
+	var questions = [{
+		question: "Why can't I draw?",
+		answer: "You probably don't have any ink left, wait 30 seconds and try again."
+	}, {
+		question: "How do I regain ink?",
+		answer: "You get ink every 30 seconds. You get a static amount plus an amount relative to your reputation."
+	}, {
+		question: "I need more ink.",
+		answer: "Good, make an account. Logged in users get twice as much ink."
+	}];
+
+	for (var qKey = 0; qKey < questions.length; qKey++) {
+		var question = faq.appendChild(document.createElement("div"));
+		question.className = "drawtogether-question";
+
+		var qhead = question.appendChild("h1");
+		qhead.innerText = questions[qKey].question;
+		qhead.textContent = questions[qKey].question;
+
+		var qText = question.appendChild("div");
+		qTest.innerText = questions[qKey].answer;
+		qTest.textContent = questions[qKey].answer;
+	}
 };
 
 DrawTogether.prototype.createControlArray = function createControlArray () {
