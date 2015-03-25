@@ -22,6 +22,14 @@ function DrawTogether (container, settings) {
 	}
 
 	requestAnimationFrame(this.drawLoop.bind(this));
+	document.addEventListener("keypress", function (event) {
+		// On "esc"
+		if (event.keyCode == 27) {
+			this.closeAccountWindow();
+			this.closeShareWindow();
+			this.closeRoomWindow();
+		}
+	}.bind(this));
 }
 
 DrawTogether.prototype.defaultSettings = {
@@ -307,6 +315,7 @@ DrawTogether.prototype.setName = function setName (name) {
 
 DrawTogether.prototype.setRoom = function setRoom (room) {
 	this.current_room = room;
+	this.roomInput.value = room;
 	location.hash = room;
 };
 
@@ -338,6 +347,10 @@ DrawTogether.prototype.closeShareWindow = function closeShareWindow () {
 
 DrawTogether.prototype.closeAccountWindow = function closeAccountWindow () {
 	this.accWindow.style.display = "";
+};
+
+DrawTogether.prototype.closeRoomWindow = function () {
+	this.roomWindow.style.display = "";
 };
 
 DrawTogether.prototype.initDom = function initDom () {
@@ -508,7 +521,14 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomButton.className = "drawtogether-button";
 	roomButton.addEventListener("click", function (event) {
 		this.changeRoom(this.roomInput.value);
+		this.closeRoomWindow();
 	}.bind(this));
+
+	var close = roomWindowConentContainer.appendChild(document.createElement("div"));
+	close.innerText = "Close login window";
+	close.textContent = "Close login window";
+	close.className = "drawtogether-button drawtogether-close-button";
+	close.addEventListener("click", this.closeRoomWindow.bind(this));
 };
 
 DrawTogether.prototype.createControls = function createControls () {
@@ -687,6 +707,9 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	var faq = selectWindow.appendChild(document.createElement("div"));
 	faq.className = "drawtogether-faq";
 	var questions = [{
+		question: "What is anondraw?",
+		answer: "It's a webapp where you can draw with strangers or friends."
+	},{
 		question: "Why can't I draw?",
 		answer: "You probably don't have any ink left, wait 30 seconds and try again."
 	}, {
@@ -701,18 +724,29 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		var question = faq.appendChild(document.createElement("div"));
 		question.className = "drawtogether-question";
 
-		var qhead = question.appendChild("h1");
+		var qhead = question.appendChild(document.createElement("h1"));
+		qhead.className = "drawtogether-question-question";
 		qhead.innerText = questions[qKey].question;
 		qhead.textContent = questions[qKey].question;
 
-		var qText = question.appendChild("div");
-		qTest.innerText = questions[qKey].answer;
-		qTest.textContent = questions[qKey].answer;
+		var qText = question.appendChild(document.createElement("div"));
+		qText.className = "drawtogether-question-answer";
+		qText.innerText = questions[qKey].answer;
+		qText.textContent = questions[qKey].answer;
 	}
 };
 
 DrawTogether.prototype.createControlArray = function createControlArray () {
 	return [{
+		name: "home-button",
+		type: "button",
+		value: "",
+		text: "Home",
+		title: "Go to home menu",
+		action: function () {
+			this.openModeSelector();
+		}.bind(this)
+	},{
 		name: "toggle-chat",
 		type: "button",
 		value: "",
