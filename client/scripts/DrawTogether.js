@@ -45,8 +45,10 @@ DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
 
 DrawTogether.prototype.connect = function connect () {
 	// Connect to the server and bind socket events
-	this.socket = io(this.settings.server);
-	this.bindSocketHandlers(this.socket);
+	if (!this.socket) {
+		this.socket = io(this.settings.server);
+		this.bindSocketHandlers(this.socket);
+	}
 };
 
 DrawTogether.prototype.drawLoop = function drawLoop () {
@@ -205,6 +207,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 };
 
 DrawTogether.prototype.sendMessage = function sendMessage (message) {
+	// Send a chat message
 	this.socket.emit("chatmessage", message);
 };
 
@@ -217,6 +220,8 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	this.socket.emit("changeroom", room + number, function (success) {
 		if (!success) {
 			this.changeRoom(room, (number || 0) + 1);
+		} else {
+			this.setLoading();
 		}
 	}.bind(this));
 
@@ -224,13 +229,21 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	this.chat.addMessage("CLIENT", "Give other people this url: http://www.anondraw.com/#" + room + number);
 };
 
+DrawTogether.prototype.setLoading = function setLoading () {
+	// Adds the word loading above the canvasses
+	// Gets removed when 'drawings' are received
+	
+};
+
 DrawTogether.prototype.changeName = function changeName (name) {
+	// Try to change the name
 	name = name || this.controls.byName.name.input.value;
 	this.socket.emit("changename", name);
 	localStorage.setItem("drawtogether-name", name);
 };
 
 DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
+	// Update the playerlist to reflect the current local list
 	while (this.playerListDom.firstChild)
 		this.playerListDom.removeChild(this.playerListDom.firstChild)
 
@@ -495,8 +508,8 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	loginButton.addEventListener("click", this.formLogin.bind(this));
 
 	var close = formContainer.appendChild(document.createElement("div"));
-	close.innerText = "Close login window";
-	close.textContent = "Close login window";
+	close.innerText = "Close room window";
+	close.textContent = "Close room window";
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeAccountWindow.bind(this));
 };
@@ -691,7 +704,12 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	publicButton.className = "drawtogether-modeselect-button";
 	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with strangers';
 	publicButton.addEventListener("click", function () {
-		this.connect();
+		if (!this.socket) {
+			this.connect();
+		} else {
+			this.changeRoom("main");
+		}
+
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
@@ -700,12 +718,21 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Alone or with friends';
 	privateButton.addEventListener("click", function () {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room
-		this.connect();
+		if (!this.socket) {
+			this.connect();
+		} else {
+			this.changeRoom(this.settings.room);
+		}
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
-	var faq = selectWindow.appendChild(document.createElement("div"));
+	selectWindow.appendChild(this.createFAQDom());
+};
+
+DrawTogether.prototype.createFAQDom = function createFAQDom () {
+	var faq = document.createElement("div");
 	faq.className = "drawtogether-faq";
+
 	var questions = [{
 		question: "What is anondraw?",
 		answer: "It's a webapp where you can draw with strangers or friends."
@@ -734,6 +761,8 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		qText.innerText = questions[qKey].answer;
 		qText.textContent = questions[qKey].answer;
 	}
+
+	return faq;
 };
 
 DrawTogether.prototype.createControlArray = function createControlArray () {
