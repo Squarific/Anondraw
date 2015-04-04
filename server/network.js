@@ -342,8 +342,9 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
-		socket.on("getrooms", function () {
-			socket.emit("publicrooms", protocol.getPublicRooms());
+		socket.on("getrooms", function (callback) {
+			if (!callback) return;
+			callback(protocol.getPublicRooms());
 		});
 
 		socket.on("login", function (data, callback) {

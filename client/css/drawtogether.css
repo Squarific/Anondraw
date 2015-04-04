@@ -39,6 +39,24 @@ h1 {
   z-index:200;
 }
 
+.drawtogether-general-message {
+  display:none;
+
+  position:absolute;
+  right:1em;
+  top:0.8em;
+  max-width:100em;
+
+  background:#0A384E;
+  color:white;
+  border:0.1em solid #8FA3B6;
+
+  padding:1em;
+  font-size:2em;
+
+  z-index:1000;
+}
+
 /**
  * View for mode selection
  */
@@ -145,6 +163,13 @@ h1 {
   background:white;
 }
 
+.drawtogether-room-text {
+  font-size:2em;
+  font-weight:800;
+  text-align:left;
+  padding: .25em .5em;
+}
+
 .drawtogether-roomwindow input {
   display:inline-block;
   min-width:300px;
@@ -160,7 +185,7 @@ h1 {
   display:inline-block;
 }
 
-.drawtogether-roomwindow .drawtogether-close-button {
+.drawtogether-roomwindow .drawtogether-close-button, .drawtogether-roomwindow .drawtogether-room-button {
   display:block;
 }
 
@@ -191,6 +216,7 @@ h1 {
   background:rgb(185, 85, 85);
   color:white;
   border:rgb(155, 69, 69) .2em solid;
+  padding:1em;
 }
 
 .drawtogether-success {

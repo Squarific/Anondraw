@@ -214,6 +214,20 @@ DrawTogether.prototype.sendMessage = function sendMessage (message) {
 	this.socket.emit("chatmessage", message);
 };
 
+DrawTogether.prototype.displayMessage = function displayMessage (message, time) {
+	// Display the given message and disappear after time
+	// If no time set, at least 3 seconds but longer based on message length
+	this.messageDom.style.display = "block";
+	this.messageDom.innerText = message;
+
+	clearTimeout(this.removeMessageTimeout);
+
+	// Remove the message after the given time
+	this.removeMessageTimeout = setTimeout(function () {
+		this.messageDom.style.display = "";
+	}.bind(this), time || Math.max(Math.ceil(message.length / 10) * 1000, 3000));
+};
+
 DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	// Change the room to room, if not possible try to join
 	// room + number, if not possible, raise number with one and try again
@@ -361,6 +375,18 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 
 DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 	this.roomWindow.style.display = "block";
+
+	this.socket.emit("getrooms", function (rooms) {
+		while (this.publicRoomsContainer.firstChild)
+			this.publicRoomsContainer.removeChild(this.publicRoomsContainer.firstChild);
+
+		for (var k = 0; k < rooms.length; k++) {
+			var roomButton = this.publicRoomsContainer.appendChild(document.createElement("div"));
+			roomButton.className = "drawtogether-button drawtogether-room-button";
+			roomButton.innerText = rooms[k].room + " [" + rooms[k].users + " users]"
+			roomButton.addEventListener("click", this.changeRoom.bind(this, rooms[k].room));
+		}
+	}.bind(this));
 };
 
 DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
@@ -389,6 +415,7 @@ DrawTogether.prototype.initDom = function initDom () {
 	this.createRoomInformation();
 	this.createDrawZone();
 	this.createControls();
+	this.createMessage();
 
 	this.createShareWindow();
 	this.createAccountWindow();
@@ -466,6 +493,11 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this));
 };
 
+DrawTogether.prototype.createMessage = function createMessage () {
+	this.messageDom = this.container.appendChild(document.createElement("div"));
+	this.messageDom.className = "drawtogether-general-message";
+};
+
 DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
 	// If its a brush the ink usage is (size * size)
 	// If it is a line the ink usage is (size * length * 2)
@@ -539,8 +571,16 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	var roomWindowConentContainer = this.roomWindow.appendChild(document.createElement("div"));
 	roomWindowConentContainer.className = "drawtogether-roomwindow-content";
 
+	var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
+	roomText.innerText = "Public Rooms:";
+	roomText.className = "drawtogether-room-text"
+
 	this.publicRoomsContainer = roomWindowConentContainer.appendChild(document.createElement("div"));
 	this.publicRoomsContainer.className = "drawtogether-publicroomscontainer";
+
+		var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
+	roomText.innerText = "Manual Room:";
+	roomText.className = "drawtogether-room-text"
 
 	this.roomInput = roomWindowConentContainer.appendChild(document.createElement("input"));
 	this.roomInput.type = "text";
@@ -700,6 +740,11 @@ DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	share.textContent = "Share image to reddit";
 	share.href = "#";
 	this.shareToRedditButton = share;
+	share.addEventListener("click", function (shareButton) {
+		if (shareButton.href.indexOf("reddit") === -1) {
+			this.showShareError("First upload the image to imgur before uploading it to reddit!");
+		}
+	}.bind(this, share));
 
 	var close = shareWindow.appendChild(document.createElement("div"));
 	close.innerText = "Close share window";
