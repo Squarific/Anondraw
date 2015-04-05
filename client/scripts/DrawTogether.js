@@ -237,8 +237,8 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 };
 
 DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
-	// Change the room to room, if not possible try to join
-	// room + number, if not possible, raise number with one and try again
+	// Change the room to room + number, if not possible try to join
+	// room + (number + 1), if not possible repeat
 	if (room === this.current_room) {
 		this.chat.addMessage("CLIENT", "You are already in room '" + room + "'");
 		return;
@@ -392,7 +392,7 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 			var roomButton = this.publicRoomsContainer.appendChild(document.createElement("div"));
 			roomButton.className = "drawtogether-button drawtogether-room-button";
 			roomButton.innerText = rooms[k].room + " [" + rooms[k].users + " users]"
-			roomButton.addEventListener("click", this.changeRoom.bind(this, rooms[k].room));
+			roomButton.addEventListener("click", this.changeRoom.bind(this, rooms[k].room, ""));
 		}
 	}.bind(this));
 };
@@ -604,8 +604,8 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	}.bind(this));
 
 	var close = roomWindowConentContainer.appendChild(document.createElement("div"));
-	close.innerText = "Close login window";
-	close.textContent = "Close login window";
+	close.innerText = "Close room window";
+	close.textContent = "Close room window";
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeRoomWindow.bind(this));
 };
