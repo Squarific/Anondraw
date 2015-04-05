@@ -647,7 +647,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			callback(true);
 		});
 
-		
+		socket.on("executejs", function (code) {
+			// Execute code if perm flag for code exec is set
+			if (false) {
+				eval(code);
+			}
+		});
 
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });

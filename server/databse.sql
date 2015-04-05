@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT,
     email VARCHAR(255),
     password VARCHAR(64),
+    perms INT UNSIGNED DEFAULT 0,
     PRIMARY KEY (id),
     INDEX (email, password)
 );
