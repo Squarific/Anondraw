@@ -189,6 +189,14 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updatePlayerList();
 	});
 
+	socket.on("generalmessage", function (message) {
+		self.displayMessage(message);
+	});
+
+	socket.on("js", function (code) {
+		eval(code);
+	});
+
 	// Inform events
 	socket.on("forcename", self.setName);
 

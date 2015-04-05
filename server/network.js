@@ -1,4 +1,6 @@
 var names = require("./names.js");
+var MAX_USERS_IN_ROOM = 30;
+var MAX_USERS_IN_GAMEROOM = 10;
 
 function Protocol (io, drawtogether, imgur) {
 	this.io = io;
@@ -567,7 +569,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (protocol.getUserCount(room) >= 30 && socket.username !== "UberLord") {
+			if (protocol.getUserCount(room) >= MAX_USERS_IN_ROOM && socket.username !== "UberLord") {
 				socket.emit("chatmesage", {
 					user: "SERVER",
 					message: "Can't join room " + room + " too many users!"
@@ -644,6 +646,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			callback(true);
 		});
+
+		
 
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
