@@ -46,7 +46,9 @@ DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
 DrawTogether.prototype.connect = function connect () {
 	// Connect to the server and bind socket events
 	if (!this.socket) {
-		this.socket = io(this.settings.server);
+		this.socket = io(this.settings.server, {
+			transports: ['websocket']
+		});
 		this.bindSocketHandlers(this.socket);
 	}
 };
@@ -474,8 +476,36 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	var drawContainer = this.container.appendChild(document.createElement("div"));
 	drawContainer.className = "drawtogether-paint-container";
 	this.paintContainer = drawContainer;
+
 	this.paint = new Paint(drawContainer);
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
+
+	this.paint.public.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
+		if (!this.socket) {
+			// The paint zone was created before a socket connection was made
+			console.error("Requested chunk ", chunkX, chunkY, " but no socket available!");
+			setTimeout(function () {
+				this.paint.public.requestUserChunk(chunkX, chunkY, callback);
+			}.bind(this), 5000);
+			return;
+		}
+
+		var image = new Image();
+
+		image.onLoad = function onChunkImageLoad (event) {
+			callback(image);
+		};
+
+		image.onError = function onChunkImageError (event) {
+			console.error("Failed to load chunk ", chunkX, chunkY, " retrying in 5 seconds");
+			setTimeout(function () {
+				this.paint.public.requestUserChunk(chunkX, chunkY, callback);
+			}.bind(this), 5000);
+		};
+		
+		image.src = this.socket.io.uri + "/chunks/" + chunkX + "/" + chunky;
+	}.bind(this);
+
 	this.paint.addEventListener("userdrawing", function (event) {
 		// When a drawing is made check if we have ink left
 		if (this.ink < 0) {

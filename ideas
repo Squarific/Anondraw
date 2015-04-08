@@ -7,6 +7,9 @@ transparent
 image upload
 bitmap background
 votekick
-room list
+kleurplaten (coloring images)
+stamps
+emote (/me)
+Only use websockets
 
 'serious/staffmoderate' room, 'free/troll' room, 'private' room, 'usermoderated' room
