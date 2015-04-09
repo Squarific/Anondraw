@@ -9,8 +9,8 @@ var database = mysql.createConnection({
 	database: "drawtogether"
 });
 
-var Protocol = require("./network.js");
-var DrawTogether = require("./drawtogether.js");
+var Protocol = require("./scripts/network.js");
+var DrawTogether = require("./scripts/drawtogether.js");
 
 var io = require("socket.io")(4958, {
 	transports: ['websocket']
