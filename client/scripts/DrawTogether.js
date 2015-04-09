@@ -94,8 +94,10 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 				email: localStorage.getItem("drawtogether/email"),
 				password: localStorage.getItem("drawtogether/pass")
 			}, function (data) {
-				if (data.success)
+				if (data.success) {
 					self.chat.addMessage("ACCOUNT", data.success);
+					self.reputation = data.reputation;
+				}
 			});
 		}
 	});
@@ -438,7 +440,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	playerDom.className = "drawtogether-player";
 
 	var upvoteButton = document.createElement("span");
-	upvoteButton.className = "drawtogether-upvote-button"
+	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button"
 
 	upvoteButton.innerText = "▲";
 	upvoteButton.textContent = "▲";
@@ -446,6 +448,14 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
+
+	var kickbanButton = document.createElement("span");
+	kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
+
+	kickbanButton.innerText = "K/B";
+	kickbanButton.textContent = "K/B";
+
+	kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
 
 	var nameText = document.createElement("span");
 	nameText.className = "drawtogether-player-name";
@@ -463,6 +473,16 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	playerDom.appendChild(nameText);
 
 	return playerDom;
+};
+
+DrawTogether.prototype.kickban = function kickban (playerid) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", function (minutes) {
+		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both"], function (type) {
+			this.socket.emit("kickban", [playerid, minutes, type], function (data) {
+				this.chat.addMessage("SERVER", data.error || data.success);
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
 };
 
 DrawTogether.prototype.createChat = function createChat () {
@@ -671,6 +691,7 @@ DrawTogether.prototype.formLogin = function formLogin () {
 			this.accountSuccess(data.success);
 			localStorage.setItem("drawtogether/email", email);
 			localStorage.setItem("drawtogether/pass", pass);
+			this.reputation = data.reputation;
 		}
 	}.bind(this));
 };

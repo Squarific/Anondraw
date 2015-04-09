@@ -1,6 +1,8 @@
 var names = require("./names.js");
 var MAX_USERS_IN_ROOM = 30;
 var MAX_USERS_IN_GAMEROOM = 10;
+var KICKBAN_MIN_REP = 50;             // Reputation required to kickban
+var REQUIRED_REP_DIFFERENCE = 20;     // Required reputation difference to be allowed to kickban someone
 
 function Protocol (io, drawtogether, imgur) {
 	this.io = io;
@@ -357,7 +359,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			// if the account exists.
 			// Exists? => register and log in
 			// Else => warn wrong password
-			protocol.drawTogether.login(data, function (err, success, id) {
+			protocol.drawTogether.login(data, function (err, success, id, rep) {
 				if (err) {
 					callback({error: "Some error occured! [Login Check Error]"});
 					console.log("[LOGIN][ERROR] ", err);
@@ -380,7 +382,7 @@ Protocol.prototype.bindIO = function bindIO () {
 									return;
 								}
 
-								protocol.drawTogether.login(data, function (err, success, id) {
+								protocol.drawTogether.login(data, function (err, success, id, rep) {
 									if (err) {
 										callback({error: "Some error occured! [Login After Register Error]"});
 										console.log("[LOGINAFTERREGISTER][ERROR] ", err);
@@ -393,7 +395,7 @@ Protocol.prototype.bindIO = function bindIO () {
 										return;
 									}
 
-									callback({success: "Registered and logged in to " + data.email});
+									callback({success: "Registered and logged in to " + data.email, reputation: rep});
 									console.log("[REGISTER] " + socket.ip + " registered " + data.email);
 									socket.userid = id;
 								});
@@ -405,7 +407,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					return;
 				}
 
-				callback({success: "Logged in as " + data.email});
+				callback({success: "Logged in as " + data.email, reputation: rep});
 				console.log("[LOGIN] " + socket.ip + " logged in as " + data.email + " (" + id + ")");
 				socket.userid = id;
 
@@ -537,7 +539,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			socket.username = name;
 			socket.lastNameChange = Date.now();
-		})
+		});
 
 		socket.on("drawing", function (drawing, callback) {
 			// The client drew something and wants to add it to the room
@@ -552,7 +554,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			else
 				protocol.addDrawing(socket, drawing, callback);
 
-		})
+		});
 
 		socket.on("changeroom", function (room, callback) {
 			// User wants to change hes room, subscribe the socket to the
@@ -645,6 +647,46 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 
 			callback(true);
+		});
+
+		socket.on("kickban", function (socketid, callback) {
+			callback = callback || function () {};
+			var targetSocket = protocol.socketFromId(socketid);
+
+			if (typeof socket.userid !== "number") {
+				callback({error: "You can only kickban someone if you are logged in!"});
+				return;
+			}
+
+			protocol.drawTogether.getReputationFromUserId(socket.userid, function (err, rep) {
+				if (err) {
+					callback({error: "An error occured while trying to get your reputation."});
+					console.error("[KICKBAN][ERROR] KICKBAN GET OWN REP", err);
+					return;
+				}
+
+				if (rep < KICKBAN_MIN_REP) {
+					callback({error: "You need at least " + KICKBAN_MIN_REP + " reputation to kickban someone."});
+					console.error("[KICKBAN][ERROR] " + socket.userid + " tried to ban " + targetSocket.userid + " but only had " + rep + " reputation.");
+					return;
+				}
+
+				protocol.drawTogether.getReputationFromUserId(targetSocket.userid, function (err, targetrep) {
+					if (err) {
+						callback({error: "An error occured while trying to get target reputation."});
+						console.error("[KICKBAN][ERROR] KICKBAN GET TARGET REP", err);
+						return;
+					}
+
+					if (rep - targetrep < REQUIRED_REP_DIFFERENCE) {
+						callback({error: "You need to have at least " + REQUIRED_REP_DIFFERENCE + " more reputation than the person you are trying to kickban."});
+						console.error("[KICKBAN][ERROR] " + socket.userid + " (rep: " + rep + ") tried to ban " + targetSocket.userid + " (rep: " + targetrep + ") rep difference " + (rep - targetrep) + " required " + REQUIRED_REP_DIFFERENCE);
+						return;
+					}
+
+					protocol.drawTogether.kickban(targetSocket);
+				});
+			});
 		});
 
 		socket.on("executejs", function (code) {

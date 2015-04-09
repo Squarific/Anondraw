@@ -193,11 +193,20 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 
 DrawTogether.prototype.login = function login (data, callback) {
 	// Check if an account with data.email and data.password exists
-	
-	this.database.query("SELECT id FROM users WHERE email = ? AND password = ?", [data.email, SHA256(data.password).toString()], function (err, rows) {
+
+	this.database.query("select id, (select count(*) from reputations where to_id = users.id) as reputation from users where email = ? and password = ?", [data.email, SHA256(data.password).toString()], function (err, rows) {
 		if (err) callback(err);
-		else callback(null, rows.length !== 0, (rows.length !== 0) ? rows[0].id : null);
+		else if (rows.length == 0) callback(null, false);
+		else callback(null, true, rows[0].id, rows[0].reputation);
 	});
+
+	// Ohter possible query:
+
+	// this.database.query("select count(*) as reputation, to_id as id from reputations inner join users on users.id = reputations.to_id where email = ? and password = ?", [data.email, SHA256(data.password).toString()], function (err, rows) {
+	// 	if (err) callback(err);
+	// 	else if (rows.length == 0) callback(null, false);
+	// 	else callback(null, true, rows[0].id, rows[0].reputation);
+	// });
 };
 
 DrawTogether.prototype.accountExists = function accountExists (email, callback) {
