@@ -11,6 +11,9 @@ function DrawTogether (container, settings) {
 	// Initialize the dom elements
 	this.initDom();
 
+	// Hardcoded values who should probably be refactored
+	this.KICKBAN_MIN_REP = 50;
+
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
 		this.openModeSelector();
@@ -449,13 +452,15 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 		this.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 
-	var kickbanButton = document.createElement("span");
-	kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
+	if (this.reputation > this.KICKBAN_MIN_REP) {
+		var kickbanButton = document.createElement("span");
+		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
 
-	kickbanButton.innerText = "K/B";
-	kickbanButton.textContent = "K/B";
+		kickbanButton.innerText = "K/B";
+		kickbanButton.textContent = "K/B";
 
-	kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
+		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
+	}
 
 	var nameText = document.createElement("span");
 	nameText.className = "drawtogether-player-name";
@@ -478,8 +483,12 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 DrawTogether.prototype.kickban = function kickban (playerid) {
 	this.gui.prompt("How long do you want to kickban this person for? (minutes)", function (minutes) {
 		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both"], function (type) {
-			this.socket.emit("kickban", [playerid, minutes, type], function (data) {
-				this.chat.addMessage("SERVER", data.error || data.success);
+			this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes.", ["Yes", "No"], function (confirmation) {
+				if (confirmation == "yes") {
+					this.socket.emit("kickban", [playerid, minutes, type], function (data) {
+						this.chat.addMessage("SERVER", data.error || data.success);
+					}.bind(this));
+				}
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
