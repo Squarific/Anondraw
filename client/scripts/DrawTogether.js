@@ -100,6 +100,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 				if (data.success) {
 					self.chat.addMessage("ACCOUNT", data.success);
 					self.reputation = data.reputation;
+					self.updatePlayerList();
 				}
 			});
 		}
@@ -701,6 +702,7 @@ DrawTogether.prototype.formLogin = function formLogin () {
 			localStorage.setItem("drawtogether/email", email);
 			localStorage.setItem("drawtogether/pass", pass);
 			this.reputation = data.reputation;
+			this.updatePlayerList();
 		}
 	}.bind(this));
 };

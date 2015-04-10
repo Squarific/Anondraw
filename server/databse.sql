@@ -41,6 +41,22 @@ CREATE TABLE IF NOT EXISTS reputations (
     INDEX(to_id, from_id)
 );
 
+CREATE TABLE IF NOT EXISTS ipbans (
+    ip VARCHAR(48),
+    startdate DATETIME,
+    enddate DATETIME,
+    PRIMARY KEY (ip),
+    INDEX (ip, enddate)
+);
+
+CREATE TABLE IF NOT EXISTS accountbans (
+    userid INT UNSIGNED,
+    startdate DATETIME,
+    enddate DATETIME,
+    PRIMARY KEY (userid),
+    INDEX (userid, enddate)
+);
+
 CREATE TABLE IF NOT EXISTS ink (
     ip VARCHAR(16),
     ink SMALLINT,

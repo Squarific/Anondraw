@@ -49,6 +49,27 @@ DrawTogether.prototype.vote = function vote (fromid, toid, callback) {
 	}.bind(this));
 };
 
+DrawTogether.prototype.kickban = function kickban (useridOrIp, minutes, callback) {
+	var table = (typeof useridOrIp == "string") ? "ipbans" : "accountbans";
+	var col = (typeof useridOrIp == "string") ? "ip" : "userid";
+
+	var startdate = new Date();
+	var enddate = new Date();
+
+	this.database.query("INSERT INTO " + table + " (" + col + ", startdate, enddate) VALUES (?, ?, ?)", [useridOrIp, startdate, enddate], function (err) {
+		callback(err, !err);
+	});
+};
+
+DrawTogether.prototype.isBanned = function isBanned (useridOrIp, callback) {
+	var table = (typeof useridOrIp == "string") ? "ipbans" : "accountbans";
+	var col = (typeof useridOrIp == "string") ? "ip" : "userid";
+
+	this.database.query("SELECT enddate FROM " + table + " WHERE " + col + " = ? AND enddate > ?", [useridOrIp, new Date()], function (err, rows) {
+		callback(err, rows.length == 0, rows.length > 0 ? rows[0].enddate : null);
+	});
+};
+
 DrawTogether.prototype.addChatMessage = function addChatMessage (room, data) {
 	this.database.query("INSERT INTO msg SET ?", {
 		room: room,

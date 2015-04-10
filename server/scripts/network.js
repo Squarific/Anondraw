@@ -282,6 +282,21 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.disconnect();
 		}
 
+		protocol.drawTogether.isBanned(socket.ip, function (err, banned, time) {
+			if (err) {
+				console.error("Error checking if banned on connect", err);
+				return;
+			}
+
+			if (banned) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You have been banned till " + time
+				});
+				socket.disconnect();
+			}
+		});
+
 		socket.username = names[Math.floor(Math.random() * names.length)] + " " + names[Math.floor(Math.random() * names.length)];
 		socket.emit("initname", socket.username);
 
@@ -411,6 +426,21 @@ Protocol.prototype.bindIO = function bindIO () {
 				console.log("[LOGIN] " + socket.ip + " logged in as " + data.email + " (" + id + ")");
 				socket.userid = id;
 
+				protocol.drawTogether.isBanned(socket.userid, function (err, banned, time) {
+					if (err) {
+						console.error("Error checking if banned on login", err);
+						return;
+					}
+
+					if (banned) {
+						socket.emit("chatmessage", {
+							user: "SERVER",
+							message: "You have been banned till " + time
+						});
+						socket.disconnect();
+					}
+				});
+
 				protocol.drawTogether.getReputationFromUserId(id, function (err, reputation) {
 					if (err) {
 						console.error("[LOGIN][GETREPUTATION]", err);
@@ -427,6 +457,14 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("upvote", function (socketid) {
 			var targetSocket = protocol.socketFromId(socketid);
+
+			if (!targetSocket) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "No user logged in with this socket id."
+				});
+				return;
+			}
 
 			if (typeof socket.userid !== "number") {
 				socket.emit("chatmessage", {
@@ -649,9 +687,15 @@ Protocol.prototype.bindIO = function bindIO () {
 			callback(true);
 		});
 
-		socket.on("kickban", function (socketid, callback) {
+		socket.on("kickban", function (options, callback) {
+			// Options = [socketid, minutes, bantype]
 			callback = callback || function () {};
-			var targetSocket = protocol.socketFromId(socketid);
+			var targetSocket = protocol.socketFromId(options[0]);
+
+			if (!targetSocket) {
+				callback({error: "No user online with this socketid"});
+				return;
+			}
 
 			if (typeof socket.userid !== "number") {
 				callback({error: "You can only kickban someone if you are logged in!"});
@@ -684,7 +728,42 @@ Protocol.prototype.bindIO = function bindIO () {
 						return;
 					}
 
-					protocol.drawTogether.kickban(targetSocket);
+					if (options[2] == "account" || options[2] == "both") {
+						protocol.kickban(targetSocket.userid, function (err, success) {
+							if (err) {
+								callback({error: "Kickban failed."});
+								console.error("[KICKBAN][ERROR] Kickban account", err);
+								return;
+							}
+
+							if (options[2] == "both") {
+								protocol.kickban(targetSocket.ip, function (err, success) {
+									if (err) {
+										callback({error: "Kickban of ip failed but account kickban was successful."});
+										console.error("[KICKBAN][ERROR] Kickban ip", err);
+										return;
+									}
+
+									callback({success: "Kickbanned account " + targetSocket.userid + " and ip " + targetSocket.ip});
+									console.log("[KICKBAN] Account " + targetSocket.userid + " and ip " + targetSocket.ip + " have been banned for " + options[1] + " minutes by " + socket.userid);
+								});
+							} else {
+								callback({success: "Kickbanned account " + targetSocket.userid});
+								console.log("[KICKBAN] Account " + targetSocket.userid + " has been banned for " + options[1] + " minutes by " + socket.userid);
+							}
+						});
+					} else if (options[2] == "ip") {
+						protocol.kickban(targetSocket.ip, function (err, success) {
+							if (err) {
+								callback({error: "Kickban of ip failed"});
+								console.error("[KICKBAN][ERROR] Kickban of ip failed", err);
+								return;
+							}
+
+							callback({success: "Kickbanned ip " + targetSocket.ip});
+							console.log("[KICKBAN] Ip " + targetSocket.ip + " has been banned for " + options[1] + " minutes by " + socket.userid);
+						});
+					}
 				});
 			});
 		});
