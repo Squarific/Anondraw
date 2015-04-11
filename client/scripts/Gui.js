@@ -17,13 +17,55 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 	callback = typeof callback == "function" ? callback : function () {};
 
 	var promptContainer = this.container.appendChild(document.createElement("div"));
-	var question = promptContainer.appendChild(document.createElement("span"));
-	var answers = promptContainer.appendChild(document.createElement("div"));
+	var promptContent = promptContainer.appendChild(document.createElement("div"));
+	var questionDom = promptContent.appendChild(document.createElement("span"));
+	var answers = promptContent.appendChild(document.createElement("div"));
 
 	promptContainer.className = "gui-prompt-container";
-	question.className = "gui-prompt-question";
+	promptContent.className = "gui-prompt-content";
+	questionDom.className = "gui-prompt-question";
 	answers.className = "gui-prompt-answers";
 
-	question.innerText = question;
-	question.textContent = question;
+	questionDom.innerText = question;
+	questionDom.textContent = question;
+
+	if (options == "freepick") {
+		var freepick = answers.appendChild(document.createElement("input"));
+		freepick.className = "gui-prompt-freepick-input";
+		freepick.placeholder = question;
+
+		freepick.addEventListener("keypress", function (event) {
+			if (event.keyCode == 13) {
+				this.container.removeChild(promptContainer);
+				callback(freepick.value);
+			}
+		}.bind(this));
+
+		var freepickButton = answers.appendChild(document.createElement("div"));
+		freepickButton.className = "gui-prompt-button gui-prompt-freepick-button";
+
+		freepickButton.innerText = "Submit";
+		freepickButton.textContent = "Submit";
+
+		freepickButton.addEventListener("click", function (event) {
+			this.container.removeChild(promptContainer);
+			callback(freepick.value);
+		}.bind(this));
+	}
+
+	if (typeof options == "object" && typeof options.length == "number") {
+		for (var k = 0; k < options.length; k++) {
+			var optionButton = answers.appendChild(document.createElement("div"));
+			optionButton.className = "gui-prompt-button gui-prompt-option-button";
+
+			optionButton.innerText = options[k];
+			optionButton.textContent = options[k];
+			optionButton.option = options[k];
+
+			optionButton.addEventListener("click", function (event) {
+				this.container.removeChild(promptContainer);
+				callback(event.target.option);
+			}.bind(this));
+		}
+	}
 };

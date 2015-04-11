@@ -443,6 +443,16 @@ DrawTogether.prototype.initDom = function initDom () {
 	this.createModeSelector();
 };
 
+DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid (socketid) {
+	for (var k = 0; k < this.playerList.length; k++) {
+		if (this.playerList[k].id == socketid) {
+			return this.playerList[k].name;
+		}
+	}
+
+	return "[Not found]";
+};
+
 DrawTogether.prototype.createPlayerDom = function (player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
@@ -473,13 +483,13 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	nameText.className = "drawtogether-player-name";
 
 	if (typeof player.reputation !== "undefined") {
-		var rep = " (" + player.reputation + ")";
+		var rep = " (" + player.reputation + " R)";
 	} else {
 		rep = "";
 	}
 
-	nameText.innerText = player.name + rep + "R";
-	nameText.textContent = player.name + rep + "R";
+	nameText.innerText = player.name + rep;
+	nameText.textContent = player.name + rep;
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
@@ -491,7 +501,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 	this.gui.prompt("How long do you want to kickban this person for? (minutes)", function (minutes) {
 		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both"], function (type) {
 			this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes.", ["Yes", "No"], function (confirmation) {
-				if (confirmation == "yes") {
+				if (confirmation == "Yes") {
 					this.socket.emit("kickban", [playerid, minutes, type], function (data) {
 						this.chat.addMessage("SERVER", data.error || data.success);
 					}.bind(this));

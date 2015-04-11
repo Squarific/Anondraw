@@ -717,6 +717,30 @@ Protocol.prototype.bindIO = function bindIO () {
 					return;
 				}
 
+				if (!targetSocket.userid) {
+					if (options[2] == "account") {
+						callback({error: "The target was not logged in, so the account could not be banned."})
+						return;
+					}
+
+					var successMessage = "Kickbanned ip " + targetSocket.ip;
+					if (options[2] == "both") {
+						successMessage = "Kickbanned ip " + targetSocket.ip + " but not account since the user was not logged in.";
+					}
+
+					protocol.kickban(targetSocket.ip, function (err, success) {
+						if (err) {
+							callback({error: "Kickban of ip failed"});
+							console.error("[KICKBAN][ERROR] Kickban of ip failed, not logged in", err);
+							return;
+						}
+
+						callback({success: successMessage});
+						console.log("[KICKBAN] Ip " + targetSocket.ip + " has been banned for " + options[1] + " minutes by " + socket.userid);
+					});
+					return;
+				}
+
 				protocol.drawTogether.getReputationFromUserId(targetSocket.userid, function (err, targetrep) {
 					if (err) {
 						callback({error: "An error occured while trying to get target reputation."});
