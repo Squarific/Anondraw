@@ -293,6 +293,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					user: "SERVER",
 					message: "You have been banned till " + time
 				});
+				console.log("[BANNED] " + socket.ip + " tried to join.");
 				socket.disconnect();
 			}
 		});
@@ -437,6 +438,7 @@ Protocol.prototype.bindIO = function bindIO () {
 							user: "SERVER",
 							message: "You have been banned till " + time
 						});
+						console.log("[BANNED] " + socket.userid + " tried to join.");
 						socket.disconnect();
 					}
 				});

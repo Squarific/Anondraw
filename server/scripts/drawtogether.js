@@ -66,7 +66,7 @@ DrawTogether.prototype.isBanned = function isBanned (useridOrIp, callback) {
 	var col = (typeof useridOrIp == "string") ? "ip" : "userid";
 
 	this.database.query("SELECT enddate FROM " + table + " WHERE " + col + " = ? AND enddate > ?", [useridOrIp, new Date()], function (err, rows) {
-		callback(err, rows.length == 0, rows.length > 0 ? rows[0].enddate : null);
+		callback(err, (rows && rows.length > 0), (rows && rows.length) > 0 ? rows[0].enddate : null);
 	});
 };
 

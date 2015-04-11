@@ -92,6 +92,7 @@ h1 {
 
     .drawtogether-faq {
         padding-top:8em;
+        text-align:left;
     }
 
     .drawtogether-question-question {
@@ -286,14 +287,15 @@ h1 {
   background:#426283;
 }
 
-.drawtogether-upvote-button {
+.drawtogether-player-button {
   display:inline-block;
   background:rgb(39, 56, 73);
   padding:.4em;
+  margin-right:.2em;
   cursor:pointer;
 }
 
-.drawtogether-upvote-button:hover {
+.drawtogether-player-button:hover {
   background:rgb(50, 71, 91);
 }
 
@@ -485,7 +487,20 @@ h1 {
   width: 100%;
   height: 100%;
   top: 0;
-  left: 0; }
+  left: 0;
+  /* Performance tricks
+      http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance/10114994#10114994
+  */
+  -webkit-transform: translatez(rotateZ(360deg));
+  -moz-transform: translatez(0);
+  -ms-transform: translatez(0);
+  -o-transform: translatez(0);
+  transform: translatez(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  backface-visibility: hidden;
+  perspective: 1000;
+}
 
 .paint-canvas-public {
   background-image: url("images/transparent.png"); }

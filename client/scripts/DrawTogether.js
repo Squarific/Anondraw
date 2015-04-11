@@ -1,4 +1,7 @@
 function DrawTogether (container, settings) {
+	// Hardcoded values who should probably be refactored
+	this.KICKBAN_MIN_REP = 50;
+
 	// Normalize settings, set container
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
@@ -10,9 +13,7 @@ function DrawTogether (container, settings) {
 
 	// Initialize the dom elements
 	this.initDom();
-
-	// Hardcoded values who should probably be refactored
-	this.KICKBAN_MIN_REP = 50;
+	this.gui = new Gui(container);
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
@@ -235,6 +236,7 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	// If no time set, at least 3 seconds but longer based on message length
 	this.messageDom.style.display = "block";
 	this.messageDom.innerText = message;
+	this.messageDom.textContent = message;
 
 	clearTimeout(this.removeMessageTimeout);
 
@@ -272,6 +274,7 @@ DrawTogether.prototype.setLoading = function setLoading (room) {
 	if (this.loading) return;
 	this.loading = this.paintContainer.appendChild(document.createElement("div"));
 	this.loading.innerText = "Loading room '" + room + "' ...";
+	this.loading.textContent = "Loading room '" + room + "' ...";
 	this.loading.className = "drawtogether-loading";
 };
 
@@ -399,7 +402,8 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 		for (var k = 0; k < rooms.length; k++) {
 			var roomButton = this.publicRoomsContainer.appendChild(document.createElement("div"));
 			roomButton.className = "drawtogether-button drawtogether-room-button";
-			roomButton.innerText = rooms[k].room + " [" + rooms[k].users + " users]"
+			roomButton.innerText = rooms[k].room + " [" + rooms[k].users + " users]";
+			roomButton.textContent = rooms[k].room + " [" + rooms[k].users + " users]";
 			roomButton.addEventListener("click", this.changeRoom.bind(this, rooms[k].room, ""));
 		}
 	}.bind(this));
@@ -457,10 +461,12 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 		var kickbanButton = document.createElement("span");
 		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
 
-		kickbanButton.innerText = "K/B";
-		kickbanButton.textContent = "K/B";
+		kickbanButton.innerText = "B";
+		kickbanButton.textContent = "B";
 
 		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
+
+		playerDom.appendChild(kickbanButton);
 	}
 
 	var nameText = document.createElement("span");
@@ -472,8 +478,8 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 		rep = "";
 	}
 
-	nameText.innerText = player.name + rep;
-	nameText.textContent = player.name + rep;
+	nameText.innerText = player.name + rep + "R";
+	nameText.textContent = player.name + rep + "R";
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
@@ -641,6 +647,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 
 	var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
 	roomText.innerText = "Public Rooms:";
+	roomText.textContent = "Public Rooms:";
 	roomText.className = "drawtogether-room-text"
 
 	this.publicRoomsContainer = roomWindowConentContainer.appendChild(document.createElement("div"));
@@ -648,6 +655,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 
 		var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
 	roomText.innerText = "Manual Room:";
+	roomText.textContent = "Manual Room:";
 	roomText.className = "drawtogether-room-text"
 
 	this.roomInput = roomWindowConentContainer.appendChild(document.createElement("input"));
@@ -870,14 +878,17 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		question: "What is anondraw?",
 		answer: "It's a webapp where you can draw with strangers or friends."
 	},{
-		question: "Why can't I draw?",
-		answer: "You probably don't have any ink left, wait 30 seconds and try again."
+		question: "Why can't I draw? How do I regain Ink?",
+		answer: "You probably don't have any ink left. You can get more ink by waiting 30 seconds. If you still don't get enough ink try making an account, the more reputation you have the more ink you get."
 	}, {
-		question: "How do I regain ink?",
-		answer: "You get ink every 30 seconds. You get a static amount plus an amount relative to your reputation."
+		question: "What is that number with an R behind peoples names?",
+		answer: "That is the amount of reputation someone has. The more they have the more benefits they get."
 	}, {
-		question: "I need more ink.",
-		answer: "Good, make an account. Logged in users get twice as much ink."
+		question: "What benefits does reputation give you?",
+		answer: "At all levels you get more ink per reputation you have. \n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave."
+	}, {
+		question: "How do I get reputation?",
+		answer: "Other people have to give you an upvote, every upvote is one reputation."
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
@@ -891,8 +902,13 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 		var qText = question.appendChild(document.createElement("div"));
 		qText.className = "drawtogether-question-answer";
-		qText.innerText = questions[qKey].answer;
-		qText.textContent = questions[qKey].answer;
+		
+		var answerLines = questions[qKey].answer.split("\n");
+		for (var k = 0; k < answerLines.length; k++) {
+			var answerLine = qText.appendChild(document.createElement("div"));
+			answerLine.innerText = answerLines[k];
+			answerLine.textContent = answerLines[k];
+		}
 	}
 
 	return faq;
