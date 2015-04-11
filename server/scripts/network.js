@@ -457,6 +457,22 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
+		socket.on("logout", function () {
+			console.log("[LOGOUT] " + socket.userid + " logged out.");
+			delete socket.userid;
+			socket.emit("chatmessage", {
+				user: "SERVER",
+				message: "You have been logged out"
+			});
+			this.getPlayerNameList(room, function (err, list) {
+				if (err) {
+					console.error("[LOGOUT][PLAYERLIST][ERROR]", err, socket.room);
+					return;
+				}
+				this.io.to(room).emit("playerlist", list);
+			}.bind(this));
+		});
+
 		socket.on("upvote", function (socketid) {
 			var targetSocket = protocol.socketFromId(socketid);
 
