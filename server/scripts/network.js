@@ -237,7 +237,7 @@ Protocol.prototype.updateAllPlayerLists = function updateAllPlayerLists () {
 		if (!roomsDone[room]) {
 			this.getPlayerNameList(room, function (err, list) {
 				if (err) {
-					console.error("[UPDATEALLPLAYERLIST][PLAYERLIST][ERROR]", err, socket.room);
+					console.error("[UPDATEALLPLAYERLIST][PLAYERLIST][ERROR]", err, room);
 					return;
 				}
 				this.io.to(room).emit("playerlist", list);
@@ -464,12 +464,12 @@ Protocol.prototype.bindIO = function bindIO () {
 				user: "SERVER",
 				message: "You have been logged out"
 			});
-			this.getPlayerNameList(room, function (err, list) {
+			this.getPlayerNameList(socket.room, function (err, list) {
 				if (err) {
 					console.error("[LOGOUT][PLAYERLIST][ERROR]", err, socket.room);
 					return;
 				}
-				this.io.to(room).emit("playerlist", list);
+				this.io.to(socket.room).emit("playerlist", list);
 			}.bind(this));
 		});
 
@@ -744,7 +744,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						successMessage = "Kickbanned ip " + targetSocket.ip + " but not account since the user was not logged in.";
 					}
 
-					protocol.kickban(targetSocket.ip, function (err, success) {
+					protocol.drawTogether.kickban(targetSocket.ip, options[0], function (err, success) {
 						if (err) {
 							callback({error: "Kickban of ip failed"});
 							console.error("[KICKBAN][ERROR] Kickban of ip failed, not logged in", err);
@@ -752,6 +752,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						}
 
 						callback({success: successMessage});
+						targetSocket.disconnect();
 						console.log("[KICKBAN] Ip " + targetSocket.ip + " has been banned for " + options[1] + " minutes by " + socket.userid);
 					});
 					return;
@@ -771,7 +772,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					if (options[2] == "account" || options[2] == "both") {
-						protocol.kickban(targetSocket.userid, function (err, success) {
+						protocol.drawTogether.kickban(targetSocket.userid, options[0], function (err, success) {
 							if (err) {
 								callback({error: "Kickban failed."});
 								console.error("[KICKBAN][ERROR] Kickban account", err);
@@ -779,7 +780,7 @@ Protocol.prototype.bindIO = function bindIO () {
 							}
 
 							if (options[2] == "both") {
-								protocol.kickban(targetSocket.ip, function (err, success) {
+								protocol.drawTogether.kickban(targetSocket.ip, function (err, success) {
 									if (err) {
 										callback({error: "Kickban of ip failed but account kickban was successful."});
 										console.error("[KICKBAN][ERROR] Kickban ip", err);
@@ -787,15 +788,17 @@ Protocol.prototype.bindIO = function bindIO () {
 									}
 
 									callback({success: "Kickbanned account " + targetSocket.userid + " and ip " + targetSocket.ip});
+									targetSocket.disconnect();
 									console.log("[KICKBAN] Account " + targetSocket.userid + " and ip " + targetSocket.ip + " have been banned for " + options[1] + " minutes by " + socket.userid);
 								});
 							} else {
 								callback({success: "Kickbanned account " + targetSocket.userid});
+								targetSocket.disconnect();
 								console.log("[KICKBAN] Account " + targetSocket.userid + " has been banned for " + options[1] + " minutes by " + socket.userid);
 							}
 						});
 					} else if (options[2] == "ip") {
-						protocol.kickban(targetSocket.ip, function (err, success) {
+						protocol.drawTogether.kickban(targetSocket.ip, options[0], function (err, success) {
 							if (err) {
 								callback({error: "Kickban of ip failed"});
 								console.error("[KICKBAN][ERROR] Kickban of ip failed", err);
@@ -803,6 +806,7 @@ Protocol.prototype.bindIO = function bindIO () {
 							}
 
 							callback({success: "Kickbanned ip " + targetSocket.ip});
+							targetSocket.disconnect();
 							console.log("[KICKBAN] Ip " + targetSocket.ip + " has been banned for " + options[1] + " minutes by " + socket.userid);
 						});
 					}

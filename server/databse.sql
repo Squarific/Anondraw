@@ -45,7 +45,6 @@ CREATE TABLE IF NOT EXISTS ipbans (
     ip VARCHAR(48),
     startdate DATETIME,
     enddate DATETIME,
-    PRIMARY KEY (ip),
     INDEX (ip, enddate)
 );
 
@@ -53,7 +52,6 @@ CREATE TABLE IF NOT EXISTS accountbans (
     userid INT UNSIGNED,
     startdate DATETIME,
     enddate DATETIME,
-    PRIMARY KEY (userid),
     INDEX (userid, enddate)
 );
 

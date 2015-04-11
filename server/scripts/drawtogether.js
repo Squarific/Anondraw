@@ -56,6 +56,8 @@ DrawTogether.prototype.kickban = function kickban (useridOrIp, minutes, callback
 	var startdate = new Date();
 	var enddate = new Date();
 
+	callback = callback || function () {};
+
 	this.database.query("INSERT INTO " + table + " (" + col + ", startdate, enddate) VALUES (?, ?, ?)", [useridOrIp, startdate, enddate], function (err) {
 		callback(err, !err);
 	});
