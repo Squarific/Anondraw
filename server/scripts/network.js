@@ -19,6 +19,12 @@ Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 	this.drawTogether.addChatMessage(room, data);
 };
 
+Protocol.prototype.sendEmote = function sendEmote (room, data) {
+	console.log("[CHAT/EMOTE][" + room + "] " + data.user + " " + data.message);
+	this.io.to(room).emit("emote", data);
+	this.drawTogether.addChatMessage(room, data);
+};
+
 Protocol.prototype.sendDrawing = function sendDrawing (room, socketid, drawing) {
 	this.io.to(room).emit("drawing", {socketid: socketid, drawing: drawing});
 };
@@ -334,8 +340,8 @@ Protocol.prototype.bindIO = function bindIO () {
 				var command = message.split(" ");
 
 				if (message.indexOf("/me") == 0) {
-					var partial = commands.slice(1).join(" ");
-					protocol.emit("emote", {
+					var partial = command.slice(1).join(" ");
+					protocol.sendEmote(socket.room, {
 						user: socket.username,
 						message: partial
 					});
@@ -344,11 +350,12 @@ Protocol.prototype.bindIO = function bindIO () {
 						"The following commands are avaialble:",
 						"/me [text] - Emote"
 					];
-					for (var k = 0; k < helpText.length; k++) {}
-					socket.emit("chatmessage", {
-						user: "SERVER",
-						message: "The following commands are available:"
-					});
+					for (var k = 0; k < helpText.length; k++) {
+						socket.emit("chatmessage", {
+							user: "SERVER",
+							message: helpText[k]
+						});
+					}
 				}
 
 				// If the message started with a '/' don't send it to the other clients 
