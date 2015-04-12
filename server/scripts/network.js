@@ -1,5 +1,5 @@
 var names = require("./names.js");
-var MAX_USERS_IN_ROOM = 30;
+var MAX_USERS_IN_ROOM = 20;
 var MAX_USERS_IN_GAMEROOM = 10;
 var KICKBAN_MIN_REP = 50;             // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;     // Required reputation difference to be allowed to kickban someone
@@ -40,6 +40,7 @@ Protocol.prototype.getPublicRooms = function getPublicRooms () {
 		}
 
 		if (found) continue;
+		if (this.io.sockets.sockets[sKey].room.indexOf("private_") == 0) continue;
 
 		rooms.push({
 			room: this.io.sockets.sockets[sKey].room,
@@ -307,13 +308,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			// User is trying to send a message, if he is in a room
 			// send the message to all other users, otherwise show an error
 
-			if (!message) {
-				socket.emit("chatmessage", {
-					user: "SERVER",
-					message: message
-				});
-				return;
-			}
+			if (!message) return;
 
 			if (!socket.room) {
 				socket.emit("chatmessage", {
@@ -323,7 +318,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (Date.now() - socket.lastMessage < 1000) {
+			if (Date.now() - socket.lastMessage < 800) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
 					message: "Don't send messages too fast!."
@@ -331,7 +326,34 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			socket.lastMessage = Date.now()
+			if (message.length > 256) return;
+
+			socket.lastMessage = Date.now();
+
+			if (message[0] == "/") {
+				var command = message.split(" ");
+
+				if (message.indexOf("/me") == 0) {
+					var partial = commands.slice(1).join(" ");
+					protocol.emit("emote", {
+						user: socket.username,
+						message: partial
+					});
+				} else if (message.indexOf("/help") == 0) {
+					var helpText = [
+						"The following commands are avaialble:",
+						"/me [text] - Emote"
+					];
+					for (var k = 0; k < helpText.length; k++) {}
+					socket.emit("chatmessage", {
+						user: "SERVER",
+						message: "The following commands are available:"
+					});
+				}
+
+				// If the message started with a '/' don't send it to the other clients 
+				return;
+			}
 
 			protocol.sendChatMessage(socket.room ,{
 				user: socket.username,
@@ -414,6 +436,18 @@ Protocol.prototype.bindIO = function bindIO () {
 									callback({success: "Registered and logged in to " + data.email, reputation: rep});
 									console.log("[REGISTER] " + socket.ip + " registered " + data.email);
 									socket.userid = id;
+
+									protocol.drawTogether.getReputationFromUserId(id, function (err, reputation) {
+										if (err) {
+											console.error("[LOGIN][GETREPUTATION]", err);
+											return;
+										}
+
+										protocol.io.to(socket.room).emit("reputation", {
+											id: socket.id,
+											reputation: reputation
+										});
+									});
 								});
 							});
 						} else {
@@ -744,7 +778,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						successMessage = "Kickbanned ip " + targetSocket.ip + " but not account since the user was not logged in.";
 					}
 
-					protocol.drawTogether.kickban(targetSocket.ip, options[0], function (err, success) {
+					protocol.drawTogether.kickban(targetSocket.ip, options[1], function (err, success) {
 						if (err) {
 							callback({error: "Kickban of ip failed"});
 							console.error("[KICKBAN][ERROR] Kickban of ip failed, not logged in", err);
@@ -772,7 +806,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					if (options[2] == "account" || options[2] == "both") {
-						protocol.drawTogether.kickban(targetSocket.userid, options[0], function (err, success) {
+						protocol.drawTogether.kickban(targetSocket.userid, options[1], function (err, success) {
 							if (err) {
 								callback({error: "Kickban failed."});
 								console.error("[KICKBAN][ERROR] Kickban account", err);
@@ -780,7 +814,7 @@ Protocol.prototype.bindIO = function bindIO () {
 							}
 
 							if (options[2] == "both") {
-								protocol.drawTogether.kickban(targetSocket.ip, function (err, success) {
+								protocol.drawTogether.kickban(targetSocket.ip, options[1], function (err, success) {
 									if (err) {
 										callback({error: "Kickban of ip failed but account kickban was successful."});
 										console.error("[KICKBAN][ERROR] Kickban ip", err);
@@ -798,7 +832,7 @@ Protocol.prototype.bindIO = function bindIO () {
 							}
 						});
 					} else if (options[2] == "ip") {
-						protocol.drawTogether.kickban(targetSocket.ip, options[0], function (err, success) {
+						protocol.drawTogether.kickban(targetSocket.ip, options[1], function (err, success) {
 							if (err) {
 								callback({error: "Kickban of ip failed"});
 								console.error("[KICKBAN][ERROR] Kickban of ip failed", err);
