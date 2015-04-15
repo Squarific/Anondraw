@@ -30,31 +30,21 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 	questionDom.textContent = question;
 
 	if (options == "freepick") {
-		var freepick = answers.appendChild(document.createElement("input"));
-		freepick.className = "gui-prompt-freepick-input";
-		freepick.placeholder = question;
-
-		freepick.addEventListener("keypress", function (event) {
-			if (event.keyCode == 13) {
-				this.container.removeChild(promptContainer);
-				callback(freepick.value);
-			}
-		}.bind(this));
-
-		var freepickButton = answers.appendChild(document.createElement("div"));
-		freepickButton.className = "gui-prompt-button gui-prompt-freepick-button";
-
-		freepickButton.innerText = "Submit";
-		freepickButton.textContent = "Submit";
-
-		freepickButton.addEventListener("click", function (event) {
+		answers.appendChild(this.createFreePick(question, function (answer) {
+			callback(answer);
 			this.container.removeChild(promptContainer);
-			callback(freepick.value);
-		}.bind(this));
+		}.bind(this)));
 	}
 
 	if (typeof options == "object" && typeof options.length == "number") {
 		for (var k = 0; k < options.length; k++) {
+			if (options[k] == "freepick") {
+				answers.appendChild(this.createFreePick(question, function (answer) {
+					callback(answer);
+					this.container.removeChild(promptContainer);
+				}.bind(this)));
+				continue;
+			}
 			var optionButton = answers.appendChild(document.createElement("div"));
 			optionButton.className = "gui-prompt-button gui-prompt-option-button";
 
@@ -68,4 +58,30 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 			}.bind(this));
 		}
 	}
+};
+
+Gui.prototype.createFreePick = function createFreePick (question, callback) {
+	var container = document.createElement("div");
+
+	var freepick = container.appendChild(document.createElement("input"));
+	freepick.className = "gui-prompt-freepick-input";
+	freepick.placeholder = question;
+
+	freepick.addEventListener("keypress", function (event) {
+		if (event.keyCode == 13) {
+			callback(freepick.value);
+		}
+	});
+
+	var freepickButton = container.appendChild(document.createElement("div"));
+	freepickButton.className = "gui-prompt-button gui-prompt-freepick-button";
+
+	freepickButton.innerText = "Submit";
+	freepickButton.textContent = "Submit";
+
+	freepickButton.addEventListener("click", function (event) {
+		callback(freepick.value);
+	});
+
+	return container;
 };

@@ -89,10 +89,6 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		if (localStorage.getItem("drawtogether-name"))
 			self.changeName(localStorage.getItem("drawtogether-name"));
 
-		// First set the current room to none, then try to join a room
-		self.current_room = undefined;
-		self.changeRoom(self.settings.room);
-
 		if (localStorage.getItem("drawtogether/email")) {
 			socket.emit("login", {
 				email: localStorage.getItem("drawtogether/email"),
@@ -105,6 +101,14 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 				}
 			});
 		}
+
+		if (self.settings.mode == "game") {
+			self.joinGame();
+			return;
+		}
+
+		// Change the room
+		self.changeRoom(self.settings.room, undefined, true);
 	});
 
 	socket.on("disconnect", function () {
@@ -219,11 +223,24 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updateInk();
 	});
 
+	socket.on("gamestatus", function (status) {
+		console.log(status);
+		self.chat.addMessage({
+			user: "GAME",
+			message: self.usernameFromSocketid(status.currentPlayer) + " is now drawing"
+		});
+	});
+
 	// chat events
 	socket.on("chatmessage", function (data) {
 		var data = data || {};
 		self.chat.addMessage(data.user, data.message);
 	});
+
+	socket.on("emote", function (data) {
+		var data = data || {};
+		self.chat.addMessage(data.user + " " + data.message);
+	})
 };
 
 DrawTogether.prototype.sendMessage = function sendMessage (message) {
@@ -246,10 +263,10 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	}.bind(this), time || Math.max(Math.ceil(message.length / 10) * 1000, 3000));
 };
 
-DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
+DrawTogether.prototype.changeRoom = function changeRoom (room, number, overrideAlreadyIn) {
 	// Change the room to room + number, if not possible try to join
 	// room + (number + 1), if not possible repeat
-	if (room === this.current_room) {
+	if (room === this.current_room && !overrideAlreadyIn) {
 		this.chat.addMessage("CLIENT", "You are already in room '" + room + "'");
 		return;
 	}
@@ -266,6 +283,14 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 
 	this.chat.addMessage("CLIENT", "Changing room to '" + room + number + "'");
 	this.chat.addMessage("CLIENT", "Give other people this url: http://www.anondraw.com/#" + room + number);
+};
+
+DrawTogether.prototype.joinGame = function joinGame () {
+	this.socket.emit("joinnewgame", function (success) {
+		if (!success) {
+			this.chat.addMessage("CLIENT", "Something went wrong while trying to join a game.")
+		}
+	});
 };
 
 DrawTogether.prototype.setLoading = function setLoading (room) {
@@ -498,8 +523,10 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", function (minutes) {
-		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both"], function (type) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "Cancel"], function (minutes) {
+		if (minutes == "Cancel") return;
+		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both", "Cancel"], function (type) {
+			if (type == "Cancel") return;
 			this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes.", ["Yes", "No"], function (confirmation) {
 				if (confirmation == "Yes") {
 					this.socket.emit("kickban", [playerid, minutes, type], function (data) {
@@ -888,6 +915,15 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
+	var gameButton = selectWindow.appendChild(document.createElement("div"));
+	gameButton.className = "drawtogether-modeselect-button";
+	gameButton.innerHTML = '<img src="images/game.png"/><br/>Game';
+	gameButton.addEventListener("click", function () {
+		this.settings.mode = "game";
+		(this.socket) ? this.joinGame() : this.connect();
+		this.selectWindow.style.display = "";
+	}.bind(this));
+
 	selectWindow.appendChild(this.createFAQDom());
 };
 
@@ -897,7 +933,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a webapp where you can draw with strangers or friends."
+		answer: "It's a webapp where you can draw live with strangers or friends."
 	},{
 		question: "Why can't I draw? How do I regain Ink?",
 		answer: "You probably don't have any ink left. You can get more ink by waiting 30 seconds. If you still don't get enough ink try making an account, the more reputation you have the more ink you get."

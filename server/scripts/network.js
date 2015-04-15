@@ -1,14 +1,18 @@
 var names = require("./names.js");
+var GameRoom = require("./GameRoom.js");
 var MAX_USERS_IN_ROOM = 20;
 var MAX_USERS_IN_GAMEROOM = 10;
-var KICKBAN_MIN_REP = 50;             // Reputation required to kickban
-var REQUIRED_REP_DIFFERENCE = 20;     // Required reputation difference to be allowed to kickban someone
+var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
+var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
 
 function Protocol (io, drawtogether, imgur) {
 	this.io = io;
 	this.drawTogether = drawtogether;
 	this.imgur = imgur;
 	this.bindIO();
+
+	this.gameRooms = {};
+
 	setInterval(this.updateInk.bind(this),  30 * 1000);
 	setInterval(this.updateAllPlayerLists.bind(this), 10 * 60 * 1000);
 }
@@ -31,6 +35,142 @@ Protocol.prototype.sendDrawing = function sendDrawing (room, socketid, drawing) 
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
 	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
+};
+
+Protocol.prototype.informClient = function informClient (socket, message) {
+	socket.emit("chatmessage", {
+		user: "SERVER",
+		message: message
+	});
+};
+
+Protocol.prototype.leaveRoom = function leaveRoom (socket) {
+	socket.leave(socket.room);
+	this.io.to(socket.room).emit("leave", {id: socket.id});
+
+	if (socket.gameroom) {
+		socket.gameroom.leave(socket);
+		delete socket.gameroom;
+	}
+};
+
+Protocol.prototype.joinRoom = function joinRoom (socket, room) {
+	// Join a room, if also joining a game, this one should be done first
+	this.leaveRoom(socket);
+
+	socket.join(room);
+	console.log("[ROOM CHANGE] " + socket.username + " changed from " + socket.room + " to " + room + " there are now " + this.getUserCount(room) + " people here.");
+	socket.room = room;
+	this.roomJoined(socket);
+
+	this.informClient(socket, "Changed room to " + room + ", loading drawings...");
+	this.syncDrawingsAndPlayerlist(socket);
+
+	this.drawTogether.getInkFromIp(socket.ip, function (err, amount) {
+		socket.emit("setink", amount);
+	});
+};
+
+Protocol.prototype.cleanEmptyGameRooms = function cleanEmptyGameRooms () {
+	for (var name in this.gameRooms) {
+		if (this.gameRooms[name].players.length == 0) {
+			delete this.gameRooms[name];
+		}
+	}
+};
+
+Protocol.prototype.joinGame = function joinGame (socket, game, callback, overrideFull) {
+	// A socket wants to join a specific game
+	// callback returns true if the user is now in the given game
+
+	if (socket.room == game) {
+		this.informClient(socket, "You are already in " + game);
+		callback(true);
+		return;
+	}
+
+	if (!overrideFull && (this.gameRooms[game] && this.gameRooms[game].players.length == MAX_USERS_IN_GAMEROOM)) {
+		this.informClient(socket, "Game " + game + " is full!")
+		callback(false);
+		return;
+	}
+
+	this.joinRoom(socket, game);
+	this.gameRooms[game] = this.gameRooms[game] || new GameRoom(game, this.io);
+	socket.gameroom = this.gameRooms[game];
+	socket.gameroom.join(socket);
+};
+
+Protocol.prototype.joinNewGame = function joinNewGame (socket, callback) {
+	// A socket wants to join a new unspecified game
+	// Preferably with other people callback returns
+	// true if successfully joined game and the name (success, name)
+
+	// We look for a non-full room
+	for (var name in this.gameRooms) {
+		if (this.gameRooms[name].players.length < MAX_USERS_IN_GAMEROOM) {
+			this.joinGame(socket, name, function (success) {
+				callback(success, name);
+			});
+			return;
+		}
+	}
+
+	// No non-full rooms, create a new room
+	var i = 1;
+	while (this.gameRooms["game_" + i]) { i++; }
+
+	this.joinGame(socket, "game_" + i, function (success) {
+		callback(success)
+		return;
+	});
+};
+
+Protocol.prototype.roomJoined = function roomJoined (socket) {
+	// Send sockets in room that someone joined
+	if (socket.userid) {
+		this.drawTogether.getReputationFromUserId(socket.userid, function (err, rep) {
+			if (err) {
+				console.log("[JOIN][REPERROR]" + err);
+				rep = 0;
+			}
+
+			this.emitJoin(socket.room, socket.userid, socket.username, rep);
+		});
+	} else {
+		this.emitJoin(socket.room, socket.userid, socket.username, 0);
+	}
+};
+
+Protocol.prototype.emitJoin = function (room, id, name, reputation) {
+	this.io.to(room).emit("join", {
+		id: id,
+		name: name,
+		reputation: reputation
+	});
+};
+
+Protocol.prototype.syncDrawingsAndPlayerlist = function (socket) {
+	// Send the client the drawings and playerlist
+	this.drawTogether.getDrawings(socket.room, function (err, drawings) {
+		if (err) {
+			this.informClient(err);
+			drawings = [];
+		}
+
+		socket.emit("drawings", {
+			room: socket.room,
+			drawings: drawings
+		});
+
+		this.getPlayerNameList(socket.room, function (err, list) {
+			if (err) {
+				console.error("[JOIN][PLAYERLIST][ERROR]", err, socket.room);
+			}
+
+			socket.emit("playerlist", list)
+		});
+	}.bind(this));
 };
 
 Protocol.prototype.getPublicRooms = function getPublicRooms () {
@@ -356,10 +496,19 @@ Protocol.prototype.bindIO = function bindIO () {
 							message: helpText[k]
 						});
 					}
+				} else {
+					socket.emit("chatmessage", {
+						user: "SERVER",
+						message: "Command not found!"
+					})
 				}
 
 				// If the message started with a '/' don't send it to the other clients 
 				return;
+			}
+
+			if (socket.gameroom) {
+				socket.gameroom.chatmessage(socket, message);
 			}
 
 			protocol.sendChatMessage(socket.room ,{
@@ -505,13 +654,13 @@ Protocol.prototype.bindIO = function bindIO () {
 				user: "SERVER",
 				message: "You have been logged out"
 			});
-			this.getPlayerNameList(socket.room, function (err, list) {
+			protocol.getPlayerNameList(socket.room, function (err, list) {
 				if (err) {
 					console.error("[LOGOUT][PLAYERLIST][ERROR]", err, socket.room);
 					return;
 				}
-				this.io.to(socket.room).emit("playerlist", list);
-			}.bind(this));
+				protocol.io.to(socket.room).emit("playerlist", list);
+			});
 		});
 
 		socket.on("upvote", function (socketid) {
@@ -668,82 +817,28 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (room.indexOf("game_") == 0) {
+				protocol.joinGame(socket, room, callback, socket.username == "UberLord");
+				return;
+			}
+
 			if (protocol.getUserCount(room) >= MAX_USERS_IN_ROOM && socket.username !== "UberLord") {
 				socket.emit("chatmesage", {
 					user: "SERVER",
-					message: "Can't join room " + room + " too many users!"
+					message: "Can't join room " + room + ", too many users!"
 				});
 				callback(false);
 				return;
 			}
 
-			console.log("[ROOM CHANGE] " + socket.username + " changed from " + socket.room + " to " + room + " there are now " + protocol.getUserCount(room) + " people here.");
-
-
-			protocol.io.to(socket.room).emit("leave", {id: socket.id});
-			socket.leave(socket.room);
-			socket.join(room);
-			socket.room = room;
-
-			if (socket.userid) {
-				protocol.drawTogether.getReputationFromUserId(socket.userid, function (err, rep) {
-					if (err) {
-						console.log("[JOIN][REPERROR]" + err);
-						protocol.io.to(socket.room).emit("join", {
-							id: socket.id,
-							name: socket.username,
-							reputation: 0
-						});
-						return;
-					}
-					protocol.io.to(socket.room).emit("join", {
-						id: socket.id,
-						name: socket.username,
-						reputation: rep
-					});
-				});
-			} else {
-				protocol.io.to(socket.room).emit("join", {
-					id: socket.id,
-					name: socket.username,
-					reputation: 0
-				});
-			}
-			
-			socket.emit("chatmessage", {
-				user: "SERVER",
-				message: "Changed room to " + room + ", loading drawings..."
-			});
-
-			protocol.drawTogether.getDrawings(room, function (err, drawings) {
-				if (err) {
-					socket.emit("chatmessage", {
-						user: "SERVER",
-						message: err
-					});
-					drawings = [];
-				}
-
-				socket.emit("drawings", {
-					room: socket.room,
-					drawings: drawings
-				});
-
-				protocol.getPlayerNameList(socket.room, function (err, list) {
-					if (err) {
-						console.error("[JOIN][PLAYERLIST][ERROR]", err, socket.room);
-						socket.emit("playerlist", list);
-						return;
-					}
-					socket.emit("playerlist", list)
-				});
-			});
-
-			protocol.drawTogether.getInkFromIp(socket.ip, function (err, amount) {
-				socket.emit("setink", amount);
-			});
+			protocol.joinRoom(socket, room);
 
 			callback(true);
+		});
+
+		socket.on("joinnewgame", function (callback) {
+			// Callback will be called with (success, gameRoomName)
+			protocol.joinNewGame(socket, callback);
 		});
 
 		socket.on("kickban", function (options, callback) {
@@ -863,6 +958,9 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("disconnect", function () {
+			if (socket.gameroom) socket.gameroom.leave(socket);
+			protocol.cleanEmptyGameRooms();
+			delete socket.gameroom;
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 		});
 	});
