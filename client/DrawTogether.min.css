@@ -47,14 +47,20 @@ h1 {
   top:0.8em;
   max-width:100em;
 
-  background:#0A384E;
+  background:rgba(10, 56, 78, 0.8);
   color:white;
-  border:0.1em solid #8FA3B6;
+  border:0.1em solid rgba(143, 163, 182, 0.8);
 
   padding:1em;
   font-size:2em;
 
   z-index:1000;
+}
+
+.drawtogether-general-message:hover {
+  background:rgba(10, 56, 78, 0.2);
+  border:0.1em solid rgba(143, 163, 182, 0.2);
+  color:rgba(255, 255, 255, 0.2);
 }
 
 /**
@@ -93,6 +99,7 @@ h1 {
 
     .drawtogether-faq {
         padding-top:8em;
+        padding-bottom:8em;
         text-align:left;
     }
 

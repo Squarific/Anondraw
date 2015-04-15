@@ -155,17 +155,6 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	});
 
 	socket.on("playerlist", function (list) {
-		// If a user does not have a reputation set we should use their old value
-		// if we had no old value we should use 0
-		for (var k = 0; k < list.length; k++) {
-			if (typeof list[k].reputation == "undefined") {
-				for (var nk = 0; nk < self.playerList.length; nk++) {
-					if (self.playerList[nk].id == list[k].id) {
-						list[k].reputation = self.playerList[nk].reputation || 0;
-					}
-				}
-			}
-		}
 		self.playerList = list;
 		self.updatePlayerList();
 	});
@@ -224,18 +213,22 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	});
 
 	socket.on("gamestatus", function (status) {
-		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing.");
-
-		console.log(status)
+		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing. You have " + Math.round(status.timeLeft / 1000) + " seconds left.");
 
 		for (var k = 0; k < status.players.length; k++) {
-			self.chat.addMessage("GAME", self.usernameFromSocketid(status.players[k].id) + " has " + status.players[k].score + " points.");
+			for (var nk = 0; nk < self.playerList.length; nk++) {
+				if (self.playerList[nk].id == status.players[k].id) {
+					self.playerList[nk].gamescore = status.players[k].score;
+				}
+			}
 		}
+
+		self.updatePlayerList();
 	});
 
 	socket.on("gameword", function (word) {
 		self.chat.addMessage("GAME", "It is your turn now! Please draw " + word);
-		self.displayMessage("It is your turn now! Please draw " + word);
+		self.displayMessage("It is your turn now! Please draw '" + word + "' you have 60 seconds!");
 	});
 
 	// chat events
@@ -514,14 +507,17 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	var nameText = document.createElement("span");
 	nameText.className = "drawtogether-player-name";
 
+	var rep = "", score = "";
 	if (typeof player.reputation !== "undefined") {
 		var rep = " (" + player.reputation + " R)";
-	} else {
-		rep = "";
 	}
 
-	nameText.innerText = player.name + rep;
-	nameText.textContent = player.name + rep;
+	if (typeof player.gamescore !== "undefined") {
+		score = " [" + player.gamescore + " Points]";
+	}
+
+	nameText.innerText = player.name + rep + score;
+	nameText.textContent = player.name + rep + score;
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
@@ -940,13 +936,19 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a webapp where you can draw live with strangers or friends."
-	},{
+		answer: "It's a webapp where you can draw live with strangers or friends. There is also a gamemode."
+	}, {
+		question: "How do you play the game?",
+		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
+	}, {
 		question: "Why can't I draw? How do I regain Ink?",
 		answer: "You probably don't have any ink left. You can get more ink by waiting 30 seconds. If you still don't get enough ink try making an account, the more reputation you have the more ink you get."
 	}, {
 		question: "What is that number with an R behind peoples names?",
 		answer: "That is the amount of reputation someone has. The more they have the more benefits they get."
+	}, {
+		question: "What are those points behind some peoples names?",
+		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
 	}, {
 		question: "What benefits does reputation give you?",
 		answer: "At all levels you get more ink per reputation you have. \n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave."

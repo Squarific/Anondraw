@@ -320,6 +320,7 @@ Protocol.prototype.getPlayerNameList = function getPlayerNameList (room, callbac
 	//     id: socketid,
 	//     name: username,
 	//     reputation: accountrep //optional
+	//     gamescore: score //Only in gamerooms
 	// }
 	var sroom = this.io.nsps['/'].adapter.rooms[room];
 	var ids = [];
@@ -339,33 +340,26 @@ Protocol.prototype.getPlayerNameList = function getPlayerNameList (room, callbac
 
 		for (var id in sroom) {
 			var socket = this.socketFromId(id);
+			var reputation;
+
 			if (typeof socket.userid == "number") {
 				// User is logged in, find the reputation
-				var found_rep = false;
 				for (var k = 0; k < rows.length; k++) {
 					if (rows[k].to_id == socket.userid) {
-						players.push({
-							id: socket.id,
-							name: socket.username,
-							reputation: rows[k].reputation
-						});
-						found_rep = true;
+						reputation = rows[k].reputation
 						break;
 					}
 				}
-				if (found_rep) continue;
-				// User is logged in but no reputation
-				players.push({
-					id: socket.id,
-					name: socket.username
-				});
 			} else {
-				players.push({
-					id: socket.id,
-					name: socket.username,
-					reputation: 0
-				});
+				reputation = 0;
 			}
+
+			players.push({
+				id: socket.id,
+				name: socket.username,
+				reputation: reputation,
+				gamescore: (this.gameRooms[room]) ? socket.gamescore : undefined
+			});
 		}
 
 		// Return back
@@ -795,7 +789,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			if (protocol.gameRooms[socket.room]) {
 				if (protocol.gameRooms[socket.room].currentPlayer == socket) {
-					protocol.addDrawing(socket, drawing, callback);
+					protocol.addDrawingNoInk(socket, drawing, callback);
 				} else {
 					callback();
 				}

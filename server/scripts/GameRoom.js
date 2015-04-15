@@ -1,5 +1,5 @@
 var words = require("./words.js");
-var TIME_PER_WORD = 20 * 1000;
+var TIME_PER_WORD = 60 * 1000;
 
 function GameRoom (name, io) {
 	this.currentPlayer;
@@ -18,7 +18,7 @@ GameRoom.prototype.join = function join (socket) {
 	if (!this.currentPlayer) {
 		this.nextGame();
 	} else {
-		socket.emit("gamestatus", this.getStatus());
+		this.io.to(this.name).emit("gamestatus", this.getStatus());
 	}	
 };
 
