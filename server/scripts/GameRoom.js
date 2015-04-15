@@ -50,7 +50,7 @@ GameRoom.prototype.chatmessage = function chatMessage (socket, message) {
 };
 
 GameRoom.prototype.nextGame = function nextGame (guessed) {
-	delete this.gameTimeout;
+	clearTimeout(this.gameTimeout);
 
 	// If noone is in the room, stop playing
 	if (this.players.length == 0) {
@@ -58,25 +58,27 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 		return;
 	}
 
+	// Was the previous game succesful?
+	if (!guessed && this.currentPlayer) {
+		this.io.to(this.name).emit("chatmessage", {
+			user: "GAME",
+			message: "The word " + this.currentWord + " has not been guessed!"
+		});
+	}
+
 	// Assign new drawer
+	var newAssigned = false;
 	for (var k = 0; k < this.players.length; k++) {
 		if (this.players[k] == this.currentPlayer) {
 			this.currentPlayer = this.players[(k + 1) % this.players.length];
+			newAssigned = true;
 			break;
 		}
 	}
 
 	// There was no current player before
-	if (!this.currentPlayer) {
+	if (!newAssigned) {
 		this.currentPlayer = this.players[0];
-	}
-
-	// Was the previous game succesful?
-	if (!guessed) {
-		this.io.to(this.currentPlayer.room).emit("chatmessage", {
-			user: "GAME",
-			message: "The word " + this.currentWord + " has not been guessed!"
-		});
 	}
 
 	// Assign new word
@@ -90,11 +92,7 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 
 	// Send the current state
 	this.io.to(this.currentPlayer.room).emit("gamestatus", this.getStatus());
-	this.currentPlayer.emit("generalmessage", "It is your turn! Please draw: '" + this.currentWord + "'");
-	this.currentPlayer.emit("chatmessage", {
-		user: "GAME",
-		message: "It is your turn! Please draw: '" + this.currentWord + "'"
-	});
+	this.currentPlayer.emit("gameword", this.currentWord);
 };
 
 GameRoom.prototype.getStatus = function getStatus () {
@@ -109,7 +107,7 @@ GameRoom.prototype.getStatus = function getStatus () {
 	return {
 		currentPlayer: this.currentPlayer.id,
 		players: players,
-		timeLeft: Date.now() - this.endTime
+		timeLeft: this.endTime - Date.now()
 	};
 };
 

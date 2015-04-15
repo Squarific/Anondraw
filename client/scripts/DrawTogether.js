@@ -224,11 +224,18 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	});
 
 	socket.on("gamestatus", function (status) {
-		console.log(status);
-		self.chat.addMessage({
-			user: "GAME",
-			message: self.usernameFromSocketid(status.currentPlayer) + " is now drawing"
-		});
+		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing.");
+
+		console.log(status)
+
+		for (var k = 0; k < status.players.length; k++) {
+			self.chat.addMessage("GAME", self.usernameFromSocketid(status.players[k].id) + " has " + status.players[k].score + " points.");
+		}
+	});
+
+	socket.on("gameword", function (word) {
+		self.chat.addMessage("GAME", "It is your turn now! Please draw " + word);
+		self.displayMessage("It is your turn now! Please draw " + word);
 	});
 
 	// chat events

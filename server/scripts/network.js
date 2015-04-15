@@ -48,9 +48,8 @@ Protocol.prototype.leaveRoom = function leaveRoom (socket) {
 	socket.leave(socket.room);
 	this.io.to(socket.room).emit("leave", {id: socket.id});
 
-	if (socket.gameroom) {
-		socket.gameroom.leave(socket);
-		delete socket.gameroom;
+	if (this.gameRooms[socket.room]) {
+		this.gameRooms[socket.room].leave(socket);
 	}
 };
 
@@ -97,8 +96,7 @@ Protocol.prototype.joinGame = function joinGame (socket, game, callback, overrid
 
 	this.joinRoom(socket, game);
 	this.gameRooms[game] = this.gameRooms[game] || new GameRoom(game, this.io);
-	socket.gameroom = this.gameRooms[game];
-	socket.gameroom.join(socket);
+	this.gameRooms[game].join(socket);
 };
 
 Protocol.prototype.joinNewGame = function joinNewGame (socket, callback) {
@@ -507,14 +505,14 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (socket.gameroom) {
-				socket.gameroom.chatmessage(socket, message);
-			}
-
 			protocol.sendChatMessage(socket.room ,{
 				user: socket.username,
 				message: message
 			});
+
+			if (protocol.gameRooms[socket.room]) {
+				protocol.gameRooms[socket.room].chatmessage(socket, message);
+			}
 		});
 
 		socket.on("uploadimage", function (base64, callback) {
@@ -795,7 +793,13 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (typeof callback !== "function")
 				callback = function () {};
 
-			if (socket.room.indexOf("private_") == 0)
+			if (protocol.gameRooms[socket.room]) {
+				if (protocol.gameRooms[socket.room].currentPlayer == socket) {
+					protocol.addDrawing(socket, drawing, callback);
+				} else {
+					callback();
+				}
+			} else if (socket.room.indexOf("private_") == 0)
 				protocol.addDrawingNoInk(socket, drawing, callback);
 			else
 				protocol.addDrawing(socket, drawing, callback);
@@ -958,9 +962,8 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("disconnect", function () {
-			if (socket.gameroom) socket.gameroom.leave(socket);
+			if (protocol.gameRooms[socket.room]) protocol.gameRooms[socket.room].leave(socket);
 			protocol.cleanEmptyGameRooms();
-			delete socket.gameroom;
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 		});
 	});
