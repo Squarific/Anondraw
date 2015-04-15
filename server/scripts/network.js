@@ -133,16 +133,16 @@ Protocol.prototype.roomJoined = function roomJoined (socket) {
 				rep = 0;
 			}
 
-			this.emitJoin(socket.room, socket.userid, socket.username, rep);
+			this.emitJoin(socket.room, socket.id, socket.username, rep);
 		});
 	} else {
-		this.emitJoin(socket.room, socket.userid, socket.username, 0);
+		this.emitJoin(socket.room, socket.id, socket.username, 0);
 	}
 };
 
-Protocol.prototype.emitJoin = function (room, id, name, reputation) {
+Protocol.prototype.emitJoin = function (room, socketid, name, reputation) {
 	this.io.to(room).emit("join", {
-		id: id,
+		id: socketid,
 		name: name,
 		reputation: reputation
 	});
