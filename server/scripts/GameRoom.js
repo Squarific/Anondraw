@@ -32,7 +32,7 @@ GameRoom.prototype.leave = function (socket) {
 	}
 };
 
-GameRoom.prototype.chatmessage = function chatMessage (socket, message) {
+GameRoom.prototype.chatmessage = function chatmessage (socket, message) {
 	if (socket == this.currentPlayer) return;
 
 	if (message.toLowerCase().indexOf(this.currentWord.toLowerCase()) !== -1) {
@@ -64,6 +64,34 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 			user: "GAME",
 			message: "The word " + this.currentWord + " has not been guessed!"
 		});
+
+		
+	}
+
+	console.log(!this.currentPlayerDrew)
+
+	if (!guessed && this.currentPlayer && !this.currentPlayerDrew) {
+		if (this.currentPlayer.hasNotDrawn) {
+			this.currentPlayer.emit("chatmessage", {
+				user: "GAME",
+				message: "You didn't draw. You have been kicked!"
+			});
+
+			this.io.to(this.name).emit("chatmessage", {
+				user: "GAME",
+				message: this.currentPlayer.username + " didn't draw again. He got kicked!"
+			});
+
+			this.currentPlayer.disconnect();
+		} else {
+			this.io.to(this.name).emit("chatmessage", {
+				user: "GAME",
+				message: this.currentPlayer.username + " didn't draw. Next time he will be kicked!"
+			});
+			this.currentPlayer.hasNotDrawn = true;
+		}
+	} else {
+		if (this.currentPlayer) delete this.currentPlayer.hasNotDrawn;
 	}
 
 	// Assign new drawer
@@ -78,8 +106,12 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 
 	// There was no current player before
 	if (!newAssigned) {
+		if (this.players.length == 0) return;
 		this.currentPlayer = this.players[0];
 	}
+
+	// The new play has not drawn yet
+	this.currentPlayerDrew = false;
 
 	// Assign new word
 	this.currentWord = words[Math.floor(Math.random() * words.length)];
@@ -93,6 +125,12 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 	// Send the current state
 	this.io.to(this.currentPlayer.room).emit("gamestatus", this.getStatus());
 	this.currentPlayer.emit("gameword", this.currentWord);
+};
+
+GameRoom.prototype.addedDrawing = function addedDrawing (socket) {
+	if (socket == this.currentPlayer) {
+		this.currentPlayerDrew = true;
+	}
 };
 
 GameRoom.prototype.getStatus = function getStatus () {

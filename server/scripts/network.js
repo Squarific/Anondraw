@@ -789,14 +789,16 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			if (protocol.gameRooms[socket.room]) {
 				if (protocol.gameRooms[socket.room].currentPlayer == socket) {
+					protocol.gameRooms[socket.room].addedDrawing(socket);
 					protocol.addDrawingNoInk(socket, drawing, callback);
 				} else {
 					callback();
 				}
-			} else if (socket.room.indexOf("private_") == 0)
+			} else if (socket.room.indexOf("private_") == 0) {
 				protocol.addDrawingNoInk(socket, drawing, callback);
-			else
+			} else {
 				protocol.addDrawing(socket, drawing, callback);
+			}
 
 		});
 
