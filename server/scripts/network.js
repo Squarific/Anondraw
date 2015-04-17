@@ -134,7 +134,7 @@ Protocol.prototype.roomJoined = function roomJoined (socket) {
 			}
 
 			this.emitJoin(socket.room, socket.id, socket.username, rep);
-		});
+		}.bind(this));
 	} else {
 		this.emitJoin(socket.room, socket.id, socket.username, 0);
 	}
