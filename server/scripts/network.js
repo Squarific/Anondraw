@@ -124,6 +124,30 @@ Protocol.prototype.joinNewGame = function joinNewGame (socket, callback) {
 	});
 };
 
+Protocol.prototype.joinPrivateRandom = function joinPrivateRandom (socket) {
+	// Join a private one on one
+
+	if (this.getUserCount(this.nextPrivateRandom) > 1) this.nextPrivateRandom = "private_" + Math.random().toString(36).substr(2, 5);
+
+	this.nextPrivateRandom = this.nextPrivateRandom || "private_" + Math.random().toString(36).substr(2, 5);
+	this.joinRoom(socket, this.nextPrivateRandom);
+
+	if (this.getUserCount(this.nextPrivateRandom) > 1) {
+		this.io.to(this.nextPrivateRandom).emit("chatmessage", {
+			user: "SERVER",
+			message: "You are now chatting with a random stranger!"
+		});
+		this.io.to(this.nextPrivateRandom).emit("generalmessage", "You are now chatting with a random stranger!");
+		this.nextPrivateRandom = "private_" + Math.random().toString(36).substr(2, 5);
+	} else {
+		socket.emit("chatmessage", {
+			user: "SERVER",
+			message: "We are looking for someone to pair you with. Please wait a few minutes!"
+		});
+		socket.emit("generalmessage", "We are looking for someone to pair you with. Please wait a few minutes!");
+	}
+};
+
 Protocol.prototype.roomJoined = function roomJoined (socket) {
 	// Send sockets in room that someone joined
 	if (socket.userid) {
@@ -837,8 +861,12 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("joinnewgame", function (callback) {
-			// Callback will be called with (success, gameRoomName)
+			// Callback will be called with (success)
 			protocol.joinNewGame(socket, callback);
+		});
+
+		socket.on("joinprivaterandom", function () {
+			protocol.joinPrivateRandom(socket);
 		});
 
 		socket.on("kickban", function (options, callback) {

@@ -68,8 +68,6 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 		
 	}
 
-	console.log(!this.currentPlayerDrew)
-
 	if (!guessed && this.currentPlayer && !this.currentPlayerDrew) {
 		if (this.currentPlayer.hasNotDrawn) {
 			this.currentPlayer.emit("chatmessage", {
