@@ -1,7 +1,7 @@
 var names = require("./names.js");
 var GameRoom = require("./GameRoom.js");
-var MAX_USERS_IN_ROOM = 20;
-var MAX_USERS_IN_GAMEROOM = 10;
+var MAX_USERS_IN_ROOM = 15;
+var MAX_USERS_IN_GAMEROOM = 8;
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
 
@@ -199,6 +199,9 @@ Protocol.prototype.getPublicRooms = function getPublicRooms () {
 	var rooms = [];
 	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
 		var found = false;
+
+		// See if the room is already in the list, if it is
+		// raise the usercount instead
 		for (var rKey = 0; rKey < rooms.length; rKey++) {
 			if (this.io.sockets.sockets[sKey].room == rooms[rKey].room) {
 				rooms[rKey].users++;
@@ -207,7 +210,9 @@ Protocol.prototype.getPublicRooms = function getPublicRooms () {
 			}
 		}
 
-		if (found) continue;
+		// If we already raised the usercount or we are not in a room
+		// or if we are in a private room then dont push this room to the list
+		if (found || !this.io.sockets.sockets[sKey].room) continue;
 		if (this.io.sockets.sockets[sKey].room.indexOf("private_") == 0) continue;
 
 		rooms.push({
@@ -777,10 +782,18 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (Date.now() - socket.lastNameChange < 1000) {
+			if (Date.now() - socket.lastNameChange < 5000) {
 				socket.emit("chatemessage", {
 					user: "SERVER",
 					message: "Don't change your name so often!"
+				});
+				return;
+			}
+
+			if (socket.username == name) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "Your name is already " + name + ". Try changing the textfield!"
 				});
 				return;
 			}

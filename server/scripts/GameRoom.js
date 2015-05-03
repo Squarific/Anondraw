@@ -1,5 +1,24 @@
 var words = require("./words.js");
-var TIME_PER_WORD = 60 * 1000;
+var TIME_PER_WORD = 90 * 1000;
+
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex ;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
 
 function GameRoom (name, io) {
 	this.currentPlayer;
@@ -113,6 +132,20 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 
 	// Assign new word
 	this.currentWord = words[Math.floor(Math.random() * words.length)];
+	this.letters = [];
+
+	// Add the letters of the current word
+	for (var k = 0; k < this.currentWord.length; k++) {
+		this.letters.push(this.currentWord[k]);
+	}
+
+	// Add 6 random letters
+	for (var k = 0; k < 6; k++) {
+		var random = Math.floor(Math.random() * 26);
+		this.letters.push((10 + random).toString(36));
+	}
+
+	shuffle(this.letters);
 
 	// Arrange the time stuff
 	this.gameTimeout = setTimeout(this.nextGame.bind(this), TIME_PER_WORD);
@@ -143,6 +176,7 @@ GameRoom.prototype.getStatus = function getStatus () {
 	return {
 		currentPlayer: this.currentPlayer.id,
 		players: players,
+		letters: this.letters,
 		timeLeft: this.endTime - Date.now()
 	};
 };

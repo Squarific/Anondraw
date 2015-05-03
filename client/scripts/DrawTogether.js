@@ -8,7 +8,7 @@ function DrawTogether (container, settings) {
 
 	// Set default values untill we receive them from the server
 	this.playerList = [];
-	this.ink = 0;
+	this.ink = 5000;
 	this.lastInkWarning = Date.now();
 
 	// Initialize the dom elements
@@ -49,6 +49,27 @@ DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
 
 DrawTogether.prototype.connect = function connect () {
 	// Connect to the server and bind socket events
+
+	// CODE FOR HUG OF DEATH
+	// Temporary trying to spread out connections
+	// this.chat.addMessage("CLIENT", "We will connect to the server in a minute. You can now draw by yourself a bit and get to know how to use the drawing tools.");
+	// this.connectAt = Date.now() + 60 * 1000;
+	// setTimeout(function () {
+	// 	if (!this.socket) {
+	// 		this.socket = io(this.settings.server, {
+	// 			transports: ['websocket']
+	// 		});
+	// 		this.bindSocketHandlers(this.socket);
+	// 	}
+	// }.bind(this), 60 * 1000);
+	// this.connectInterval = setInterval(function () {
+	// 	if (this.connectAt - Date.now() < 15000) {
+	// 		clearInterval(this.connectInterval);
+	// 	}
+
+	// 	this.chat.addMessage("CLIENT", "We will connect to the server in " + Math.round((this.connectAt - Date.now()) / 1000) + " seconds.");
+	// }.bind(this), 10000);
+
 	if (!this.socket) {
 		this.socket = io(this.settings.server, {
 			transports: ['websocket']
@@ -73,9 +94,9 @@ DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (n
 	this.userCtx.font = "12px monospace";
 	this.userCtx.strokeStyle = 'black';
     this.userCtx.lineWidth = 3;
-    this.userCtx.strokeText(name, position[0] - this.userCtx.canvas.leftTopX, position[1] - 40 - this.userCtx.canvas.leftTopY);
+    this.userCtx.strokeText(name, position[0] * this.paint.public.zoom - this.userCtx.canvas.leftTopX, position[1] * this.paint.public.zoom - 40 - this.userCtx.canvas.leftTopY);
     this.userCtx.fillStyle = 'white';
-    this.userCtx.fillText(name, position[0] - this.userCtx.canvas.leftTopX, position[1] - 40 - this.userCtx.canvas.leftTopY);
+    this.userCtx.fillText(name, position[0] * this.paint.public.zoom - this.userCtx.canvas.leftTopX, position[1] * this.paint.public.zoom - 40 - this.userCtx.canvas.leftTopY);
 };
 
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
@@ -105,7 +126,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		if (self.settings.mode == "game") {
 			self.joinGame();
 			return;
-		} else if (self.settings.mode = "oneonone") {
+		} else if (self.settings.mode == "oneonone") {
 			self.joinOneOnOne();
 			return;
 		}
@@ -217,6 +238,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 
 	socket.on("gamestatus", function (status) {
 		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing. You have " + Math.round(status.timeLeft / 1000) + " seconds left.");
+		self.chat.addMessage("GAME", "The word contains some of the following letters: " + status.letters.join(", "));
+
+		self.displayMessage("The word contains some of the following letters: " + status.letters.join(", "));
 
 		for (var k = 0; k < status.players.length; k++) {
 			for (var nk = 0; nk < self.playerList.length; nk++) {
@@ -320,6 +344,7 @@ DrawTogether.prototype.removeLoading = function () {
 DrawTogether.prototype.changeName = function changeName (name) {
 	// Try to change the name
 	name = name || this.controls.byName.name.input.value;
+	this.controls.byName.name.input.focus();
 	this.socket.emit("changename", name);
 	localStorage.setItem("drawtogether-name", name);
 };
@@ -366,6 +391,7 @@ DrawTogether.prototype.updateInk = function updateInk () {
 };
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
+	if (!this.socket) return;
 	this.socket.emit("drawing", this.encodeDrawing(drawing), callback);
 };
 
@@ -500,7 +526,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 		this.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 
-	if (this.reputation > this.KICKBAN_MIN_REP) {
+	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var kickbanButton = document.createElement("span");
 		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
 
@@ -564,31 +590,31 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint = new Paint(drawContainer);
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
 
-	this.paint.public.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
-		if (!this.socket) {
-			// The paint zone was created before a socket connection was made
-			console.error("Requested chunk ", chunkX, chunkY, " but no socket available!");
-			setTimeout(function () {
-				this.paint.public.requestUserChunk(chunkX, chunkY, callback);
-			}.bind(this), 5000);
-			return;
-		}
+	// this.paint.public.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
+	// 	if (!this.socket) {
+	// 		// The paint zone was created before a socket connection was made
+	// 		console.error("Requested chunk ", chunkX, chunkY, " but no socket available!");
+	// 		setTimeout(function () {
+	// 			this.paint.public.requestUserChunk(chunkX, chunkY, callback);
+	// 		}.bind(this), 5000);
+	// 		return;
+	// 	}
 
-		var image = new Image();
+	// 	var image = new Image();
 
-		image.onLoad = function onChunkImageLoad (event) {
-			callback(image);
-		};
+	// 	image.onLoad = function onChunkImageLoad (event) {
+	// 		callback(image);
+	// 	};
 
-		image.onError = function onChunkImageError (event) {
-			console.error("Failed to load chunk ", chunkX, chunkY, " retrying in 5 seconds");
-			setTimeout(function () {
-				this.paint.public.requestUserChunk(chunkX, chunkY, callback);
-			}.bind(this), 5000);
-		};
+	// 	image.onError = function onChunkImageError (event) {
+	// 		console.error("Failed to load chunk ", chunkX, chunkY, " retrying in 5 seconds");
+	// 		setTimeout(function () {
+	// 			this.paint.public.requestUserChunk(chunkX, chunkY, callback);
+	// 		}.bind(this), 5000);
+	// 	};
 		
-		image.src = this.socket.io.uri + "/chunks/" + chunkX + "/" + chunky;
-	}.bind(this);
+	// 	image.src = this.socket.io.uri + "/chunks/" + chunkX + "/" + chunky;
+	// }.bind(this);
 
 	this.paint.addEventListener("userdrawing", function (event) {
 		// When a drawing is made check if we have ink left
@@ -601,8 +627,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			return;
 		}
 
-		// Lower our ink with how much it takes to draw this if not in a private room
-		if (this.current_room.indexOf("private_") !== 0) {
+		// Lower our ink with how much it takes to draw this
+		// Only do that if we are connected and in a room that does not start with private_ or game_
+		if (this.socket && (!this.current_room || (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0))) {
 			this.ink -= this.inkUsageFromDrawing(event.drawing);
 			this.updateInk();
 		}
@@ -906,6 +933,11 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	text.textContent = "Draw online with friends and strangers.";
 	text.className = "drawtogether-welcome-text";
 
+	// var text = selectWindow.appendChild(document.createElement("h1"));
+	// text.innerText = "There is some heavier than usual load, so the server might lagg a bit.";
+	// text.textContent = "There is some heavier than usual load, so the server might lagg a bit.";
+	// text.className = "drawtogether-welcome-text-error";
+
 	var publicButton = selectWindow.appendChild(document.createElement("div"));
 	publicButton.className = "drawtogether-modeselect-button";
 	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with strangers';
@@ -969,6 +1001,7 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 			title.className = "drawtogether-redditdrawings-title";
 
 			for (var k = 0; k < posts.length; k++) {
+				if (posts[k].data.thumbnail == "self" || posts[k].data.thumbnail == "default" || posts[k].data.thumbnail == "nsfw") continue;
 				this.redditDrawings.appendChild(this.createRedditPost(posts[k].data));
 			}
 		}
@@ -983,7 +1016,7 @@ DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
 	container.target = "_blank";
 	container.className = "drawtogether-redditpost"
 
-	if (data.thumbnail !== "self" && data.thumbnail !== "nsfw") {
+	if (data.thumbnail !== "self" && data.thumbnail !== "default" && data.thumbnail !== "nsfw") {
 		var thumb = container.appendChild(document.createElement("img"))
 		thumb.className = "drawtogether-redditpost-thumb";
 		thumb.src = data.thumbnail;
@@ -1090,7 +1123,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 	}, {
 		name: "room-button",
 		type: "button",
-		text: "Change room",
+		text: "Room",
 		action: this.openRoomWindow.bind(this)
 	}, {
 		name: "share-button",

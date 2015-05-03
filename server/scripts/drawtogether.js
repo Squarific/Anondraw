@@ -176,9 +176,10 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		x: drawing[1],
 		y: drawing[2],
 		size: drawing[3],
-		r: parseInt(drawing[4].substr(1, 2), 16),
-		g: parseInt(drawing[4].substr(3, 2), 16),
-		b: parseInt(drawing[4].substr(5, 2), 16),
+		r: parseInt(drawing[4].substr(1, 2), 16) || 0,
+		g: parseInt(drawing[4].substr(3, 2), 16) || 0,
+		b: parseInt(drawing[4].substr(5, 2), 16) || 0,
+		a: parseInt(drawing[4].substr(7, 2), 16) || 0,
 		x1: drawing[5],
 		y1: drawing[6],
 		now: new Date()
@@ -201,7 +202,7 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
 
 	var self = this;
-	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 10000) AS T ORDER BY id ASC", room, function (err, rows) {
+	this.database.query("SELECT * FROM (SELECT id, type, x, y, x1, y1, size, r, g, b, room FROM drawings WHERE room = ? ORDER BY id DESC LIMIT 60000) AS T ORDER BY id ASC", room, function (err, rows) {
 		if (err) {
 			console.log(err);
 			callback("Something went wrong while trying to retrieve the drawings from the database!");
@@ -211,7 +212,10 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 			callback(undefined, drawings);
 		});
 	});
-	// callback(undefined, [])
+
+	// setTimeout(function () {
+	// 	callback(undefined, [])
+	// }, 0);
 };
 
 DrawTogether.prototype.login = function login (data, callback) {

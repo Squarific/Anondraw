@@ -294,7 +294,12 @@ var names = [
   "Lyle",
   "Stefan",
   "Ernest",
-  "Jeffrey"
+  "Jeffrey",
+  "Robert",
+  "Bart",
+  "Bernard",
+  "Graves",
+  "Gulio"
 ];
 
 module.exports = names;

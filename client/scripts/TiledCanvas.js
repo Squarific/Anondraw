@@ -1,10 +1,14 @@
 function TiledCanvas (canvas, settings) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
+
     this.leftTopX = 0;
     this.leftTopY = 0;
+    this.zoom = 1; // 2 = two times zoomed in
+
     this.affecting = [[0, 0], [0, 0]];
     this.chunks = {};
+
     this.settings = this.normalizeDefaults(settings, this.defaultSettings);
     this.contextQueue = [];
     this.context = this.createContext();
@@ -40,12 +44,14 @@ TiledCanvas.prototype.normalizeDefaults = function normalizeDefaults (target, de
 };
 
 
-TiledCanvas.prototype.redraw = function redraw () {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+TiledCanvas.prototype.redraw = function redraw (noclear) {
+    if (!noclear) this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
     var startChunkX = Math.floor(this.leftTopX / this.settings.chunkSize),
-        endChunkX =  Math.ceil((this.leftTopX + this.canvas.width) / this.settings.chunkSize),
+        endChunkX   = Math.ceil((this.leftTopX + this.canvas.width / this.zoom) / this.settings.chunkSize),
         startChunkY = Math.floor(this.leftTopY / this.settings.chunkSize),
-        endChunkY = Math.ceil((this.leftTopY + this.canvas.height) / this.settings.chunkSize);
+        endChunkY   = Math.ceil((this.leftTopY + this.canvas.height / this.zoom) / this.settings.chunkSize);
+    
     for (var chunkX = startChunkX; chunkX < endChunkX; chunkX++) {
         for (var chunkY = startChunkY; chunkY < endChunkY; chunkY++) {
             this.drawChunk(chunkX, chunkY);
@@ -55,13 +61,25 @@ TiledCanvas.prototype.redraw = function redraw () {
 
 TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
     if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) {
-        this.ctx.drawImage(this.chunks[chunkX][chunkY].canvas, chunkX * this.settings.chunkSize - this.leftTopX, chunkY * this.settings.chunkSize - this.leftTopY);
+        this.ctx.drawImage(this.chunks[chunkX][chunkY].canvas, ((chunkX * this.settings.chunkSize) - this.leftTopX) * this.zoom, ((chunkY * this.settings.chunkSize) - this.leftTopY) * this.zoom, this.settings.chunkSize * this.zoom, this.settings.chunkSize * this.zoom);
+    } else if(typeof this.requestUserChunk == "function") {
+        this.requestChunk(chunkX, chunkY);
     }
 };
 
 TiledCanvas.prototype.goto = function goto (x, y) {
     this.leftTopX = x;
     this.leftTopY = y;
+    this.redraw();
+};
+
+TiledCanvas.prototype.relativeZoom = function relativeZoom (zoom) {
+    this.zoom *= zoom;
+    this.redraw();
+};
+
+TiledCanvas.prototype.absoluteZoom = function absoluteZoom (zoom) {
+    this.zoom = zoom;
     this.redraw();
 };
 
@@ -96,10 +114,61 @@ TiledCanvas.prototype.clearChunk = function clearChunk (chunkX, chunkY) {
 	this.chunks[chunkX][chunkY].clearRect(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize, this.chunks[chunkX][chunkY].canvas.width, this.chunks[chunkX][chunkY].canvas.height);
 };
 
-TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
-    this.chunks[chunkX] = this.chunks[chunkX] || [];
+TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, callback) {
+    // Request a chunk and redraw once we got it
+    if (typeof this.requestUserChunk !== "function") return;
+    callback = callback || function () {};
+    this.requestChunkCallbackList = this.requestChunkCallbackList || {};
 
-    this.chunks[chunkX][chunkY] = this.chunks[chunkX][chunkY] || this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
+    if (this.requestChunkCallbackList[chunkX] && this.requestChunkCallbackList[chunkX][chunkY]) {
+        // This chunk has already been requested, add to the callback list
+        this.requestChunkCallbackList[chunkX][chunkY].push(callback);
+    } else {
+        // Create a callback list for this chunk
+        this.requestChunkCallbackList[chunkX] = this.requestChunkCallbackList[chunkX] || {};
+        this.requestChunkCallbackList[chunkX][chunkY] = [callback];
+
+        this.requestUserChunk(chunkX, chunkY, function (image) {
+            // Draw the chunk
+            this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
+            this.chunks[chunkX][chunkY].drawImage(image, 0, 0);
+
+            // Run all callbacks
+            var callbackList = this.requestChunkCallbackList[chunkX][chunkY];
+            for (var k = 0; k < callbackList.length; k++) {
+                callbackList[k]();
+            }
+
+            // Do a full redraw of the tiled canvas
+            this.redraw();
+
+            delete this.requestChunkCallbackList[chunkX][chunkY];
+        }.bind(this));
+    }
+};
+
+TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queue) {
+    // Executes the current queue on a chunk
+    // If queue is set execute that queue instead
+    this.chunks[chunkX] = this.chunks[chunkX] || [];
+    this.chunks[chunkX][chunkY] = this.chunks[chunkX][chunkY];
+ 
+    if (!this.chunks[chunkX][chunkY]) {
+        // This chunk has never been painted to before
+        // We first have to ask what this chunk looks like
+        // Remember the Queue untill we got the chunk
+        // if we already remembered a queue then add this queue to it
+        // Only do this when we actually want to use userdefined chunks
+        if (typeof this.requestUserChunk == "function") {
+            this.requestChunk(chunkX, chunkY, function (queue) {
+                this.executeChunk(chunkX, chunkY, queue);
+            }.bind(this, this.copyArray(queue || this.contextQueue)))
+            return;
+        } else {
+            this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
+        }
+    }
+
     var ctx = this.chunks[chunkX][chunkY];
 
     for (var queuekey = 0; queuekey < this.contextQueue.length; queuekey++) {
@@ -113,13 +182,6 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
 
 TiledCanvas.prototype.executeQueueOnChunk = function executeQueueOnChunk (ctx, args) {
     ctx[args[0]].apply(ctx, Array.prototype.slice.call(args, 1));
-};
-
-TiledCanvas.prototype.cleanup = function cleanup (chunkX, chunkY, arguments) {
-    if (typeof this.cleanupFunctions[arguments[0]] === 'function') {
-        return this.cleanupFunctions[arguments[0]](arguments.slice(), chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
-    }
-    return arguments;
 };
 
 TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, border) {

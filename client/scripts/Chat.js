@@ -24,6 +24,35 @@ function Chat (container, onmessage) {
 	this.onMessage = onmessage || function () {};
 }
 
+Chat.prototype.string2Color = function string2Color (str) {
+    var h = 2348;
+    var s = 0.9;
+    var l = 0.4;
+    
+    for(var j = Math.max(str.length - 1, 2); j >= 0; j--)
+        for(var i = str.length-1; i >= 0; i--) {
+            h = ((h << 5) - h) + ~ str.charCodeAt(i);
+        }
+    
+    if(h < 0) {
+        h = -h;
+        l = 0.35;
+    }
+    
+    if(h > 360) {
+        var c = parseInt(h / 360.0);
+        h -= c * 360;
+        
+        if(c % 3 === 0) {
+            s = 1;
+        } else if(c % 2 === 0) {
+            s = 0.95;
+        }
+    }
+    
+    return "hsl("+ h +", "+ s*100 +"%, "+ l*70 +"%)";
+};
+
 Chat.prototype.addMessage = function addMessage (user, message) {
 		max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 		old_scroll = Math.ceil(this.messagesDom.scrollTop);
@@ -37,8 +66,15 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 
 		if (typeof message == "undefined")
 			messageDom.appendChild(document.createTextNode("[" + time + "] " + user));
-		else
-			messageDom.appendChild(document.createTextNode("[" + time + "] " + user + ": " + message));
+		else {
+			messageDom.appendChild(document.createTextNode("[" + time + "] "));
+
+			var userSpan = messageDom.appendChild(document.createElement("span"));
+			userSpan.innerText = user + ": ";
+			userSpan.style.color = this.string2Color(user);
+
+			messageDom.appendChild(document.createTextNode(message));
+		}
 
 		if (max_scroll <= old_scroll) {
 			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
