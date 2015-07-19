@@ -546,7 +546,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			console.log("Imgur upload request from " + socket.ip);
 
 			callback = callback || function () {};
-			protocol.imgur.uploadBase64(base64)
+			protocol.imgur.uploadBase64(base64, "HwxiL5OnjizcwpD")
 			.then(function (json) {
 				console.log("[IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
 				callback({

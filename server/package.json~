@@ -3,7 +3,7 @@
  "version": "0.9.0",
  "dependencies": {
   "socket.io": "*",
-  "imgur": ">0.1.4",
+  "imgur": ">1.4.0",
   "mysql": "*",
   "crypto-js": "*"
   }

@@ -18,4 +18,11 @@ var io = require("socket.io")(4958, {
 var drawTogether = new DrawTogether(database);
 imgur.setClientId("8fd93ca8e547c10");
 
+// imgur.createAlbum().then(function(json) {
+//     console.log(json);
+// })
+// .catch(function (err) {
+//     console.error(err.message);
+// });
+
 var protocol = new Protocol(io, drawTogether, imgur);
