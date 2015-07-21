@@ -1,0 +1,25 @@
+{
+  "name": "playerserver",
+  "private": "true",
+  "version": "0.0.0",
+  "description": "Anondraw player server",
+  "main": "playerserver.js",
+  "dependencies": {
+    "crypto-js": "^3.1.5",
+    "mysql": "^2.7.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Squarific/drawtogether.git"
+  },
+  "author": "Filip Smets <alemaaltevinden@gmail.com>",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/Squarific/drawtogether/issues"
+  },
+  "homepage": "http://www.anondraw.com"
+}
