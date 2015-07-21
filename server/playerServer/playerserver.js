@@ -17,6 +17,15 @@ var hours = 60 * 60 * 1000;
 var STAY_LOGGED_IN = 30 * minutes; // How long should a session stay valid?
 var MAX_SESSIONS = 50; // How many sessions can one user open?
 
+// Ips from coinbase
+var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", "54.175.255.194",
+"54.175.255.195", "54.175.255.196", "54.175.255.197", "54.175.255.198", "54.175.255.199",
+"54.175.255.200", "54.175.255.201", "54.175.255.202", "54.175.255.203", "54.175.255.204",
+"54.175.255.205", "54.175.255.206", "54.175.255.207", "54.175.255.208", "54.175.255.209",
+"54.175.255.210", "54.175.255.211", "54.175.255.212", "54.175.255.213", "54.175.255.214",
+"54.175.255.215", "54.175.255.216", "54.175.255.217", "54.175.255.218", "54.175.255.219",
+"54.175.255.220", "54.175.255.221", "54.175.255.222", "54.175.255.223"];
+
 // Contains users
 // {id: Number, email: String, uKey: String, lastUpdate: Date.now()} //uKey is used for identification
 var loggedInUsers = [];
@@ -99,15 +108,16 @@ var server = http.createServer(function (req, res) {
 	var url = require("url");
 	var parsedUrl = url.parse(req.url, true);
 
-	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader("Content-Type", "application/json");
+	res.writeHead(200, {
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type": "application/json"
+	});
 
 	if (parsedUrl.pathname == "/login") {
 		var email = parsedUrl.query.email;
 		var pass = parsedUrl.query.pass;
 
 		if (!email || !pass) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "No user or password provided"}');
 			return;
 		}
@@ -117,19 +127,16 @@ var server = http.createServer(function (req, res) {
 			if (loggedInUsers[k].email == email) sessions++;
 
 		if (sessions > MAX_SESSIONS) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "You have too many open sessions. Try logging out!"}');
 			return;
 		}
 
 		login(email, pass, function (err, uKey) {
-			if (err) {	
-				res.writeHead(200, {'Content-Type': 'text/plain'});
+			if (err) {
 				res.end('{"error": "' + err + '"}');
 				return;
 			}
 
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
 		});
 
@@ -141,19 +148,16 @@ var server = http.createServer(function (req, res) {
 		var pass = parsedUrl.query.pass;
 
 		if (!email || !pass) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "No user or password provided"}');
 			return;
 		}
 
 		register(email, pass, function (err, uKey) {
 			if (err) {
-				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end('{"error": "' + err + '"}');
 				return;
 			}
 
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
 		});
 
@@ -164,20 +168,32 @@ var server = http.createServer(function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 
 		if (!uKey) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "No ukey provided"}');
 			return;
 		}
 
 		var key = getKeyByProp(loggedInUsers, "uKey", uKey);
 		if (key == -1) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "Not logged in"}');
 			return;
 		}
 
-		res.writeHead(200, {'Content-Type': 'text/plain'});
 		res.end('{"success": "Logged in"}');
+		return;
+	}
+
+	if (parsedUrl.pathname == "/getreputation") {
+		var userId = parsedUrl.query.userid;
+
+		getReputation(userId, function (err, rep) {
+			if (err) {
+				res.end('{"error": "' + err + '"}');
+				return;
+			}
+
+			res.end('{"rep": ' + rep + '}');
+			return;
+		});
 		return;
 	}
 
@@ -185,21 +201,17 @@ var server = http.createServer(function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 
 		if (!uKey) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "No ukey provided"}');
 			return;
 		}
 
 		var key = getKeyByProp(loggedInUsers, "uKey", uKey);
 		if (key == -1) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "Not logged in"}');
 			return;
 		}
 
 		loggedInUsers.splice(key, 1);
-
-		res.writeHead(200, {'Content-Type': 'text/plain'});
 		res.end('{"success": "You have been logged out."}');
 		return;
 	}
@@ -207,41 +219,28 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/status") {
 		var pass = parsedUrl.query.pass;
 		if (pass !== "jafiwef24fj23") {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "No pass provided or wrong!"}');
 			return;
 		}
 
-		res.writeHead(200, {'Content-Type': 'text/plain'});
 		res.end('{"players": ' + JSON.stringify(loggedInUsers) + '}');
 		return;
 	}
 
 	if (parsedUrl.pathname == "/payment") {
-		// Ips from coinbase
-		var allowedIps = ["54.243.226.26", "54.175.255.192", "54.175.255.193", "54.175.255.194",
-		"54.175.255.195", "54.175.255.196", "54.175.255.197", "54.175.255.198", "54.175.255.199",
-		"54.175.255.200", "54.175.255.201", "54.175.255.202", "54.175.255.203", "54.175.255.204",
-		"54.175.255.205", "54.175.255.206", "54.175.255.207", "54.175.255.208", "54.175.255.209",
-		"54.175.255.210", "54.175.255.211", "54.175.255.212", "54.175.255.213", "54.175.255.214",
-		"54.175.255.215", "54.175.255.216", "54.175.255.217", "54.175.255.218", "54.175.255.219",
-		"54.175.255.220", "54.175.255.221", "54.175.255.222", "54.175.255.223"];
-
-		if (allowedIps.indexOf(req.connection.remoteAddress) == -1) {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
+		if (ALLOWED_PAYMENT_IPS.indexOf(req.connection.remoteAddress) == -1) {
 			res.end('{"error": "This method is restricted to certain ips"}');
 			console.log("[Payment error] Got callback from unallowed ip", req.connection.remoteAddress);
 			return;
 		}
 
 		if (req.method !== 'POST') {
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"error": "This command is only supported using POST"}');
 			console.log("[Payment error] request did not use post");
 			return;
 		}
-		var body = '';
 
+		var body = '';
 		req.on('data', function (data) {
 		    body += data;
 
@@ -249,41 +248,36 @@ var server = http.createServer(function (req, res) {
 		    // stop the connection
 		    if (body.length > 1e6) {
 		        req.connection.destroy();
+		        console.log("[PAYMENT] Request too big!");
 		    }
 		});
 
 		req.on('end', function () {
-			console.log("end");
 			try {
 				var data = JSON.parse(body);
 			} catch (e) {
 				console.log("Error parsing json on payment", e, body);
-				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end('{"error": "Invalid json!"}');
 				return;
 			}
 			
 			if (typeof data.order !== "object" || typeof data.customer !== "object") {
 				console.log("No order or cusomer object", data, body);
-				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end('{"error": "No order or cusomer object!"}');
 				return;
 			}
 
 			if (data.order.status !== "completed") {
-				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end('{"success": "Nothing done"}');
 				return;
 			}
 
 			console.log("[PAYMENT]", data.customer.email);
-			res.writeHead(200, {'Content-Type': 'text/plain'});
 			res.end('{"success": "Payment applied!"}');
 			return;
 		});
 	    return;
 	}
 
-	res.writeHead(200, {'Content-Type': 'text/plain'});
 	res.end('{"error": "Unknown command"}');
-}.bind(this)).listen(4252);
+}.bind(this)).listen(4552);

@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Squarific/drawtogether.git"
+    "url": "git@github.com:Squarific/drawtogether2.git"
   },
   "author": "Filip Smets <alemaaltevinden@gmail.com>",
   "license": "proprietary",
   "bugs": {
-    "url": "https://github.com/Squarific/drawtogether/issues"
+    "url": "https://github.com/Squarific/drawtogether2/issues"
   },
   "homepage": "http://www.anondraw.com"
 }
