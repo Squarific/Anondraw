@@ -104,6 +104,24 @@ function login (email, pass, callback) {
 	});
 }
 
+function getReputation (userid, callback) {
+	database.query("", [userid], function (err, rows) {
+		if (err) {
+			callback("Database error (#1) while getting reputation.");
+			console.log("[GETREPUTATION] Database error: ", err);
+			return;
+		}
+
+		if (rows.length == 0) {
+			callback("Database error (#2) while getting reputation");
+			console.log("[GETREPUTATION] Rows length was 0 on a query that should always return at least one row!", rows);
+			return;
+		}
+
+		callback(null, rows[0].reputation);
+	});
+}
+
 var server = http.createServer(function (req, res) {
 	var url = require("url");
 	var parsedUrl = url.parse(req.url, true);
