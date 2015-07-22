@@ -5,7 +5,7 @@ var SHA256 = require("crypto-js/sha256");
 var database = mysql.createConnection({
 	host: "localhost",
 	user: "anondraw",
-	password: 'mafs8mfas9ma',
+	password: require("mysql_password.js"),
 	database: "anondraw",
 	multipleStatements: true
 });
