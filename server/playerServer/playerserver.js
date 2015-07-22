@@ -5,17 +5,16 @@ var SHA256 = require("crypto-js/sha256");
 var database = mysql.createConnection({
 	host: "localhost",
 	user: "anondraw",
-	password: require("mysql_password.js"),
+	password: require("./mysql_password.js"),
 	database: "anondraw",
 	multipleStatements: true
 });
 
-var seconds = 1000;
-var minutes = 60 * 1000;
-var hours = 60 * 60 * 1000;
+var PlayerDatabase = require("./scripts/PlayerDatabase.js");
+var Sessions = require("./scripts/Sessions.js");
 
-var STAY_LOGGED_IN = 30 * minutes; // How long should a session stay valid?
-var MAX_SESSIONS = 50; // How many sessions can one user open?
+var playerDatabase = new PlayerDatabase(database);
+var sessions = new Sessions();
 
 // Ips from coinbase
 var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", "54.175.255.194",
@@ -25,102 +24,6 @@ var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", 
 "54.175.255.210", "54.175.255.211", "54.175.255.212", "54.175.255.213", "54.175.255.214",
 "54.175.255.215", "54.175.255.216", "54.175.255.217", "54.175.255.218", "54.175.255.219",
 "54.175.255.220", "54.175.255.221", "54.175.255.222", "54.175.255.223"];
-
-// Contains users
-// {id: Number, email: String, uKey: String, lastUpdate: Date.now()} //uKey is used for identification
-var loggedInUsers = [];
-
-function getKeyByProp (array, prop, value) {
-	for (var k = 0; k < array.length; k++)
-		if (array[k][prop] == value)
-			return k;
-	return -1;
-}
-
-function randomString (length) {
-	var chars = "abcdefghijklmnopqrstuvwxyz1234567890";
-	var string = "";
-
-	for (var k = 0; k < length; k++)
-		string += chars[Math.floor(Math.random() * chars.length)];
-
-	return string;
-}
-
-function cleanUsers () {
-	for (var k = 0; k < loggedInUsers.length; k++) {
-		if (Date.now() - loggedInUsers[k].lastUpdate > STAY_LOGGED_IN) {
-			loggedInUsers.splice(k, 1);
-			k--;
-		}
-	}
-}
-
-setInterval(cleanUsers, 10 * 60 * 1000);
-
-function register (email, pass, callback) {
-	database.query("INSERT INTO users (email, pass) VALUES (?, ?)", [email, SHA256(pass).toString()], function (err, result) {
-		if (err) {
-			callback("Couldn't register, do you already have an account?");
-			console.log("[REGISTER ERROR]", err);
-			return;
-		}
-
-		console.log("[REGISTER]", email)
-		login(email, pass, callback);
-	});
-}
-
-// Logs in a user
-// callback(err, uKey)
-function login (email, pass, callback) {
-	database.query("SELECT id FROM users WHERE email = ? AND pass = ?", [email, SHA256(pass).toString()], function (err, rows) {
-		if (err) {
-			callback("Database error");
-			console.log("[LOGIN ERROR] ", err);
-			return;
-		}
-
-		if (rows.length < 1) {
-			callback("This account/password combo was not found.");
-			return;
-		}
-
-		var uKey = randomString(32);
-
-		if (getKeyByProp(loggedInUsers, "uKey", uKey) !== -1)
-			throw "Duplicate uKey generated. Shutting down. uKey: " + uKey;
-
-		loggedInUsers.push({
-			id: rows[0].id,
-			uKey: uKey,
-			email: email,
-			lastUpdate: Date.now()
-		});
-
-		callback(null, uKey);
-		console.log("[LOGGED IN]", email, uKey)
-		return;
-	});
-}
-
-function getReputation (userid, callback) {
-	database.query("", [userid], function (err, rows) {
-		if (err) {
-			callback("Database error (#1) while getting reputation.");
-			console.log("[GETREPUTATION] Database error: ", err);
-			return;
-		}
-
-		if (rows.length == 0) {
-			callback("Database error (#2) while getting reputation");
-			console.log("[GETREPUTATION] Rows length was 0 on a query that should always return at least one row!", rows);
-			return;
-		}
-
-		callback(null, rows[0].reputation);
-	});
-}
 
 var server = http.createServer(function (req, res) {
 	var url = require("url");
@@ -140,21 +43,18 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		var sessions = 0;
-		for (var k = 0; k < loggedInUsers.length; k++)
-			if (loggedInUsers[k].email == email) sessions++;
-
-		if (sessions > MAX_SESSIONS) {
-			res.end('{"error": "You have too many open sessions. Try logging out!"}');
+		if (sessions.tooManySessions(email)) {
+			res.end('{"error": "You have too many open sessions. Try logging out or waiting!"}');
 			return;
 		}
 
-		login(email, pass, function (err, uKey) {
+		playerDatabase.login(email, pass, function (err, id) {
 			if (err) {
 				res.end('{"error": "' + err + '"}');
 				return;
 			}
 
+			var uKey = sessions.addSession(id, email);
 			res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
 		});
 
@@ -170,12 +70,13 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		register(email, pass, function (err, uKey) {
+		playerDatabase.register(email, pass, function (err, id) {
 			if (err) {
 				res.end('{"error": "' + err + '"}');
 				return;
 			}
 
+			var uKey = sessions.addSession(id, email);
 			res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
 		});
 
@@ -186,12 +87,11 @@ var server = http.createServer(function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 
 		if (!uKey) {
-			res.end('{"error": "No ukey provided"}');
+			res.end('{"error": "No uKey provided"}');
 			return;
 		}
 
-		var key = getKeyByProp(loggedInUsers, "uKey", uKey);
-		if (key == -1) {
+		if (!sessions.loggedIn(uKey)) {
 			res.end('{"error": "Not logged in"}');
 			return;
 		}
@@ -203,7 +103,7 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/getreputation") {
 		var userId = parsedUrl.query.userid;
 
-		getReputation(userId, function (err, rep) {
+		playerDatabase.getReputation(userId, function (err, rep) {
 			if (err) {
 				res.end('{"error": "' + err + '"}');
 				return;
@@ -215,21 +115,37 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/givereputation") {
+		var uKey = parsedUrl.query.uKey;
+		var userid = parsedUrl.query.userid;
+
+		if (!uKey || !userid) {
+			res.end('{"error": "This command requires a uKey and userid to be provided!"}');
+			return;
+		}
+
+		var toUser = sessions.getUser("uKey", uKey);
+		if (!toUser) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		playerDatabase.giveReputation(toUser.id, userid, function (err) {
+			if (err) {
+				res.end('{"error": "' + err + '"}');
+				return;
+			}
+
+			res.end('{"success": "You gave reputation!"}');
+			return;
+		});
+		return;
+	}
+
 	if (parsedUrl.pathname == "/logout") {
 		var uKey = parsedUrl.query.uKey;
+		sessions.logout(uKey);
 
-		if (!uKey) {
-			res.end('{"error": "No ukey provided"}');
-			return;
-		}
-
-		var key = getKeyByProp(loggedInUsers, "uKey", uKey);
-		if (key == -1) {
-			res.end('{"error": "Not logged in"}');
-			return;
-		}
-
-		loggedInUsers.splice(key, 1);
 		res.end('{"success": "You have been logged out."}');
 		return;
 	}
@@ -241,7 +157,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		res.end('{"players": ' + JSON.stringify(loggedInUsers) + '}');
+		res.end('{"players": ' + JSON.stringify(sessions.loggedInUsers) + '}');
 		return;
 	}
 
