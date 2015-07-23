@@ -1,0 +1,22 @@
+{
+  "name": "switch",
+  "private": "true",
+  "version": "0.0.0",
+  "description": "Castlewar switch server",
+  "main": "switch.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Squarific/castlewar2.git"
+  },
+  "author": "Filip Smets <alemaaltevinden@gmail.com>",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/Squarific/castlewar2/issues"
+  },
+  "homepage": "https://github.com/Squarific/castlewar2"
+}
