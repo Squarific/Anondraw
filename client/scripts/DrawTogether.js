@@ -14,6 +14,7 @@ function DrawTogether (container, settings) {
 	// Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
+	this.network = new Network("http://direct.anondraw.com:3552");
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {

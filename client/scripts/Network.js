@@ -16,7 +16,12 @@ function Network (mainServer) {
 // drawings: [drawingObject, ...]
 
 Network.prototype.loadRoom = function loadRoom (room, callback) {
-	this.getServerFromRoom(room, function (server) {
+	this.getServerFromRoom(room, function (err, server) {
+		if (err) {
+			callback(err);
+			return;
+		}
+
 		// Change to the server
 		this.changeServer(server);
 
@@ -25,8 +30,43 @@ Network.prototype.loadRoom = function loadRoom (room, callback) {
 	}.bind(this));
 };
 
+Network.prototype.getRooms = function getRooms (callback) {
+	var req = new XMLHttpRequest();
+
+	req.addEventListener("readystatechange", function (event) {
+		if (req.status == 200 && req.readyState == 4) {
+			var data = JSON.parse(req.responseText);
+			callback(null, data.rooms);
+		} else if (req.readyState == 4) {
+			callback("There was an error trying to find a server to play on. Are you connected to the internet? Status code: " + req.status);
+		}
+	});
+
+	req.open("GET", this.mainServer + "/getrooms");
+	req.send();
+};
+
 Network.prototype.getServerFromRoom = function getServerFromRoom (room, callback) {
-	
+	var req = new XMLHttpRequest();
+
+	req.addEventListener("readystatechange", function (event) {
+		if (req.status == 200 && req.readyState == 4) {
+			var data = JSON.parse(req.responseText);
+
+			if (data.error) {
+				callback("There was an error trying to find a server to play on. Server response: " + data.error)						
+				return;
+			}
+
+			callback(null, data.server);
+			
+		} else if (req.readyState == 4) {
+			callback("There was an error trying to find a server to play on. Are you connected to the internet? Status code: " + req.status);
+		}
+	});
+
+	req.open("GET", this.mainServer + "/getserver?room=" + encodeURIComponent(room));
+	req.send();
 };
 
 // If we are not connected to the given server, change our socket
