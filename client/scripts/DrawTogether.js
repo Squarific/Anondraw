@@ -21,9 +21,9 @@ function DrawTogether (container, settings) {
 		this.openModeSelector();
 	} else {
 		if (this.settings.mode == "private") {
-			this.settings.room = Math.random().toString(36).substr(2, 5); // Random 5 letter room;
+			this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
+			this.changeRoom(this.settings.room);
 		}
-		this.connect();
 	}
 
 	requestAnimationFrame(this.drawLoop.bind(this));
@@ -38,46 +38,12 @@ function DrawTogether (container, settings) {
 }
 
 DrawTogether.prototype.defaultSettings = {
-	server: "http://127.0.0.1:8080",       // Server to connect to, best to add http://
 	mode: "ask",                           // Mode: public, private, oneonone, game, ask, defaults to public
-	room: "main",                          // Room to join at startup
-	locked_room: false                     // Is the user allowed to change the room?
-	                                       // If the room is full it retries after 45sec
+	room: "main"                           // Room to join at startup
 };
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
 DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
-
-DrawTogether.prototype.connect = function connect () {
-	// Connect to the server and bind socket events
-
-	// CODE FOR HUG OF DEATH
-	// Temporary trying to spread out connections
-	// this.chat.addMessage("CLIENT", "We will connect to the server in a minute. You can now draw by yourself a bit and get to know how to use the drawing tools.");
-	// this.connectAt = Date.now() + 60 * 1000;
-	// setTimeout(function () {
-	// 	if (!this.socket) {
-	// 		this.socket = io(this.settings.server, {
-	// 			transports: ['websocket']
-	// 		});
-	// 		this.bindSocketHandlers(this.socket);
-	// 	}
-	// }.bind(this), 60 * 1000);
-	// this.connectInterval = setInterval(function () {
-	// 	if (this.connectAt - Date.now() < 15000) {
-	// 		clearInterval(this.connectInterval);
-	// 	}
-
-	// 	this.chat.addMessage("CLIENT", "We will connect to the server in " + Math.round((this.connectAt - Date.now()) / 1000) + " seconds.");
-	// }.bind(this), 10000);
-
-	if (!this.socket) {
-		this.socket = io(this.settings.server, {
-			transports: ['websocket']
-		});
-		this.bindSocketHandlers(this.socket);
-	}
-};
 
 DrawTogether.prototype.drawLoop = function drawLoop () {
 	// Draw all user interactions of the last 2 seconds
@@ -103,37 +69,6 @@ DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (n
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
 	// Bind all socket events
 	var self = this;
-
-	// Connection events
-	// this.network.on("connect", function () {
-	// 	if (localStorage.getItem("drawtogether-name"))
-	// 		self.changeName(localStorage.getItem("drawtogether-name"));
-
-	// 	if (localStorage.getItem("drawtogether/email")) {
-	// 		socket.emit("login", {
-	// 			email: localStorage.getItem("drawtogether/email"),
-	// 			password: localStorage.getItem("drawtogether/pass")
-	// 		}, function (data) {
-	// 			if (data.success) {
-	// 				self.chat.addMessage("ACCOUNT", data.success);
-	// 				self.reputation = data.reputation;
-	// 				self.updatePlayerList();
-	// 			}
-	// 		});
-	// 	}
-
-	// 	if (self.settings.mode == "game") {
-	// 		self.joinGame();
-	// 		return;
-	// 	} else if (self.settings.mode == "oneonone") {
-	// 		self.joinOneOnOne();
-	// 		return;
-	// 	}
-	// });
-
-	// this.network.on("disconnect", function () {
-	// 	self.chat.addMessage("CLIENT", "Lost connection to the server.");
-	// });
 
 	// Startup events
 
@@ -249,7 +184,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 	this.network.on("emote", function (data) {
 		var data = data || {};
 		self.chat.addMessage(data.user + " " + data.message);
-	})
+	});
 };
 
 DrawTogether.prototype.sendMessage = function sendMessage (message) {
@@ -287,7 +222,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 			this.changeRoom(room, (number || 0) + 1);
 			return;
 		} else if (err) {
-			this.chat.addMessage("SERVER", "Failed to load room '" + room "'. Server error: " + err);
+			this.chat.addMessage("SERVER", "Failed to load room '" + room + "'. Server error: " + err);
 		} else {
 			this.paint.clear();
 
@@ -1124,7 +1059,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Account",
 		action: this.openAccountWindow.bind(this)
-	}, /*{
+	} /*{
 		name: "private",
 		type: "button",
 		text: "Random one-on-one",

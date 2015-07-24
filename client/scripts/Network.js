@@ -79,7 +79,9 @@ Network.prototype.changeServer = function changeServer (server) {
 
 	// No socket, connect to the server
 	if (!this.socket) {
-		this.socket = io(server);
+		this.socket = io(server, {
+			transports: ['websocket']
+		});
 		this.reBindHandlers();
 	}
 };
@@ -102,7 +104,7 @@ Network.prototype.reBindHandlers = function reBindHandlers () {
 	if (!this.socket || this.socket.DT_handlersBound) return;
 
 	// Bind the handlers on our socket
-	for (var name in this.callbacks) {
+	for (var name in this.callbacks)
 		for (var k = 0; k < this.callbacks[name].length; k++)
 			this.socket.on(name, this.callbacks[name][k]);
 
