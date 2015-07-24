@@ -26,7 +26,7 @@ Network.prototype.loadRoom = function loadRoom (room, callback) {
 		this.changeServer(server);
 
 		// Get the drawings
-		this.socket.emit("getdrawings", room, callback);
+		this.socket.emit("changeroom", room, callback);
 	}.bind(this));
 };
 
