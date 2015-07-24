@@ -52,6 +52,7 @@ Servers.prototype.getServersFromRoom = function getServersFromRoom (room) {
 // Get the server that should be used for this room
 // Returns the server with the room or the least loaded
 // If multiple servers have the room, cleans up and returns the real server
+// If no servers available returns null
 Servers.prototype.getServerFromRoom = function getServerFromRoom (room) {
 	// Get all servers that have this room
 	var servers = this.getServersFromRoom(room);
