@@ -2,7 +2,7 @@
   "name": "switch",
   "private": "true",
   "version": "0.0.0",
-  "description": "Castlewar switch server",
+  "description": "Anondraw switch server",
   "main": "switch.js",
   "dependencies": {},
   "devDependencies": {},
@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Squarific/castlewar2.git"
+    "url": "git@github.com:Squarific/DrawTogether2.git"
   },
   "author": "Filip Smets <alemaaltevinden@gmail.com>",
   "license": "proprietary",
   "bugs": {
-    "url": "https://github.com/Squarific/castlewar2/issues"
+    "url": "https://github.com/Squarific/drawtogether2/issues"
   },
-  "homepage": "https://github.com/Squarific/castlewar2"
+  "homepage": "http://www.anondraw.com"
 }

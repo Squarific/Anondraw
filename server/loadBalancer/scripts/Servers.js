@@ -15,6 +15,17 @@ function Servers (code) {
 	setInterval(this.rebalance.bind(this), CHECK_REBALANCE_EVERY);
 }
 
+Servers.prototype.getRooms = function getRooms () {
+	var rooms = {};
+	for (var k = 0; k < this.servers.length; k++) {
+		for (var name in this.servers[k].rooms) {
+			rooms[name] = rooms[name] || 0;
+			rooms[name] += this.servers[k].rooms[name];
+		}
+	}
+	return rooms;
+};
+
 Servers.prototype.getServer = function getServer (field, value) {
 	for (var k = 0; k < this.servers.length; k++) {
 		if (this.servers[k][field] == value)

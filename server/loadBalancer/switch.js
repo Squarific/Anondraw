@@ -55,6 +55,12 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/getrooms") {
+		res.writeHead(200, {'Content-Type': 'text/plain'});
+		res.end('{"rooms": "' + JSON.stringify(servers.getRooms()) + '"}');
+		return;
+	}
+
 	if (parsedUrl.pathname == "/update") {
 		var id = parsedUrl.query.id;
 
@@ -93,4 +99,4 @@ var server = http.createServer(function (req, res) {
 	console.log("[URL REQUEST UNKOWN] ", req.connection.remoteAddress, parsedUrl);	
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 	res.end('{"error": "Unknown command"}');
-}.bind(this)).listen(3252);
+}.bind(this)).listen(3552);
