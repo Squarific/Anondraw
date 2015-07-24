@@ -4,6 +4,16 @@ function Players (server) {
 	this.server = server;
 }
 
+// Kickban the given target (uKey or ip)
+Players.prototype.kickban = function kickban (target, minutes, callback) {
+	
+};
+
+// Callback (err, banned, till)
+Players.prototype.isBanned = function isBanned (uKeyOrIp, callback) {
+		
+};
+
 Players.prototype.getReputationFromUKey = function getReputationFromUKey (uKey, callback) {
 	var req = http.request({
 		hostname: this.server,
