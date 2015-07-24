@@ -19,6 +19,9 @@ Servers.prototype.getRooms = function getRooms () {
 	var rooms = {};
 	for (var k = 0; k < this.servers.length; k++) {
 		for (var name in this.servers[k].rooms) {
+			// Don't return private rooms
+			if (name.indexOf("private_") == 0) continue;
+
 			rooms[name] = rooms[name] || 0;
 			rooms[name] += this.servers[k].rooms[name];
 		}
