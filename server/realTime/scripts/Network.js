@@ -5,11 +5,12 @@ var MAX_USERS_IN_GAMEROOM = 8;
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
 
-function Protocol (io, drawtogether, imgur, players) {
+function Protocol (io, drawtogether, imgur, players, register) {
 	this.io = io;
 	this.drawTogether = drawtogether;
 	this.imgur = imgur;
 	this.players = players;
+	this.register = register;
 	this.bindIO();
 
 	this.gameRooms = {};
@@ -359,7 +360,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			// Check if this room should be on this server
-			protocol.drawTogether.isOurs(room, function (err, ours) {
+			protocol.register.isOurs(room, function (err, ours) {
 				if (err) {
 					callback("Unknown error, try again later. (Error asking the loadbalancer if we are on the right server)");
 					console.log("[JOIN][ERROR]", err);
@@ -378,6 +379,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 				// Join this room
 				socket.join(room);
+				protocol.register.updatePlayerCount();
 				callback(null, anondraw.getDrawings(room), getUserList(room));
 			});
 		});

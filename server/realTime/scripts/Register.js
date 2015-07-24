@@ -7,6 +7,8 @@ function Register (server, key, io, port) {
 	this.port = port;
 	this.io = io;
 
+	this.updateInterval;
+
 	getIp(function (err, ip) {
 		if (err) throw err;
 
@@ -15,6 +17,11 @@ function Register (server, key, io, port) {
 		this.register();
 	}.bind(this));
 }
+
+Register.prototype.isOurs = function isOurs (room, callback) {
+	console.log("TODO ISOURS"); //TODO
+	callback(null, true);
+};
 
 Register.prototype.register = function register () {
 	var req = http.request({
@@ -37,7 +44,9 @@ Register.prototype.register = function register () {
 
 			console.log("[REGISTER] Our id is ", data.id);
 			this.id = data.id;
-			setInterval(this.updatePlayerCount.bind(this), 120 * 1000);
+
+			clearInterval(this.updateInterval);
+			this.updateInterval = setInterval(this.updatePlayerCount.bind(this), 120 * 1000);
 		}.bind(this));
 	}.bind(this));
 
@@ -47,7 +56,12 @@ Register.prototype.register = function register () {
 Register.prototype.updatePlayerCount = function updatePlayerCount () {
 	var rooms = {};
 
-	throw "TODO: Fill rooms";
+	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
+		var socket = this.io.sockets.sockets[sKey];
+		if (rooms[socket.room] || !socket.room) continue;
+
+		rooms[socket.room] = Object.keys(this.io.nsps['/'].adapter.rooms[socket.room] || {}).length;
+	}
 
 	var req = http.request({
 		hostname: this.server,
