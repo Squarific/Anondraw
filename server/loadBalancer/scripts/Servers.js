@@ -8,6 +8,16 @@ var TIMEOUT = 140 * 1000;
 var REBALANCE_LOAD = 400;
 var CHECK_REBALANCE_EVERY = 1 * 60 * 1000; //ms
 
+function randomString (length) {
+	var chars = "abcdefghijklmnopqrstuvwxyz1234567890";
+	var string = "";
+
+	for (var k = 0; k < length; k++)
+		string += chars[Math.floor(Math.random() * chars.length)];
+
+	return string;
+}
+
 function Servers (code) {
 	this.code = code;
 	this.servers = [];
@@ -227,6 +237,8 @@ Servers.prototype.add = function add (url) {
 		room: {},
 		load: 0
 	});
+
+	return id;
 };
 
 module.exports = Servers;

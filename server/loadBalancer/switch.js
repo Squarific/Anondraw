@@ -1,5 +1,5 @@
 var http = require("http");
-var JOIN_CODE = require("join_code_password.js");
+var JOIN_CODE = require("./join_code_password.js");
 
 var Servers = require("./scripts/Servers.js");
 var servers = new Servers(JOIN_CODE);
