@@ -103,6 +103,17 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/getreputation") {
 		var userId = parsedUrl.query.userid;
 
+		if (!userId) {
+			var uKey = parsedUrl.query.uKey;
+			if (!uKey) {
+				res.end('{"error": "No userid or ukey provided"}');
+				return;
+			}
+
+			var user = sessions.getUser("uKey", uKey);
+			userId = user.id;
+		}
+
 		playerDatabase.getReputation(userId, function (err, rep) {
 			if (err) {
 				res.end('{"error": "' + err + '"}');
@@ -118,19 +129,29 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/givereputation") {
 		var uKey = parsedUrl.query.uKey;
 		var userid = parsedUrl.query.userid;
+		var uKeyTo = parsedUrl.query.uKeyTo;
 
-		if (!uKey || !userid) {
-			res.end('{"error": "This command requires a uKey and userid to be provided!"}');
+		if (!uKey || (!userid && !uKeyTo)) {
+			res.end('{"error": "This command requires a uKey and (userid or uKeyTo) to be provided!"}');
 			return;
 		}
 
-		var toUser = sessions.getUser("uKey", uKey);
-		if (!toUser) {
+		var fromUser = sessions.getUser("uKey", uKey);
+		if (!fromUser) {
 			res.end('{"error": "You are not logged in!"}');
 			return;
 		}
 
-		playerDatabase.giveReputation(toUser.id, userid, function (err) {
+		if (!userid) {
+			var toUser = sessions.getUser("uKey", uKeyTo);
+			if (!toUser) {
+				res.end('{"error": "That person is not logged in!"}');
+				return;
+			}
+			userid = toUser.id;
+		}
+
+		playerDatabase.giveReputation(fromUser.id, userid, function (err) {
 			if (err) {
 				res.end('{"error": "' + err + '"}');
 				return;

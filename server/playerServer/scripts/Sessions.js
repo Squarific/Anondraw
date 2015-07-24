@@ -32,9 +32,12 @@ Sessions.prototype.normalizeSettings = function normalizeSettings () {
 };
 
 Sessions.prototype.getUser = function getUser (prop, value) {
-	for (var k = 0; k < this.loggedInUsers.length; k++)
-		if (this.loggedInUsers[k][prop] == value)
+	for (var k = 0; k < this.loggedInUsers.length; k++) {
+		if (this.loggedInUsers[k][prop] == value) {
+			this.loggedInUsers[k].lastUpdate = Date.now();
 			return this.loggedInUsers[k];
+		}
+	}
 		
 	return null;
 };
@@ -56,13 +59,20 @@ Sessions.prototype.addSession = function addSession (id, email) {
 };
 
 Sessions.prototype.logout = function logout (uKey) {
-
+	for (var k = 0; k < this.loggedInUsers.length; k++) {
+		if (this.loggedInUsers[k].uKey == uKey) {
+			this.loggedInUsers.splice(k, 1);
+			k--;
+		}
+	}
 };
 
 Sessions.prototype.loggedIn = function loggedIn (uKey) {
 	for (var k = 0; k < this.loggedInUsers.length; k++) {
-		if (this.loggedInUsers[k].uKey == uKey)
+		if (this.loggedInUsers[k].uKey == uKey) {
+			this.loggedInUsers[k].lastUpdate = Date.now();
 			return true;
+		}
 	}
 
 	return false;
