@@ -23,6 +23,7 @@ Network.prototype.loadRoom = function loadRoom (room, callback) {
 		}
 
 		// Change to the server
+		console.log("Room '" + room + "' is on server: " + server);
 		this.changeServer(server);
 
 		// Get the drawings
@@ -72,14 +73,15 @@ Network.prototype.getServerFromRoom = function getServerFromRoom (room, callback
 // If we are not connected to the given server, change our socket
 Network.prototype.changeServer = function changeServer (server) {
 	// We are on another server, disconnect and destroy the socket
-	if (this.socket.io.uri !== server) {
+	if (this.socket && this.socket.io.uri !== server) {
 		this.socket.destroy();
 		delete this.socket;
 	}
 
+	server = "localhost:2586";
 	// No socket, connect to the server
 	if (!this.socket) {
-		this.socket = io(server, {
+		this.socket = io("http://" + server, {
 			transports: ['websocket']
 		});
 		this.reBindHandlers();
@@ -94,8 +96,8 @@ Network.prototype.on = function on (name, callback) {
 	if (this.callbacks[name].indexOf(callback) !== -1) return;
 	this.callbacks[name].push(callback);
 
-	// Bind the callback on our socket
-	this.socket.on(name, callback);
+	// Bind the callback on our socket if it exists
+	this.socket && this.socket.on(name, callback);
 };
 
 // Bind the handlers on our socket

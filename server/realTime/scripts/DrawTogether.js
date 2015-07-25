@@ -1,3 +1,5 @@
+var CACHE_LENGTH = 30000; //How many drawings are saved
+
 function DrawTogether () {
 	this.drawings = {};
 }
@@ -34,7 +36,7 @@ DrawTogether.prototype.sqDistance = function sqDistance (point1, point2) {
 
 DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
-	callback(this.drawings[room]);
+	callback(null, this.drawings[room] || []);
 };
 
 DrawTogether.prototype.utils = {

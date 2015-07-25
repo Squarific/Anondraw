@@ -1,6 +1,6 @@
 var names = require("./names.js");
 var GameRoom = require("./GameRoom.js");
-var MAX_USERS_IN_ROOM = 20;
+var MAX_USERS_IN_ROOM = 25;
 var MAX_USERS_IN_GAMEROOM = 8;
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
@@ -87,7 +87,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.disconnect();
 		}
 
-		protocol.drawTogether.isBanned(socket.ip, function (err, banned, time) {
+		protocol.players.isBanned(socket.ip, function (err, banned, time) {
 			if (err) {
 				console.error("Error checking if banned on connect", err);
 				return;
@@ -354,7 +354,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (playerCount(room) > MAX_USERS) {
+			if (protocol.getUserCount(room) > MAX_USERS_IN_ROOM) {
 				callback("Too many users");
 				return;
 			}
@@ -374,13 +374,16 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 
 				// Leave our current room
-				io.to(socket.room).emit("leave", { id: socket.id });
+				protocol.io.to(socket.room).emit("leave", { id: socket.id });
 				socket.leave(socket.room);
 
 				// Join this room
 				socket.join(room);
+				socket.room = room;
 				protocol.register.updatePlayerCount();
-				callback(null, anondraw.getDrawings(room), getUserList(room));
+				protocol.drawTogether.getDrawings(room, function (err, drawings) {
+					callback(null, drawings, protocol.getUserList(room));
+				});
 			});
 		});
 
@@ -419,6 +422,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					protocol.informClient(socket, "You banned hes account!");
+					targetSocket.disconnect();
 				});
 			}
 
@@ -430,12 +434,14 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					protocol.informClient(socket, "You banned " + socket.ip);
+					targetSocket.disconnect();
 				});
 			}
 		});
 
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
+			protocol.register.updatePlayerCount();
 		});
 	}.bind(this));
 };

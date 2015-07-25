@@ -29,4 +29,4 @@ imgur.setClientId("8fd93ca8e547c10");
 
 
 var Protocol = require("./scripts/Network.js");
-var protocol = new Protocol(io, drawTogether, imgur, players);
+var protocol = new Protocol(io, drawTogether, imgur, players, register);

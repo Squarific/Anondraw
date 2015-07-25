@@ -14,19 +14,23 @@ function DrawTogether (container, settings) {
 	// Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
-	this.network = new Network("http://direct.anondraw.com:3552");
+	//this.network = new Network("http://direct.anondraw.com:3552");
+	this.network = new Network("http://localhost:3552");
+	this.bindSocketHandlers();
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
 		this.openModeSelector();
-	} else {
-		if (this.settings.mode == "private") {
-			this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
-			this.changeRoom(this.settings.room);
-		}
+	} else if (this.settings.mode == "join") {
+		this.changeRoom(this.settings.room);
+	} else  if (this.settings.mode == "private") {
+		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
+		this.changeRoom(this.settings.room);
 	}
 
 	requestAnimationFrame(this.drawLoop.bind(this));
+	this.needsClear = false;
+
 	document.addEventListener("keypress", function (event) {
 		// On "esc"
 		if (event.keyCode == 27) {
@@ -47,10 +51,17 @@ DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
 
 DrawTogether.prototype.drawLoop = function drawLoop () {
 	// Draw all user interactions of the last 2 seconds
-	this.userCtx.clearRect(0, 0, this.userCtx.canvas.width, this.userCtx.canvas.height);
+	if (this.needsClear) {
+		this.userCtx.clearRect(0, 0, this.userCtx.canvas.width, this.userCtx.canvas.height);
+		this.needsClear = false
+	}
+
+
 	for (var k = 0; k < this.playerList.length; k++) {
-		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 1500)
+		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 1500) {
 			this.drawPlayerInteraction(this.playerList[k].name, this.playerList[k].lastPosition.pos);
+			this.needsClear = true;
+		}
 	}
 
 	// Recall the drawloop
@@ -66,15 +77,19 @@ DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (n
     this.userCtx.fillText(name, position[0] * this.paint.public.zoom - this.userCtx.canvas.leftTopX, position[1] * this.paint.public.zoom - 40 - this.userCtx.canvas.leftTopY);
 };
 
-DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
+DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	// Bind all socket events
 	var self = this;
 
 	// Startup events
-
 	this.network.on("connect", function () {
 		if (localStorage.getItem("drawtogether-name"))
-			this.changeName(localStorage.getItem("drawtogether-name"));
+			self.changeName(localStorage.getItem("drawtogether-name"));
+
+		if (self.current_room) {
+			delete self.current_room;
+			self.changeRoom(self.current_room);
+		}
 	});
 
 	this.network.on("initname", function (name) {
@@ -217,7 +232,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	}
 
 	number = number || "";
-	this.network.loadRoom(room + number, function (err, drawings) {
+	this.network.loadRoom(room + number, function (err, drawings, playerlist) {
 		if (err == "Too many users") {
 			this.changeRoom(room, (number || 0) + 1);
 			return;
@@ -227,12 +242,15 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 			this.paint.clear();
 
 			this.setRoom(room);
-			self.paint.drawDrawings("public", self.decodeDrawings(drawings));
+			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
 
-			self.chat.addMessage("CLIENT", "Ready to draw.");
+			this.chat.addMessage("CLIENT", "Ready to draw.");
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
-			self.removeLoading();
+			this.playerList = playerlist;
+			this.updatePlayerList();
+
+			this.removeLoading();
 		}
 	}.bind(this));
 
@@ -324,7 +342,7 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 // };
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
-	if (!this.socket) return;
+	if (!this.network.socket) return;
 	this.network.socket.emit("drawing", this.encodeDrawing(drawing), callback);
 };
 
