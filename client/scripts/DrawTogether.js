@@ -85,7 +85,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("connect", function () {
 		if (localStorage.getItem("drawtogether-name"))
 			self.changeName(localStorage.getItem("drawtogether-name"));
+	});
 
+	this.network.on("disconnect", function () {
 		if (self.current_room) {
 			var room = self.current_room;
 			delete self.current_room;

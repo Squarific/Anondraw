@@ -1,4 +1,5 @@
 var http = require("http");
+var url = require("url");
 var JOIN_CODE = require("./join_code_password.js");
 
 var Servers = require("./scripts/Servers.js");
@@ -7,7 +8,6 @@ var servers = new Servers(JOIN_CODE);
 var MAX_USERS_PER_ROOM = 20;
 
 var server = http.createServer(function (req, res) {
-	var url = require("url");
 	var parsedUrl = url.parse(req.url, true);
 
 	res.writeHead(200, {
@@ -109,4 +109,4 @@ var server = http.createServer(function (req, res) {
 
 	console.log("[URL REQUEST UNKOWN] ", req.connection.remoteAddress, parsedUrl);	
 	res.end('{"error": "Unknown command"}');
-}.bind(this)).listen(3552);
+}).listen(3552);

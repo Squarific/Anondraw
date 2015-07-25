@@ -1,8 +1,10 @@
 var getIp = require('external-ip')();
 var http = require('http');
 
-function Register (server, key, io, port) {
+function Register (server, key, io, port, listenServer) {
 	this.server = server;
+	this.listenServer = listenServer;
+
 	this.key = key;
 	this.port = port;
 	this.io = io;
@@ -15,6 +17,32 @@ function Register (server, key, io, port) {
 		console.log("[STARTUP] Our ip is ", ip);
 		this.ip = ip;
 		this.register();
+	}.bind(this));
+
+	this.listenServer.addEventListener("request", function (req, res) {
+		var parsedUrl = url.parse(req.url, true);
+
+		res.writeHead(200, {
+			"Access-Control-Allow-Origin": "*",
+			"Content-Type": "application/json"
+		});
+
+		if (parsedUrl.pathname == "/closeroom") {
+			var code = parsedUrl.query.code;
+			var room = parsedUrl.query.room;
+
+			if (code !== this.key) {
+				res.end('{"error": "Invalid key"}');
+				return;
+			}
+
+			var sRoom = this.io.nsps['/'].adapter.rooms[room];
+			for (var id in sRoom) {
+				this.io.nsps['/'].connected[id].disconnect();
+			}
+			
+			res.end('{"success": "Disconnected all clients in room ' + room + '"}');
+		}
 	}.bind(this));
 }
 
