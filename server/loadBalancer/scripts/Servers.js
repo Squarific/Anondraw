@@ -135,7 +135,7 @@ Servers.prototype.sendCloseRoom = function sendCloseRoom (server, room) {
 Servers.prototype.clean = function clean () {
 	for (var k = 0; k < this.servers.length; k++) {
 		if (Date.now() - this.servers[k].lastUpdate > TIMEOUT) {
-			this.servers[k].splice(k, 1);
+			this.servers.splice(k, 1);
 			k--;
 		}
 	}
@@ -234,7 +234,7 @@ Servers.prototype.add = function add (url) {
 		id: id,
 		url: url,
 		lastUpdate: Date.now(),
-		room: {},
+		rooms: {},
 		load: 0
 	});
 
