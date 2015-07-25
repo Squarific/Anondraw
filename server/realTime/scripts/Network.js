@@ -309,7 +309,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (typeof socket.room !== "undefined") {
 				protocol.sendChatMessage(socket.room, {
 					user: "SERVER",
-					message: socket.username + " changed name to " + name
+					message: socket.name + " changed name to " + name
 				});
 			}
 
@@ -321,6 +321,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			socket.name = name;
 			socket.lastNameChange = Date.now();
+			callback(null, name);
 		});
 
 		socket.on("drawing", function (drawing, callback) {
@@ -380,10 +381,14 @@ Protocol.prototype.bindIO = function bindIO () {
 				// Join this room
 				socket.join(room);
 				socket.room = room;
+
+				console.log("[CHANGEROOM] " + socket.name + " changed room to " + room);
+
 				protocol.register.updatePlayerCount();
 				protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(room));
+
 				protocol.drawTogether.getDrawings(room, function (err, drawings) {
-					callback(null, drawings, protocol.getUserList(room));
+					callback(null, drawings);
 				});
 			});
 		});

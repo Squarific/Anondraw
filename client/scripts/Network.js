@@ -1,6 +1,7 @@
 function Network (mainServer) {
 	this.mainServer = mainServer;
 	this.socket;
+	this.oldSockets = {};
 
 	this.callbacks = {};
 }
@@ -24,10 +25,14 @@ Network.prototype.loadRoom = function loadRoom (room, callback) {
 
 		// Change to the server
 		console.log("Room '" + room + "' is on server: " + server);
-		this.changeServer(server);
+		this.changeServer(server, function (err) {
+			if (err) {
+				callback(err);
+			}
 
-		// Get the drawings
-		this.socket.emit("changeroom", room, callback);
+			// Change our room
+			this.socket.emit("changeroom", room, callback);
+		}.bind(this));
 	}.bind(this));
 };
 
@@ -71,21 +76,25 @@ Network.prototype.getServerFromRoom = function getServerFromRoom (room, callback
 };
 
 // If we are not connected to the given server, change our socket
-Network.prototype.changeServer = function changeServer (server) {
-	// We are on another server, disconnect and destroy the socket
-	if (this.socket && this.socket.io.uri !== server) {
-		this.socket.destroy();
-		delete this.socket;
+// Should not include a protocol (http:// or https://)
+Network.prototype.changeServer = function changeServer (server, callback) {
+	if (server.indexOf("http://") == -1) server = "http://" + server;
+	server = "http://localhost:" + server.split(":")[2];
+
+	// If the current socket is to the right server, just callback
+	if (this.socket && this.socket.io.uri == server) {
+		callback();
+		return;
 	}
 
-	server = "localhost:2586";
-	// No socket, connect to the server
-	if (!this.socket) {
-		this.socket = io("http://" + server, {
-			transports: ['websocket']
-		});
-		this.reBindHandlers();
+	// We are on another server, disconnect
+	if (this.socket) {
+		this.socket.disconnect();
 	}
+
+	this.socket = io(server, { transports: ['websocket'], forceNew: true });
+	this.reBindHandlers();
+	callback();
 };
 
 // Register an event

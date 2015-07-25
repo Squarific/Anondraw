@@ -87,8 +87,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 			self.changeName(localStorage.getItem("drawtogether-name"));
 
 		if (self.current_room) {
+			var room = self.current_room;
 			delete self.current_room;
-			self.changeRoom(self.current_room);
+			self.changeRoom(room);
 		}
 	});
 
@@ -231,10 +232,14 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 		return;
 	}
 
+	if (this.changingRoom) return;
+	this.changingRoom = true;
+
 	number = number || "";
-	this.network.loadRoom(room + number, function (err, drawings, playerlist) {
+	this.network.loadRoom(room + number, function (err, drawings) {
 		if (err == "Too many users") {
 			this.changeRoom(room, (number || 0) + 1);
+			this.chat.addMessage("SERVER", "Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
 			return;
 		} else if (err) {
 			this.chat.addMessage("SERVER", "Failed to load room '" + room + "'. Server error: " + err);
@@ -247,10 +252,8 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 			this.chat.addMessage("CLIENT", "Ready to draw.");
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
-			this.playerList = playerlist;
-			this.updatePlayerList();
-
 			this.removeLoading();
+			this.changingRoom = false;
 		}
 	}.bind(this));
 
@@ -294,8 +297,13 @@ DrawTogether.prototype.changeName = function changeName (name) {
 		this.controls.byName.name.input.focus();
 	}
 
-	this.network.socket.emit("changename", name, function (realname) {
-		this.chat.addMessage("SERVER", "Changed name to " + realname);
+	this.network.socket.emit("changename", name, function (err, realname) {
+		if (err) {
+			this.chat.addMessage("SERVER", err);
+			return;
+		}
+
+		this.chat.addMessage("SERVER", "Your name is now " + realname);
 		localStorage.setItem("drawtogether-name", realname);
 	}.bind(this));
 };
@@ -406,7 +414,7 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 	this.roomWindow.style.display = "block";
 
-	this.network.getRooms(function (rooms) {
+	this.network.getRooms(function (err, rooms) {
 		while (this.publicRoomsContainer.firstChild)
 			this.publicRoomsContainer.removeChild(this.publicRoomsContainer.firstChild);
 
@@ -414,7 +422,10 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 			var roomButton = this.publicRoomsContainer.appendChild(document.createElement("div"));
 			roomButton.className = "drawtogether-button drawtogether-room-button";
 			roomButton.appendChild(document.createTextNode(name + " (" + rooms[name] + " users)"))
-			roomButton.addEventListener("click", this.changeRoom.bind(this, name));
+			roomButton.addEventListener("click", function (name, event) {
+				this.changeRoom(name);
+				this.closeRoomWindow();
+			}.bind(this, name));
 		}
 	}.bind(this));
 };
