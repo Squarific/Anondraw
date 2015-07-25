@@ -71,7 +71,12 @@ Servers.prototype.getServerFromRoom = function getServerFromRoom (room) {
 	var servers = this.getServersFromRoom(room);
 
 	// If no server has this room, just return the least loaded
-	if (servers.length == 0) return this.getLeastLoad();
+	if (servers.length == 0) {
+		var target = this.getLeastLoad();
+		target.rooms[room] = 0;
+		return target;
+	}
+	
 	if (servers.length == 1) return servers[0];
 
 	// Multiple servers have this room, should not happen
@@ -91,6 +96,7 @@ Servers.prototype.retargetRoom = function retargetRoom (room) {
 		servers.splice(key, 1);
 
 	this.sendCloseRoom(servers, room);
+	target.rooms[room] = 0;
 	return target;
 };
 
@@ -100,7 +106,7 @@ Servers.prototype.sendCloseRoom = function sendCloseRoom (servers, room) {
 	}
 };
 
-Servers.prototype.sendCloseRoom = function sendCloseRoom (server, room) {
+Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer (server, room) {
 	var parsedUrl = url.parse(server.url);
 
 	var req = http.request({

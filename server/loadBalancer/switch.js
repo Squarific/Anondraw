@@ -56,8 +56,24 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/isourroom") {
+		var room = parsedUrl.query.room;
+		var id = parsedUrl.query.id;
+
+		var server = servers.getServerFromRoom(room);
+		if (!server) res.end('{"error", "No server found"}');
+
+		if (server.id == id) {
+			res.end('{"isours": true}');
+			return;
+		}
+
+		res.end('{"isours": false}');
+		return;
+	}
+
 	if (parsedUrl.pathname == "/getrooms") {
-		res.end('{"rooms": "' + JSON.stringify(servers.getRooms()) + '"}');
+		res.end('{"rooms": ' + JSON.stringify(servers.getRooms()) + '}');
 		return;
 	}
 

@@ -369,7 +369,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 
 				if (!ours) {
-					callback("Wrong server!");
+					callback("Wrong server");
 					console.log("[JOIN] Someone tried joining a room that wasn't ours", room)
 					return;
 				}

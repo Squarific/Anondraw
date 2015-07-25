@@ -19,8 +19,24 @@ function Register (server, key, io, port) {
 }
 
 Register.prototype.isOurs = function isOurs (room, callback) {
-	console.log("TODO ISOURS"); //TODO
-	callback(null, true);
+	var req = http.request({
+		hostname: this.server,
+		port: 3552,
+		method: "GET",
+		path: "/isourroom?room=" + encodeURIComponent(room) + "&id=" + encodeURIComponent(this.id)
+	}, function (res) {
+		res.on("data", function (chunk) {
+			data = JSON.parse(chunk);
+			if (data.error) {
+				callback(data.error);
+				return;
+			}
+
+			callback(null, data.isours);
+		}.bind(this));
+	}.bind(this));
+
+	req.end();
 };
 
 Register.prototype.register = function register () {
