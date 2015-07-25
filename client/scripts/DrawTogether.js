@@ -1065,9 +1065,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
-		action: function (event) {
-			console.log(event);
-		}
+		action: function () {}
 	}, {
 		name: "name-button",
 		type: "button",
