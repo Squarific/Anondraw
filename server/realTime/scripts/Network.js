@@ -381,6 +381,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.join(room);
 				socket.room = room;
 				protocol.register.updatePlayerCount();
+				protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(room));
 				protocol.drawTogether.getDrawings(room, function (err, drawings) {
 					callback(null, drawings, protocol.getUserList(room));
 				});
