@@ -1,6 +1,5 @@
 var http = require("http");
 var mysql = require("mysql");
-var SHA256 = require("crypto-js/sha256");
 
 var database = mysql.createConnection({
 	host: "localhost",

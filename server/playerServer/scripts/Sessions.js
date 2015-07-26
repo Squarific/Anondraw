@@ -45,7 +45,7 @@ Sessions.prototype.getUser = function getUser (prop, value) {
 Sessions.prototype.addSession = function addSession (id, email) {
 	var uKey = randomString(32);
 
-	if (!this.getUser("uKey", uKey))
+	if (this.getUser("uKey", uKey))
 		console.log("Generated uKey was already in use.", uKey, this.loggedInUsers.length);
 
 	this.loggedInUsers.push({

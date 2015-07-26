@@ -1,9 +1,11 @@
+var SHA256 = require("crypto-js/sha256");
+
 function PlayerDatabase (database) {
 	this.database = database;
 }
 
 PlayerDatabase.prototype.login = function login (email, pass, callback) {
-	database.query("SELECT id FROM users WHERE email = ? AND pass = ?", [email, SHA256(pass).toString()], function (err, rows) {
+	this.database.query("SELECT id FROM users WHERE email = ? AND pass = ?", [email, SHA256(pass).toString()], function (err, rows) {
 		if (err) {
 			callback("Database error");
 			console.log("[LOGIN ERROR] ", err);
@@ -20,9 +22,13 @@ PlayerDatabase.prototype.login = function login (email, pass, callback) {
 };
 
 PlayerDatabase.prototype.register = function register (email, pass, callback) {
-	database.query("INSERT INTO users (email, pass) VALUES (?, ?)", [email, SHA256(pass).toString()], function (err, result) {
+	this.database.query("INSERT INTO users (email, pass) VALUES (?, ?)", [email, SHA256(pass).toString()], function (err, result) {
 		if (err) {
-			callback("Couldn't register, do you already have an account?");
+			if (err.code == "ER_DUP_ENTRY") {
+				callback("Already registered!");
+				return;
+			}
+			callback("Database error");
 			console.log("[REGISTER ERROR]", err);
 			return;
 		}
@@ -33,7 +39,7 @@ PlayerDatabase.prototype.register = function register (email, pass, callback) {
 };
 
 PlayerDatabase.prototype.getReputation = function getReputation (userid, callback) {
-	database.query("SELECT COUNT(*) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
+	this.database.query("SELECT COUNT(*) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
 		if (err) {
 			callback("Database error (#1) while getting reputation.");
 			console.log("[GETREPUTATION] Database error: ", err);
@@ -51,7 +57,7 @@ PlayerDatabase.prototype.getReputation = function getReputation (userid, callbac
 };
 
 PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId, callback) {
-	database.query("SELECT id FROM reputations WHERE from_id = ? AND to_id = ?", [fromId, toId], function (err, rows) {
+	this.database.query("SELECT id FROM reputations WHERE from_id = ? AND to_id = ?", [fromId, toId], function (err, rows) {
 		if (err) {
 			callback("Database error (#1) trying to give reputation.");
 			console.log("[GIVEREPUTATION] Database error while checking uniqueness: ", err);
