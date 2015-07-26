@@ -11,12 +11,14 @@ function DrawTogether (container, settings) {
 	this.ink = 5000;
 	this.lastInkWarning = Date.now();
 
+	//this.network = new Network("http://direct.anondraw.com:3552");
+	this.network = new Network("http://localhost:3552");
+	this.account = new Account();
+	this.bindSocketHandlers();
+
 	// Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
-	//this.network = new Network("http://direct.anondraw.com:3552");
-	this.network = new Network("http://localhost:3552");
-	this.bindSocketHandlers();
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
@@ -31,7 +33,7 @@ function DrawTogether (container, settings) {
 	requestAnimationFrame(this.drawLoop.bind(this));
 	this.needsClear = false;
 
-	document.addEventListener("keypress", function (event) {
+	document.addEventListener("keydown", function (event) {
 		// On "esc"
 		if (event.keyCode == 27) {
 			this.closeAccountWindow();
@@ -645,53 +647,73 @@ DrawTogether.prototype.createGameInformation = function createGameInformation ()
 };
 
 DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
+	if (this.accWindow) {
+		this.accWindow.parentNode.removeChild(this.accWindow);
+	}
+
 	var accWindow = this.container.appendChild(document.createElement("div"));
 	accWindow.className = "drawtogether-window drawtogether-accountwindow";
 	this.accWindow = accWindow;
+	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
-	var formContainer = accWindow.appendChild(document.createElement("div"));
-	formContainer.className = "drawtogether-account-formcontainer";
+	this.account.checkLogin(function (err, loggedIn) {
+		var formContainer = accWindow.appendChild(document.createElement("div"));
+		formContainer.className = "drawtogether-account-formcontainer";
 
-	this.loginMessage = formContainer.appendChild(document.createElement("div"));
+		this.loginMessage = formContainer.appendChild(document.createElement("div"));
 
-	var emailInput = formContainer.appendChild(document.createElement("input"));
-	emailInput.type = "email";
-	emailInput.placeholder = "email@example.com";
-	this.emailInput = emailInput;
+		if (this.account.mail) this.accountSuccess("Logged in as " + this.account.mail);
+		if (err) this.accountError("Error getting session state: " + err);
 
-	var passInput = formContainer.appendChild(document.createElement("input"));
-	passInput.type = "password";
-	passInput.placeholder = "*********";
-	this.passInput = passInput;
+		if (!loggedIn) {
+			var emailInput = formContainer.appendChild(document.createElement("input"));
+			emailInput.type = "email";
+			emailInput.placeholder = "email@example.com";
+			this.emailInput = emailInput;
 
-	this.emailInput.addEventListener("keydown", function (event) {
-		if (event.keyCode == 13) this.formLogin();
+			var passInput = formContainer.appendChild(document.createElement("input"));
+			passInput.type = "password";
+			passInput.placeholder = "*********";
+			this.passInput = passInput;
+
+			this.emailInput.addEventListener("keydown", function (event) {
+				if (event.keyCode == 13) this.formLogin();
+			}.bind(this));
+			this.passInput.addEventListener("keydown", function (event) {
+				if (event.keyCode == 13) this.formLogin();
+			}.bind(this));
+
+			var loginButton = formContainer.appendChild(document.createElement("div"));
+			loginButton.appendChild(document.createTextNode("Login"));
+			loginButton.className = "drawtogether-button drawtogether-login-button";
+			loginButton.addEventListener("click", this.formLogin.bind(this));
+
+			var registerButton = formContainer.appendChild(document.createElement("div"));
+			registerButton.appendChild(document.createTextNode("Register"));
+			registerButton.className = "drawtogether-button drawtogether-register-button";
+			registerButton.addEventListener("click", this.formRegister.bind(this));
+		} else {
+			var logoutButton = formContainer.appendChild(document.createElement("div"));
+			logoutButton.appendChild(document.createTextNode("Logout"));
+			logoutButton.className = "drawtogether-button drawtogether-logout-button";
+			logoutButton.addEventListener("click", function () {
+				this.account.logout(function (err) {
+					if (err) {
+						this.accountError("Couldn't logout: " + err);
+						return;
+					}
+
+					this.createAccountWindow();
+				}.bind(this));
+			}.bind(this));
+		}
+		
+		var close = formContainer.appendChild(document.createElement("div"));
+		close.innerText = "Close room window";
+		close.textContent = "Close room window";
+		close.className = "drawtogether-button drawtogether-close-button";
+		close.addEventListener("click", this.closeAccountWindow.bind(this));
 	}.bind(this));
-	this.passInput.addEventListener("keydown", function (event) {
-		if (event.keyCode == 13) this.formLogin();
-	}.bind(this));
-
-	var loginButton = formContainer.appendChild(document.createElement("div"));
-	loginButton.innerText = "Login/Register";
-	loginButton.textContent = "Login/Register";
-	loginButton.className = "drawtogether-button drawtogether-login-button";
-	loginButton.addEventListener("click", this.formLogin.bind(this));
-
-	var logoutButton = formContainer.appendChild(document.createElement("div"));
-	logoutButton.innerText = "Logout";
-	logoutButton.textContent = "Logout";
-	logoutButton.className = "drawtogether-button drawtogether-logout-button";
-	logoutButton.addEventListener("click", function () {
-		localStorage.removeItem("drawtogether/email");
-		localStorage.removeItem("drawtogether/pass");
-		this.closeAccountWindow();
-	}.bind(this));
-
-	var close = formContainer.appendChild(document.createElement("div"));
-	close.innerText = "Close room window";
-	close.textContent = "Close room window";
-	close.className = "drawtogether-button drawtogether-close-button";
-	close.addEventListener("click", this.closeAccountWindow.bind(this));
 };
 
 DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
@@ -750,24 +772,33 @@ DrawTogether.prototype.createControls = function createControls () {
 DrawTogether.prototype.formLogin = function formLogin () {
 	// Login using the data of the account form
 	var email = this.emailInput.value;
-	var pass = CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64);
+	var pass = this.passInput.value;
 
-	// Reset account error	
-	this.accountError(undefined);
-	this.socket.emit("login", {
-		email: email,
-		password: pass
-	}, function (data) {
-		if (data.error)
-			this.accountError(data.error);
+	this.accountError(undefined); // Reset account error	
 
-		if (data.success) {
-			this.accountSuccess(data.success);
-			localStorage.setItem("drawtogether/email", email);
-			localStorage.setItem("drawtogether/pass", pass);
-			this.reputation = data.reputation;
-			this.updatePlayerList();
+	this.account.login(email, pass, function (err) {
+		if (err) {
+			this.accountError("Couldn't login: " + err);
+			return;
 		}
+
+		this.createAccountWindow();
+	}.bind(this));
+};
+
+DrawTogether.prototype.formRegister = function formRegister () {
+	var email = this.emailInput.value;
+	var pass = this.passInput.value;
+
+	this.accountError(undefined); // Reset account error	
+
+	this.account.register(email, pass, function (err) {
+		if (err) {
+			this.accountError("Couldn't register: " + err);
+			return;
+		}
+
+		this.createAccountWindow();
 	}.bind(this));
 };
 
