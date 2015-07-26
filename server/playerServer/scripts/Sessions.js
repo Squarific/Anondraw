@@ -45,8 +45,10 @@ Sessions.prototype.getUser = function getUser (prop, value) {
 Sessions.prototype.addSession = function addSession (id, email) {
 	var uKey = randomString(32);
 
-	if (this.getUser("uKey", uKey))
+	if (this.getUser("uKey", uKey)) {
 		console.log("Generated uKey was already in use.", uKey, this.loggedInUsers.length);
+		throw "That's a very small chance o.0 this might mean something is wrong. Too many sessions maybe? Altough even then it have to be a lot of them.";
+	}
 
 	this.loggedInUsers.push({
 		id: id,
