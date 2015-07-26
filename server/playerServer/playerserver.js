@@ -110,6 +110,10 @@ var server = http.createServer(function (req, res) {
 			}
 
 			var user = sessions.getUser("uKey", uKey);
+			if (!user) {
+				res.end('{"error": "No such session"}');
+				return;
+			}
 			userId = user.id;
 		}
 

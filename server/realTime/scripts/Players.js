@@ -33,6 +33,10 @@ Players.prototype.getReputationFromUKey = function getReputationFromUKey (uKey, 
 		});
 	});
 
+	req.on("error", function (e) {
+		callback(e.message);
+	});
+
 	req.end();
 }
 
@@ -41,11 +45,15 @@ Players.prototype.giveReputation = function giveReputation (fromUkey, toUkey, ca
 		hostname: this.server,
 		port: 4552,
 		method: "GET",
-		path: "/givereputation?uKey=" + encodeURIComponent(uKey) + "&uKeyTo=" + encodeURIComponent(toUkey)
+		path: "/givereputation?uKey=" + encodeURIComponent(fromUkey) + "&uKeyTo=" + encodeURIComponent(toUkey)
 	}, function (res) {
 		res.on("data", function (chunk) {
-			callback(JSON.parse(chunk));
+			callback(JSON.parse(chunk).error);
 		});
+	});
+
+	req.on("error", function (e) {
+		callback(e.message);
 	});
 
 	req.end();

@@ -19,7 +19,7 @@ function Register (server, key, io, port, listenServer) {
 		this.register();
 	}.bind(this));
 
-	this.listenServer.addEventListener("request", function (req, res) {
+	this.listenServer.addListener("request", function (req, res) {
 		var parsedUrl = url.parse(req.url, true);
 
 		res.writeHead(200, {
@@ -64,6 +64,10 @@ Register.prototype.isOurs = function isOurs (room, callback) {
 		}.bind(this));
 	}.bind(this));
 
+	req.on("error", function (e) {
+		callback(e.message);
+	});
+
 	req.end();
 };
 
@@ -77,13 +81,8 @@ Register.prototype.register = function register () {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);
 			if (data.error) {
-				// If the error is that we have already registered we are gonna
-				// wait for a timeout
-				if (data.error.indexOf("already been registered") == -1) {
-					throw data.error;
-				} else{
-					console.log("Already registered. Just ignoring the error.")
-				}
+				// If we can't register there is no point in staying online
+				throw data.error;
 			}
 
 			console.log("[REGISTER] Our id is ", data.id);
@@ -93,6 +92,10 @@ Register.prototype.register = function register () {
 			this.updateInterval = setInterval(this.updatePlayerCount.bind(this), 120 * 1000);
 		}.bind(this));
 	}.bind(this));
+
+	req.on("error", function (e) {
+		throw e.message;
+	});
 
 	req.end();
 };
@@ -123,6 +126,10 @@ Register.prototype.updatePlayerCount = function updatePlayerCount () {
 			}
 		}.bind(this));
 	}.bind(this));
+
+	req.on("error", function (e) {
+		console.log("Couldn't update player count " + e.message);
+	});
 
 	req.end();
 };

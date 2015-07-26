@@ -87,6 +87,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("connect", function () {
 		if (localStorage.getItem("drawtogether-name"))
 			self.changeName(localStorage.getItem("drawtogether-name"));
+
+		if (self.account.uKey)
+			self.network.socket.emit("uKey", self.account.uKey);
 	});
 
 	this.network.on("disconnect", function () {
@@ -236,17 +239,23 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 		return;
 	}
 
+	// Don't change the room if we are still waiting for the server
 	if (this.changingRoom) return;
 	this.changingRoom = true;
+	var changingRoomTimeout = setTimeout(function () {
+		this.changingRoom = false;
+	}.bind(this), 2000);
 
 	number = number || "";
 	this.network.loadRoom(room + number, function (err, drawings) {
+		this.changingRoom = false;
 		if (err == "Too many users") {
 			this.changeRoom(room, (number || 0) + 1);
 			this.chat.addMessage("SERVER", "Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
 			return;
 		} else if (err) {
-			this.chat.addMessage("SERVER", "Failed to load room '" + room + "'. Server error: " + err);
+			this.chat.addMessage("SERVER", "Failed to load room '" + room + "'. Server error: " + err + ". Trying again in 5 seconds.");
+			setTimeout(this.changeRoom.bind(this, room, number), 5000);
 		} else {
 			this.paint.clear();
 
@@ -257,7 +266,6 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
 			this.removeLoading();
-			this.changingRoom = false;
 		}
 	}.bind(this));
 
@@ -490,7 +498,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	upvoteButton.textContent = "▲";
 
 	upvoteButton.addEventListener("click", function (playerid, event) {
-		// TODO: upvote
+		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
@@ -704,6 +712,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 					}
 
 					this.createAccountWindow();
+					this.network.socket.emit("uKey", this.account.uKey);
 				}.bind(this));
 			}.bind(this));
 		}
@@ -782,6 +791,7 @@ DrawTogether.prototype.formLogin = function formLogin () {
 			return;
 		}
 
+		this.network.socket.emit("uKey", this.account.uKey);
 		this.createAccountWindow();
 	}.bind(this));
 };
@@ -798,6 +808,7 @@ DrawTogether.prototype.formRegister = function formRegister () {
 			return;
 		}
 
+		this.network.socket.emit("uKey", this.account.uKey);
 		this.createAccountWindow();
 	}.bind(this));
 };

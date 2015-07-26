@@ -204,11 +204,17 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("uKey", function (uKey) {
+			if (!uKey) {
+				delete socket.uKey;
+				socket.reputation = 0;
+				return;
+			}
+			
 			socket.uKey = uKey;
 			protocol.players.getReputationFromUKey(uKey, function (err, rep) {
 				socket.reputation = rep;
 				protocol.io.to(socket.room).emit("reputation", {
-					id: targetSocket.id,
+					id: socket.id,
 					reputation: rep
 				});
 			});
@@ -447,7 +453,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
-			protocol.register.updatePlayerCount();
+			setTimeout(protocol.register.updatePlayerCount.bind(protocol.register), 500);
 		});
 	}.bind(this));
 };
