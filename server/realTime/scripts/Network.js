@@ -87,7 +87,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.disconnect();
 		}
 
-		protocol.players.isBanned(socket.ip, function (err, banned, time) {
+		protocol.players.isBanned(socket.ip, function (err, banned, enddate, reason) {
 			if (err) {
 				console.error("Error checking if banned on connect", err);
 				return;
@@ -96,7 +96,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (banned) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
-					message: "You have been banned till " + time
+					message: "You have been banned till " + enddate + ". Reason: " + reason
 				});
 				console.log("[BANNED] " + socket.ip + " tried to join.");
 				socket.disconnect();
@@ -207,12 +207,14 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (!uKey) {
 				delete socket.uKey;
 				socket.reputation = 0;
+				socket.emit("setreputation", socket.reputation);
 				return;
 			}
 			
 			socket.uKey = uKey;
 			protocol.players.getReputationFromUKey(uKey, function (err, rep) {
 				socket.reputation = rep;
+				socket.emit("setreputation", socket.reputation);
 				protocol.io.to(socket.room).emit("reputation", {
 					id: socket.id,
 					reputation: rep
@@ -285,6 +287,8 @@ Protocol.prototype.bindIO = function bindIO () {
 						id: targetSocket.id,
 						reputation: reputation
 					});
+					targetSocket.reputation = reputation;
+					targetSocket.emit("setreputation", socket.reputation);
 				});
 			});
 		});
@@ -426,26 +430,28 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			callback({success: "Banning player ..."});
+
 			if (options[2] == "both" || options[2] == "account") {
-				protocol.players.kickban(targetSocket.uKey, options[1], function (err) {
+				protocol.players.kickbanAccount(targetSocket.uKey, socket.uKey, options[1], options[3], function (err) {
 					if (err) {
-						protocol.informClient(socket, "Error while trying to kickban: " + err);
+						protocol.informClient(socket, "Error while trying to kickban account: " + err);
 						return;
 					}
 
-					protocol.informClient(socket, "You banned hes account!");
+					protocol.informClient(socket, "You banned " + targetSocket.name);
 					targetSocket.disconnect();
 				});
 			}
 
 			if (options[2] == "both" || options[2] == "ip") {
-				protocol.players.kickban(targetSocket.ip, options[1], function (err) {
+				protocol.players.kickbanIp(targetSocket.ip, socket.uKey, options[1], options[3], function (err) {
 					if (err) {
-						protocol.informClient(socket, "Error while trying to kickban: " + err);
+						protocol.informClient(socket, "Error while trying to kickban ip: " + err);
 						return;
 					}
 
-					protocol.informClient(socket, "You banned " + socket.ip);
+					protocol.informClient(socket, "You banned " + targetSocket.ip);
 					targetSocket.disconnect();
 				});
 			}

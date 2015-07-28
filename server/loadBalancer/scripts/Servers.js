@@ -73,7 +73,12 @@ Servers.prototype.getServerFromRoom = function getServerFromRoom (room) {
 	// If no server has this room, just return the least loaded
 	if (servers.length == 0) {
 		var target = this.getLeastLoad();
+		if (!target) return target;
+
+		// Reserve this server so if someone asks again and noone has connected yet
+		// and the loads have been changed then we still give back this one
 		target.rooms[room] = 0;
+
 		return target;
 	}
 	

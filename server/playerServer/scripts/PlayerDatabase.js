@@ -4,8 +4,65 @@ function PlayerDatabase (database) {
 	this.database = database;
 }
 
+// Callback(err, banned, {
+//	  enddate: enddate,
+//    reason: reason
+// })
+function isBannedHandler (callback, err, rows) {
+	if (err) {
+		callback(err);
+		return;
+	}
+
+	if (rows.length == 0) {
+		callback(null, false);
+		return;
+	}
+
+	callback(null, true, {
+		enddate: rows[0].enddate,
+		reason: rows[0].reason
+	});
+}
+
+// Callback see isbannedhandler
+PlayerDatabase.prototype.isIpBanned = function isIpBanned (ip, callback) {
+	this.database.query("SELECT enddate, reason FROM ipbans WHERE ip = ? AND enddate > ?", [ip, new Date()], isBannedHandler.bind(this, callback));
+};
+
+// Callback see isbannedhandler
+PlayerDatabase.prototype.isIdBanned = function isIdBanned (id, callback) {
+	this.database.query("SELECT enddate, reason FROM accountbans WHERE userid = ? AND enddate > ?", [id, new Date()], isBannedHandler.bind(this, callback));
+};
+
+PlayerDatabase.prototype.banIp = function banIp (ip, by, minutes, reason, callback) {
+	var startdate = new Date();
+	var enddate = new Date(Date.now() + parseInt(minutes) * 60 * 1000);
+
+	this.database.query("INSERT INTO ipbans (ip, banned_by, startdate, enddate, reason) VALUES (?, ?, ?, ?, ?)", [ip, by, startdate, enddate, reason], function (err) {
+		callback(err, !err);
+	});
+};
+
+PlayerDatabase.prototype.banId = function banId (id, by, minutes, reason, callback) {
+	var startdate = new Date();
+	var enddate = new Date(Date.now() + parseInt(minutes) * 60 * 1000);
+
+	this.database.query("INSERT INTO accountbans (userid, banned_by, startdate, enddate, reason) VALUES (?, ?, ?, ?, ?)", [id, by, startdate, enddate, reason], function (err) {
+		callback(err, !err);
+	});
+
+};
+
+// callback(err, id)
 PlayerDatabase.prototype.login = function login (email, pass, callback) {
-	this.database.query("SELECT id FROM users WHERE email = ? AND pass = ?", [email, SHA256(pass).toString()], function (err, rows) {
+	var query = "select id, email, max(enddate) as endban, reason";
+	query += " from users left join accountbans";
+	query += " on users.id = accountbans.userid";
+	query += " where email = ? AND pass = ?";
+	query += " group by id";
+
+	this.database.query(query, [email, SHA256(pass).toString()], function (err, rows) {
 		if (err) {
 			callback("Database error");
 			console.log("[LOGIN ERROR] ", err);
@@ -14,6 +71,11 @@ PlayerDatabase.prototype.login = function login (email, pass, callback) {
 
 		if (rows.length < 1) {
 			callback("This account/password combo was not found.");
+			return;
+		}
+
+		if (rows[0].endban) {
+			callback("You have been banned till " + rows[0].endban + ". Reason: " + rows[0].reason);
 			return;
 		}
 

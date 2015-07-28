@@ -11,9 +11,6 @@ var io = require('socket.io')(server, {
 	transports: ['websocket']
 });
 
-var names = require("./scripts/names.js");
-function randomName () {return names[Math.floor(Math.random() * names.length)]}
-
 // Library to register to the main server
 var Register = require("./scripts/Register.js");
 

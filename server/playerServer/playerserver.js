@@ -1,5 +1,7 @@
 var http = require("http");
 var mysql = require("mysql");
+var kickbancode = require("./kickban_password.js");
+var statuscode = require("./status_password.js");
 
 var database = mysql.createConnection({
 	host: "localhost",
@@ -69,14 +71,27 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		playerDatabase.register(email, pass, function (err, id) {
+		playerDatabase.isIpBanned(req.connection.remoteAddress, function (err, banned, info) {
 			if (err) {
-				res.end('{"error": "' + err + '"}');
+				res.end('{"error": "Couldn\'t check if your ip was banned."}');
+				console.error(err);
 				return;
 			}
 
-			var uKey = sessions.addSession(id, email);
-			res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
+			if (banned) {
+				res.end('{"error": "Your ip has been banned till ' + info.enddate + '. Reason: ' + info.reason + '"}');
+				return;
+			}
+
+			playerDatabase.register(email, pass, function (err, id) {
+				if (err) {
+					res.end('{"error": "' + err + '"}');
+					return;
+				}
+
+				var uKey = sessions.addSession(id, email);
+				res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
+			});
 		});
 
 		return;
@@ -166,6 +181,70 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	// Query params: target, by, minutes, reason, kickbancode
+	if (parsedUrl.pathname == "/kickban") {
+		if (parsedUrl.query.kickbancode !== kickbancode) {
+			console.log("Unauthorized kickban request.", req.connection.remoteAddress);
+			res.end('{"error": "Your kickbancode was wrong!"}');
+			return;
+		}
+
+		var by = sessions.getUser("uKey", parsedUrl.query.by);
+		if (!by) {
+			res.end('{"error": "The person trying to ban is not logged in."}');
+			return;
+		}
+
+		if (parsedUrl.query.target) {
+			var target = sessions.getUser("uKey", parsedUrl.query.target);
+			if (!target) {
+				res.end('{"error": "The account you are trying to ban is not logged in"}');
+				return;
+			}
+
+			playerDatabase.banId(target.id, by.id, parsedUrl.query.minutes, parsedUrl.query.reason, function (err) {
+				if (err) {
+					res.end('{"error": "Couldn\'t ban this person"}');
+					console.log("[BANID][ERROR]", err, target);
+					return;
+				}
+
+				res.end('{"success": "User banned"}');
+				sessions.logout(target.ukey);
+			});
+			return;
+		}
+
+		if (!parsedUrl.query.ip) {
+			res.end('{"error": "No target ukey or ip provided!"}');
+			return;
+		}
+
+		playerDatabase.banIp(parsedUrl.query.ip, by.id, parsedUrl.query.minutes, parsedUrl.query.reason, function (err) {
+			if (err) {
+				res.end('{"error": "Couldn\'t ban this ip"}');
+				console.log("[BANIP][ERROR]", err, parsedUrl.query.ip);
+				return;
+			}
+
+			res.end('{"success": "Ip banned"}');
+		});
+		return;
+	}
+
+	if (parsedUrl.pathname == "/isbanned") {
+		var ip = parsedUrl.query.ip;
+
+		playerDatabase.isIpBanned(ip, function (err, banned, info) {
+			res.end(JSON.stringify({
+				error: err,
+				banned: banned,
+				info: info
+			}));
+		});
+		return;
+	}
+
 	if (parsedUrl.pathname == "/logout") {
 		var uKey = parsedUrl.query.uKey;
 		sessions.logout(uKey);
@@ -176,7 +255,7 @@ var server = http.createServer(function (req, res) {
 
 	if (parsedUrl.pathname == "/status") {
 		var pass = parsedUrl.query.pass;
-		if (pass !== "jafiwef24fj23") {
+		if (pass !== statuscode) {
 			res.end('{"error": "No pass provided or wrong!"}');
 			return;
 		}

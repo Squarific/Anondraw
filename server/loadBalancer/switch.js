@@ -1,6 +1,7 @@
 var http = require("http");
 var urlParser = require("url");
 var JOIN_CODE = require("./join_code_password.js");
+var statuscode = require("./status_password.js");
 
 var Servers = require("./scripts/Servers.js");
 var servers = new Servers(JOIN_CODE);
@@ -98,7 +99,7 @@ var server = http.createServer(function (req, res) {
 
 	if (parsedUrl.pathname == "/status") {
 		var pass = parsedUrl.query.pass;
-		if (pass !== "jafiwef24fj23") {
+		if (pass !== statuscode) {
 			res.end('{"error": "No pass provided or wrong!"}');
 			return;
 		}

@@ -208,6 +208,10 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		var data = data || {};
 		self.chat.addMessage(data.user + " " + data.message);
 	});
+
+	this.network.on("setreputation", function (rep) {
+		self.reputation = rep;
+	});
 };
 
 DrawTogether.prototype.sendMessage = function sendMessage (message) {
@@ -535,16 +539,23 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "Cancel"], function (minutes) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "1 year", "1 week", "1 day", "1 hour", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
+		if (minutes == "1 year") minutes = 356 * 24 * 60;
+		if (minutes == "1 week") minutes = 7 * 24 * 60;
+		if (minutes == "1 day") minutes = 24 * 60;
+		if (minutes == "1 hour") minutes = 60;
 		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both", "Cancel"], function (type) {
 			if (type == "Cancel") return;
-			this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes.", ["Yes", "No"], function (confirmation) {
-				if (confirmation == "Yes") {
-					this.network.socket.emit("kickban", [playerid, minutes, type], function (data) {
-						this.chat.addMessage("SERVER", data.error || data.success);
-					}.bind(this));
-				}
+			this.gui.prompt("What is the reason you want to ban him?", ["freepick", "Drawings swastikas", "Destroying drawings", "Being a dick in chat", "Spam", "Cancel"], function (reason) {
+				if (reason == "Cancel") return;
+				this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes. Reason: " + reason, ["Yes", "No"], function (confirmation) {
+					if (confirmation == "Yes") {
+						this.network.socket.emit("kickban", [playerid, minutes, type, reason], function (data) {
+							this.chat.addMessage("SERVER", data.error || data.success);
+						}.bind(this));
+					}
+				}.bind(this));
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
