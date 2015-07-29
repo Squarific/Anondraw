@@ -265,8 +265,6 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 
 			this.setRoom(room);
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
-
-			this.chat.addMessage("CLIENT", "Ready to draw.");
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
 			this.removeLoading();
