@@ -5,6 +5,12 @@ var MAX_USERS_IN_GAMEROOM = 8;
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
 
+var MAX_INK = 50000;
+var BASE_GEN = 2000;
+var PER_REP_GEN = 300;
+
+var SAME_IP_INK_MESSAGE = "You will not get any ink because someone else on your ip has already gotten some.";
+
 function Protocol (io, drawtogether, imgur, players, register) {
 	this.io = io;
 	this.drawTogether = drawtogether;
@@ -14,7 +20,25 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.bindIO();
 
 	this.gameRooms = {};
+	setInterval(this.inkTick.bind(this), 20 * 1000);
 }
+
+Protocol.prototype.inkTick = function inkTick () {
+	var ips = [];
+
+	for (var id in this.io.nsps['/'].connected) {
+		var socket = this.io.nsps['/'].connected[id];
+
+		if (ips.indexOf(socket.ip) !== -1) {
+			this.informClient(socket, SAME_IP_INK_MESSAGE);
+			continue;
+		}
+
+		var extra = BASE_GEN + PER_REP_GEN * (socket.reputation || 0);
+		socket.ink = Math.min(socket.ink + extra, MAX_INK);
+		socket.emit("setink", socket.ink);
+	}
+};
 
 Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 	console.log("[CHAT][" + room + "] " + data.user + ": " + data.message);
@@ -32,10 +56,6 @@ Protocol.prototype.sendDrawing = function sendDrawing (room, socketid, drawing) 
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
 	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
-};
-
-Protocol.prototype.updatePlayerList = function updatePlayerList (room) {
-	// Update the player list for all clients in this room
 };
 
 Protocol.prototype.informClient = function informClient (socket, message) {
@@ -75,9 +95,7 @@ Protocol.prototype.socketFromId = function socketFromId (id) {
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
 	this.io.on("connection", function (socket) {
-		// Give the user a name and send it to the client, then bind
-		// all events so we can answer the client when it asks something
-
+		socket.ink = 2500;
 		socket.ip = socket.client.conn.remoteAddress;
 		if (!socket.ip) {
 			socket.emit("chatmessage", {
@@ -348,6 +366,19 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			// If we aren't in a private room, check our ink
+			if (socket.room.indexOf("private_") !== 0) {
+				var usage = protocol.drawTogether.inkUsageFromDrawing(drawing);
+
+				if (socket.ink < usage) {
+					protocol.informClient(socket, "Not enough ink!");
+					callback();
+					return;
+				}
+
+				socket.ink -= usage;
+			}
+			
 			protocol.drawTogether.addDrawing(socket.room, drawing, function () {
 				protocol.sendDrawing(socket.room, socket.id, drawing);
 				callback();

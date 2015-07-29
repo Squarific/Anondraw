@@ -8,7 +8,7 @@ function DrawTogether (container, settings) {
 
 	// Set default values untill we receive them from the server
 	this.playerList = [];
-	this.ink = 5000;
+	this.ink = 2500;
 	this.lastInkWarning = Date.now();
 
 	//this.network = new Network("http://direct.anondraw.com:3552");
@@ -19,6 +19,7 @@ function DrawTogether (container, settings) {
 	// Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
+	this.updateInk();
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
@@ -166,16 +167,6 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		self.displayMessage(message);
 	});
 
-	// this.network.on("setink", function (amount) {
-	// 	self.ink = amount;
-	// 	self.updateInk();
-	// });
-
-	// this.network.on("changeink", function (amount) {
-	// 	self.ink = Math.min(self.ink + amount, 30000);
-	// 	self.updateInk();
-	// });
-
 	this.network.on("gamestatus", function (status) {
 		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing. You have " + Math.round(status.timeLeft / 1000) + " seconds left.");
 		self.chat.addMessage("GAME", "The word contains some of the following letters: " + status.letters.join(", "));
@@ -211,6 +202,11 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 
 	this.network.on("setreputation", function (rep) {
 		self.reputation = rep;
+	});
+
+	this.network.on("setink", function (ink) {
+		self.ink = ink;
+		self.updateInk();
 	});
 };
 
@@ -347,21 +343,21 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 	}
 };
 
-// DrawTogether.prototype.updateInk = function updateInk () {
-// 	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/30000";
-// 	this.inkDom.textContent = "Ink: " + Math.floor(this.ink) + "/30000";
-// 	this.inkDom.style.width = Math.floor(Math.max(this.ink / 300, 0)) + "%"; // = ink / 10000 * 100
-// 	if (this.ink < 3000) {
-// 		this.inkDom.classList.add("drawtogether-ink-low");
-// 		this.inkDom.classList.remove("drawtogether-ink-middle");
-// 	} else if (this.ink < 8000) {
-// 		this.inkDom.classList.add("drawtogether-ink-middle");
-// 		this.inkDom.classList.remove("drawtogether-ink-low");
-// 	} else {
-// 		this.inkDom.classList.remove("drawtogether-ink-middle");
-// 		this.inkDom.classList.remove("drawtogether-ink-low");
-// 	}
-// };
+DrawTogether.prototype.updateInk = function updateInk () {
+	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/50000";
+	this.inkDom.textContent = "Ink: " + Math.floor(this.ink) + "/50000";
+	this.inkDom.style.width = Math.floor(Math.max(this.ink / 500, 0)) + "%"; // = ink / 10000 * 100
+	if (this.ink < 3000) {
+		this.inkDom.classList.add("drawtogether-ink-low");
+		this.inkDom.classList.remove("drawtogether-ink-middle");
+	} else if (this.ink < 8000) {
+		this.inkDom.classList.add("drawtogether-ink-middle");
+		this.inkDom.classList.remove("drawtogether-ink-low");
+	} else {
+		this.inkDom.classList.remove("drawtogether-ink-middle");
+		this.inkDom.classList.remove("drawtogether-ink-low");
+	}
+};
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
 	if (!this.network.socket) return;
@@ -602,21 +598,24 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("userdrawing", function (event) {
 		// When a drawing is made check if we have ink left
-		// if (this.ink < 0) {
-		// 	if (Date.now() - this.lastInkWarning > 5000) {
-		// 		this.chat.addMessage("CLIENT", "No ink left! You will regain ink every 2 minutes. Tip: Small brushes use less ink.");
-		// 		this.lastInkWarning = Date.now();
-		// 	}
-		// 	event.removeDrawing();
-		// 	return;
-		// }
+		var usage = this.inkUsageFromDrawing(event.drawing);
+		if (this.ink < usage) {
+			if (Date.now() - this.lastInkWarning > 20000) {
+				this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
+				this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
+				this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
+				this.lastInkWarning = Date.now();
+			}
+			event.removeDrawing();
+			return;
+		}
 
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		// if (this.socket && (!this.current_room || (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0))) {
-		// 	this.ink -= this.inkUsageFromDrawing(event.drawing);
-		// 	this.updateInk();
-		// }
+		if (this.current_room.indexOf("private_") !== 0) {
+			this.ink -= usage;
+			this.updateInk();
+		}
 
 		// Send the drawing to the server and remove from the local
 		// layer once we got a confirmation from the server
@@ -631,16 +630,16 @@ DrawTogether.prototype.createMessage = function createMessage () {
 	this.messageDom.className = "drawtogether-general-message";
 };
 
-// DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
-// 	// If its a brush the ink usage is (size * size)
-// 	// If it is a line the ink usage is (size * length * 2)
-// 	var length = drawing.size;
+DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
+	// If its a brush the ink usage is (size * size)
+	// If it is a line the ink usage is (size * length * 2)
+	var length = drawing.size;
 
-// 	if (typeof drawing.x1 == "number")
-// 		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1) * 2;
+	if (typeof drawing.x1 == "number")
+		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1) * 2;
 
-// 	return Math.ceil(drawing.size * length / 100);
-// };
+	return Math.ceil(drawing.size * length / 100);
+};
 
 DrawTogether.prototype.createRoomInformation = function createRoomInformation () {
 	var infoContainer = this.container.appendChild(document.createElement("div"));
@@ -1194,7 +1193,7 @@ DrawTogether.prototype.utils = {
 	distance: function (x1, y1, x2, y2) {
 		// Returns the distance between (x1, y1) and (x2, y2)
 		var xDis = x1 - x2,
-		    yDis = y1 - y1;
+		    yDis = y1 - y2;
 		return Math.sqrt(xDis * xDis + yDis * yDis);
 	}
 };
