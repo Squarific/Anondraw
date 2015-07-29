@@ -21,12 +21,7 @@
 		<script src="DrawTogether.min.js?v=83"></script>
 		<script type="text/javascript">
 			var room = location.hash.substr(1, location.hash.length);
-			//var servers = ["http://server1.anondraw.com:4958", "http://server2.anondraw.com:4958", "http://server3.anondraw.com:4958"];
-			//var server = servers[Math.floor(Math.random() * servers.length)];
 			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
-				//server: server,
-				//server: "http://127.0.0.1:4958",
-				server: "http://server1.anondraw.com:4958",
 				room: room || "main",
 				mode: (room) ? "join" : "ask"
 			});

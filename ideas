@@ -1,20 +1,29 @@
 minimap
 premium
-game
 transparent
-image upload
+
 bitmap background
 votekick
 kleurplaten (coloring images)
+
 stamps
 profiles
 friends(list)
-zoom
-banreason
+
+better zoom
 opacity
 room with very limited ink so only small drawings, after permanent background
+
 ding/tablad text change on chat
 default colors next to tools?
 roleplaying mode
 
-'serious/staffmoderate' room, 'free/troll' room, 'private' room, 'usermoderated' room
+enable game mode
+enable ink
+
+SVG export
+http://www.w3schools.com/svg/tryit.asp?filename=trysvg_circle
+http://www.w3schools.com/svg/tryit.asp?filename=trysvg_line
+
+
+'serious/staffmoderate' room, 'free/troll' room, 'private' room, 'usermoderated' room (?)

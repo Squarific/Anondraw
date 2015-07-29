@@ -1,0 +1,22 @@
+{
+  "name": "switch",
+  "private": "true",
+  "version": "0.0.0",
+  "description": "Anondraw switch server",
+  "main": "switch.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Squarific/DrawTogether2.git"
+  },
+  "author": "Filip Smets <alemaaltevinden@gmail.com>",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/Squarific/drawtogether2/issues"
+  },
+  "homepage": "http://www.anondraw.com"
+}

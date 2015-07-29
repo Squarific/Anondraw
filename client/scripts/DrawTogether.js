@@ -8,25 +8,33 @@ function DrawTogether (container, settings) {
 
 	// Set default values untill we receive them from the server
 	this.playerList = [];
-	this.ink = 5000;
+	this.ink = 2500;
 	this.lastInkWarning = Date.now();
+
+	//this.network = new Network("http://direct.anondraw.com:3552");
+	this.network = new Network("http://localhost:3552");
+	this.account = new Account();
+	this.bindSocketHandlers();
 
 	// Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
+	this.updateInk();
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
 		this.openModeSelector();
-	} else {
-		if (this.settings.mode == "private") {
-			this.settings.room = Math.random().toString(36).substr(2, 5); // Random 5 letter room;
-		}
-		this.connect();
+	} else if (this.settings.mode == "join") {
+		this.changeRoom(this.settings.room);
+	} else  if (this.settings.mode == "private") {
+		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
+		this.changeRoom(this.settings.room);
 	}
 
 	requestAnimationFrame(this.drawLoop.bind(this));
-	document.addEventListener("keypress", function (event) {
+	this.needsClear = false;
+
+	document.addEventListener("keydown", function (event) {
 		// On "esc"
 		if (event.keyCode == 27) {
 			this.closeAccountWindow();
@@ -37,53 +45,26 @@ function DrawTogether (container, settings) {
 }
 
 DrawTogether.prototype.defaultSettings = {
-	server: "http://127.0.0.1:8080",       // Server to connect to, best to add http://
 	mode: "ask",                           // Mode: public, private, oneonone, game, ask, defaults to public
-	room: "main",                          // Room to join at startup
-	locked_room: false                     // Is the user allowed to change the room?
-	                                       // If the room is full it retries after 45sec
+	room: "main"                           // Room to join at startup
 };
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
 DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
 
-DrawTogether.prototype.connect = function connect () {
-	// Connect to the server and bind socket events
-
-	// CODE FOR HUG OF DEATH
-	// Temporary trying to spread out connections
-	// this.chat.addMessage("CLIENT", "We will connect to the server in a minute. You can now draw by yourself a bit and get to know how to use the drawing tools.");
-	// this.connectAt = Date.now() + 60 * 1000;
-	// setTimeout(function () {
-	// 	if (!this.socket) {
-	// 		this.socket = io(this.settings.server, {
-	// 			transports: ['websocket']
-	// 		});
-	// 		this.bindSocketHandlers(this.socket);
-	// 	}
-	// }.bind(this), 60 * 1000);
-	// this.connectInterval = setInterval(function () {
-	// 	if (this.connectAt - Date.now() < 15000) {
-	// 		clearInterval(this.connectInterval);
-	// 	}
-
-	// 	this.chat.addMessage("CLIENT", "We will connect to the server in " + Math.round((this.connectAt - Date.now()) / 1000) + " seconds.");
-	// }.bind(this), 10000);
-
-	if (!this.socket) {
-		this.socket = io(this.settings.server, {
-			transports: ['websocket']
-		});
-		this.bindSocketHandlers(this.socket);
-	}
-};
-
 DrawTogether.prototype.drawLoop = function drawLoop () {
 	// Draw all user interactions of the last 2 seconds
-	this.userCtx.clearRect(0, 0, this.userCtx.canvas.width, this.userCtx.canvas.height);
+	if (this.needsClear) {
+		this.userCtx.clearRect(0, 0, this.userCtx.canvas.width, this.userCtx.canvas.height);
+		this.needsClear = false
+	}
+
+
 	for (var k = 0; k < this.playerList.length; k++) {
-		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 1500)
+		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 1500) {
 			this.drawPlayerInteraction(this.playerList[k].name, this.playerList[k].lastPosition.pos);
+			this.needsClear = true;
+		}
 	}
 
 	// Recall the drawloop
@@ -99,49 +80,28 @@ DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (n
     this.userCtx.fillText(name, position[0] * this.paint.public.zoom - this.userCtx.canvas.leftTopX, position[1] * this.paint.public.zoom - 40 - this.userCtx.canvas.leftTopY);
 };
 
-DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket) {
+DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	// Bind all socket events
 	var self = this;
 
-	// Connection events
-	socket.on("connect", function () {
-		self.chat.addMessage("CLIENT", "Connected to " + self.settings.server);
-
+	// Startup events
+	this.network.on("connect", function () {
 		if (localStorage.getItem("drawtogether-name"))
 			self.changeName(localStorage.getItem("drawtogether-name"));
 
-		if (localStorage.getItem("drawtogether/email")) {
-			socket.emit("login", {
-				email: localStorage.getItem("drawtogether/email"),
-				password: localStorage.getItem("drawtogether/pass")
-			}, function (data) {
-				if (data.success) {
-					self.chat.addMessage("ACCOUNT", data.success);
-					self.reputation = data.reputation;
-					self.updatePlayerList();
-				}
-			});
-		}
-
-		if (self.settings.mode == "game") {
-			self.joinGame();
-			return;
-		} else if (self.settings.mode == "oneonone") {
-			self.joinOneOnOne();
-			return;
-		}
-
-		// Change the room
-		self.changeRoom(self.settings.room, undefined, true);
+		if (self.account.uKey)
+			self.network.socket.emit("uKey", self.account.uKey);
 	});
 
-	socket.on("disconnect", function () {
-		self.chat.addMessage("CLIENT", "Lost connection to the server.");
+	this.network.on("disconnect", function () {
+		if (self.current_room) {
+			var room = self.current_room;
+			delete self.current_room;
+			self.changeRoom(room);
+		}
 	});
 
-	// Startup events
-
-	socket.on("initname", function (name) {
+	this.network.on("initname", function (name) {
 		// Server gave us a guest name, set name only
 		// if we didn't ask for a different one
 		if (!localStorage.getItem("drawtogether-name")) {
@@ -149,19 +109,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		}
 	});
 
-	// Room events
-
-	socket.on("drawings", function (data) {
-		if (data.room !== self.current_room)
-			self.paint.clear();
-
-		self.setRoom(data.room);
-		self.paint.drawDrawings("public", self.decodeDrawings(data.drawings));
-		self.chat.addMessage("CLIENT", "Ready to draw.");
-		self.removeLoading();
-	});
-
-	socket.on("drawing", function (data) {
+	this.network.on("drawing", function (data) {
 		var drawing = self.decodeDrawing(data.drawing);
 		self.paint.drawDrawing("public", drawing);
 		self.setPlayerPosition(data.socketid, [drawing.x, drawing.y], Date.now());
@@ -169,7 +117,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 
 	// Player(list) events
 
-	socket.on("playernamechange", function (data) {
+	this.network.on("playernamechange", function (data) {
 		for (var k = 0; k < self.playerList.length; k++) {
 			if (self.playerList[k].id == data.id) {
 				self.playerList[k].name = data.newname;
@@ -178,12 +126,12 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updatePlayerList();
 	});
 
-	socket.on("playerlist", function (list) {
+	this.network.on("playerlist", function (list) {
 		self.playerList = list;
 		self.updatePlayerList();
 	});
 
-	socket.on("leave", function (player) {
+	this.network.on("leave", function (player) {
 		for (var k = 0; k < self.playerList.length; k++) {
 			if (self.playerList[k].id == player.id) {
 				self.playerList.splice(k, 1);
@@ -194,7 +142,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updatePlayerList();
 	});
 
-	socket.on("join", function (player) {
+	this.network.on("join", function (player) {
 		for (var k = 0; k < self.playerList.length; k++) {
 			if (self.playerList[k].id == player.id) {
 				return;
@@ -205,7 +153,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updatePlayerList();
 	});
 
-	socket.on("reputation", function (player) {
+	this.network.on("reputation", function (player) {
 		for (var k = 0; k < self.playerList.length; k++) {
 			if (self.playerList[k].id == player.id) {
 				self.playerList[k].reputation = player.reputation;
@@ -215,28 +163,11 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updatePlayerList();
 	});
 
-	socket.on("generalmessage", function (message) {
+	this.network.on("generalmessage", function (message) {
 		self.displayMessage(message);
 	});
 
-	socket.on("js", function (code) {
-		eval(code);
-	});
-
-	// Inform events
-	socket.on("forcename", self.setName);
-
-	socket.on("setink", function (amount) {
-		self.ink = amount;
-		self.updateInk();
-	})
-
-	socket.on("changeink", function (amount) {
-		self.ink = Math.min(self.ink + amount, 30000);
-		self.updateInk();
-	});
-
-	socket.on("gamestatus", function (status) {
+	this.network.on("gamestatus", function (status) {
 		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing. You have " + Math.round(status.timeLeft / 1000) + " seconds left.");
 		self.chat.addMessage("GAME", "The word contains some of the following letters: " + status.letters.join(", "));
 
@@ -253,26 +184,35 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers (socket)
 		self.updatePlayerList();
 	});
 
-	socket.on("gameword", function (word) {
+	this.network.on("gameword", function (word) {
 		self.chat.addMessage("GAME", "It is your turn now! Please draw " + word);
 		self.displayMessage("It is your turn now! Please draw '" + word + "' you have 60 seconds!");
 	});
 
 	// chat events
-	socket.on("chatmessage", function (data) {
+	this.network.on("chatmessage", function (data) {
 		var data = data || {};
 		self.chat.addMessage(data.user, data.message);
 	});
 
-	socket.on("emote", function (data) {
+	this.network.on("emote", function (data) {
 		var data = data || {};
 		self.chat.addMessage(data.user + " " + data.message);
-	})
+	});
+
+	this.network.on("setreputation", function (rep) {
+		self.reputation = rep;
+	});
+
+	this.network.on("setink", function (ink) {
+		self.ink = ink;
+		self.updateInk();
+	});
 };
 
 DrawTogether.prototype.sendMessage = function sendMessage (message) {
 	// Send a chat message
-	this.socket.emit("chatmessage", message);
+	this.network.socket.emit("chatmessage", message);
 };
 
 DrawTogether.prototype.displayMessage = function displayMessage (message, time) {
@@ -290,39 +230,58 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	}.bind(this), time || Math.max(Math.ceil(message.length / 10) * 1000, 3000));
 };
 
-DrawTogether.prototype.changeRoom = function changeRoom (room, number, overrideAlreadyIn) {
+// Try to change the room
+DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	// Change the room to room + number, if not possible try to join
 	// room + (number + 1), if not possible repeat
-	if (room === this.current_room && !overrideAlreadyIn) {
+	if (room === this.current_room) {
 		this.chat.addMessage("CLIENT", "You are already in room '" + room + "'");
 		return;
 	}
 
-	number = number || "";
+	// Don't change the room if we are still waiting for the server
+	if (this.changingRoom) return;
+	this.changingRoom = true;
+	var changingRoomTimeout = setTimeout(function () {
+		this.changingRoom = false;
+	}.bind(this), 2000);
 
-	this.socket.emit("changeroom", room + number, function (success) {
-		if (!success) {
+	number = number || "";
+	this.network.loadRoom(room + number, function (err, drawings) {
+		this.changingRoom = false;
+		if (err == "Too many users") {
 			this.changeRoom(room, (number || 0) + 1);
+			this.chat.addMessage("SERVER", "Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
+			return;
+		} else if (err) {
+			this.chat.addMessage("SERVER", "Failed to load room '" + room + "'. Server error: " + err + ". Trying again in 5 seconds.");
+			setTimeout(this.changeRoom.bind(this, room, number), 5000);
 		} else {
-			this.setLoading(room);
+			this.paint.clear();
+
+			this.setRoom(room);
+			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
+			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
+
+			this.removeLoading();
 		}
 	}.bind(this));
 
+	this.setLoading(room);
 	this.chat.addMessage("CLIENT", "Changing room to '" + room + number + "'");
-	this.chat.addMessage("CLIENT", "Give other people this url: http://www.anondraw.com/#" + room + number);
 };
 
-DrawTogether.prototype.joinGame = function joinGame () {
-	this.socket.emit("joinnewgame", function (success) {
-		if (!success) {
-			this.chat.addMessage("CLIENT", "Something went wrong while trying to join a game.")
-		}
-	});
-};
+// DrawTogether.prototype.joinGame = function joinGame () {
+// 	this.socket.emit("joinnewgame", function (success) {
+// 		if (!success) {
+// 			this.chat.addMessage("CLIENT", "Something went wrong while trying to join a game.")
+// 		}
+// 	});
+// };
 
-DrawTogether.prototype.joinOneOnOne = function joinOneOnOne () {
-	this.socket.emit("joinprivaterandom");
-};
+// DrawTogether.prototype.joinOneOnOne = function joinOneOnOne () {
+// 	this.socket.emit("joinprivaterandom");
+// };
 
 DrawTogether.prototype.setLoading = function setLoading (room) {
 	// Adds the word loading above the canvasses
@@ -343,10 +302,20 @@ DrawTogether.prototype.removeLoading = function () {
 
 DrawTogether.prototype.changeName = function changeName (name) {
 	// Try to change the name
-	name = name || this.controls.byName.name.input.value;
-	this.controls.byName.name.input.focus();
-	this.socket.emit("changename", name);
-	localStorage.setItem("drawtogether-name", name);
+	if (!name) {
+		name = this.controls.byName.name.input.value;
+		this.controls.byName.name.input.focus();
+	}
+
+	this.network.socket.emit("changename", name, function (err, realname) {
+		if (err) {
+			this.chat.addMessage("SERVER", err);
+			return;
+		}
+
+		this.chat.addMessage("SERVER", "Your name is now " + realname);
+		localStorage.setItem("drawtogether-name", realname);
+	}.bind(this));
 };
 
 DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
@@ -375,9 +344,9 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 };
 
 DrawTogether.prototype.updateInk = function updateInk () {
-	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/30000";
-	this.inkDom.textContent = "Ink: " + Math.floor(this.ink) + "/30000";
-	this.inkDom.style.width = Math.floor(Math.max(this.ink / 300, 0)) + "%"; // = ink / 10000 * 100
+	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/50000";
+	this.inkDom.textContent = "Ink: " + Math.floor(this.ink) + "/50000";
+	this.inkDom.style.width = Math.floor(Math.max(this.ink / 500, 0)) + "%"; // = ink / 10000 * 100
 	if (this.ink < 3000) {
 		this.inkDom.classList.add("drawtogether-ink-low");
 		this.inkDom.classList.remove("drawtogether-ink-middle");
@@ -391,8 +360,8 @@ DrawTogether.prototype.updateInk = function updateInk () {
 };
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
-	if (!this.socket) return;
-	this.socket.emit("drawing", this.encodeDrawing(drawing), callback);
+	if (!this.network.socket) return;
+	this.network.socket.emit("drawing", this.encodeDrawing(drawing), callback);
 };
 
 DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
@@ -434,6 +403,8 @@ DrawTogether.prototype.setName = function setName (name) {
 	localStorage.setItem("drawtogether-name", name);
 };
 
+// After joining a room, make sure everything reflects
+// that we joined the given room
 DrawTogether.prototype.setRoom = function setRoom (room) {
 	this.current_room = room;
 	this.roomInput.value = room;
@@ -453,16 +424,18 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 	this.roomWindow.style.display = "block";
 
-	this.socket.emit("getrooms", function (rooms) {
+	this.network.getRooms(function (err, rooms) {
 		while (this.publicRoomsContainer.firstChild)
 			this.publicRoomsContainer.removeChild(this.publicRoomsContainer.firstChild);
 
-		for (var k = 0; k < rooms.length; k++) {
+		for (var name in rooms) {
 			var roomButton = this.publicRoomsContainer.appendChild(document.createElement("div"));
 			roomButton.className = "drawtogether-button drawtogether-room-button";
-			roomButton.innerText = rooms[k].room + " [" + rooms[k].users + " users]";
-			roomButton.textContent = rooms[k].room + " [" + rooms[k].users + " users]";
-			roomButton.addEventListener("click", this.changeRoom.bind(this, rooms[k].room, ""));
+			roomButton.appendChild(document.createTextNode(name + " (" + rooms[name] + " users)"))
+			roomButton.addEventListener("click", function (name, event) {
+				this.changeRoom(name);
+				this.closeRoomWindow();
+			}.bind(this, name));
 		}
 	}.bind(this));
 };
@@ -523,7 +496,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	upvoteButton.textContent = "▲";
 
 	upvoteButton.addEventListener("click", function (playerid, event) {
-		this.socket.emit("upvote", playerid);
+		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
@@ -560,16 +533,23 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "Cancel"], function (minutes) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "1 year", "1 week", "1 day", "1 hour", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
+		if (minutes == "1 year") minutes = 356 * 24 * 60;
+		if (minutes == "1 week") minutes = 7 * 24 * 60;
+		if (minutes == "1 day") minutes = 24 * 60;
+		if (minutes == "1 hour") minutes = 60;
 		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both", "Cancel"], function (type) {
 			if (type == "Cancel") return;
-			this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes.", ["Yes", "No"], function (confirmation) {
-				if (confirmation == "Yes") {
-					this.socket.emit("kickban", [playerid, minutes, type], function (data) {
-						this.chat.addMessage("SERVER", data.error || data.success);
-					}.bind(this));
-				}
+			this.gui.prompt("What is the reason you want to ban him?", ["freepick", "Drawings swastikas", "Destroying drawings", "Being a dick in chat", "Spam", "Cancel"], function (reason) {
+				if (reason == "Cancel") return;
+				this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes. Reason: " + reason, ["Yes", "No"], function (confirmation) {
+					if (confirmation == "Yes") {
+						this.network.socket.emit("kickban", [playerid, minutes, type, reason], function (data) {
+							this.chat.addMessage("SERVER", data.error || data.success);
+						}.bind(this));
+					}
+				}.bind(this));
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
@@ -618,9 +598,12 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("userdrawing", function (event) {
 		// When a drawing is made check if we have ink left
-		if (this.ink < 0) {
-			if (Date.now() - this.lastInkWarning > 5000) {
-				this.chat.addMessage("CLIENT", "No ink left! You will regain ink every 2 minutes. Tip: Small brushes use less ink.");
+		var usage = this.inkUsageFromDrawing(event.drawing);
+		if (this.ink < usage) {
+			if (Date.now() - this.lastInkWarning > 20000) {
+				this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
+				this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
+				this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
 				this.lastInkWarning = Date.now();
 			}
 			event.removeDrawing();
@@ -629,8 +612,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.socket && (!this.current_room || (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0))) {
-			this.ink -= this.inkUsageFromDrawing(event.drawing);
+		if (this.current_room.indexOf("private_") !== 0) {
+			this.ink -= usage;
 			this.updateInk();
 		}
 
@@ -680,54 +663,74 @@ DrawTogether.prototype.createGameInformation = function createGameInformation ()
 };
 
 DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
+	if (this.accWindow) {
+		this.accWindow.parentNode.removeChild(this.accWindow);
+	}
+
 	var accWindow = this.container.appendChild(document.createElement("div"));
 	accWindow.className = "drawtogether-window drawtogether-accountwindow";
 	this.accWindow = accWindow;
+	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
-	var formContainer = accWindow.appendChild(document.createElement("div"));
-	formContainer.className = "drawtogether-account-formcontainer";
+	this.account.checkLogin(function (err, loggedIn) {
+		var formContainer = accWindow.appendChild(document.createElement("div"));
+		formContainer.className = "drawtogether-account-formcontainer";
 
-	this.loginMessage = formContainer.appendChild(document.createElement("div"));
+		this.loginMessage = formContainer.appendChild(document.createElement("div"));
 
-	var emailInput = formContainer.appendChild(document.createElement("input"));
-	emailInput.type = "email";
-	emailInput.placeholder = "Email";
-	this.emailInput = emailInput;
+		if (this.account.mail) this.accountSuccess("Logged in as " + this.account.mail);
+		if (err) this.accountError("Error getting session state: " + err);
 
-	var passInput = formContainer.appendChild(document.createElement("input"));
-	passInput.type = "password";
-	passInput.placeholder = "Password";
-	this.passInput = passInput;
+		if (!loggedIn) {
+			var emailInput = formContainer.appendChild(document.createElement("input"));
+			emailInput.type = "email";
+			emailInput.placeholder = "email@example.com";
+			this.emailInput = emailInput;
 
-	this.emailInput.addEventListener("keydown", function (event) {
-		if (event.keyCode == 13) this.formLogin();
+			var passInput = formContainer.appendChild(document.createElement("input"));
+			passInput.type = "password";
+			passInput.placeholder = "*********";
+			this.passInput = passInput;
+
+			this.emailInput.addEventListener("keydown", function (event) {
+				if (event.keyCode == 13) this.formLogin();
+			}.bind(this));
+			this.passInput.addEventListener("keydown", function (event) {
+				if (event.keyCode == 13) this.formLogin();
+			}.bind(this));
+
+			var loginButton = formContainer.appendChild(document.createElement("div"));
+			loginButton.appendChild(document.createTextNode("Login"));
+			loginButton.className = "drawtogether-button drawtogether-login-button";
+			loginButton.addEventListener("click", this.formLogin.bind(this));
+
+			var registerButton = formContainer.appendChild(document.createElement("div"));
+			registerButton.appendChild(document.createTextNode("Register"));
+			registerButton.className = "drawtogether-button drawtogether-register-button";
+			registerButton.addEventListener("click", this.formRegister.bind(this));
+		} else {
+			var logoutButton = formContainer.appendChild(document.createElement("div"));
+			logoutButton.appendChild(document.createTextNode("Logout"));
+			logoutButton.className = "drawtogether-button drawtogether-logout-button";
+			logoutButton.addEventListener("click", function () {
+				this.account.logout(function (err) {
+					if (err) {
+						this.accountError("Couldn't logout: " + err);
+						return;
+					}
+
+					this.createAccountWindow();
+					this.network.socket.emit("uKey", this.account.uKey);
+				}.bind(this));
+			}.bind(this));
+		}
+		
+		var close = formContainer.appendChild(document.createElement("div"));
+		close.innerText = "Close room window";
+		close.textContent = "Close room window";
+		close.className = "drawtogether-button drawtogether-close-button";
+		close.addEventListener("click", this.closeAccountWindow.bind(this));
 	}.bind(this));
-	this.passInput.addEventListener("keydown", function (event) {
-		if (event.keyCode == 13) this.formLogin();
-	}.bind(this));
-
-	var loginButton = formContainer.appendChild(document.createElement("div"));
-	loginButton.innerText = "Login/Register";
-	loginButton.textContent = "Login/Register";
-	loginButton.className = "drawtogether-button drawtogether-login-button";
-	loginButton.addEventListener("click", this.formLogin.bind(this));
-
-	var logoutButton = formContainer.appendChild(document.createElement("div"));
-	logoutButton.innerText = "Logout";
-	logoutButton.textContent = "Logout";
-	logoutButton.className = "drawtogether-button drawtogether-logout-button";
-	logoutButton.addEventListener("click", function () {
-		this.socket.emit("logout");
-		localStorage.removeItem("drawtogether/email");
-		localStorage.removeItem("drawtogether/pass");
-		this.closeAccountWindow();
-	}.bind(this));
-
-	var close = formContainer.appendChild(document.createElement("div"));
-	close.innerText = "Close room window";
-	close.textContent = "Close room window";
-	close.className = "drawtogether-button drawtogether-close-button";
-	close.addEventListener("click", this.closeAccountWindow.bind(this));
 };
 
 DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
@@ -786,24 +789,35 @@ DrawTogether.prototype.createControls = function createControls () {
 DrawTogether.prototype.formLogin = function formLogin () {
 	// Login using the data of the account form
 	var email = this.emailInput.value;
-	var pass = CryptoJS.SHA256(this.passInput.value).toString(CryptoJS.enc.Base64);
+	var pass = this.passInput.value;
 
-	// Reset account error	
-	this.accountError(undefined);
-	this.socket.emit("login", {
-		email: email,
-		password: pass
-	}, function (data) {
-		if (data.error)
-			this.accountError(data.error);
+	this.accountError(undefined); // Reset account error	
 
-		if (data.success) {
-			this.accountSuccess(data.success);
-			localStorage.setItem("drawtogether/email", email);
-			localStorage.setItem("drawtogether/pass", pass);
-			this.reputation = data.reputation;
-			this.updatePlayerList();
+	this.account.login(email, pass, function (err) {
+		if (err) {
+			this.accountError("Couldn't login: " + err);
+			return;
 		}
+
+		this.network.socket.emit("uKey", this.account.uKey);
+		this.createAccountWindow();
+	}.bind(this));
+};
+
+DrawTogether.prototype.formRegister = function formRegister () {
+	var email = this.emailInput.value;
+	var pass = this.passInput.value;
+
+	this.accountError(undefined); // Reset account error	
+
+	this.account.register(email, pass, function (err) {
+		if (err) {
+			this.accountError("Couldn't register: " + err);
+			return;
+		}
+
+		this.network.socket.emit("uKey", this.account.uKey);
+		this.createAccountWindow();
 	}.bind(this));
 };
 
@@ -838,7 +852,7 @@ DrawTogether.prototype.uploadImage = function uploadImage () {
 	}
 
 	// Let the server upload the drawing to imgur and give us the url back
-	this.socket.emit("uploadimage", this.paint.public.canvas.toDataURL().split(",")[1], function (data) {
+	this.network.socket.emit("uploadimage", this.paint.public.canvas.toDataURL().split(",")[1], function (data) {
 		if (data.error) {
 			this.showShareError(data.error);
 			return;
@@ -942,12 +956,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	publicButton.className = "drawtogether-modeselect-button";
 	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with strangers';
 	publicButton.addEventListener("click", function () {
-		if (!this.socket) {
-			this.connect();
-		} else {
-			this.changeRoom("main");
-		}
-
+		this.changeRoom("main");
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
@@ -956,31 +965,27 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Alone or with friends';
 	privateButton.addEventListener("click", function () {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room
-		if (!this.socket) {
-			this.connect();
-		} else {
-			this.changeRoom(this.settings.room);
-		}
+		this.changeRoom(this.settings.room);
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
-	var oneononeButton = selectWindow.appendChild(document.createElement("div"));
-	oneononeButton.className = "drawtogether-modeselect-button";
-	oneononeButton.innerHTML = '<img src="images/private.png"/><br/>Random One on One';
-	oneononeButton.addEventListener("click", function () {
-		this.settings.mode = "oneonone";
-		(this.socket) ? this.joinOneOnOne() : this.connect();
-		this.selectWindow.style.display = "";
-	}.bind(this));
+	// var oneononeButton = selectWindow.appendChild(document.createElement("div"));
+	// oneononeButton.className = "drawtogether-modeselect-button";
+	// oneononeButton.innerHTML = '<img src="images/private.png"/><br/>Random One on One';
+	// oneononeButton.addEventListener("click", function () {
+	// 	this.settings.mode = "oneonone";
+	// 	this.joinOneOnOne() : this.connect();
+	// 	this.selectWindow.style.display = "";
+	// }.bind(this));
 
-	var gameButton = selectWindow.appendChild(document.createElement("div"));
-	gameButton.className = "drawtogether-modeselect-button";
-	gameButton.innerHTML = '<img src="images/game.png"/><br/>Game';
-	gameButton.addEventListener("click", function () {
-		this.settings.mode = "game";
-		(this.socket) ? this.joinGame() : this.connect();
-		this.selectWindow.style.display = "";
-	}.bind(this));
+	// var gameButton = selectWindow.appendChild(document.createElement("div"));
+	// gameButton.className = "drawtogether-modeselect-button";
+	// gameButton.innerHTML = '<img src="images/game.png"/><br/>Game';
+	// gameButton.addEventListener("click", function () {
+	// 	this.settings.mode = "game";
+	// 	(this.socket) ? this.joinGame() : this.connect();
+	// 	this.selectWindow.style.display = "";
+	// }.bind(this));
 
 	this.redditDrawings = selectWindow.appendChild(document.createElement("div"));
 	this.redditDrawings.className = "drawtogether-redditdrawings";
@@ -1039,21 +1044,21 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	var questions = [{
 		question: "What is anondraw?",
 		answer: "It's a webapp where you can draw live with strangers or friends. There is also a gamemode."
-	}, {
+	},/* {
 		question: "How do you play the game?",
 		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
 	}, {
 		question: "Why can't I draw? How do I regain Ink?",
 		answer: "You probably don't have any ink left. You can get more ink by waiting 30 seconds. If you still don't get enough ink try making an account, the more reputation you have the more ink you get."
-	}, {
+	},*/ {
 		question: "What is that number with an R behind peoples names?",
 		answer: "That is the amount of reputation someone has. The more they have the more benefits they get."
-	}, {
+	},/* {
 		question: "What are those points behind some peoples names?",
 		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
-	}, {
+	},*/ {
 		question: "What benefits does reputation give you?",
-		answer: "At all levels you get more ink per reputation you have. \n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave."
+		answer: "\n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave."
 	}, {
 		question: "How do I get reputation?",
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
@@ -1112,9 +1117,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
-		action: function (event) {
-			console.log(event);
-		}
+		action: function () {}
 	}, {
 		name: "name-button",
 		type: "button",
@@ -1135,7 +1138,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Account",
 		action: this.openAccountWindow.bind(this)
-	}, /*{
+	} /*{
 		name: "private",
 		type: "button",
 		text: "Random one-on-one",
@@ -1190,7 +1193,7 @@ DrawTogether.prototype.utils = {
 	distance: function (x1, y1, x2, y2) {
 		// Returns the distance between (x1, y1) and (x2, y2)
 		var xDis = x1 - x2,
-		    yDis = y1 - y1;
+		    yDis = y1 - y2;
 		return Math.sqrt(xDis * xDis + yDis * yDis);
 	}
 };
