@@ -14,7 +14,7 @@ function draw() {
         var pixel = context.getImageData(x, y, 1, 1).data;
         var hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
        
-        drawTogether.socket.emit("drawing", [0, x + basex, y + basey, 1, hex, x + basex, y + basey]);
+        drawTogether.network.socket.emit("drawing", [0, x + basex, y + basey, 1, hex, x + basex, y + basey]);
        
         x++;
         if (x == canvas.width) { x = 0; y++; }

@@ -1,5 +1,5 @@
-// var DRAWTOGETHER_ACCOUNT_SERVER = "http://direct.castlewar.net:4252";
-var DRAWTOGETHER_ACCOUNT_SERVER = "http://localhost:4552";
+var DRAWTOGETHER_ACCOUNT_SERVER = "http://direct.anondraw.com:4552";
+// var DRAWTOGETHER_ACCOUNT_SERVER = "http://localhost:4552";
 
 function Account (uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";

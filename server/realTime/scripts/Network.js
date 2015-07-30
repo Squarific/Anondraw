@@ -37,6 +37,7 @@ Protocol.prototype.inkTick = function inkTick () {
 		var extra = BASE_GEN + PER_REP_GEN * (socket.reputation || 0);
 		socket.ink = Math.min(socket.ink + extra, MAX_INK);
 		socket.emit("setink", socket.ink);
+		ips.push(socket.ip);
 	}
 };
 
@@ -306,7 +307,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						reputation: reputation
 					});
 					targetSocket.reputation = reputation;
-					targetSocket.emit("setreputation", socket.reputation);
+					targetSocket.emit("setreputation", targetSocket.reputation);
 				});
 			});
 		});

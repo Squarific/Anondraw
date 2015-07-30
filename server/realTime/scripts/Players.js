@@ -101,7 +101,7 @@ Players.prototype.getReputationFromUKey = function getReputationFromUKey (uKey, 
 			data = JSON.parse(chunk);
 
 			if (data.error) {
-				callback(data.error, [])
+				callback(data.error)
 				return;
 			}
 

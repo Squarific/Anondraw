@@ -11,8 +11,8 @@ function DrawTogether (container, settings) {
 	this.ink = 2500;
 	this.lastInkWarning = Date.now();
 
-	//this.network = new Network("http://direct.anondraw.com:3552");
-	this.network = new Network("http://localhost:3552");
+	this.network = new Network("http://direct.anondraw.com:3552");
+	// this.network = new Network("http://localhost:3552");
 	this.account = new Account();
 	this.bindSocketHandlers();
 

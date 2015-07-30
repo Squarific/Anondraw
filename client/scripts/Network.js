@@ -76,10 +76,8 @@ Network.prototype.getServerFromRoom = function getServerFromRoom (room, callback
 };
 
 // If we are not connected to the given server, change our socket
-// Should not include a protocol (http:// or https://)
 Network.prototype.changeServer = function changeServer (server, callback) {
 	if (server.indexOf("http://") == -1) server = "http://" + server;
-	server = "http://localhost:" + server.split(":")[2];
 
 	// If the current socket is to the right server, just callback
 	if (this.socket && this.socket.io.uri == server) {
