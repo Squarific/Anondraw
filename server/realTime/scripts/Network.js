@@ -115,7 +115,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (banned) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
-					message: "You have been banned till " + enddate + ". Reason: " + reason
+					message: "You have been banned till " + new Date(enddate) + ". Reason: " + reason
 				});
 				console.log("[BANNED] " + socket.ip + " tried to join.");
 				socket.disconnect();
