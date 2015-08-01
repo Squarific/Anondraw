@@ -851,6 +851,7 @@ DrawTogether.prototype.uploadImage = function uploadImage () {
 		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
 	}
 
+	this.showShareMessage("Uploading...");
 	// Let the server upload the drawing to imgur and give us the url back
 	this.network.socket.emit("uploadimage", this.paint.public.canvas.toDataURL().split(",")[1], function (data) {
 		if (data.error) {
@@ -871,6 +872,19 @@ DrawTogether.prototype.showShareError = function showShareError (error) {
 	errorMessage.innerText = error;
 	errorMessage.textContent = error;
 	errorMessage.className = "drawtogether-error drawtogether-share-error";
+};
+
+DrawTogether.prototype.showShareMessage = function showShareMessage (msg) {
+	while (this.imgurUrl.firstChild) {
+		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
+	}
+
+	var urlMessage = this.imgurUrl.appendChild(document.createElement("div"));
+	urlMessage.appendChild(document.createTextNode(msg));
+	urlMessage.className = "drawtogether-share-url";
+
+	this.shareToRedditButton.target = "_blank";
+	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?title=[DRAWING]%20Description&url=" + encodeURIComponent(url);
 };
 
 DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
