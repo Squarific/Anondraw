@@ -79,7 +79,7 @@ var server = http.createServer(function (req, res) {
 			}
 
 			if (banned) {
-				res.end('{"error": "Your ip has been banned till ' + info.enddate + '. Reason: ' + info.reason + '"}');
+				res.end('{"error": "Your ip has been banned till ' + new Date(info.enddate) + '. Reason: ' + info.reason + '"}');
 				return;
 			}
 
