@@ -6,7 +6,7 @@ var TIMEOUT = 140 * 1000;
 // much more load than the least loaded
 // 400 = one room of 20 people or about 8 rooms of one person
 var REBALANCE_LOAD = 400;
-var CHECK_REBALANCE_EVERY = 1 * 60 * 1000; //ms
+var CHECK_REBALANCE_EVERY = 1 * 40 * 1000; //ms
 
 function randomString (length) {
 	var chars = "abcdefghijklmnopqrstuvwxyz1234567890";
@@ -106,12 +106,13 @@ Servers.prototype.retargetRoom = function retargetRoom (room) {
 };
 
 Servers.prototype.sendCloseRoom = function sendCloseRoom (servers, room) {
-	for (var k = 0; k < servers.lengt; k++) {
+	for (var k = 0; k < servers.length; k++) {
 		this.sendCloseRoomServer(servers[k], room);
 	}
 };
 
 Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer (server, room) {
+	if (server.url.indexOf("http") == -1) server.url = "http://" + server.url;
 	var parsedUrl = url.parse(server.url);
 
 	var req = http.request({
@@ -156,6 +157,8 @@ Servers.prototype.rebalance = function rebalance () {
 	var least = this.getLeastLoad();
 	var most = this.getMostLoad();
 
+	console.log("Checking balance!");
+
 	// Not enough servers
 	if (!least || !most || least == most) return;
 
@@ -166,7 +169,7 @@ Servers.prototype.rebalance = function rebalance () {
 		// placing it on the least loaded does not make the least loaded
 		// the most loaded
 		var currentTargetRoom;
-		var maxTargetLoad = REBALANCE_LOAD - 16; // Give some wiggle room
+		var maxTargetLoad = Math.floor((most.load - least.load) / 2); // Give some wiggle room
 
 		for (var name in most.rooms) {
 			if (most.rooms[name] * most.rooms[name] + 50 < maxTargetLoad &&
@@ -175,6 +178,7 @@ Servers.prototype.rebalance = function rebalance () {
 			}
 		}
 
+		console.log("Unbalanced, retargeting room ", currentTargetRoom);
 		this.retargetRoom(currentTargetRoom);
 	}
 };

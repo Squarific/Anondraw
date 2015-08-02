@@ -1,0 +1,24 @@
+{
+  "name": "imageserver",
+  "private": "true",
+  "version": "0.0.1",
+  "description": "Anondraw image server",
+  "main": "imageserver.js",
+  "dependencies": {
+    "canvas": "*"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Squarific/drawtogether2.git"
+  },
+  "author": "Filip Smets <alemaaltevinden@gmail.com>",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/Squarific/drawtogether2/issues"
+  },
+  "homepage": "http://www.anondraw.com"
+}

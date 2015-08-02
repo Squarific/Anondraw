@@ -2,6 +2,7 @@ var http = require("http");
 var urlParser = require("url");
 var JOIN_CODE = require("./join_code_password.js");
 var statuscode = require("./status_password.js");
+var room_regex = /^[a-z0-9_]+$/i;
 
 var Servers = require("./scripts/Servers.js");
 var servers = new Servers(JOIN_CODE);
@@ -39,6 +40,11 @@ var server = http.createServer(function (req, res) {
 
 		if (!room) {
 			res.end('{"error": "You did not provid the requierd room query"}');
+			return;
+		}
+
+		if (!room_regex.test(room)) {
+			res.end('{"error": "Room names should only contain lowercase letters, numbers and _"}');
 			return;
 		}
 

@@ -1,5 +1,8 @@
 var names = require("./names.js");
 var GameRoom = require("./GameRoom.js");
+
+var room_regex = /^[a-z0-9_]+$/i;
+
 var MAX_USERS_IN_ROOM = 25;
 var MAX_USERS_IN_GAMEROOM = 8;
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
@@ -391,6 +394,11 @@ Protocol.prototype.bindIO = function bindIO () {
 			// given room, tell the user he is subscribed and send the drawing.
 			// Callback (err, drawings)
 			callback = callback || function () {};
+
+			if (!room_regex.test(room)) {
+				callback("The room can only exist of lowercase letters, numbers and _");
+				return;
+			}
 
 			if (socket.room == room) {
 				callback("You are already in room " + room + "!");

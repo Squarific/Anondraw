@@ -1,5 +1,6 @@
 var getIp = require('external-ip')();
 var http = require('http');
+var urlParse = require("url");
 
 function Register (server, key, io, port, listenServer) {
 	this.server = server;
@@ -20,7 +21,7 @@ function Register (server, key, io, port, listenServer) {
 	}.bind(this));
 
 	this.listenServer.addListener("request", function (req, res) {
-		var parsedUrl = url.parse(req.url, true);
+		var parsedUrl = urlParse.parse(req.url, true);
 
 		res.writeHead(200, {
 			"Access-Control-Allow-Origin": "*",
