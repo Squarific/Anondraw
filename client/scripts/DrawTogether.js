@@ -249,7 +249,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	number = number || "";
 	this.network.loadRoom(room + number, function (err, drawings) {
 		this.changingRoom = false;
-		if (err == "Too many users") {
+		if (err && err.indexOf("Too many users") !== -1) {
 			this.changeRoom(room, (number || 0) + 1);
 			this.chat.addMessage("SERVER", "Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
 			return;
