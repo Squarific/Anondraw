@@ -1,4 +1,4 @@
-var CACHE_LENGTH = 50000; //How many drawings are saved
+var CACHE_LENGTH = 30000; //How many drawings are saved
 
 function DrawTogether () {
 	this.drawings = {};
@@ -24,7 +24,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	// Put the given drawing in the database for the given room, returns err if error
 	this.drawings[room] = this.drawings[room] || [];
 	this.drawings[room].push(drawing);
-	this.drawings[room].splice(0, this.drawings[room] - CACHE_LENGTH);
+	this.drawings[room].splice(0, this.drawings[room].length - CACHE_LENGTH);
 	callback();
 };
 

@@ -7,7 +7,7 @@ var room_regex = /^[a-z0-9_]+$/i;
 var Servers = require("./scripts/Servers.js");
 var servers = new Servers(JOIN_CODE);
 
-var MAX_USERS_PER_ROOM = 20;
+var MAX_USERS_PER_ROOM = 10;
 
 var server = http.createServer(function (req, res) {
 	var parsedUrl = urlParser.parse(req.url, true);

@@ -9,8 +9,8 @@ var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
 
 var MAX_INK = 50000;
-var BASE_GEN = 2000;
-var PER_REP_GEN = 300;
+var BASE_GEN = 5000;
+var PER_REP_GEN = 500;
 
 var SAME_IP_INK_MESSAGE = "You will not get any ink because someone else on your ip has already gotten some.";
 
@@ -23,7 +23,7 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.bindIO();
 
 	this.gameRooms = {};
-	setInterval(this.inkTick.bind(this), 20 * 1000);
+	setInterval(this.inkTick.bind(this), 60 * 1000);
 }
 
 Protocol.prototype.inkTick = function inkTick () {
