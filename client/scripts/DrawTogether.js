@@ -882,9 +882,6 @@ DrawTogether.prototype.showShareMessage = function showShareMessage (msg) {
 	var urlMessage = this.imgurUrl.appendChild(document.createElement("div"));
 	urlMessage.appendChild(document.createTextNode(msg));
 	urlMessage.className = "drawtogether-share-url";
-
-	this.shareToRedditButton.target = "_blank";
-	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?title=[DRAWING]%20Description&url=" + encodeURIComponent(url);
 };
 
 DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
@@ -966,7 +963,10 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	// text.textContent = "There is some heavier than usual load, so the server might lagg a bit.";
 	// text.className = "drawtogether-welcome-text-error";
 
-	var publicButton = selectWindow.appendChild(document.createElement("div"));
+	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
+	buttonContainer.className = "drawtogether-buttoncontainer";
+
+	var publicButton = buttonContainer.appendChild(document.createElement("div"));
 	publicButton.className = "drawtogether-modeselect-button";
 	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with strangers';
 	publicButton.addEventListener("click", function () {
@@ -974,7 +974,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
-	var privateButton = selectWindow.appendChild(document.createElement("div"));
+	var privateButton = buttonContainer.appendChild(document.createElement("div"));
 	privateButton.className = "drawtogether-modeselect-button";
 	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Alone or with friends';
 	privateButton.addEventListener("click", function () {
@@ -1001,11 +1001,11 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	// 	this.selectWindow.style.display = "";
 	// }.bind(this));
 
+	selectWindow.appendChild(this.createFAQDom());
+
 	this.redditDrawings = selectWindow.appendChild(document.createElement("div"));
 	this.redditDrawings.className = "drawtogether-redditdrawings";
 	this.populateRedditDrawings();
-
-	selectWindow.appendChild(this.createFAQDom());
 };
 
 DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings () {
@@ -1033,7 +1033,11 @@ DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
 	var container = document.createElement("a");
 	container.href = "http://www.reddit.com" + data.permalink;
 	container.target = "_blank";
-	container.className = "drawtogether-redditpost"
+	container.className = "drawtogether-redditpost";
+
+	var title = container.appendChild(document.createElement("span"));
+	title.className = "drawtogether-redditpost-title";
+	title.appendChild(document.createTextNode(data.title));
 
 	if (data.thumbnail !== "self" && data.thumbnail !== "default" && data.thumbnail !== "nsfw") {
 		var thumb = container.appendChild(document.createElement("img"))
@@ -1042,12 +1046,9 @@ DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
 	} else {
 		var filler = container.appendChild(document.createElement("div"));
 		filler.className = "drawtogether-redditpost-thumbfiller";
-		filler.innerText = "Selfpost";
+		filler.appendChild(document.createTextNode("Text post"));
 	}
 
-	var title = container.appendChild(document.createElement("span"));
-	title.className = "drawtogether-redditpost-title";
-	title.innerText = data.title;
 	return container;
 };
 
