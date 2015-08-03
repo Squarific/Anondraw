@@ -29,6 +29,8 @@ function DrawTogether (container, settings) {
 	} else  if (this.settings.mode == "private") {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
 		this.changeRoom(this.settings.room);
+	} else if (this.settings.mode == "member") {
+		this.changeRoom("member-main");
 	}
 
 	requestAnimationFrame(this.drawLoop.bind(this));
@@ -45,7 +47,7 @@ function DrawTogether (container, settings) {
 }
 
 DrawTogether.prototype.defaultSettings = {
-	mode: "ask",                           // Mode: public, private, oneonone, game, ask, defaults to public
+	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
 	room: "main"                           // Room to join at startup
 };
 
@@ -983,6 +985,14 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
+	var privateButton = buttonContainer.appendChild(document.createElement("div"));
+	privateButton.className = "drawtogether-modeselect-button";
+	privateButton.innerHTML = '<img src="images/member.png"/><br/>Members only room';
+	privateButton.addEventListener("click", function () {
+		this.changeRoom("member_main");
+		this.selectWindow.style.display = "";
+	}.bind(this));
+
 	// var oneononeButton = selectWindow.appendChild(document.createElement("div"));
 	// oneononeButton.className = "drawtogether-modeselect-button";
 	// oneononeButton.innerHTML = '<img src="images/private.png"/><br/>Random One on One';
@@ -1058,7 +1068,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a webapp where you can draw live with strangers or friends. There is also a gamemode."
+		answer: "It's a webapp where you can draw live with strangers or friends."
 	},/* {
 		question: "How do you play the game?",
 		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
@@ -1073,7 +1083,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
 	},*/ {
 		question: "What benefits does reputation give you?",
-		answer: "\n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave."
+		answer: "\n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave. \n At 5 reputation, you can join the member only rooms."
 	}, {
 		question: "How do I get reputation?",
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
@@ -1083,7 +1093,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		var question = faq.appendChild(document.createElement("div"));
 		question.className = "drawtogether-question";
 
-		var qhead = question.appendChild(document.createElement("h1"));
+		var qhead = question.appendChild(document.createElement("h2"));
 		qhead.className = "drawtogether-question-question";
 		qhead.innerText = questions[qKey].question;
 		qhead.textContent = questions[qKey].question;
@@ -1103,7 +1113,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 };
 
 DrawTogether.prototype.createControlArray = function createControlArray () {
-	return [{
+	var buttonList = [{
 		name: "home-button",
 		type: "button",
 		value: "",
@@ -1148,12 +1158,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Put on imgur/reddit",
 		action: this.openShareWindow.bind(this)
-	}, {
-		name: "account",
-		type: "button",
-		text: "Account",
-		action: this.openAccountWindow.bind(this)
-	} /*{
+	}, /*{
 		name: "private",
 		type: "button",
 		text: "Random one-on-one",
@@ -1172,6 +1177,15 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		value: "game",
 		action: this.changeMode.bind(this)
 	}*/];
+	if (location.toString().indexOf("kongregate") == -1) {
+		buttonList.push({
+			name: "account",
+			type: "button",
+			text: "Account",
+			action: this.openAccountWindow.bind(this)
+		});
+	}
+	return buttonList;
 };
 
 // Utility functions, should be kept small

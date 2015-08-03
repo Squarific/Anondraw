@@ -1,4 +1,4 @@
-var CACHE_LENGTH = 30000; //How many drawings are saved
+var CACHE_LENGTH = 50000; //How many drawings are saved
 
 function DrawTogether () {
 	this.drawings = {};

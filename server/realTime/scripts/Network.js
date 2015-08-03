@@ -37,8 +37,12 @@ Protocol.prototype.inkTick = function inkTick () {
 			continue;
 		}
 
+		// If ink is NaN we need to reset it
+		if (socket.ink !== socket.ink) socket.ink = 0;
+
 		var extra = BASE_GEN + PER_REP_GEN * (socket.reputation || 0);
 		socket.ink = Math.min(socket.ink + extra, MAX_INK);
+
 		socket.emit("setink", socket.ink);
 		ips.push(socket.ip);
 	}
@@ -370,6 +374,15 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (socket.room.indexOf("member_") == 0 && (!socket.reputation || socket.reputation < 5)) {
+				callback();
+				if (!socket.lastMemberOnlyWarning || Date.now() - socket.lastMemberOnlyWarning > 5000) {
+					protocol.informClient(socket, "This is a member only room, you need at least 5 rep!")
+					socket.lastMemberOnlyWarning = Date.now();
+				}
+				return;
+			}
+
 			// If we aren't in a private room, check our ink
 			if (socket.room.indexOf("private_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromDrawing(drawing);
@@ -470,7 +483,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			callback({success: "Banning player ..."});
+			callback({success: "Banning player " + targetSocket.name + " ..."});
 
 			if (options[2] == "both" || options[2] == "account") {
 				protocol.players.kickbanAccount(targetSocket.uKey, socket.uKey, options[1], options[3], function (err) {
@@ -480,6 +493,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					protocol.informClient(socket, "You banned " + targetSocket.name);
+					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
 					targetSocket.disconnect();
 				});
 			}
@@ -492,6 +506,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					protocol.informClient(socket, "You banned " + targetSocket.ip);
+					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
 					targetSocket.disconnect();
 				});
 			}
