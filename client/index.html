@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html style="padding:0; margin:0; height:100%;">
 	<head>
+		<!-- 
+			This is the anondraw draw online source code 
+			Readable version: https://github.com/Squarific/drawtogether2/
+		-->
 		<link rel="stylesheet" href="DrawTogether.min.css?v=49">
 		<title>AnonDraw - Draw online together with friends and strangers anonymously</title>
 
@@ -9,17 +13,18 @@
 		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		
 		<meta property="fb:admins" content="100000842878520" />
-		<meta name="description" content="Draw online with strangers or draw with friends in a public or private room. Drawing online made easy.">
+		<meta name="description" content="Draw online with strangers or draw with friends in a public or private room. Draw online using the paint app.">
 		<link rel="shortcut icon" href="favicon.ico?t=220408112013"> 
 
 		<meta property="og:image" content="http://www.anondraw.com/thumb.png" />
 	</head>
 	<body style="position:relative; padding:0; margin:0; min-height: 100%;">
-		<img src="thumb.png" alt="Anon Draw" style="display:none;">
+		<img src="thumb.png?v=1" alt="Anon Draw" style="display:none;">
 		<div id="fullscreen" style="position:absolute; left:0; right:0; top:0; bottom:0; background:white;"></div>
 		<script src="jquery.js"></script>
-		<script src="DrawTogether.min.js?v=94"></script>
+		<script src="DrawTogether.min.js?v=95"></script>
 		<script type="text/javascript">
+			// Draw and paint online
 			var room = location.hash.substr(1, location.hash.length);
 			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
 				room: room || "main",
@@ -28,5 +33,26 @@
 		</script>
 		<!-- Go to www.addthis.com/dashboard to customize your tools -->
 		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-53c4fbf2311fe8f1" async="async"></script>
+		<script type="text/javascript">
+			reformal_wdg_domain    = "anondraw";
+			reformal_wdg_mode    = 0;
+			reformal_wdg_title   = "Anondraw";
+			reformal_wdg_ltitle  = "Feedback";
+			reformal_wdg_lfont   = "";
+			reformal_wdg_lsize   = "";
+			reformal_wdg_color   = "#45678a";
+			reformal_wdg_bcolor  = "#516683";
+			reformal_wdg_tcolor  = "#FFFFFF";
+			reformal_wdg_align   = "left";
+			reformal_wdg_waction = 0;
+			reformal_wdg_vcolor  = "#9FCE54";
+			reformal_wdg_cmline  = "#E0E0E0";
+			reformal_wdg_glcolor  = "#105895";
+			reformal_wdg_tbcolor  = "#FFFFFF";
+			 
+			reformal_wdg_bimage = "bea4c2c8eb82d05891ddd71584881b56.png";
+		</script>
+		<style type="text/css">.furjbqy {z-index:1000 !important;} .furjbqy a {padding: .5em;}</style>
+		<script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=anondraw"></script><noscript><a href="http://anondraw.idea.informer.com">Anondraw feedback </a> <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a></noscript>
 	</body>
 </html>

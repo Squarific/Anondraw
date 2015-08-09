@@ -4,6 +4,7 @@ var DRAWTOGETHER_ACCOUNT_SERVER = "http://direct.anondraw.com:4552";
 function Account (uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";
 	this.mail = localStorage.getItem("drawtogether-mail");
+	setInterval(this.checkLogin.bind(this), 30 * 60 * 1000);
 }
 
 // Callback (err)
@@ -105,6 +106,8 @@ Account.prototype.logout = function logout (callback) {
 // if there is no email/pass stored returns (null, false)
 // Callback (err, loggedIn)
 Account.prototype.checkLogin = function checkLogin (callback) {
+	callback = callback || function () {};
+
 	if (!this.uKey && localStorage.getItem("drawtogether-mail") && localStorage.getItem("drawtogether-pass")) {
 		this.loginNoHash(localStorage.getItem("drawtogether-mail"), localStorage.getItem("drawtogether-pass"), function (err) {
 			callback(err, !err);

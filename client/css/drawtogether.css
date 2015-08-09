@@ -521,6 +521,7 @@ h2 {
       .drawtogether-paint-container .control-container [class^='control-']:not(.control-integer-input), .drawtogether-paint-container .control-container .sp-replacer:not(.control-integer-input) {
         line-height: 2rem; }
   .drawtogether-paint-container .control-button {
+    z-index:9999;
     min-width: 3em;
     text-align: center; }
     .drawtogether-paint-container .control-button img {
@@ -531,6 +532,7 @@ h2 {
  */
 .drawtogether-control-container {
   height: 3rem;
+  padding-left:4em;
   overflow: hidden;
   box-shadow: 0 0 .5em #000; }
   .drawtogether-control-container .control-button,
