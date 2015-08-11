@@ -7,8 +7,23 @@ var fs = require("fs");
 var room_regex = /^[a-z0-9_]+$/i;
 var currentlyDrawing = {};
 
-function drawOnCanvas (ctx, drawing) {
-	
+function newTiledCanvas () {
+	var tiledCanvas = new TiledCanvas();
+
+	tiledCanvas.requestUserChunk = function (x, y, callback) {
+		fs.readFile("./images/" + room + "/" + x + "-" + y + ".png", function (err, img) {
+			if (err) {
+				if (err.code !== "ENOENT") {
+					throw "Image load error: " + err;
+				}
+				img = transparent;
+			}
+
+			callback(img);
+		});
+	};
+
+	return tiledCanvas;
 }
 
 fs.readFile("./images/transparent.png", function (err, transparent) {
@@ -39,6 +54,7 @@ fs.readFile("./images/transparent.png", function (err, transparent) {
 					return;
 				}
 
+				// TODO: CACHE
 				res.end(data, "binary");
 			});
 			return;
@@ -96,33 +112,23 @@ fs.readFile("./images/transparent.png", function (err, transparent) {
 					return;
 				}
 				
-				var tiledCanvas = new TiledCanvas(function (x, y, callback) {
-					fs.readFile("./images/" + room + "/" + x + "-" + y + ".png", function (err, img) {
-						if (err) {
-							if (err.code !== "ENOENT") {
-								throw "Image load error: " + err;
+				var tiledCanvas = newTiledCanvas();
+
+				tiledCanvas.drawDrawings(data, function () {
+					tiledCanvas.save(function (canvas, x, y, callback) {
+						fs.writeFile("./images/" + room + "/" + x + "-" + y + ".png", data, function (err) {
+							if (err) {
+								console.log("[DRAW][ERROR] Save image error", err);
+								callback();
+								return;
 							}
-							img = transparent;
-						}
 
-						callback(img);
-					});
-				});
-
-				tiledCanvas.drawDrawings(data);
-				tiledCanvas.save(function (canvas, x, y, callback) {
-					fs.writeFile("./images/" + room + "/" + x + "-" + y + ".png", data, function (err) {
-						if (err) {
-							console.log("[DRAW][ERROR] Save image error", err);
 							callback();
-							return;
-						}
-
-						callback();
+						});
+					}, function () {
+						res.end('{"success": "done"}');
+						currentlyDrawing[room] = false;
 					});
-				}, function () {
-					res.end('{"success": "done"}');
-					currentlyDrawing[room] = false;
 				});
 				return;
 			});
