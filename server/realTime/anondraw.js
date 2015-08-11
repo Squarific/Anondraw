@@ -22,9 +22,12 @@ var Players = require("./scripts/Players.js");
 var players = new Players("direct.anondraw.com");
 // var players = new Players("localhost");
 
+var Background = require("./scripts/Background.js");
+var background = new Background("direct.anondraw.com");
+
 // Drawtogether library
 var DrawTogether = require("./scripts/DrawTogether.js");
-var drawTogether = new DrawTogether();
+var drawTogether = new DrawTogether(background);
 
 var imgur = require("imgur");
 imgur.setClientId("8fd93ca8e547c10");

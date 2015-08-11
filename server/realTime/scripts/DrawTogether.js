@@ -1,7 +1,8 @@
 var CACHE_LENGTH = 50000; //How many drawings are saved
 
-function DrawTogether () {
+function DrawTogether (background) {
 	this.drawings = {};
+	this.background = background;
 }
 
 DrawTogether.prototype.rgbToHex = function rgbToHex (r, g, b) {
@@ -9,22 +10,26 @@ DrawTogether.prototype.rgbToHex = function rgbToHex (r, g, b) {
 	return "#" + ("000000" + hex).slice(-6);
 };
 
-// DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
-// 	// If its a brush the ink usage is ceil(size * size / 100)
-// 	// If it is a line the ink usage is ceil(size * length * 2 / 100)
-// 	var length = drawing[3];
-
-// 	if (typeof drawing[5] == "number")
-// 		length = this.utils.distance(drawing[1], drawing[2], drawing[5], drawing[6]) * 2;
-
-// 	return Math.ceil(drawing[3] * length / 100);
-// };
-
 DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback) {
 	// Put the given drawing in the database for the given room, returns err if error
 	this.drawings[room] = this.drawings[room] || [];
 	this.drawings[room].push(drawing);
-	this.drawings[room].splice(0, this.drawings[room].length - CACHE_LENGTH);
+
+	if (this.drawings[room].length > CACHE_LENGTH && !this.drawings[room].sending) {
+		// Make sure we wait till the server responded
+		this.drawings[room].sending = true;
+
+		this.background.sendDrawings(this.drawings[room].slice(0, CACHE_LENGTH), function (err) {
+			this.drawings[room].splice(0, CACHE_LENGTH);
+			this.drawings[room].sending = false;
+
+			if (err) {
+				console.log("[SENDDRAWING][ERROR] ", err);
+				return;
+			}
+		}.bind(this));
+	}
+
 	callback();
 };
 
