@@ -1,9 +1,10 @@
+var drawingTypes = ["line", "brush", "block"];
 function decodeDrawing (drawing) {
     if (drawing[4].length == 6)
         drawing[4] = "#" + drawing[4]
 
     var newDrawing = {
-        type: this.drawingTypes[drawing[0]],
+        type: drawingTypes[drawing[0]],
         x: drawing[1],
         y: drawing[2],
         size: drawing[3],
@@ -16,9 +17,10 @@ function decodeDrawing (drawing) {
     return newDrawing;
 }
 
+var Canvas = require("canvas");
+
 function TiledCanvas (canvas, settings) {
     this.canvas = canvas;
-    this.ctx = this.canvas.getContext('2d');
 
     this.leftTopX = 0;
     this.leftTopY = 0;
@@ -277,9 +279,6 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
         callbackList[k]();
     }
 
-    // Do a full redraw of the tiled canvas
-    this.redraw();
-
     delete this.requestChunkCallbackList[chunkX][chunkY];
 };
 
@@ -297,7 +296,7 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queu
 
     // Executes the current queue on a chunk
     // If queue is set execute that queue instead
-    this.chunks[chunkX] = this.chunks[chunkX] || [];
+    this.chunks[chunkX] = this.chunks[chunkX] || {};
  
     if (!this.chunks[chunkX][chunkY] || this.chunks[chunkX][chunkY] == "empty") {
         // This chunk has never been painted to before
@@ -319,16 +318,17 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queu
 
     for (var queuekey = 0; queuekey < queue.length; queuekey++) {
         if (typeof ctx[queue[queuekey][0]] === 'function') {
-            this.executeQueueOnChunk(ctx, queue[queuekey], callback);
+            this.executeQueueOnChunk(ctx, queue[queuekey]);
         } else {
             ctx[queue[queuekey][0]] = queue[queuekey][1];
         }
     }
+
+    callback();
 };
 
-TiledCanvas.prototype.executeQueueOnChunk = function executeQueueOnChunk (ctx, args, callback) {
+TiledCanvas.prototype.executeQueueOnChunk = function executeQueueOnChunk (ctx, args) {
     ctx[args[0]].apply(ctx, Array.prototype.slice.call(args, 1));
-    callback();
 };
 
 TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, border) {
@@ -340,16 +340,16 @@ TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, bord
 };
 
 TiledCanvas.prototype.newCtx = function newCtx (width, height, translateX, translateY) {
-    var ctx = document.createElement('canvas').getContext('2d');
-    ctx.canvas.width = width;
-    ctx.canvas.height = height;
+    var canvas = new Canvas(width, height);
+    var ctx = canvas.getContext('2d');
     ctx.translate(translateX, translateY);
     return ctx;
 };
 
 TiledCanvas.prototype.createContext = function createContext () {
     var context = {};
-    var ctx = document.createElement('canvas').getContext('2d');
+    var canvas = new Canvas();
+    var ctx = canvas.getContext('2d');
     for (var key in ctx) {
         if (typeof ctx[key] === 'function') {
             context[key] = function (func) {
@@ -399,13 +399,8 @@ TiledCanvas.prototype.save = function save (saveFunction, callback) {
     
     for (var x in this.chunks) {
         for (var y in this.chunks[x]) {
-            this.chunks[x][y].toBuffer(function (x, y, err, data) {
-                if (err) {
-                    console.log("toBuffer error", err);
-                    return;
-                }
-
-                saveFunction(data, x, y, lowerAndCheck);
+            this.chunks[x][y].canvas.toBuffer(function (x, y, err, data) {
+                saveFunction(err, data, x, y, lowerAndCheck);
             }.bind(this, x, y));
         }
     }
