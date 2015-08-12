@@ -28,7 +28,9 @@
 			var room = location.hash.substr(1, location.hash.length);
 			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
 				room: room || "main",
-				mode: (room) ? "join" : "ask"
+				mode: (room) ? "join" : "ask",
+				loadbalancer: "http://localhost:3552",
+				imageServer: "http://localhost:5552"
 			});
 		</script>
 		<!-- Go to www.addthis.com/dashboard to customize your tools -->

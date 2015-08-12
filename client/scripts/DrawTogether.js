@@ -11,9 +11,8 @@ function DrawTogether (container, settings) {
 	this.ink = 2500;
 	this.lastInkWarning = Date.now();
 
-	this.network = new Network("http://direct.anondraw.com:3552");
-	// this.network = new Network("http://localhost:3552");
-	this.account = new Account();
+	this.network = new Network(this.settings.loadbalancer);
+	this.account = new Account(this.settings.accountServer);
 	this.bindSocketHandlers();
 
 	// Initialize the dom elements
@@ -48,7 +47,10 @@ function DrawTogether (container, settings) {
 
 DrawTogether.prototype.defaultSettings = {
 	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
-	room: "main"                           // Room to join at startup
+	room: "main",                          // Room to join at startup
+	loadbalancer: "http://direct.anondraw.com:3552",
+	accountServer: "http://direct.anondraw.com:4552",
+	imageServer: "http://direct.anondraw.com:5552"
 };
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
@@ -259,9 +261,9 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 			this.chat.addMessage("SERVER", "Failed to load room '" + room + "'. Server error: " + err + ". Trying again in 5 seconds.");
 			setTimeout(this.changeRoom.bind(this, room, number), 5000);
 		} else {
-			this.paint.clear();
-
 			this.setRoom(room);
+
+			this.paint.clear();
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
@@ -572,31 +574,27 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint = new Paint(drawContainer);
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
 
-	// this.paint.public.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
-	// 	if (!this.socket) {
-	// 		// The paint zone was created before a socket connection was made
-	// 		console.error("Requested chunk ", chunkX, chunkY, " but no socket available!");
-	// 		setTimeout(function () {
-	// 			this.paint.public.requestUserChunk(chunkX, chunkY, callback);
-	// 		}.bind(this), 5000);
-	// 		return;
-	// 	}
+	this.paint.public.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
+		var image = new Image();
 
-	// 	var image = new Image();
+		image.onload = function onChunkImageLoad (event) {
+			callback(image);
+		};
 
-	// 	image.onLoad = function onChunkImageLoad (event) {
-	// 		callback(image);
-	// 	};
-
-	// 	image.onError = function onChunkImageError (event) {
-	// 		console.error("Failed to load chunk ", chunkX, chunkY, " retrying in 5 seconds");
-	// 		setTimeout(function () {
-	// 			this.paint.public.requestUserChunk(chunkX, chunkY, callback);
-	// 		}.bind(this), 5000);
-	// 	};
+		image.onerror = function onChunkImageError (event) {
+			console.error("Failed to load chunk ", chunkX, chunkY, " retrying in 5 seconds");
+			setTimeout(function () {
+				this.paint.public.requestUserChunk(chunkX, chunkY, callback);
+			}.bind(this), 5000);
+		}.bind(this);
 		
-	// 	image.src = this.socket.io.uri + "/chunks/" + chunkX + "/" + chunky;
-	// }.bind(this);
+		var room = encodeURIComponent(this.current_room);
+		chunkX = encodeURIComponent(chunkX);
+		chunkY = encodeURIComponent(chunkY);
+
+		// TODO RATE LIMIT
+		image.src = this.settings.imageServer + "/chunk?room=" + room + "&x=" + chunkX + "&y=" + chunkY;
+	}.bind(this);
 
 	this.paint.addEventListener("userdrawing", function (event) {
 		// When a drawing is made check if we have ink left
@@ -896,7 +894,7 @@ DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
 	urlMessage.className = "drawtogether-share-url";
 
 	this.shareToRedditButton.target = "_blank";
-	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?title=[DRAWING]%20Description&url=" + encodeURIComponent(url);
+	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?url=" + encodeURIComponent(url);
 };
 
 DrawTogether.prototype.toggleChat = function toggleChat () {

@@ -1,9 +1,7 @@
-var DRAWTOGETHER_ACCOUNT_SERVER = "http://direct.anondraw.com:4552";
-// var DRAWTOGETHER_ACCOUNT_SERVER = "http://localhost:4552";
-
-function Account (uKey) {
+function Account (server, uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";
 	this.mail = localStorage.getItem("drawtogether-mail");
+	this.server = server;
 	setInterval(this.checkLogin.bind(this), 30 * 60 * 1000);
 }
 
@@ -36,7 +34,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 		}
 	}.bind(this));
 
-	req.open("GET", DRAWTOGETHER_ACCOUNT_SERVER + "/login?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass));
+	req.open("GET", this.server + "/login?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass));
 	req.send();
 };
 
@@ -65,7 +63,7 @@ Account.prototype.register = function register (email, pass, callback) {
 		}
 	}.bind(this));
 
-	req.open("GET", DRAWTOGETHER_ACCOUNT_SERVER + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass));
+	req.open("GET", this.server + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass));
 	req.send();
 };
 
@@ -95,7 +93,7 @@ Account.prototype.logout = function logout (callback) {
 		}
 	}.bind(this));
 
-	req.open("GET", DRAWTOGETHER_ACCOUNT_SERVER + "/logout?uKey=" + encodeURIComponent(this.uKey));
+	req.open("GET", this.server + "/logout?uKey=" + encodeURIComponent(this.uKey));
 	req.send();
 };
 
@@ -158,6 +156,6 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 		}
 	}.bind(this));
 
-	req.open("GET", DRAWTOGETHER_ACCOUNT_SERVER + "/checklogin?uKey=" + encodeURIComponent(this.uKey));
+	req.open("GET", this.server + "/checklogin?uKey=" + encodeURIComponent(this.uKey));
 	req.send();
 };
