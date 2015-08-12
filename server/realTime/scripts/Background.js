@@ -1,3 +1,5 @@
+var http = require("http");
+
 function Background (server, drawcode) {
 	this.server = server;
 	this.drawcode = drawcode;
@@ -27,7 +29,7 @@ Background.prototype.sendDrawings = function (room, drawings, callback) {
 		callback(e);
 	});
 
-	req.write(encodeURIComponent(JSON.stringify(drawings)));
+	req.write(JSON.stringify(drawings));
 	req.end();
 };
 

@@ -115,7 +115,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 				try {
 					var data = JSON.parse(body);
 				} catch (e) {
-					console.log("Error parsing the drawings, is it valid json?", e, body);
+					console.log("Error parsing the drawings, is it valid json?", e);
 					res.end('{"error": "Invalid json!"}');
 					return;
 				}

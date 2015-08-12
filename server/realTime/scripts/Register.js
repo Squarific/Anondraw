@@ -12,13 +12,18 @@ function Register (server, key, io, port, listenServer) {
 
 	this.updateInterval;
 
-	getIp(function (err, ip) {
-		if (err) throw err;
-
-		console.log("[STARTUP] Our ip is ", ip);
-		this.ip = ip;
+	if (server == "localhost") {
+		this.ip = "localhost";
 		this.register();
-	}.bind(this));
+	} else {
+		getIp(function (err, ip) {
+			if (err) throw err;
+
+			console.log("[STARTUP] Our ip is ", ip);
+			this.ip = ip;
+			this.register();
+		}.bind(this));
+	}
 
 	this.listenServer.addListener("request", function (req, res) {
 		var parsedUrl = urlParse.parse(req.url, true);

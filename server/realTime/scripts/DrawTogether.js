@@ -1,4 +1,4 @@
-var CACHE_LENGTH = 50000; //How many drawings are saved
+var CACHE_LENGTH = 4000; //How many drawings are saved
 
 function DrawTogether (background) {
 	this.drawings = {};
@@ -15,12 +15,17 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	this.drawings[room] = this.drawings[room] || [];
 	this.drawings[room].push(drawing);
 
+	if (this.drawings[room].length % 500 == 0)
+		console.log(this.drawings[room].length);
+
 	if (this.drawings[room].length > CACHE_LENGTH && !this.drawings[room].sending) {
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
 
-		this.background.sendDrawings(this.drawings[room].slice(0, CACHE_LENGTH), function (err) {
+		console.log("Sending");
+		this.background.sendDrawings(room, this.drawings[room].slice(0, CACHE_LENGTH), function (err) {
 			this.drawings[room].splice(0, CACHE_LENGTH);
+			console.log("done", err);
 			this.drawings[room].sending = false;
 
 			if (err) {
