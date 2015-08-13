@@ -5,7 +5,7 @@
 			This is the anondraw draw online source code 
 			Readable version: https://github.com/Squarific/drawtogether2/
 		-->
-		<link rel="stylesheet" href="DrawTogether.min.css?v=49">
+		<link rel="stylesheet" href="DrawTogether.min.css?v=53">
 		<title>AnonDraw - Draw online together with friends and strangers anonymously</title>
 
 		<meta name="viewport" content="width=device-width">
@@ -16,21 +16,19 @@
 		<meta name="description" content="Draw online with strangers or draw with friends in a public or private room. Draw online using the paint app.">
 		<link rel="shortcut icon" href="favicon.ico?t=220408112013"> 
 
-		<meta property="og:image" content="http://www.anondraw.com/thumb.png" />
+		<meta property="og:image" content="http://www.anondraw.com/images/logo.png?v=1" />
 	</head>
 	<body style="position:relative; padding:0; margin:0; min-height: 100%;">
-		<img src="thumb.png?v=1" alt="Anon Draw" style="display:none;">
+		<img src="http://www.anondraw.com/images/logo.png?v=1" alt="Anon Draw" style="display:none;">
 		<div id="fullscreen" style="position:absolute; left:0; right:0; top:0; bottom:0; background:white;"></div>
 		<script src="jquery.js"></script>
-		<script src="DrawTogether.min.js?v=95"></script>
+		<script src="DrawTogether.min.js?v=103"></script>
 		<script type="text/javascript">
 			// Draw and paint online
 			var room = location.hash.substr(1, location.hash.length);
 			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
 				room: room || "main",
-				mode: (room) ? "join" : "ask",
-				loadbalancer: "http://localhost:3552",
-				imageServer: "http://localhost:5552"
+				mode: (room) ? "join" : "ask"
 			});
 		</script>
 		<!-- Go to www.addthis.com/dashboard to customize your tools -->
@@ -56,5 +54,6 @@
 		</script>
 		<style type="text/css">.furjbqy {z-index:1000 !important;} .furjbqy a {padding: .5em;}</style>
 		<script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=anondraw"></script><noscript><a href="http://anondraw.idea.informer.com">Anondraw feedback </a> <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a></noscript>
+		<a href="http://feelthebern.org/">Bernie Sanders 2016</a>
 	</body>
 </html>

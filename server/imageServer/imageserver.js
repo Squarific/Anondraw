@@ -20,7 +20,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 		var tiledCanvas = new TiledCanvas();
 
 		tiledCanvas.requestUserChunk = function (x, y, callback) {
-			fs.readFile("./images/" + room + "/" + x + "-" + y + ".png", function (err, imgBytes) {
+			fs.readFile("./images/" + room + "/" + x + ":" + y + ".png", function (err, imgBytes) {
 				if (err) {
 					if (err.code !== "ENOENT") {
 						throw "Image load error: " + err;
@@ -149,6 +149,9 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 						}, function () {
 							res.end('{"success": "done"}');
 							currentlyDrawing[room] = false;
+							
+							// In case there is a memory leak, this might help
+							tiledCanvas.chunks = {};
 						});
 					});
 				});

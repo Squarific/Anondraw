@@ -79,9 +79,9 @@ DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (n
 	this.userCtx.font = "12px monospace";
 	this.userCtx.strokeStyle = 'black';
     this.userCtx.lineWidth = 3;
-    this.userCtx.strokeText(name, position[0] * this.paint.public.zoom - this.userCtx.canvas.leftTopX, position[1] * this.paint.public.zoom - 40 - this.userCtx.canvas.leftTopY);
+    this.userCtx.strokeText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
     this.userCtx.fillStyle = 'white';
-    this.userCtx.fillText(name, position[0] * this.paint.public.zoom - this.userCtx.canvas.leftTopX, position[1] * this.paint.public.zoom - 40 - this.userCtx.canvas.leftTopY);
+    this.userCtx.fillText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
 };
 
 DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
@@ -566,6 +566,21 @@ DrawTogether.prototype.createChat = function createChat () {
 	this.chatContainer = chatContainer;
 };
 
+DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
+	loadTime = loadTime || 5000;
+	var loadImage = new Image();
+
+	loadImage.onload = function () {
+		this.paint.public.loadingImage = loadImage;
+	}.bind(this);
+
+	loadImage.onerror = function () {
+		setTimeout(this.setLoadImage.bind(this, loadTime * 2), loadTime * 2);
+	}.bind(this);
+
+	loadImage.src = "images/loadingChunk.png?v=1";
+};
+
 DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	var drawContainer = this.container.appendChild(document.createElement("div"));
 	drawContainer.className = "drawtogether-paint-container";
@@ -573,6 +588,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint = new Paint(drawContainer);
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
+	this.setLoadImage();
 
 	this.paint.public.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
 		var image = new Image();
@@ -592,7 +608,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		chunkX = encodeURIComponent(chunkX);
 		chunkY = encodeURIComponent(chunkY);
 
-		// TODO RATE LIMIT
+		image.crossOrigin = "Anonymous";
 		image.src = this.settings.imageServer + "/chunk?room=" + room + "&x=" + chunkX + "&y=" + chunkY;
 	}.bind(this);
 
@@ -962,6 +978,10 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	// text.innerText = "There is some heavier than usual load, so the server might lagg a bit.";
 	// text.textContent = "There is some heavier than usual load, so the server might lagg a bit.";
 	// text.className = "drawtogether-welcome-text-error";
+
+	var text = selectWindow.appendChild(document.createElement("div"));
+	text.appendChild(document.createTextNode("12 aug 2015 - New feature: background is now permanent"))
+	text.className = "drawtogether-welcome-text-box";
 
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
 	buttonContainer.className = "drawtogether-buttoncontainer";

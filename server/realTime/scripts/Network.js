@@ -3,7 +3,7 @@ var GameRoom = require("./GameRoom.js");
 
 var room_regex = /^[a-z0-9_]+$/i;
 
-var MAX_USERS_IN_ROOM = 25;
+var MAX_USERS_IN_ROOM = 30;
 var MAX_USERS_IN_GAMEROOM = 8;
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone

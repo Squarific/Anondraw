@@ -15,9 +15,6 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	this.drawings[room] = this.drawings[room] || [];
 	this.drawings[room].push(drawing);
 
-	if (this.drawings[room].length % 500 == 0)
-		console.log(this.drawings[room].length);
-
 	if (this.drawings[room].length > CACHE_LENGTH && !this.drawings[room].sending) {
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;

@@ -20,6 +20,10 @@ h2 {
   color:white;
 }
 
+.furjbqy td {
+  background: rgb(45, 69, 93);
+}
+
 .at4-share-outer-right {
   display:none;
 }
@@ -27,6 +31,12 @@ h2 {
 .drawtogether-welcome-text-error {
   background:rgb(90, 33, 33);
   padding:2em;
+}
+
+.drawtogether-welcome-text-box {
+  background:#21374D;
+  padding:1em;
+  color:white;
 }
 
 * {
@@ -514,7 +524,8 @@ h2 {
     -webkit-touch-callout: none;
     -moz-touch-callout: none;
     touch-callout: none;
-    z-index: 100; }
+    z-index: 100; 
+    margin-left:38px;}
     .drawtogether-paint-container .control-container [class^='control-'], .drawtogether-paint-container .control-container .sp-replacer {
       float: left;
       height: 2rem; }
@@ -532,7 +543,7 @@ h2 {
  */
 .drawtogether-control-container {
   height: 3rem;
-  padding-left:4em;
+  padding-left:38px;
   overflow: hidden;
   box-shadow: 0 0 .5em #000; }
   .drawtogether-control-container .control-button,
