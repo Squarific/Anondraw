@@ -53,6 +53,11 @@ Chat.prototype.string2Color = function string2Color (str) {
     return "hsl("+ h +", "+ s*100 +"%, "+ l*70 +"%)";
 };
 
+Chat.prototype.emotesOrder = ["Kappa"];
+Chat.prototype.emotesHash = {
+	"Kappa": "images/emotes/Kappa.png"
+};
+
 Chat.prototype.addMessage = function addMessage (user, message) {
 		max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 		old_scroll = Math.ceil(this.messagesDom.scrollTop);
@@ -73,12 +78,55 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 			userSpan.innerText = user + ": ";
 			userSpan.style.color = this.string2Color(user);
 
-			messageDom.appendChild(document.createTextNode(message));
+			this.addMessage(messageDom, message);
 		}
 
 		if (max_scroll <= old_scroll) {
 			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 		}
+};
+
+Chat.prototype.addMessage = function addMessage (messageDom, message) {
+	var messages = [];
+	var temp;
+
+	// Run trough all the emotes
+	for (var eKey = 0; eKey < this.emotesOrder.length; eKey++) {
+		var emoteName = this.emotesOrder[eKey];
+		temp = [];
+
+		// Replace in all messages the current emotetext
+		for (var mKey = 0; mKey < messages.length; mKey++) {
+
+			// If the text is completly an emote, don't replace parts of it
+			if (this.emotesHash[messages[mKey]]) {
+				temp.push(messages[mKey]);
+				continue;
+			}
+
+			// Take out all the emote text
+			var split = messages[mKey].split(emoteName);
+
+			// Add them to the temp list
+			for (var k = 0; k < split.length; k++) {
+				temp.push(split[k]);
+				temp.push(emoteName);
+			}
+
+			// Remove the last push
+			temp.pop();
+		}
+
+		messages = temp;
+	}
+
+	this.addMessageList(messageDom. messages);	
+};
+
+Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
+	for (var k = 0; k < messages.length; k++) {
+		
+	}
 };
 
 Chat.prototype.sendChat = function sendChat () {
