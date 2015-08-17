@@ -73,7 +73,8 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 			userSpan.innerText = user + ": ";
 			userSpan.style.color = this.string2Color(user);
 
-			messageDom.appendChild(document.createTextNode(message));
+			var textSpan = messageDom.appendChild(document.createElement("span"));
+			textSpan.innerHTML = message.replace(/((http|ftp)s?:[\/{2}][^\s]+)/g, "<a href=\"$1\">$1</a>");
 		}
 
 		if (max_scroll <= old_scroll) {
