@@ -53,6 +53,18 @@ Chat.prototype.string2Color = function string2Color (str) {
     return "hsl("+ h +", "+ s*100 +"%, "+ l*70 +"%)";
 };
 
+Chat.prototype.sanitize = function (unsafe) {
+	var replacements = {
+		"&": "&amp;",
+		"<": "&lt;",
+		">": "&gt;"
+	};
+
+	return unsafe.replace(/[&<>]/g, function (o) {
+		return replacements[o];
+	});
+}
+
 Chat.prototype.addMessage = function addMessage (user, message) {
 		max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 		old_scroll = Math.ceil(this.messagesDom.scrollTop);
@@ -74,7 +86,8 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 			userSpan.style.color = this.string2Color(user);
 
 			var textSpan = messageDom.appendChild(document.createElement("span"));
-			textSpan.innerHTML = message.replace(/((http|ftp)s?:[\/{2}][^\s]+)/g, "<a href=\"$1\">$1</a>");
+			textSpan.innerHTML = this.sanitize(message)
+				.replace(/((http|ftp)s?:[\/{2}][^\s]+)/g, "<a href=\"$1\">$1</a>");
 		}
 
 		if (max_scroll <= old_scroll) {
