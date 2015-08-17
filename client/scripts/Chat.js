@@ -53,6 +53,18 @@ Chat.prototype.string2Color = function string2Color (str) {
     return "hsl("+ h +", "+ s*100 +"%, "+ l*70 +"%)";
 };
 
+Chat.prototype.sanitize = function (unsafe) {
+	var replacements = {
+		"&": "&amp;",
+		"<": "&lt;",
+		">": "&gt;"
+	};
+
+	return unsafe.replace(/[&<>]/g, function (o) {
+		return replacements[o];
+	});
+}
+
 Chat.prototype.emotesOrder = ["Kappa"];
 Chat.prototype.emotesHash = {
 	"Kappa": "images/emotes/Kappa.png"
@@ -133,7 +145,9 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 			continue;
 		}
 
-		messageDom.appendChild(document.createTextNode(messages[k]));
+		var textSpan = messageDom.appendChild(document.createElement("span"));
+			textSpan.innerHTML = this.sanitize(messages[k])
+				.replace(/((http|ftp)s?:[\/{2}][^\s]+)/g, "<a href=\"$1\">$1</a>");
 	}
 };
 
