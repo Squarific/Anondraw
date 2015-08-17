@@ -65,34 +65,102 @@ Chat.prototype.sanitize = function (unsafe) {
 	});
 }
 
+Chat.prototype.emotesOrder = ["Kappa"];
+Chat.prototype.emotesHash = {
+	"Kappa": "images/emotes/Kappa.png"
+};
+
 Chat.prototype.addMessage = function addMessage (user, message) {
-		max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
-		old_scroll = Math.ceil(this.messagesDom.scrollTop);
-		
-		messageDom = this.messagesDom.appendChild(document.createElement("div"));
-		messageDom.classList.add("chat-message");
-		var time = new Date();
-		time = ("0" + time.getHours()).slice(-2) + ":"
-		     + ("0" + time.getMinutes()).slice(-2) + ":"
-		     + ("0" + time.getSeconds()).slice(-2);
+	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
+	
+	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
+	messageDom.classList.add("chat-message");
 
-		if (typeof message == "undefined")
-			messageDom.appendChild(document.createTextNode("[" + time + "] " + user));
-		else {
-			messageDom.appendChild(document.createTextNode("[" + time + "] "));
+	var time = new Date();
+	time = ("0" + time.getHours()).slice(-2) + ":"
+	     + ("0" + time.getMinutes()).slice(-2) + ":"
+	     + ("0" + time.getSeconds()).slice(-2);
 
-			var userSpan = messageDom.appendChild(document.createElement("span"));
-			userSpan.innerText = user + ": ";
-			userSpan.style.color = this.string2Color(user);
+	if (typeof message == "undefined")
+		messageDom.appendChild(document.createTextNode("[" + time + "] " + user));
+	else {
+		messageDom.appendChild(document.createTextNode("[" + time + "] "));
 
-			var textSpan = messageDom.appendChild(document.createElement("span"));
-			textSpan.innerHTML = this.sanitize(message)
+		var userSpan = messageDom.appendChild(document.createElement("span"));
+		userSpan.innerText = user + ": ";
+		userSpan.style.color = this.string2Color(user);
+
+		this.addMessageToDom(messageDom, message);
+	}
+
+	if (max_scroll <= old_scroll) {
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+	}
+};
+
+Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
+	var messages = [message];
+	var temp;
+
+	// Run trough all the emotes
+	for (var eKey = 0; eKey < this.emotesOrder.length; eKey++) {
+		var emoteName = this.emotesOrder[eKey];
+		temp = [];
+
+		// Replace in all messages the current emotetext
+		for (var mKey = 0; mKey < messages.length; mKey++) {
+
+			// If the text is completly an emote, don't replace parts of it
+			if (this.emotesHash[messages[mKey]]) {
+				temp.push(messages[mKey]);
+				continue;
+			}
+
+			// Take out all the emote text
+			var split = messages[mKey].split(emoteName);
+
+			// Add them to the temp list
+			for (var k = 0; k < split.length; k++) {
+				temp.push(split[k]);
+				temp.push(emoteName);
+			}
+
+			// Remove the last push
+			temp.pop();
+		}
+
+		messages = temp;
+	}
+
+	this.addMessageList(messageDom, messages);	
+};
+
+Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
+	for (var k = 0; k < messages.length; k++) {
+		var emoteUrl = this.emotesHash[messages[k]];
+
+		if (emoteUrl) {
+			messageDom.appendChild(this.createEmote(messages[k], emoteUrl));
+			continue;
+		}
+
+		var textSpan = messageDom.appendChild(document.createElement("span"));
+			textSpan.innerHTML = this.sanitize(messages[k])
 				.replace(/((http|ftp)s?:[\/{2}][^\s]+)/g, "<a href=\"$1\">$1</a>");
-		}
+	}
+};
 
-		if (max_scroll <= old_scroll) {
-			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
-		}
+Chat.prototype.createEmote = function createEmote (name, url) {
+	var img = document.createElement("img");
+
+	img.title = name;
+	img.alt = name;
+	img.src = url;
+
+	img.className = "drawtogether-emote";
+
+	return img;
 };
 
 Chat.prototype.sendChat = function sendChat () {

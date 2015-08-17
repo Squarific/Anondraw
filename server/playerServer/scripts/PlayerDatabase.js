@@ -74,7 +74,7 @@ PlayerDatabase.prototype.login = function login (email, pass, callback) {
 			return;
 		}
 
-		if (rows[0].endban) {
+		if (rows[0].endban > new Date()) {
 			callback("You have been banned till " + rows[0].endban + ". Reason: " + rows[0].reason);
 			return;
 		}

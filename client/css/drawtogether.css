@@ -39,6 +39,10 @@ h2 {
   color:white;
 }
 
+.drawtogether-emote {
+  height:2em;
+}
+
 * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
