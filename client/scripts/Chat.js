@@ -53,10 +53,13 @@ Chat.prototype.string2Color = function string2Color (str) {
     return "hsl("+ h +", "+ s*100 +"%, "+ l*70 +"%)";
 };
 
-Chat.prototype.emotesOrder = ["Kappa"];
+Chat.prototype.emotesOrder = ["Kappa", "CasualLama"];
 Chat.prototype.emotesHash = {
-	"Kappa": "images/emotes/Kappa.png"
+	"Kappa": "images/emotes/Kappa.png",
+	"CasualLama": "images/emotes/CasualLama.png"
 };
+
+Chat.prototype.urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
 Chat.prototype.addMessage = function addMessage (user, message) {
 	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
@@ -88,8 +91,19 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
-	var messages = [message];
+	var messages = [];
 	var temp;
+	var result;
+
+	// Split the message on all urls
+	while (result = this.urlRegex.exec(message)) {
+		messages.push(message.slice(0, result.index));                  // Add the part before the url
+		messages.push({url: result[0]});                                // Add the url
+		message = message.slice(result.index + result[0].length);       // Prepare to search after the url
+	}
+
+	// Add the last part that didnt contain any urls
+	messages.push(message);
 
 	// Run trough all the emotes
 	for (var eKey = 0; eKey < this.emotesOrder.length; eKey++) {
@@ -98,9 +112,8 @@ Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) 
 
 		// Replace in all messages the current emotetext
 		for (var mKey = 0; mKey < messages.length; mKey++) {
-
-			// If the text is completly an emote, don't replace parts of it
-			if (this.emotesHash[messages[mKey]]) {
+			// Don't replace if emote or url
+			if (messages[mKey].url || this.emotesHash[messages[mKey]]) {
 				temp.push(messages[mKey]);
 				continue;
 			}
@@ -124,6 +137,7 @@ Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) 
 	this.addMessageList(messageDom, messages);	
 };
 
+// messages = ["a lit of messages", "unlimited", "with urls: ", {url: "http://wwww.google.com"}]
 Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 	for (var k = 0; k < messages.length; k++) {
 		var emoteUrl = this.emotesHash[messages[k]];
@@ -133,8 +147,20 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 			continue;
 		}
 
+		if (messages[k].url) {
+			var a = messageDom.appendChild(this.createUrl(messages[k].url));
+			continue;
+		}
+
 		messageDom.appendChild(document.createTextNode(messages[k]));
 	}
+};
+
+Chat.prototype.createUrl = function createUrl (url) {
+	var a = document.createElement("a");
+	a.href = url;
+	a.appendChild(document.createTextNode(url));
+	return a;
 };
 
 Chat.prototype.createEmote = function createEmote (name, url) {

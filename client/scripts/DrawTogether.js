@@ -980,7 +980,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	// text.className = "drawtogether-welcome-text-error";
 
 	var text = selectWindow.appendChild(document.createElement("div"));
-	text.appendChild(document.createTextNode("12 aug 2015 - New feature: background is now permanent"))
+	text.appendChild(document.createTextNode("12 aug 2015 - New feature: background is now permanent"));
 	text.className = "drawtogether-welcome-text-box";
 
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
