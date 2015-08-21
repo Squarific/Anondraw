@@ -1,10 +1,14 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
 	id INT UNSIGNED AUTO_INCREMENT,
 	email VARCHAR(255) UNIQUE,
 	pass VARCHAR(64),
 	PRIMARY KEY(id),
 	INDEX (email, pass)
 );
+
+ALTER TABLE users ADD COLUMN last_username VARCHAR(32);
+ALTER TABLE users ADD COLUMN bio TEXT;
+ALTER TABLE users ADD COLUMN last_online DATETIME;
 
 CREATE TABLE IF NOT EXISTS reputations (
     id INT UNSIGNED AUTO_INCREMENT,
@@ -22,6 +26,8 @@ CREATE TABLE IF NOT EXISTS ipbans (
     reason TEXT,
     INDEX (ip, enddate)
 );
+
+ALTER TABLE ipbans ADD INDEX banned_by (banned_by);
 
 CREATE TABLE IF NOT EXISTS accountbans (
     userid INT UNSIGNED,

@@ -68,7 +68,10 @@ var server = http.createServer(function (req, res) {
 		var id = parsedUrl.query.id;
 
 		var server = servers.getServerFromRoom(room);
-		if (!server) res.end('{"error", "No server found"}');
+		if (!server) {
+			res.end('{"error": "No server found"}');
+			return;
+		}
 
 		if (server.id == id) {
 			res.end('{"isours": true}');

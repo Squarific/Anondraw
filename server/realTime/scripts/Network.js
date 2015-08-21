@@ -3,11 +3,16 @@ var GameRoom = require("./GameRoom.js");
 
 var room_regex = /^[a-z0-9_]+$/i;
 
+// User settings
 var MAX_USERS_IN_ROOM = 30;
 var MAX_USERS_IN_GAMEROOM = 8;
+
+// Reputation settings
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
+var UPVOTE_MIN_REP = 4;
 
+// Ink settings
 var MAX_INK = 50000;
 var BASE_GEN = 2300;
 var PER_REP_GEN = 500;
@@ -285,6 +290,14 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.emit("chatmessage", {
 					user: "SERVER",
 					message: "Hey don't try cheating you sneaky bastard!"
+				});
+				return;
+			}
+
+			if (socket.reputation < UPVOTE_MIN_REP) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You need at least " + UPVOTE_MIN_REP + "R yourself before you can give others!"
 				});
 				return;
 			}

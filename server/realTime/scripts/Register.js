@@ -62,6 +62,7 @@ Register.prototype.isOurs = function isOurs (room, callback) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);
 			if (data.error) {
+				if (data.error.indexOf("No server") !== -1) this.register();
 				callback(data.error);
 				return;
 			}

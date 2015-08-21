@@ -53,10 +53,11 @@ Chat.prototype.string2Color = function string2Color (str) {
     return "hsl("+ h +", "+ s*100 +"%, "+ l*70 +"%)";
 };
 
-Chat.prototype.emotesOrder = ["Kappa", "CasualLama"];
+Chat.prototype.emotesOrder = ["Kappa", "CasualLama", "Nyan"];
 Chat.prototype.emotesHash = {
 	"Kappa": "images/emotes/Kappa.png",
-	"CasualLama": "images/emotes/CasualLama.png"
+	"CasualLama": "images/emotes/CasualLama.png",
+	"Nyan": "images/emotes/Nyan.png"
 };
 
 Chat.prototype.urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;

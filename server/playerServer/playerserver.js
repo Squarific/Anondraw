@@ -97,6 +97,27 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/reputationlist") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		playerDatabase.reputationList(user.id, function (err, list) {
+			if (err) {
+				res.end('{"error": "' + err + '"}');
+				console.log("[GETREPUTATIONLIST][ERROR]", err);
+				return;
+			}
+
+			res.end('{"reputationlist": ' + JSON.stringify(list) + '}');
+		});
+		return;
+	}
+
 	if (parsedUrl.pathname == "/checklogin") {
 		var uKey = parsedUrl.query.uKey;
 
