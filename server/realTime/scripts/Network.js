@@ -10,7 +10,9 @@ var MAX_USERS_IN_GAMEROOM = 8;
 // Reputation settings
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
-var UPVOTE_MIN_REP = 4;
+var UPVOTE_MIN_REP = 6;
+var MEMBER_MIN_REP = UPVOTE_MIN_REP;
+var SHARE_IP_MIN_REP = UPVOTE_MIN_REP;
 
 // Ink settings
 var MAX_INK = 50000;
@@ -37,8 +39,11 @@ Protocol.prototype.inkTick = function inkTick () {
 	for (var id in this.io.nsps['/'].connected) {
 		var socket = this.io.nsps['/'].connected[id];
 
-		if (ips.indexOf(socket.ip) !== -1) {
-			this.informClient(socket, SAME_IP_INK_MESSAGE);
+		if (ips.indexOf(socket.ip) !== -1 && socket.reputation < SHARE_IP_MIN_REP) {
+			if (Date.now() - socket.lastIpInkMessage > 30000) {
+				this.informClient(socket, SAME_IP_INK_MESSAGE);
+				socket.lastIpInkMessage = Date.now();
+			}
 			continue;
 		}
 
@@ -387,7 +392,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (socket.room.indexOf("member_") == 0 && (!socket.reputation || socket.reputation < 5)) {
+			if (socket.room.indexOf("member_") == 0 && (!socket.reputation || socket.reputation < MEMBER_MIN_REP)) {
 				callback();
 				if (!socket.lastMemberOnlyWarning || Date.now() - socket.lastMemberOnlyWarning > 5000) {
 					protocol.informClient(socket, "This is a member only room, you need at least 5 rep!")

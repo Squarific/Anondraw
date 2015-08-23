@@ -1101,7 +1101,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
 	},*/ {
 		question: "What benefits does reputation give you?",
-		answer: "\n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave. \n At 5 reputation, you can join the member only rooms."
+		answer: "\n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave. \n At 6 reputation, you can join the member only rooms, give others reputation and share with multiple users under one ip."
 	}, {
 		question: "How do I get reputation?",
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
