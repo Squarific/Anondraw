@@ -1105,6 +1105,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "How do I get reputation?",
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
+	}, {
+		question: "Am I allowed to destroy drawings?",
+		answer: "The goal is to let people draw together. You should never be afraid to help or change a drawing. However if you just want to destroy it refrain from doing so."
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
