@@ -533,6 +533,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 			setTimeout(protocol.register.updatePlayerCount.bind(protocol.register), 500);
+			// TODO end path
 		});
 	}.bind(this));
 };
