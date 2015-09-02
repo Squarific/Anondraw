@@ -382,34 +382,22 @@ DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
 };
 
 DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
-	var newDrawing = [this.drawingTypesByName[drawing.type], drawing.x, drawing.y, drawing.size, drawing.color.toHex8()];
-	if (drawing.x1) newDrawing.push(drawing.x1);
-	if (drawing.y1) newDrawing.push(drawing.y1);
+	var newDrawing = {};
+
+	for (var k in drawing) {
+		newDrawing[k] = drawing[k];
+	}
+
+	newDrawing.color = drawing.color.toHex8();
+
 	return newDrawing; 
-};
-
-DrawTogether.prototype.decodeDrawing = function decodeDrawing (drawing) {
-	if (drawing[4].length == 6)
-		drawing[4] = "#" + drawing[4]
-
-	var newDrawing = {
-		type: this.drawingTypes[drawing[0]],
-		x: drawing[1],
-		y: drawing[2],
-		size: drawing[3],
-		color: tinycolor(drawing[4])
-	};
-
-	if (drawing[5]) newDrawing.x1 = drawing[5];
-	if (drawing[6]) newDrawing.y1 = drawing[6];
-
-	return newDrawing;
 };
 
 DrawTogether.prototype.decodeDrawings = function decodeDrawings (drawings) {
 	for (var dKey = 0; dKey < drawings.length; dKey++) {
-		drawings[dKey] = this.decodeDrawing(drawings[dKey]);
+		drawings[dKey].color = tinycolor(drawings[dKey].color);
 	}
+
 	return drawings;
 };
 
@@ -656,7 +644,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("startuserpath", function (event) {
 		// start path
-		this.network.socket.emit("sp", event.props.color, event.props.size);
+		this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size);
 		this.lastPathSize = event.props.size;
 	}.bind(this));
 
