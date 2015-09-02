@@ -419,6 +419,43 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback();
 			});
 		});
+	
+		// Startpath, endpath and pathpoint handlers
+		socket.on("sp", function (color, size) {
+			if (size > 50 || size < 0) return;
+			protocol.drawTogether.addPath(socket.room, socket.id, {type: "path", color: color, size: size});
+			socket.lastPathSize = size;
+			delete socket.lastPathPoint;
+			socket.broadcast.emit("sp", {socket.id, color: color, size: size});
+		});
+
+		socket.on("ep", function (callback) {
+			protocol.drawTogether.finalizePath(socket.room, socket.id, callback);
+			socket.broadcast.emit("ep", socket.id);
+		});
+
+		socket.on("pp", function (point, callback) {
+			if (!point || point.length !== 2) {
+				callback();
+				return;
+			}
+
+			// If we aren't in a private room, check our ink
+			if (socket.room.indexOf("private_") !== 0) {
+				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
+
+				if (socket.ink < usage) {
+					protocol.informClient(socket, "Not enough ink!");
+					callback();
+					return;
+				}
+
+				socket.ink -= usage;
+			}
+
+			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
+			socket.broadcast.emit("pp", socket.id, point);
+		});
 
 		socket.on("changeroom", function (room, callback) {
 			// User wants to change hes room, subscribe the socket to the
@@ -533,7 +570,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 			setTimeout(protocol.register.updatePlayerCount.bind(protocol.register), 500);
-			// TODO end path
+			protocol.drawTogether.finalizePath(socket.room, socket.id);
 		});
 	}.bind(this));
 };

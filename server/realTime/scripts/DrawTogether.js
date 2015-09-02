@@ -52,17 +52,21 @@ DrawTogether.prototype.countParts = function countParts (drawingList) {
 };
 
 DrawTogether.prototype.addPath = function addPath (room, id, props) {
+	this.paths[room] = this.paths[room] || {};
+	this.finalizePath(room, id);
 	this.paths[room][id] = props;
 };
 
 DrawTogether.prototype.addPathPoint = function addPathPoint (room, id, point) {
-	if (!this.paths[room][id]) return false;
+	if (!this.paths[room] || !this.paths[room][id]) return false;
 	this.paths[room][id].points = this.paths[room][id].points || [];
 	this.paths[room][id].points.push(point);
 	return true;
 };
 
 DrawTogether.prototype.finalizePath = function finalizePath (room, id, callback) {
+	if (!this.paths[room] || !this.paths[room][id]) return;
+	callback = callback || function () {};
 	this.addDrawing(room, this.paths[room][id], callback);
 	this.removePath(room, id);
 };
@@ -83,14 +87,21 @@ DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 };
 
 DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
-	// If its a brush the ink usage is ceil(size * size / 100)
-	// If it is a line the ink usage is ceil(size * length * 2 / 100)
-	var length = drawing[3];
+	// If its a brush the ink usage is (size * size)
+	// If it is a line the ink usage is (size * length * 2)
+	var length = drawing.size;
 
-	if (typeof drawing[5] == "number")
-		length = this.utils.distance(drawing[1], drawing[2], drawing[5], drawing[6]) * 2;
+	if (typeof drawing.x1 == "number")
+		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1) * 2;
 
-	return Math.ceil(drawing[3] * length / 100);
+	return Math.ceil(drawing.size * length / 100);
+};
+
+// Returns the inkusage for a pathpoint
+// (point1, point2, size) or (point1, undefined, size)
+DrawTogether.prototype.inkUsageFromPath = function inkUsageFromPath (point1, point2, size) {
+	var length = size + (point2 ? this.utils.distance(point1[0], point1[1], point2[0], point2[1]) : 0);
+	return Math.ceil(size * length / 100);
 };
 
 DrawTogether.prototype.utils = {
