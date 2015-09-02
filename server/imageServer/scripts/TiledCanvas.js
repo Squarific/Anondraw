@@ -1,20 +1,9 @@
 var drawingTypes = ["line", "brush", "block"];
+var tinycolor = require("./tinycolor");
+
 function decodeDrawing (drawing) {
-    if (drawing[4].length == 6)
-        drawing[4] = "#" + drawing[4]
-
-    var newDrawing = {
-        type: drawingTypes[drawing[0]],
-        x: drawing[1],
-        y: drawing[2],
-        size: drawing[3],
-        color: drawing[4]
-    };
-
-    if (drawing[5]) newDrawing.x1 = drawing[5];
-    if (drawing[6]) newDrawing.y1 = drawing[6];
-
-    return newDrawing;
+    drawing.color = tinycolor(drawing.color);
+    return drawing;
 }
 
 var Canvas = require("canvas");
@@ -80,20 +69,6 @@ TiledCanvas.prototype.drawFunctions = {
         }
     },
     line: function (context, drawing, tiledCanvas, callback) {
-        var todo = 3;
-
-        function lowerAndCheck () {
-            todo--;
-            if (todo == 0) callback();
-        }
-
-        this.brush(context, {
-            x: drawing.x,
-            y: drawing.y,
-            color: drawing.color,
-            size: drawing.size / 2
-        }, tiledCanvas, lowerAndCheck);
-
         context.beginPath();
 
         context.moveTo(drawing.x, drawing.y);
@@ -102,19 +77,44 @@ TiledCanvas.prototype.drawFunctions = {
         context.strokeStyle = drawing.color;
         context.lineWidth = drawing.size;
 
+        context.lineCap = "round";
+
         context.stroke();
         
         if (tiledCanvas) {
             tiledCanvas.drawingRegion(drawing.x, drawing.y, drawing.x1, drawing.y1, drawing.size);
-            tiledCanvas.executeNoRedraw(lowerAndCheck);
+            tiledCanvas.executeNoRedraw(callback);
+        }
+    },
+    path: function (ctx, path, tiledCanvas, callback) {
+        var minX = path.points[0][0],
+            minY = path.points[0][1],
+            maxX = path.points[0][0],
+            maxY = path.points[0][1]; 
+
+        // Start on the first point
+        ctx.beginPath();
+        ctx.moveTo(path.points[0][0], path.points[0][1]);
+
+        // Connect a line between all points
+        for (var pointId = 1; pointId < path.points.length; pointId++) {
+            ctx.lineTo(path.points[pointId][0], path.points[pointId][1]);
+
+            minX = Math.min(path.points[pointId][0], minX);
+            minY = Math.min(path.points[pointId][1], minY);
+            maxX = Math.max(path.points[pointId][0], maxX);
+            maxY = Math.max(path.points[pointId][1], maxY);
         }
 
-        this.brush(context, {
-            x: drawing.x1,
-            y: drawing.y1,
-            color: drawing.color,
-            size: drawing.size / 2
-        }, tiledCanvas, lowerAndCheck);
+        ctx.strokeStyle = path.color.toRgbString();
+        ctx.lineWidth = path.size * 2;
+
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
+        ctx.stroke();
+        tiledCanvas.drawingRegion(minX, minY, maxX, maxY, path.size);
+        tiledCanvas.executeNoRedraw(callback);
     }
 };
 
