@@ -6,14 +6,10 @@ function DrawTogether (background) {
 	this.background = background;
 }
 
-DrawTogether.prototype.rgbToHex = function rgbToHex (r, g, b) {
-	var hex = ((r << 16) | (g << 8) | b).toString(16);
-	return "#" + ("000000" + hex).slice(-6);
-};
-
 DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback) {
-	// Put the given drawing in the database for the given room, returns err if error
+	// Put the given drawing in the database for the given room
 	this.drawings[room] = this.drawings[room] || [];
+	this.drawings[room].currentParts = this.drawings[room].currentParts || 0;
 	this.drawings[room].push(drawing);
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : 1;
 
@@ -84,6 +80,10 @@ DrawTogether.prototype.sqDistance = function sqDistance (point1, point2) {
 DrawTogether.prototype.getDrawings = function getDrawings (room, callback) {
 	// Return a list of network transmittable drawings
 	callback(null, this.drawings[room] || []);
+};
+
+DrawTogether.prototype.getPaths = function getPaths (room, callback) {
+	callback(null, this.paths[room] || {});
 };
 
 DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {

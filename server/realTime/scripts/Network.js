@@ -223,7 +223,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.lastImgurUpload = Date.now();
 			console.log("Imgur upload request from " + socket.ip);
 
-			callback = callback || function () {};
+			callback = (typeof callback == "function") ? callback : function () {};
 			protocol.imgur.uploadBase64(base64, "HwxiL5OnjizcwpD")
 			.then(function (json) {
 				console.log("[IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
@@ -383,8 +383,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			// If a valid drawing put it in the database and send it to
 			// the rest of the people in the room
 
-			if (typeof callback !== "function")
-				callback = function () {};
+			callback = (typeof callback == "function") ? callback : function () {};
 
 			if (!socket.room) {
 				callback();
@@ -426,7 +425,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.drawTogether.addPath(socket.room, socket.id, {type: "path", color: color, size: size});
 			socket.lastPathSize = size;
 			delete socket.lastPathPoint;
-			socket.broadcast.emit("sp", {socket.id, color: color, size: size});
+			socket.broadcast.emit("sp", {id: socket.id, color: color, size: size});
 		});
 
 		socket.on("ep", function (callback) {
@@ -435,8 +434,26 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("pp", function (point, callback) {
+			if (typeof callback !== "function")
+				callback = function () {};
+
+			if (!socket.room) {
+				callback(false);
+				protocol.informClient(socket, "You can't draw when not in a room!");
+				return;
+			}
+
+			if (socket.room.indexOf("member_") == 0 && (!socket.reputation || socket.reputation < MEMBER_MIN_REP)) {
+				callback(false);
+				if (!socket.lastMemberOnlyWarning || Date.now() - socket.lastMemberOnlyWarning > 5000) {
+					protocol.informClient(socket, "This is a member only room, you need at least 5 rep!")
+					socket.lastMemberOnlyWarning = Date.now();
+				}
+				return;
+			}
+
 			if (!point || point.length !== 2) {
-				callback();
+				callback(false);
 				return;
 			}
 
@@ -444,9 +461,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (socket.room.indexOf("private_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
 
+				// Always set latpathpoint even if we failed to draw
+				socket.lastPathPoint = point;
+
 				if (socket.ink < usage) {
 					protocol.informClient(socket, "Not enough ink!");
-					callback();
+					callback(false);
 					return;
 				}
 
@@ -454,6 +474,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
+			callback(true);
 			socket.broadcast.emit("pp", socket.id, point);
 		});
 
@@ -461,7 +482,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			// User wants to change hes room, subscribe the socket to the
 			// given room, tell the user he is subscribed and send the drawing.
 			// Callback (err, drawings)
-			callback = callback || function () {};
+			callback = (typeof callback == "function") ? callback : function () {};
 
 			if (!room_regex.test(room)) {
 				callback("The room can only exist of lowercase letters, numbers and _");
@@ -495,6 +516,8 @@ Protocol.prototype.bindIO = function bindIO () {
 				// Leave our current room
 				protocol.io.to(socket.room).emit("leave", { id: socket.id });
 				socket.leave(socket.room);
+				protocol.drawTogether.finalizePath(socket.room, socket.id);
+				socket.broadcast.emit("ep", socket.id);
 
 				// Join this room
 				socket.join(room);
@@ -507,13 +530,16 @@ Protocol.prototype.bindIO = function bindIO () {
 
 				protocol.drawTogether.getDrawings(room, function (err, drawings) {
 					callback(null, drawings);
+					protocol.drawTogether.getPaths(room, function (err, paths) {
+						socket.emit("paths", paths);
+					});
 				});
 			});
 		});
 
 		socket.on("kickban", function (options, callback) {
 			// Options = [socketid, minutes, bantype]
-			callback = callback || function () {};
+			callback = (typeof callback == "function") ? callback : function () {};
 			var targetSocket = protocol.socketFromId(options[0]);
 
 			if (!targetSocket) {
@@ -571,6 +597,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 			setTimeout(protocol.register.updatePlayerCount.bind(protocol.register), 500);
 			protocol.drawTogether.finalizePath(socket.room, socket.id);
+			socket.broadcast.emit("ep", socket.id);
 		});
 	}.bind(this));
 };
