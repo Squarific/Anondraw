@@ -1,5 +1,5 @@
 var drawingTypes = ["line", "brush", "block"];
-var tinycolor = require("./tinycolor");
+var tinycolor = require("tinycolor");
 
 function decodeDrawing (drawing) {
     drawing.color = tinycolor(drawing.color);
