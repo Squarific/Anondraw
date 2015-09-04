@@ -120,6 +120,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	});
 
 	this.network.on("sp", function (props) {
+		props.color = tinycolor(props.color);
 		self.paint.addPath(props.id, props);
 	});
 
@@ -130,6 +131,12 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("pp", function (id, point) {
 		self.paint.addPathPoint(id, point);
 		self.setPlayerPosition(id, point, Date.now());
+	});
+
+	this.network.on("paths", function (paths) {
+		for (var id in paths) {
+			self.paint.addPath(id, paths[id]);
+		}
 	});
 
 	// Player(list) events
@@ -361,19 +368,28 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 };
 
 DrawTogether.prototype.updateInk = function updateInk () {
-	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/50000";
-	this.inkDom.textContent = "Ink: " + Math.floor(this.ink) + "/50000";
-	this.inkDom.style.width = Math.floor(Math.max(this.ink / 500, 0)) + "%"; // = ink / 10000 * 100
-	if (this.ink < 3000) {
+	// Remove the previous text
+	while (this.inkDom.firstChild) this.inkDom.removeChild(this.inkDom.firstChild);
+
+	this.inkDom.appendChild(document.createTextNode("Ink: " + Math.floor(this.ink) + "/50000"));
+	this.inkDom.style.width = Math.floor(Math.max(this.ink / 500, 0)) + "%";
+
+	// If ink is below 3000 => set class low
+	// if ink is below 8000 => set class middle
+	// otherwise remove classes
+	// previousInk is used so we don't switch classes every time
+	if (this.previousInk >= 3000 && this.ink < 3000) {
 		this.inkDom.classList.add("drawtogether-ink-low");
 		this.inkDom.classList.remove("drawtogether-ink-middle");
-	} else if (this.ink < 8000) {
+	} else if (this.previousInk >= 8000 && this.ink < 8000) {
 		this.inkDom.classList.add("drawtogether-ink-middle");
 		this.inkDom.classList.remove("drawtogether-ink-low");
-	} else {
+	} else if (this.previousInk < 8000 && this.ink >= 8000) {
 		this.inkDom.classList.remove("drawtogether-ink-middle");
 		this.inkDom.classList.remove("drawtogether-ink-low");
 	}
+	
+	this.previousInk = this.ink;
 };
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
@@ -650,7 +666,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("enduserpath", function (event) {
 		this.network.socket.emit("ep", function () {
-			event.removePath();
+			event.removePath(true);
 		});
 	}.bind(this));
 
@@ -668,7 +684,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 					this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
 					this.lastInkWarning = Date.now();
 				}
-				event.removePathPoint("localuser", event.point);
+				event.removePathPoint();
 				return;
 			}
 
@@ -676,7 +692,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			this.updateInk();
 		}
 		
-		this.network.socket.emit("pp", event.point);
+		this.network.socket.emit("pp", event.point, function (success) {
+			if (!success) event.removePathPoint();
+		});
 		this.lastPathPoint = event.point;
 	}.bind(this));
 };
