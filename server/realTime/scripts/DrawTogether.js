@@ -1,4 +1,5 @@
-var CACHE_LENGTH = 4000; //How many drawings are saved
+var CACHE_LENGTH = 2000; //How many drawings are saved
+var PARTS_PER_DRAWING = 10;
 
 function DrawTogether (background) {
 	this.drawings = {};
@@ -11,7 +12,10 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	this.drawings[room] = this.drawings[room] || [];
 	this.drawings[room].currentParts = this.drawings[room].currentParts || 0;
 	this.drawings[room].push(drawing);
-	this.drawings[room].currentParts += drawing.points ? drawing.points.length : 1;
+	// If it is a path, add how many points there are, otherwise add the value for drawings
+	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
+
+	console.log(this.drawings[room].currentParts);
 
 	if (this.drawings[room].currentParts > CACHE_LENGTH && !this.drawings[room].sending) {
 		// Make sure we wait till the server responded
