@@ -1,4 +1,4 @@
-var CACHE_LENGTH = 2000; //How many drawings are saved
+var CACHE_LENGTH = 4000; //How many drawings are saved
 var PARTS_PER_DRAWING = 10;
 
 function DrawTogether (background) {

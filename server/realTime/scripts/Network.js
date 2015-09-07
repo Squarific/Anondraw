@@ -14,6 +14,8 @@ var UPVOTE_MIN_REP = 6;
 var MEMBER_MIN_REP = UPVOTE_MIN_REP;
 var SHARE_IP_MIN_REP = UPVOTE_MIN_REP;
 
+var DRAWING_TYPES = ["brush", "line", "block", "path"];
+
 // Ink settings
 var MAX_INK = 50000;
 var BASE_GEN = 2300;
@@ -400,6 +402,11 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (DRAWING_TYPES.indexOf(drawing.type) == -1) {
+				callback();
+				return;
+			}
+
 			// If we aren't in a private room, check our ink
 			if (socket.room.indexOf("private_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromDrawing(drawing);
@@ -425,12 +432,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.drawTogether.addPath(socket.room, socket.id, {type: "path", color: color, size: size});
 			socket.lastPathSize = size;
 			delete socket.lastPathPoint;
-			socket.broadcast.emit("sp", {id: socket.id, color: color, size: size});
+			socket.broadcast.to(socket.room).emit("sp", {id: socket.id, color: color, size: size});
 		});
 
 		socket.on("ep", function (callback) {
 			protocol.drawTogether.finalizePath(socket.room, socket.id, callback);
-			socket.broadcast.emit("ep", socket.id);
+			socket.broadcast.to(socket.room).emit("ep", socket.id);
 		});
 
 		socket.on("pp", function (point, callback) {
@@ -475,7 +482,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
 			callback(true);
-			socket.broadcast.emit("pp", socket.id, point);
+			socket.broadcast.to(socket.room).emit("pp", socket.id, point);
 		});
 
 		socket.on("changeroom", function (room, callback) {
@@ -517,7 +524,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				protocol.io.to(socket.room).emit("leave", { id: socket.id });
 				socket.leave(socket.room);
 				protocol.drawTogether.finalizePath(socket.room, socket.id);
-				socket.broadcast.emit("ep", socket.id);
+				socket.broadcast.to(socket.room).emit("ep", socket.id);
 
 				// Join this room
 				socket.join(room);
