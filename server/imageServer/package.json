@@ -5,7 +5,8 @@
   "description": "Anondraw image server",
   "main": "imageserver.js",
   "dependencies": {
-    "canvas": "*"
+    "canvas": "*",
+    "tinycolor2": "*"
   },
   "devDependencies": {},
   "scripts": {

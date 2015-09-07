@@ -65,7 +65,7 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 
 
 	for (var k = 0; k < this.playerList.length; k++) {
-		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 1500) {
+		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 3000) {
 			this.drawPlayerInteraction(this.playerList[k].name, this.playerList[k].lastPosition.pos);
 			this.needsClear = true;
 		}
@@ -117,6 +117,26 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		var drawing = self.decodeDrawing(data.drawing);
 		self.paint.drawDrawing("public", drawing);
 		self.setPlayerPosition(data.socketid, [drawing.x, drawing.y], Date.now());
+	});
+
+	this.network.on("sp", function (props) {
+		props.color = tinycolor(props.color);
+		self.paint.addPath(props.id, props);
+	});
+
+	this.network.on("ep", function (id) {
+		self.paint.finalizePath(id);
+	});
+
+	this.network.on("pp", function (id, point) {
+		self.paint.addPathPoint(id, point);
+		self.setPlayerPosition(id, point, Date.now());
+	});
+
+	this.network.on("paths", function (paths) {
+		for (var id in paths) {
+			self.paint.addPath(id, paths[id]);
+		}
 	});
 
 	// Player(list) events
@@ -348,19 +368,28 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 };
 
 DrawTogether.prototype.updateInk = function updateInk () {
-	this.inkDom.innerText = "Ink: " + Math.floor(this.ink) + "/50000";
-	this.inkDom.textContent = "Ink: " + Math.floor(this.ink) + "/50000";
-	this.inkDom.style.width = Math.floor(Math.max(this.ink / 500, 0)) + "%"; // = ink / 10000 * 100
-	if (this.ink < 3000) {
+	// Remove the previous text
+	while (this.inkDom.firstChild) this.inkDom.removeChild(this.inkDom.firstChild);
+
+	this.inkDom.appendChild(document.createTextNode("Ink: " + Math.floor(this.ink) + "/50000"));
+	this.inkDom.style.width = Math.floor(Math.max(this.ink / 500, 0)) + "%";
+
+	// If ink is below 3000 => set class low
+	// if ink is below 8000 => set class middle
+	// otherwise remove classes
+	// previousInk is used so we don't switch classes every time
+	if (this.previousInk >= 3000 && this.ink < 3000) {
 		this.inkDom.classList.add("drawtogether-ink-low");
 		this.inkDom.classList.remove("drawtogether-ink-middle");
-	} else if (this.ink < 8000) {
+	} else if (this.previousInk >= 8000 && this.ink < 8000) {
 		this.inkDom.classList.add("drawtogether-ink-middle");
 		this.inkDom.classList.remove("drawtogether-ink-low");
-	} else {
+	} else if (this.previousInk < 8000 && this.ink >= 8000) {
 		this.inkDom.classList.remove("drawtogether-ink-middle");
 		this.inkDom.classList.remove("drawtogether-ink-low");
 	}
+	
+	this.previousInk = this.ink;
 };
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
@@ -369,34 +398,22 @@ DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
 };
 
 DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
-	var newDrawing = [this.drawingTypesByName[drawing.type], drawing.x, drawing.y, drawing.size, drawing.color];
-	if (drawing.x1) newDrawing.push(drawing.x1);
-	if (drawing.y1) newDrawing.push(drawing.y1);
+	var newDrawing = {};
+
+	for (var k in drawing) {
+		newDrawing[k] = drawing[k];
+	}
+
+	newDrawing.color = drawing.color.toHex8();
+
 	return newDrawing; 
-};
-
-DrawTogether.prototype.decodeDrawing = function decodeDrawing (drawing) {
-	if (drawing[4].length == 6)
-		drawing[4] = "#" + drawing[4]
-
-	var newDrawing = {
-		type: this.drawingTypes[drawing[0]],
-		x: drawing[1],
-		y: drawing[2],
-		size: drawing[3],
-		color: drawing[4]
-	};
-
-	if (drawing[5]) newDrawing.x1 = drawing[5];
-	if (drawing[6]) newDrawing.y1 = drawing[6];
-
-	return newDrawing;
 };
 
 DrawTogether.prototype.decodeDrawings = function decodeDrawings (drawings) {
 	for (var dKey = 0; dKey < drawings.length; dKey++) {
-		drawings[dKey] = this.decodeDrawing(drawings[dKey]);
+		drawings[dKey].color = tinycolor(drawings[dKey].color);
 	}
+
 	return drawings;
 };
 
@@ -613,22 +630,23 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this);
 
 	this.paint.addEventListener("userdrawing", function (event) {
-		// When a drawing is made check if we have ink left
-		var usage = this.inkUsageFromDrawing(event.drawing);
-		if (this.ink < usage) {
-			if (Date.now() - this.lastInkWarning > 20000) {
-				this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
-				this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
-				this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
-				this.lastInkWarning = Date.now();
-			}
-			event.removeDrawing();
-			return;
-		}
-
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0) {
+
+			// When a drawing is made check if we have ink left
+			var usage = this.inkUsageFromDrawing(event.drawing);
+			if (this.ink < usage) {
+				if (Date.now() - this.lastInkWarning > 20000) {
+					this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
+					this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
+					this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
+					this.lastInkWarning = Date.now();
+				}
+				event.removeDrawing();
+				return;
+			}
+
 			this.ink -= usage;
 			this.updateInk();
 		}
@@ -639,11 +657,58 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			event.removeDrawing();
 		});
 	}.bind(this));
+
+	this.paint.addEventListener("startuserpath", function (event) {
+		// start path
+		this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size);
+		this.lastPathSize = event.props.size;
+	}.bind(this));
+
+	this.paint.addEventListener("enduserpath", function (event) {
+		this.network.socket.emit("ep", function () {
+			event.removePath(true);
+		});
+	}.bind(this));
+
+	this.paint.addEventListener("userpathpoint", function (event) {
+		// Lower our ink with how much it takes to draw this
+		// Only do that if we are connected and in a room that does not start with private_ or game_
+		if (this.current_room.indexOf("private_") !== 0) {
+
+			// When a drawing is made check if we have ink left
+			var usage = this.inkUsageFromPath(event.point, this.lastPathPoint, this.lastPathSize);
+			if (this.ink < usage) {
+				if (Date.now() - this.lastInkWarning > 20000) {
+					this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
+					this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
+					this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
+					this.lastInkWarning = Date.now();
+				}
+				event.removePathPoint();
+				return;
+			}
+
+			this.ink -= usage;
+			this.updateInk();
+		}
+		
+		this.network.socket.emit("pp", event.point, function (success) {
+			if (!success) event.removePathPoint();
+		});
+		this.lastPathPoint = event.point;
+	}.bind(this));
 };
 
 DrawTogether.prototype.createMessage = function createMessage () {
 	this.messageDom = this.container.appendChild(document.createElement("div"));
 	this.messageDom.className = "drawtogether-general-message";
+};
+
+// Returns the inkusage for a pathpoint
+// (point1, point2, size) or (point1, undefined, size)
+DrawTogether.prototype.inkUsageFromPath = function inkUsageFromPath (point1, point2, size) {
+	var length = size + (point2 ? this.utils.distance(point1[0], point1[1], point2[0], point2[1]) : 0);
+	return Math.ceil(size * length / 100);
 };
 
 DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
