@@ -6,7 +6,7 @@
   "main": "imageserver.js",
   "dependencies": {
     "canvas": "*",
-    "tinycolor": "*"
+    "tinycolor2": "*"
   },
   "devDependencies": {},
   "scripts": {

@@ -1,5 +1,5 @@
 var drawingTypes = ["line", "brush", "block"];
-var tinycolor = require("tinycolor");
+var tinycolor = require("tinycolor2");
 
 function decodeDrawing (drawing) {
     drawing.color = tinycolor(drawing.color);
@@ -87,6 +87,11 @@ TiledCanvas.prototype.drawFunctions = {
         }
     },
     path: function (ctx, path, tiledCanvas, callback) {
+        if (!path.points || path.points.length < 2) {
+            callback();
+            return;
+        }
+        
         var minX = path.points[0][0],
             minY = path.points[0][1],
             maxX = path.points[0][0],
