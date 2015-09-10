@@ -285,6 +285,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 
 			this.paint.clear();
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
+			this.chat.addMessage("CLIENT", "Welcome to anondraw, the free interactive group drawing app.");
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
 			this.removeLoading();
@@ -1151,7 +1152,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a website where you can draw in group with friends or straners. Join one of the room and start drawing with the group."
+		answer: "It's a website where you can draw in group with friends or strangers. Join one of the room and start drawing with the group. The interactive drawing works on the iPad and other android tablets. It also works on most phones."
 	},/* {
 		question: "How do you play the game?",
 		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
