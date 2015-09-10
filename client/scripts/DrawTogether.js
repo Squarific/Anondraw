@@ -822,8 +822,8 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomWindowConentContainer.className = "drawtogether-roomwindow-content";
 
 	var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
-	roomText.innerText = "Public Rooms:";
-	roomText.textContent = "Public Rooms:";
+	roomText.innerText = "Public Group Rooms:";
+	roomText.textContent = "Public Group Rooms:";
 	roomText.className = "drawtogether-room-text"
 
 	this.publicRoomsContainer = roomWindowConentContainer.appendChild(document.createElement("div"));
@@ -1151,7 +1151,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a webapp where you can draw live with strangers or friends."
+		answer: "It's a website where you can draw in group with friends or straners. Join one of the room and start drawing with the group."
 	},/* {
 		question: "How do you play the game?",
 		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
