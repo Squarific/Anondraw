@@ -604,7 +604,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 			setTimeout(protocol.register.updatePlayerCount.bind(protocol.register), 500);
 			protocol.drawTogether.finalizePath(socket.room, socket.id);
-			socket.broadcast.emit("ep", socket.id);
+			socket.broadcast.to(socket.room).emit("ep", socket.id);
 		});
 	}.bind(this));
 };
