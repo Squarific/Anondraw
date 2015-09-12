@@ -114,7 +114,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	});
 
 	this.network.on("drawing", function (data) {
-		var drawing = self.decodeDrawing(data.drawing);
+		var drawing = self.decodeDrawings([data.drawing]);
 		self.paint.drawDrawing("public", drawing);
 		self.setPlayerPosition(data.socketid, [drawing.x, drawing.y], Date.now());
 	});
