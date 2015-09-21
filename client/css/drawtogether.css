@@ -28,6 +28,11 @@ h2 {
   display:none;
 }
 
+.mouse-coords {
+	left:initial !important;
+	right:0;
+}
+
 .drawtogether-welcome-text-error {
   background:rgb(90, 33, 33);
   padding:2em;

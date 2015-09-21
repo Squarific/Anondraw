@@ -435,6 +435,7 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 
 DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	this.shareWindow.style.display = "block";
+	ga("send", "event", "openwindow", "share");
 
 	this.preview.width = this.shareWindow.offsetWidth * 0.9;
 	this.preview.height = this.preview.width * (this.paint.public.canvas.height / this.paint.public.canvas.width);
@@ -445,6 +446,7 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 
 DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 	this.roomWindow.style.display = "block";
+	ga("send", "event", "openwindow", "rooms");
 
 	this.network.getRooms(function (err, rooms) {
 		while (this.publicRoomsContainer.firstChild)
@@ -464,6 +466,7 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 
 DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
 	this.accWindow.style.display = "block";
+	ga("send", "event", "openwindow", "account");
 };
 
 DrawTogether.prototype.openModeSelector = function openModeSelector () {
@@ -1057,6 +1060,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with strangers';
 	publicButton.addEventListener("click", function () {
 		this.changeRoom("main");
+		ga("send", "event", "modeselector", "strangers");
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
@@ -1066,6 +1070,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	privateButton.addEventListener("click", function () {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room
 		this.changeRoom(this.settings.room);
+		ga("send", "event", "modeselector", "private");
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
@@ -1074,6 +1079,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	privateButton.innerHTML = '<img src="images/member.png"/><br/>Members only room';
 	privateButton.addEventListener("click", function () {
 		this.changeRoom("member_main");
+		ga("send", "event", "modeselector", "member");
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
@@ -1100,6 +1106,10 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	this.redditDrawings = selectWindow.appendChild(document.createElement("div"));
 	this.redditDrawings.className = "drawtogether-redditdrawings";
 	this.populateRedditDrawings();
+
+	var contactInfo = selectWindow.appendChild(document.createElement("div"));
+	contactInfo.appendChild(document.createTextNode("Contact us at info@anondraw.com"));
+	contactInfo.classList.add("contactinfo");
 };
 
 DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings () {
