@@ -701,6 +701,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		});
 		this.lastPathPoint = event.point;
 	}.bind(this));
+
+	this.paint.setTool("grab");
 };
 
 DrawTogether.prototype.createMessage = function createMessage () {
