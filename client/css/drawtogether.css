@@ -81,10 +81,10 @@ h2 {
 
   background:rgba(10, 56, 78, 0.8);
   color:white;
-  border:0.1em solid rgba(143, 163, 182, 0.8);
+  border:0.05em solid rgba(143, 163, 182, 0.8);
 
-  padding:1em;
-  font-size:2em;
+  padding:.8em;
+  font-size:1.5em;
 
   z-index:1000;
 }

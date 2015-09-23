@@ -43,6 +43,8 @@ function DrawTogether (container, settings) {
 			this.closeRoomWindow();
 		}
 	}.bind(this));
+
+	setInterval(this.displayTip.bind(this), 5 * 60 * 1000);
 }
 
 DrawTogether.prototype.defaultSettings = {
@@ -254,6 +256,29 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	}.bind(this), time || Math.max(Math.ceil(message.length / 10) * 1000, 3000));
 };
 
+DrawTogether.prototype.displayTip = function displayTip () {
+	var tips = [
+		"Did you know you can use shortcuts? Press C to toggle the color selection!",
+		"Tip: use B to switch to the brush tool. (Others: [l]ine, [c]olor, [p]icker, [g]rab, ...)",
+		"Tip: You get ink faster if you register an account and get reputation!",
+		"Did you know? You can easily upload your drawing to imgur, you can also share it to reddit!",
+		"Did you know? Private rooms always start with private_",
+		"Did you know? There is a member only room where only people with enough reputation can draw.",
+		"Tip: If you type Nyan with a capital, a cat will appear.",
+		"Tip: If you write Kappa with a capital you will get the twitch emote.",
+		"Tip: There are a few commands, try typing /me or /help",
+		"Need more ink? Try creating an account.",
+		"Want to be showed on the frontpage? If you share to reddit it will get added automatically.",
+		"Tip: Use transparency to get nicer effects.",
+		"The ▲ next to peoples name is the upvote button.",
+		"Did you know you can ban people once you have 50+ rep?",
+		"Got feedback? There is a button at the left where you can leave it!",
+		"Try some shortcuts: C, L, B, P, G"
+	];
+
+	this.displayMessage(tips[Math.floor(Math.random() * tips.length)]);
+};
+
 // Try to change the room
 DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	// Change the room to room + number, if not possible try to join
@@ -289,6 +314,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
 			this.removeLoading();
+			setTimeout(this.displayTip.bind(this), 15000);
 		}
 	}.bind(this));
 
@@ -702,7 +728,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		this.lastPathPoint = event.point;
 	}.bind(this));
 
-	this.paint.setTool("grab");
+	this.paint.changeTool("grab");
 };
 
 DrawTogether.prototype.createMessage = function createMessage () {
@@ -828,28 +854,38 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomWindowConentContainer.className = "drawtogether-roomwindow-content";
 
 	var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
-	roomText.innerText = "Public Group Rooms:";
-	roomText.textContent = "Public Group Rooms:";
+	roomText.appendChild(document.createTextNode("Public group rooms:"));
 	roomText.className = "drawtogether-room-text"
 
 	this.publicRoomsContainer = roomWindowConentContainer.appendChild(document.createElement("div"));
 	this.publicRoomsContainer.className = "drawtogether-publicroomscontainer";
 
-		var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
-	roomText.innerText = "Manual Room:";
-	roomText.textContent = "Manual Room:";
+	var roomText = roomWindowConentContainer.appendChild(document.createElement("div"));
+	roomText.appendChild(document.createTextNode("Manual room:"))
+
 	roomText.className = "drawtogether-room-text"
 
 	this.roomInput = roomWindowConentContainer.appendChild(document.createElement("input"));
 	this.roomInput.type = "text";
-	this.roomInput.placeholder = "Room";
+	this.roomInput.placeholder = "Room name";
 	
 	var roomButton = roomWindowConentContainer.appendChild(document.createElement("div"));
-	roomButton.innerText = "Change room";
-	roomButton.textContent = "Change room";
+	roomButton.appendChild(document.createTextNode("Create public room"));
 	roomButton.className = "drawtogether-button";
 	roomButton.addEventListener("click", function (event) {
 		this.changeRoom(this.roomInput.value);
+		this.closeRoomWindow();
+	}.bind(this));
+
+	this.roomInput = roomWindowConentContainer.appendChild(document.createElement("input"));
+	this.roomInput.type = "text";
+	this.roomInput.placeholder = "Room name";
+	
+	var roomButton = roomWindowConentContainer.appendChild(document.createElement("div"));
+	roomButton.appendChild(document.createTextNode("Create private room"));
+	roomButton.className = "drawtogether-button";
+	roomButton.addEventListener("click", function (event) {
+		this.changeRoom("private_" + this.roomInput.value);
 		this.closeRoomWindow();
 	}.bind(this));
 
