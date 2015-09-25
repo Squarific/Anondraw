@@ -873,25 +873,23 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomButton.appendChild(document.createTextNode("Create public room"));
 	roomButton.className = "drawtogether-button";
 	roomButton.addEventListener("click", function (event) {
-		this.changeRoom(this.roomInput.value);
+		if (this.roomInput.value == this.current_room)
+			this.changeRoom("main");
+		else
+			this.changeRoom(this.roomInput.value);
 		this.closeRoomWindow();
 	}.bind(this));
-
-	this.roomInput = roomWindowConentContainer.appendChild(document.createElement("input"));
-	this.roomInput.type = "text";
-	this.roomInput.placeholder = "Room name";
 	
 	var roomButton = roomWindowConentContainer.appendChild(document.createElement("div"));
 	roomButton.appendChild(document.createTextNode("Create private room"));
-	roomButton.className = "drawtogether-button";
+	roomButton.className = "drawtogether-button create-private-room";
 	roomButton.addEventListener("click", function (event) {
-		this.changeRoom("private_" + this.roomInput.value);
+		this.changeRoom("private_" + Math.random().toString(36).substr(2, 5));
 		this.closeRoomWindow();
 	}.bind(this));
 
 	var close = roomWindowConentContainer.appendChild(document.createElement("div"));
-	close.innerText = "Close room window";
-	close.textContent = "Close room window";
+	close.appendChild(document.createTextNode("Close room window"));
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeRoomWindow.bind(this));
 };
@@ -952,8 +950,7 @@ DrawTogether.prototype.accountError = function accountError (msg) {
 
 	var err = this.loginMessage.appendChild(document.createElement("div"));
 	err.className = "drawtogether-error drawtogether-login-error";
-	err.innerText = msg;
-	err.textContent = msg;
+	err.appendChild(document.createTextNode(msg));
 };
 
 DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
@@ -964,8 +961,7 @@ DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
 
 	var msg = this.loginMessage.appendChild(document.createElement("div"));
 	msg.className = "drawtogether-success drawtogether-login-success";
-	msg.innerText = success;
-	msg.textContent = success;
+	msg.appendChild(document.createTextNode(success));
 };
 
 DrawTogether.prototype.uploadImage = function uploadImage () {
@@ -1077,8 +1073,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	this.selectWindow = selectWindow;
 
 	var text = selectWindow.appendChild(document.createElement("h1"));
-	text.innerText = "Draw online with friends and strangers.";
-	text.textContent = "Draw online with friends and strangers.";
+	text.appendChild(document.createTextNode("Draw online in group with friends or strangers."));
 	text.className = "drawtogether-welcome-text";
 
 	// var text = selectWindow.appendChild(document.createElement("h1"));
@@ -1200,8 +1195,17 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a website where you can draw in group with friends or strangers. Join one of the room and start drawing with the group. The interactive drawing works on the iPad and other android tablets. It also works on most phones."
-	},/* {
+		answer: "It's a website where you can draw in group with friends or strangers. Join one of the room and start drawing and collaborating with the group. The interactive drawing works on the iPad and other android tablets. It also works on most phones."
+	}, {
+		question: "How do I chat?",
+		answer: "There is a chat to the right or if you are on mobile you can click on the chat button."
+	}, {
+		question: "How big is the canvas?",
+		answer: "The interactive canvas has an infinite size. You could move as far away from the center as you'd like."
+	}, {
+		question: "I want to draw privatly with some people, is that possible?",
+		answer: "Yes, in the home screen click on draw with friends and then share the invite url printed in the chat. If you are already in a room, simply click on the room button and then click create private room after giving it a name."
+	}, /* {
 		question: "How do you play the game?",
 		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
 	},*/ {
@@ -1221,7 +1225,10 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
 	}, {
 		question: "Am I allowed to destroy drawings?",
-		answer: "The goal is to let people draw together. You should never be afraid to help or change a drawing. However if you just want to destroy it refrain from doing so."
+		answer: "The goal is to let people draw together. You should never be afraid to help or change a drawing. However griefing on purpose is not allowed."
+	}, {
+		question: "I want to draw in group but I don't want people to destroy my drawing.",
+		answer: "Move away from the center where there are less people then get some reputation from your drawings and use the member rooms."
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {

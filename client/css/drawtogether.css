@@ -300,7 +300,8 @@ h2 {
   display:inline-block;
 }
 
-.drawtogether-roomwindow .drawtogether-close-button, .drawtogether-roomwindow .drawtogether-room-button {
+.drawtogether-roomwindow .drawtogether-close-button, .drawtogether-roomwindow .drawtogether-room-button,
+.drawtogether-roomwindow .create-private-room {
   display:block;
 }
 

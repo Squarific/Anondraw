@@ -159,3 +159,71 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 	req.open("GET", this.server + "/checklogin?uKey=" + encodeURIComponent(this.uKey));
 	req.send();
 };
+
+// Gets the reputation list (aka friend list)
+// Callback gives (err, data) where err is a string with an http error  or
+// the error returned by the server in the parsed data object (data.error || data.err)
+// data = the parsed json response text
+Account.prototype.getReputationList = function getReputationList (callback) {
+	this.request("/getreputationlist", {}, this.parseData.bind(this, function (err, data) {
+		if (err || !data || data.error || data.err) {
+			callback(err || data.error || data.err, data);
+			return;
+		}
+
+		callback(null, data);
+	}));
+};
+
+// Make a get request to the account server to the given path with the given options
+// Options will be appended with {uKey: "The current ukey"}
+// Callback returns (err, request) with error being a string with the http error (human readable)
+// Request is the XMLHttpRequest with readyState == 4
+Account.prototype.request = function request (path, options, callback) {
+	var req = new XMLHttpRequest();
+
+	// Build the get parameter string
+	var optionString = "?";
+
+	// Add options to the string, uri encoded
+	for (var k in options) {
+		optionString += encodeURIComponent(k) + "=" + encodeURIComponent(options[k]) + "&";
+	}
+
+	// Remove trailing &
+	optionString = optionString.slice(0, optionString.length - 1);
+
+
+	req.addEventListener("readystatechange", function (event) {
+		if (req.readyState == 4) {
+			var err;
+
+			if (req.status !== 200) {
+				err = "Http error: " + req.status + " are you connected to the internet?";
+			}
+
+			callback(err, req);
+		}
+	});
+
+	req.open("GET", this.server + path + optionString);
+	req.send();
+};
+
+// Parses the server returned data as a JSON object
+// Callback gives err if err was already defined or if the JSON parsing failed
+// Callback (err, data)
+Account.prototype.parseData = function parseData (err, request, callback) {
+	if (err) {
+		callback(err);
+		return;
+	}
+
+	try {
+		var data = JSON.parse(request.responseText);
+	} catch (e) {
+		err = "JSON Parse error. Server response was: " + request.responseText;
+	}
+
+	callback(err, data);
+};
