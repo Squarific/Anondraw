@@ -18,7 +18,7 @@ var DRAWING_TYPES = ["brush", "line", "block", "path"];
 
 // Ink settings
 var MAX_INK = 50000;
-var BASE_GEN = 2300;
+var BASE_GEN = 2000;
 var PER_REP_GEN = 500;
 
 var SAME_IP_INK_MESSAGE = "You will not get any ink because someone else on your ip has already gotten some.";
@@ -32,7 +32,7 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.bindIO();
 
 	this.gameRooms = {};
-	setInterval(this.inkTick.bind(this), 20 * 1000);
+	setInterval(this.inkTick.bind(this), 10 * 1000);
 }
 
 Protocol.prototype.inkTick = function inkTick () {
@@ -115,7 +115,7 @@ Protocol.prototype.socketFromId = function socketFromId (id) {
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
 	this.io.on("connection", function (socket) {
-		socket.ink = 2500;
+		socket.ink = 500;
 		socket.ip = socket.client.conn.remoteAddress;
 		if (!socket.ip) {
 			socket.emit("chatmessage", {
