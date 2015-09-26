@@ -83,7 +83,12 @@ var server = http.createServer(function (req, res) {
 	}
 
 	if (parsedUrl.pathname == "/getrooms") {
-		res.end('{"rooms": ' + JSON.stringify(servers.getRooms()) + '}');
+		var rooms = servers.getRooms();
+
+		rooms.main = rooms.main || 0;
+		rooms.member_main = rooms.member_main || 0;
+
+		res.end('{"rooms": ' + JSON.stringify(rooms) + '}');
 		return;
 	}
 
