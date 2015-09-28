@@ -120,6 +120,20 @@ TiledCanvas.prototype.drawFunctions = {
         ctx.stroke();
         tiledCanvas.drawingRegion(minX, minY, maxX, maxY, path.size);
         tiledCanvas.executeNoRedraw(callback);
+    },
+    text: function (ctx, drawing, tiledCanvas, callback) {
+        ctx.font = drawing.size + "px Verdana, Geneva, sans-serif";
+        ctx.fillStyle = drawing.color.toRgbString();
+
+        ctx.fillText(drawing.text, drawing.x, drawing.y);        
+        
+        var canvas = new Canvas();
+        var hiddenContext = canvas.getContext('2d');
+        hiddenContext.font = drawing.size + "pt Verdana, Geneva, sans-serif";
+        var textWidth = hiddenContext.measureText(drawing.text).width;
+
+        tiledCanvas.drawingRegion(drawing.x, drawing.y - drawing.size, drawing.x + textWidth, drawing.y, drawing.size);
+        tiledCanvas.executeNoRedraw();
     }
 };
 
