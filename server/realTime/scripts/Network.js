@@ -14,7 +14,7 @@ var UPVOTE_MIN_REP = 6;
 var MEMBER_MIN_REP = UPVOTE_MIN_REP;
 var SHARE_IP_MIN_REP = UPVOTE_MIN_REP;
 
-var DRAWING_TYPES = ["brush", "line", "block", "path"];
+var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
 // Ink settings
 var MAX_INK = 50000;

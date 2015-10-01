@@ -751,6 +751,9 @@ DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawi
 	if (typeof drawing.x1 == "number")
 		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1) * 2;
 
+	if (typeof drawing.text == "string")
+		length *= drawing.text.length;
+
 	return Math.ceil(drawing.size * length / 100);
 };
 

@@ -20,6 +20,11 @@ h2 {
   color:white;
 }
 
+input.paint-texttool {
+  margin-left:50px !important;
+  display:block;
+}
+
 .furjbqy td {
   background: rgb(45, 69, 93);
 }
