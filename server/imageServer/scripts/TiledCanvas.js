@@ -133,7 +133,7 @@ TiledCanvas.prototype.drawFunctions = {
         var textWidth = hiddenContext.measureText(drawing.text).width;
 
         tiledCanvas.drawingRegion(drawing.x, drawing.y - drawing.size, drawing.x + textWidth, drawing.y, drawing.size);
-        tiledCanvas.executeNoRedraw();
+        tiledCanvas.executeNoRedraw(callback);
     }
 };
 
