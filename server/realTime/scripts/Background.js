@@ -1,8 +1,9 @@
 var http = require("http");
 
-function Background (server, drawcode) {
+function Background (server, httpListenServer, drawcode) {
 	this.server = server;
 	this.drawcode = drawcode;
+	this.httpListenServer = httpListenServer;
 }
 
 Background.prototype.sendDrawings = function (room, drawings, callback) {

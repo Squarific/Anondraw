@@ -3,7 +3,7 @@ var drawcode = require("./draw_password.js");
 
 var Canvas = require("canvas");
 var TiledCanvas = require("./scripts/TiledCanvas.js");
-var fs = require("fs");
+var fs = require('graceful-fs');
 
 var mkdirp = require('mkdirp');
 
@@ -117,6 +117,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 				} catch (e) {
 					console.log("Error parsing the drawings, is it valid json?", e);
 					res.end('{"error": "Invalid json!"}');
+					currentlyDrawing[room] = false;
 					return;
 				}
 				
@@ -124,6 +125,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 					if (err) {
 						res.end('{"error": "Faulty directory"}');
 						console.log("Error creating image folder for room", room, err);
+						currentlyDrawing[room] = false;
 						return;
 					}
 

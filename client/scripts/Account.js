@@ -54,9 +54,9 @@ Account.prototype.register = function register (email, pass, callback) {
 
 			this.uKey = data.uKey;
 			this.mail = email;
-			localStorage.setItem("castlewar-uKey", data.uKey);
-			localStorage.setItem("castlewar-mail", email);
-			localStorage.setItem("castlewar-pass", pass);
+			localStorage.setItem("drawtogether-uKey", data.uKey);
+			localStorage.setItem("drawtogether-mail", email);
+			localStorage.setItem("drawtogether-pass", pass);
 			setTimeout(callback, 0);
 		} else if (req.readyState == 4) {
 			callback("Connection error, status code: " + req.status);
