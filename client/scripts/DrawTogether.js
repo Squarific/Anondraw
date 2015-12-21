@@ -268,7 +268,7 @@ DrawTogether.prototype.displayTip = function displayTip () {
 		"Tip: If you write Kappa with a capital you will get the twitch emote.",
 		"Tip: There are a few commands, try typing /me or /help",
 		"Need more ink? Try creating an account.",
-		"Want to be showed on the frontpage? If you share to reddit it will get added automatically.",
+		"Want to be shown on the frontpage? If you share to reddit it will get added automatically.",
 		"Tip: Use transparency to get nicer effects.",
 		"The ▲ next to peoples name is the upvote button.",
 		"Did you know you can ban people once you have 50+ rep?",
@@ -1144,7 +1144,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	this.populateRedditDrawings();
 
 	var contactInfo = selectWindow.appendChild(document.createElement("div"));
-	contactInfo.appendChild(document.createTextNode("Contact us at info@anondraw.com"));
+	contactInfo.appendChild(document.createTextNode("Feedback/contact: info@anondraw.com"));
 	contactInfo.classList.add("contactinfo");
 };
 
@@ -1155,7 +1155,7 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 			var posts = JSON.parse(req.responseText).data.children;
 			
 			var title = this.redditDrawings.appendChild(document.createElement("a"));
-			title.innerText = "/r/AnonDraw";
+			title.appendChild(document.createTextNode("Reddit gallery (/r/anondraw)"))
 			title.href = "http://www.reddit.com/r/AnonDraw";
 			title.className = "drawtogether-redditdrawings-title";
 
@@ -1198,7 +1198,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a website where you can draw in group with friends or strangers. Join one of the room and start drawing and collaborating with the group. The interactive drawing works on the iPad and other android tablets. It also works on most phones."
+		answer: "It's a website where you can draw or doodle in group with friends or strangers. Join one of the room and start drawing and collaborating with the group. The interactive drawing works on the iPad and other android tablets. You can also doodle on phones."
 	}, {
 		question: "How do I chat?",
 		answer: "There is a chat to the right or if you are on mobile you can click on the chat button."
@@ -1227,10 +1227,10 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		question: "How do I get reputation?",
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
 	}, {
-		question: "Am I allowed to destroy drawings?",
+		question: "Am I allowed to destroy doodles or drawings?",
 		answer: "The goal is to let people draw together. You should never be afraid to help or change a drawing. However griefing on purpose is not allowed."
 	}, {
-		question: "I want to draw in group but I don't want people to destroy my drawing.",
+		question: "I want to draw in group but I don't want people to destroy my drawing/doodle.",
 		answer: "Move away from the center where there are less people then get some reputation from your drawings and use the member rooms."
 	}];
 

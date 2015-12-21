@@ -25,6 +25,14 @@ input.paint-texttool {
   display:block;
 }
 
+.contactinfo {
+    padding: 2em;
+    color: white;
+    font-size: 1.2em;
+    font-weight: 800;
+}
+}
+
 .furjbqy td {
   background: rgb(45, 69, 93);
 }
@@ -175,30 +183,21 @@ input.paint-texttool {
   }
 
   .drawtogether-redditpost {
-    margin:.1em;
     padding:.5em;
-    height:15em;
-    width:15em;
     font-size:1em;
     white-space:normal;
     text-align:left;
     vertical-align: bottom;
-    margin-top:4em;
-    margin-bottom:1em;
     overflow:hidden;
   }
 
   .drawtogether-redditpost-thumb {
     display:block;
-    margin:auto;
-    margin-top:1em;
-    margin-bottom:1em;
-    max-width: 140px;
+    height:10em;
   }
 
   .drawtogether-redditpost-thumbfiller {
-    min-height:100px;
-    margin:1em;
+    height:10em;
     padding:1em;
     text-align:center;
     background:rgba(0, 0, 0, 0.1);
@@ -206,8 +205,23 @@ input.paint-texttool {
 
   .drawtogether-redditpost-title {
     display:inline-block;
+
+    min-height:3em;
+    padding:0.5em;
     margin-bottom:1em;
+
+    width: calc(100% - 1em);
+    width: 100%;
+
+
+    text-align:center;
+    background-color: rgba(6, 18, 37, 0.5);
     text-decoration: none;
+
+    position:absolute;
+    bottom:0;
+    left: 0;
+    left: calc(0.5em);
   }
 
   .drawtogether-redditdrawings a {
@@ -225,10 +239,11 @@ input.paint-texttool {
   }
 
   .drawtogether-redditdrawings-title {
-    position:absolute !important;
+    display:block !important;
+    width:100%;
+    margin-bottom:1em;
     color:white;
     font-weight:800;
-    float:left;
     vertical-align: top;
     padding:1em;
     font-size:1em;
@@ -374,7 +389,7 @@ input.paint-texttool {
   position:absolute;
   top:0;
   right:0;
-  bottom:70%;
+  bottom:60%;
   width: 20rem;
   overflow: hidden;
   overflow-y: auto;
@@ -455,7 +470,7 @@ input.paint-texttool {
  */
 .drawtogether-chat-container {
   position: absolute;
-  top: 30%;
+  top: 40%;
   bottom: 0;
   right: 0;
   width: 20rem;
@@ -848,4 +863,16 @@ input.paint-texttool {
 
 .gui-prompt-button:hover {
   background-color: #233445;
+}
+
+/* ADS */
+
+.drawtogether-ad-container {
+  text-align: center;
+}
+
+.chitikaAdContainer {
+  display:inline-block;
+  margin-top:1em;
+  margin-bottom:1em;
 }
