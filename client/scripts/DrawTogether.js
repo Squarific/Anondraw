@@ -1076,7 +1076,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	this.selectWindow = selectWindow;
 
 	var text = selectWindow.appendChild(document.createElement("h1"));
-	text.appendChild(document.createTextNode("Draw online in group with friends or strangers."));
+	text.appendChild(document.createTextNode("Draw with friends or strangers!"));
 	text.className = "drawtogether-welcome-text";
 
 	// var text = selectWindow.appendChild(document.createElement("h1"));
@@ -1085,7 +1085,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	// text.className = "drawtogether-welcome-text-error";
 
 	var text = selectWindow.appendChild(document.createElement("div"));
-	text.appendChild(document.createTextNode("7 sept 2015 - New feature: transparency"));
+	text.appendChild(document.createTextNode("Realtime in private or public chat rooms with an unlimited canvas. Choose with whom you want to draw:"));
 	text.className = "drawtogether-welcome-text-box";
 
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
@@ -1093,7 +1093,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 
 	var publicButton = buttonContainer.appendChild(document.createElement("div"));
 	publicButton.className = "drawtogether-modeselect-button";
-	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with strangers';
+	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with everyone';
 	publicButton.addEventListener("click", function () {
 		this.changeRoom("main");
 		ga("send", "event", "modeselector", "strangers");
