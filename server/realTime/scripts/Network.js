@@ -296,7 +296,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (socket.uKey == targetSocket.uKey) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
-					message: "Hey don't try cheating you sneaky bastard!"
+					message: "Hey don't try cheating, you can't give yourself reputation!"
 				});
 				return;
 			}
