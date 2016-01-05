@@ -59,6 +59,13 @@ input.paint-texttool {
   color:white;
 }
 
+.drawtogether-notification-text-box {
+  background:#214D4D;
+  margin-top:1em;
+  padding:1em;
+  color:white;
+}
+
 .drawtogether-emote {
   height:2em;
 }
@@ -411,6 +418,7 @@ input.paint-texttool {
 
 .drawtogether-player {
   display:inline-block;
+  cursor:pointer;
   width:100%;
   color:#fff;
   font-size:1em;
@@ -432,8 +440,17 @@ input.paint-texttool {
   cursor:pointer;
 }
 
+.drawtogether-player-button img {
+  height:1em;
+  vertical-align: bottom;
+}
+
 .drawtogether-player-button:hover {
   background:rgb(50, 71, 91);
+}
+
+.drawtogether-activated {
+  background:#374E65;
 }
 
 .drawtogether-player-name {

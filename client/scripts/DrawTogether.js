@@ -8,8 +8,18 @@ function DrawTogether (container, settings) {
 
 	// Set default values untill we receive them from the server
 	this.playerList = [];
+	this.moveQueue = [];
 	this.ink = 2500;
-	this.lastInkWarning = Date.now();
+
+	this.lastInkWarning = Date.now();    // Last time we showed that we are out of ink
+	this.lastViewDeduction = Date.now(); // Time since we last deducted someones viewscore
+
+	this.lastScreenMove = Date.now();    // Last time we moved the screen
+	this.lastScreenMoveStartPosition;    // Last start position
+
+	this._forceFollow;      // The playerid that should be followed
+	this._autoMoveScreen;   // Boolean, should we move the screen automatically?
+	this._followingPlayer;  // The player the view is currently following
 
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
@@ -45,6 +55,7 @@ function DrawTogether (container, settings) {
 	}.bind(this));
 
 	setInterval(this.displayTip.bind(this), 5 * 60 * 1000);
+	setTimeout(this.autoMoveScreen.bind(this), 0);
 }
 
 DrawTogether.prototype.defaultSettings = {
@@ -73,8 +84,141 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 		}
 	}
 
+	this.handleMoveQueue();
+
 	// Recall the drawloop
 	requestAnimationFrame(this.drawLoop.bind(this));
+};
+
+DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
+	if (this.moveQueue.length > 0) {
+		if (Date.now() - this.lastScreenMove >= this.moveQueue[0].duration) {
+			this.lastScreenMove = Date.now();
+			this.lastScreenMoveStartPosition = this.moveQueue[0].position;
+
+			this.paint.goto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
+			this.moveQueue.shift();
+			return;
+		}
+
+		var delta = Date.now() - this.lastScreenMove;
+		var relativeDistance = delta / this.moveQueue[0].duration;
+		var distances = [relativeDistance * (this.moveQueue[0].position[0] - this.lastScreenMoveStartPosition[0]),
+		                 relativeDistance * (this.moveQueue[0].position[1] - this.lastScreenMoveStartPosition[1])];
+
+		this.paint.goto(distances[0] + this.lastScreenMoveStartPosition[0],
+		                distances[1] + this.lastScreenMoveStartPosition[1]);
+	}
+};
+
+DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
+	if (this._forceFollow) {
+
+		this.moveScreenTo(this._forceFollow);
+		this._followingPlayer = null;
+
+	} else if (this._autoMoveScreen) {
+
+		if (!this._followingPlayer) {
+			this._followingPlayer = this.getMaxViewScorePlayer();
+			this.lastViewDeduction = Date.now();
+		}
+
+		var viewDeductionDelta = Date.now() - this.lastViewDeduction;
+		
+		for (var k = 0; k < this.playerList.length; k++) {
+			this.playerList[k].id == this._followingPlayer;
+			this.playerList[k].viewScore -= viewDeductionDelta;
+			break;
+		}
+
+		this.lastViewDeduction += viewDeductionDelta;
+
+		this.moveScreenTo(this._followingPlayer);
+		this._followingPlayer = this.getMaxViewScorePlayer();
+
+	} else {
+		this._followingPlayer = null;
+	}
+
+	setTimeout(this.autoMoveScreen.bind(this), 5000);
+};
+
+// Move to the given player in 1 second
+// If the player is close (1 screen difference in every direction) we just move to it
+// If the player is farther we start moving in its direction for half a second
+// then jump close (.5 screen) to him and then move from the close point to the player
+DrawTogether.prototype.moveScreenTo = function moveScreenTo (playerid) {
+	var player = this.playerFromId(playerid);
+	if (!player || !player.lastPosition || !player.lastPosition.pos) return;
+
+	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+	                  this.paint.public.canvas.height / this.paint.public.zoom];
+
+	var targetPosEnd = [player.lastPosition.pos[0] - screenSize[0] / 2,
+	                    player.lastPosition.pos[1] - screenSize[1] / 2];
+
+	var distances = [targetPosEnd[0] - this.paint.public.leftTopX,
+	                 targetPosEnd[1] - this.paint.public.leftTopY];
+
+	// If we are still well on the screen lets just not move
+	if (Math.abs(distances[0]) < screenSize[0] * 0.35 &&
+	    Math.abs(distances[1]) < screenSize[1] * 0.35) {
+		return;
+	}
+
+	// If we are only like a screen away, lets move quickly
+	if (Math.abs(distances[0]) < screenSize[0] &&
+	    Math.abs(distances[1]) < screenSize[1]) {
+		this.moveScreenToPosition(targetPosEnd, 3500);
+		return;
+	}
+
+	var targetPosStart = [this.paint.public.leftTopX + 0.15 * distances[0],
+	                      this.paint.public.leftTopY + 0.15 * distances[1]];
+
+	var targetPosMiddle = [targetPosEnd[0] - distances[0] * 0.15,
+	                       targetPosEnd[1] - distances[1] * 0.15];
+
+	this.moveScreenToPosition(targetPosStart, 500);
+	this.moveScreenToPosition(targetPosMiddle, 0);
+	this.moveScreenToPosition(targetPosEnd, 500);
+	console.log(this.moveQueue);
+};
+
+DrawTogether.prototype.moveScreenToPosition = function moveScreenToPosition (position, duration) {
+	if (!this.lastScreenMoveStartPosition || this.moveQueue.length == 0) {
+		this.lastScreenMoveStartPosition = [this.paint.public.leftTopX,
+		                                    this.paint.public.leftTopY];
+		this.lastScreenMove = Date.now();
+	}
+
+	if (isNaN(duration) || isNaN(position[0]) || isNaN(position[1]))
+		throw "Duration or position was not a number";
+
+	this.moveQueue.push({
+		position: position,
+		duration: duration
+	});
+
+	return true;
+};
+
+// Returns the playerid with the biggest viewscore
+DrawTogether.prototype.getMaxViewScorePlayer = function getMaxViewScorePlayer () {
+	if (this.playerList.length < 1) return null;
+
+	var maxViewScore = -Infinity;
+	var maxId = this.playerList[0].id;
+
+	for (var k = 0; k < this.playerList.length; k++) {
+		if (this.playerList[k].viewScore > maxViewScore) {
+			maxViewScore = this.playerList[k].viewScore;
+			maxId = this.playerList[k].id;
+		}
+	}
+
+	return maxId;
 };
 
 DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (name, position) {
@@ -273,7 +417,9 @@ DrawTogether.prototype.displayTip = function displayTip () {
 		"The ▲ next to peoples name is the upvote button.",
 		"Did you know you can ban people once you have 50+ rep?",
 		"Got feedback? There is a button at the left where you can leave it!",
-		"Try some shortcuts: C, L, B, P, G"
+		"Try some shortcuts: C, L, B, P, G",
+		"If you click on someones name you will jump to their last draw position!",
+		"Pressing the eye next to someones name will make your screen follow the player."
 	];
 
 	this.displayMessage(tips[Math.floor(Math.random() * tips.length)]);
@@ -388,8 +534,12 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 	for (var k = 0; k < this.playerList.length; k++) {
 		if (this.playerList[k].id == id) {
 			this.playerList[k].lastPosition = this.playerList[k].lastPosition || {};
+			this.playerList[k].viewScore = this.playerList[k].viewScore || 0;
+
 			this.playerList[k].lastPosition.pos = position;
 			this.playerList[k].lastPosition.time = time;
+
+			this.playerList[k].viewScore += 100;
 		}
 	}
 };
@@ -536,15 +686,45 @@ DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid (soc
 	return "[Not found]";
 };
 
+DrawTogether.prototype.playerFromId = function playerFromId (id) {
+	for (var k = 0; k < this.playerList.length; k++) {
+		if (this.playerList[k].id == id) {
+			return this.playerList[k];
+		}
+	}
+
+	return null;
+};
+
 DrawTogether.prototype.createPlayerDom = function (player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
 
+	playerDom.addEventListener("click", function (playerid, event) {
+		this.moveScreenTo(playerid);
+	}.bind(this, player.id));
+
+	var followButton = playerDom.appendChild(document.createElement("span"));
+	followButton.className = "drawtogether-player-button drawtogether-follow-button";
+	if (player.id == this._forceFollow) followButton.classList.add("drawtogether-activated");
+
+	var img = followButton.appendChild(document.createElement("img"));
+	img.src = "images/icons/eye.png";
+
+	followButton.addEventListener("click", function (playerid, event) {
+		if (this._forceFollow == playerid) {
+			this._forceFollow = null;
+			this.updatePlayerList();
+			return;
+		}
+
+		this._forceFollow = playerid;
+		this.updatePlayerList();
+	}.bind(this, player.id));
+
 	var upvoteButton = document.createElement("span");
 	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button"
-
-	upvoteButton.innerText = "▲";
-	upvoteButton.textContent = "▲";
+	upvoteButton.appendChild(document.createTextNode("▲"));
 
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.network.socket.emit("upvote", playerid);
@@ -1033,6 +1213,15 @@ DrawTogether.prototype.toggleInfo = function toggleInfo () {
 		this.infoContainer.classList.add("drawtogether-unhide-on-mobile");
 };
 
+DrawTogether.prototype.toggleFollow = function toggleFollow () {
+	this._autoMoveScreen = !this._autoMoveScreen;
+
+	if (this._autoMoveScreen)
+		this.displayMessage("Your screen will now move around automatically.");
+	else
+		this.displayMessage("You now have to move the camera manually.");
+};
+
 DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	shareWindow = this.container.appendChild(document.createElement("div"));
 	shareWindow.className = "drawtogether-sharewindow";
@@ -1087,6 +1276,10 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	var text = selectWindow.appendChild(document.createElement("div"));
 	text.appendChild(document.createTextNode("Realtime in private or public chat rooms with an unlimited canvas. Choose with whom you want to draw:"));
 	text.className = "drawtogether-welcome-text-box";
+
+	var text = selectWindow.appendChild(document.createElement("div"));
+	text.appendChild(document.createTextNode("New feature: autocam and go to peoples position"));
+	text.className = "drawtogether-notification-text-box";
 
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
 	buttonContainer.className = "drawtogether-buttoncontainer";
@@ -1264,9 +1457,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		value: "",
 		text: "Home",
 		title: "Go to home menu",
-		action: function () {
-			this.openModeSelector();
-		}.bind(this)
+		action: this.openModeSelector.bind(this)
 	},{
 		name: "toggle-chat",
 		type: "button",
@@ -1281,6 +1472,13 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Info",
 		title: "Toggle room info",
 		action: this.toggleInfo.bind(this)
+	}, {
+		name: "toggle-view",
+		type: "button",
+		value: "",
+		text: "Toggle Auto Camera",
+		title: "Toggle the camera to follow where people are drawing.",
+		action: this.toggleFollow.bind(this)
 	}, {
 		name: "name",
 		type: "text",
