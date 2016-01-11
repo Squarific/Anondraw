@@ -74,17 +74,18 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	     + ("0" + time.getMinutes()).slice(-2) + ":"
 	     + ("0" + time.getSeconds()).slice(-2);
 
-	if (typeof message == "undefined")
-		messageDom.appendChild(document.createTextNode("[" + time + "] " + user));
-	else {
-		messageDom.appendChild(document.createTextNode("[" + time + "] "));
-
+	// Make it possible to call this function without user
+	if (typeof message == "undefined") {
+		message = user;
+	} else {
 		var userSpan = messageDom.appendChild(document.createElement("span"));
 		userSpan.innerText = user + ": ";
 		userSpan.style.color = this.string2Color(user);
-
-		this.addMessageToDom(messageDom, message);
 	}
+
+	this.addMessageToDom(messageDom, message);
+	messageDom.title = time;
+	messageDom.alt = time;
 
 	if (max_scroll <= old_scroll) {
 		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;

@@ -701,6 +701,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	playerDom.className = "drawtogether-player";
 
 	playerDom.addEventListener("click", function (playerid, event) {
+		this.moveQueue.length = 0;
 		this.moveScreenTo(playerid);
 	}.bind(this, player.id));
 
@@ -712,13 +713,14 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 	img.src = "images/icons/eye.png";
 
 	followButton.addEventListener("click", function (playerid, event) {
+		this.moveQueue.length = 0;
+
 		if (this._forceFollow == playerid) {
 			this._forceFollow = null;
-			this.updatePlayerList();
-			return;
+		} else {
+			this._forceFollow = playerid;
 		}
 
-		this._forceFollow = playerid;
 		this.updatePlayerList();
 	}.bind(this, player.id));
 
@@ -1218,8 +1220,10 @@ DrawTogether.prototype.toggleFollow = function toggleFollow () {
 
 	if (this._autoMoveScreen)
 		this.displayMessage("Your screen will now move around automatically.");
-	else
+	else {
 		this.displayMessage("You now have to move the camera manually.");
+		this.moveQueue.length = 0;
+	}
 };
 
 DrawTogether.prototype.createShareWindow = function createShareWindow () {
