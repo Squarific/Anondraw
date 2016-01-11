@@ -37,9 +37,10 @@ var server = http.createServer(function (req, res) {
 
 	if (parsedUrl.pathname == "/getserver") {
 		var room = parsedUrl.query.room;
+		var maxOverride = parsedUrl.query.maxoverride;
 
 		if (!room) {
-			res.end('{"error": "You did not provid the requierd room query"}');
+			res.end('{"error": "You did not provide the required room query"}');
 			return;
 		}
 
@@ -54,7 +55,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		if (server.rooms[room] > MAX_USERS_PER_ROOM) {
+		if (server.rooms[room] > MAX_USERS_PER_ROOM && !maxOverride) {
 			res.end('{"error": "Too many users"}');
 			return;
 		}
