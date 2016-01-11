@@ -340,6 +340,8 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("changename", function (name, callback) {
+			if (!name) return;
+
 			// Remove all bad characters
 			name.replace(/[^\x00-\x7F]/g, "");
 
