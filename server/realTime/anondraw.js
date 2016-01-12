@@ -23,8 +23,8 @@ var players = new Players("direct.anondraw.com");
 // var players = new Players("localhost");
 
 var Background = require("./scripts/Background.js");
-var background = new Background("direct.anondraw.com", require("./draw_password.js"));
-// var background = new Background("localhost", require("./draw_password.js"));
+var background = new Background("direct.anondraw.com", undefined, require("./draw_password.js"));
+// var background = new Background("localhost", undefined, require("./draw_password.js"));
 
 // Drawtogether library
 var DrawTogether = require("./scripts/DrawTogether.js");

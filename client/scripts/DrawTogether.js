@@ -34,12 +34,14 @@ function DrawTogether (container, settings) {
 	if (this.settings.mode == "ask") {
 		this.openModeSelector();
 	} else if (this.settings.mode == "join") {
-		this.changeRoom(this.settings.room);
+		this.changeRoom(this.settings.room, undefined, true);
 	} else  if (this.settings.mode == "private") {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
-		this.changeRoom(this.settings.room);
+		this.changeRoom(this.settings.room, undefined, true);
 	} else if (this.settings.mode == "member") {
 		this.changeRoom("member-main");
+	} else if (this.settings.mode == "auto") {
+		this.changeRoom("main");
 	}
 
 	requestAnimationFrame(this.drawLoop.bind(this));
@@ -247,7 +249,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		if (self.current_room) {
 			var room = self.current_room;
 			delete self.current_room;
-			self.changeRoom(room);
+			self.changeRoom(room, undefined, true);
 		}
 	});
 
@@ -426,7 +428,12 @@ DrawTogether.prototype.displayTip = function displayTip () {
 };
 
 // Try to change the room
-DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
+// We will change it to the first parameter, if thta doesn't work we will go to
+// room + number where number starts at 1 and raises with 1 for every full room
+// If you make the third parameter true we will tell the server we really want
+// to join that particular room and the fourth is a "secret" override that 
+// ignores if a room is full
+DrawTogether.prototype.changeRoom = function changeRoom (room, number, specific, override) {
 	// Change the room to room + number, if not possible try to join
 	// room + (number + 1), if not possible repeat
 	if (room === this.current_room) {
@@ -442,7 +449,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 	}.bind(this), 2000);
 
 	number = number || "";
-	this.network.loadRoom(room + number, function (err, drawings) {
+	this.network.loadRoom(room + number, specific, override, function (err, drawings) {
 		this.changingRoom = false;
 		if (err && err.indexOf("Too many users") !== -1) {
 			this.changeRoom(room, (number || 0) + 1);
@@ -460,7 +467,6 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number) {
 			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
 
 			this.removeLoading();
-			setTimeout(this.displayTip.bind(this), 15000);
 		}
 	}.bind(this));
 
@@ -633,7 +639,7 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 			roomButton.className = "drawtogether-button drawtogether-room-button";
 			roomButton.appendChild(document.createTextNode(name + " (" + rooms[name] + " users)"))
 			roomButton.addEventListener("click", function (name, event) {
-				this.changeRoom(name);
+				this.changeRoom(name, undefined, true);
 				this.closeRoomWindow();
 			}.bind(this, name));
 		}
@@ -1059,7 +1065,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomButton.className = "drawtogether-button";
 	roomButton.addEventListener("click", function (event) {
 		if (this.roomInput.value == this.current_room)
-			this.changeRoom("main");
+			this.changeRoom("main", undefined, true);
 		else
 			this.changeRoom(this.roomInput.value);
 		this.closeRoomWindow();
@@ -1069,7 +1075,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomButton.appendChild(document.createTextNode("Create private room"));
 	roomButton.className = "drawtogether-button create-private-room";
 	roomButton.addEventListener("click", function (event) {
-		this.changeRoom("private_" + Math.random().toString(36).substr(2, 5));
+		this.changeRoom("private_" + Math.random().toString(36).substr(2, 5), undefined, true);
 		this.closeRoomWindow();
 	}.bind(this));
 
@@ -1302,7 +1308,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Alone or with friends';
 	privateButton.addEventListener("click", function () {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room
-		this.changeRoom(this.settings.room);
+		this.changeRoom(this.settings.room, undefined, true);
 		ga("send", "event", "modeselector", "private");
 		this.selectWindow.style.display = "";
 	}.bind(this));

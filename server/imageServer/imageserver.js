@@ -77,6 +77,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 			});
 
 			if (drawcode !== parsedUrl.query.drawcode) {
+				console.log("Wrong drawcode", drawcode, parsedUrl.query.drawcode);
 				res.end('{"error": "Wrong drawcode"}');
 				return;
 			}

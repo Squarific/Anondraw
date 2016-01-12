@@ -15,8 +15,6 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
 
-	console.log(this.drawings[room].currentParts);
-
 	if (this.drawings[room].currentParts > CACHE_LENGTH && !this.drawings[room].sending) {
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;

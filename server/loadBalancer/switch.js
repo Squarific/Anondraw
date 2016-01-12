@@ -7,7 +7,12 @@ var room_regex = /^[a-z0-9_]+$/i;
 var Servers = require("./scripts/Servers.js");
 var servers = new Servers(JOIN_CODE);
 
-var MAX_USERS_PER_ROOM = 24;
+// This is the amount of people the autobalancer uses
+// for the first joined room
+var MAX_USERS_PER_ROOM = 22;
+
+// How many people are allowed to really join when they ask for a specific room
+var MAX_USERS_PER_ROOM_IF_SPECIFIC = 30;
 
 var server = http.createServer(function (req, res) {
 	var parsedUrl = urlParser.parse(req.url, true);
@@ -37,7 +42,12 @@ var server = http.createServer(function (req, res) {
 
 	if (parsedUrl.pathname == "/getserver") {
 		var room = parsedUrl.query.room;
-		var maxOverride = parsedUrl.query.maxoverride;
+
+		// This one means we wanted this room
+		// Be a bit more lenient about the amount of people allowed
+		var specificOverride = parsedUrl.query.specificoverride;
+
+		var maxOverride = parsedUrl.query.maxoverride; // This one can be forced
 
 		if (!room) {
 			res.end('{"error": "You did not provide the required room query"}');
@@ -55,8 +65,13 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		if (server.rooms[room] > MAX_USERS_PER_ROOM && !maxOverride) {
+		if (server.rooms[room] > MAX_USERS_PER_ROOM && !maxOverride && !specificoverride) {
 			res.end('{"error": "Too many users"}');
+			return;
+		}
+
+		if (server.rooms[room] > MAX_USERS_PER_ROOM_IF_SPECIFIC && !maxOverride) {
+			res.end('{"error": "Too many users in this room"}');
 			return;
 		}
 	

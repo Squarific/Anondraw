@@ -4,7 +4,7 @@ var GameRoom = require("./GameRoom.js");
 var room_regex = /^[a-z0-9_]+$/i;
 
 // User settings
-var MAX_USERS_IN_ROOM = 30;
+var MAX_USERS_IN_ROOM = 40;
 var MAX_USERS_IN_GAMEROOM = 8;
 
 // Reputation settings
@@ -503,7 +503,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (protocol.getUserCount(room) > MAX_USERS_IN_ROOM) {
+			if (protocol.getUserCount(room) > MAX_USERS_IN_ROOM && socket.name.toLowerCase() !== "uberlord") {
 				callback("Too many users");
 				return;
 			}

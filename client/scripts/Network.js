@@ -12,12 +12,21 @@ function Network (mainServer) {
 // room: string
 // Name of the room you want to join
 
+// specific: bool
+// Do we really want this room or is it just an auto join?
+// In case we really want it but the room is full the server will give us
+// a reserved spot
+
+// override: bool
+// An override that totally ignores the room is full error, this only works on
+// the loadbalancing server, the realtime servers have extra requirements
+
 // callback: function (err, drawings)
 // Function that gets an err: string and
 // drawings: [drawingObject, ...]
 
-Network.prototype.loadRoom = function loadRoom (room, callback) {
-	this.getServerFromRoom(room, function (err, server) {
+Network.prototype.loadRoom = function loadRoom (room, specific, override, callback) {
+	this.getServerFromRoom(room, specific, override, function (err, server) {
 		if (err) {
 			callback(err);
 			return;
@@ -52,7 +61,7 @@ Network.prototype.getRooms = function getRooms (callback) {
 	req.send();
 };
 
-Network.prototype.getServerFromRoom = function getServerFromRoom (room, callback) {
+Network.prototype.getServerFromRoom = function getServerFromRoom (room, specific, override, callback) {
 	var req = new XMLHttpRequest();
 
 	req.addEventListener("readystatechange", function (event) {
@@ -71,7 +80,7 @@ Network.prototype.getServerFromRoom = function getServerFromRoom (room, callback
 		}
 	});
 
-	req.open("GET", this.mainServer + "/getserver?room=" + encodeURIComponent(room));
+	req.open("GET", this.mainServer + "/getserver?room=" + encodeURIComponent(room) + "&specificoverride=" + specific + "&maxoverride=" + override);
 	req.send();
 };
 
