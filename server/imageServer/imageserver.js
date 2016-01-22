@@ -30,6 +30,11 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 					return;
 				}
 
+				if (imgBytes.length == 0) {
+					callback(transparent);
+					return;
+				}
+
 				var img = new Canvas.Image();
 				img.src = imgBytes;
 				callback(img);
@@ -48,18 +53,37 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 			var y = parseInt(parsedUrl.query.y);
 			var room = parsedUrl.query.room;
 
-			res.writeHead(200, {
-				"Access-Control-Allow-Origin": "*",
-				"Content-Type": "image/png"
-			});
-
 			if (!room_regex.test(room)) {
+				res.writeHead(200, {
+					"Access-Control-Allow-Origin": "*",
+					"Content-Type": "image/png"
+				});
 				res.end(transparentBytes);
 				return;
 			}
 
 			fs.readFile("./images/" + room + "/" + x + ":" + y + ".png", function (err, data) {
+				if (err && err.code === "ENOENT") {
+					res.writeHead(200, {
+						"Access-Control-Allow-Origin": "*",
+						"Content-Type": "image/png"
+					});
+					res.end(transparentBytes);
+					return;
+				}
+
 				if (err) {
+					res.writeHead(502);
+					return;
+				}
+
+				res.writeHead(200, {
+					"Access-Control-Allow-Origin": "*",
+					"Content-Type": "image/png"
+				});
+
+				if (data.length === 0) {
+					// Shouldn't happen but if it does, just send transparent
 					res.end(transparentBytes);
 					return;
 				}

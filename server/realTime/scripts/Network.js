@@ -5,7 +5,7 @@ var room_regex = /^[a-z0-9_]+$/i;
 
 // User settings
 var MAX_USERS_IN_ROOM = 40;
-var MAX_USERS_IN_GAMEROOM = 8;
+var MAX_USERS_IN_GAMEROOM = 12;
 
 // Reputation settings
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
@@ -30,6 +30,11 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.players = players;
 	this.register = register;
 	this.bindIO();
+
+	this.drawTogether.onFinalize = function (room) {
+		this.io.to(room).emit("finalize");
+		console.log(room + " has been finalized. And we send it.");
+	}.bind(this);
 
 	this.gameRooms = {};
 	setInterval(this.inkTick.bind(this), 10 * 1000);
@@ -98,6 +103,7 @@ Protocol.prototype.getUserList = function getUserList (room) {
 
 	for (var id in sroom) {
 		var socket = this.socketFromId(id);
+		if (!socket) continue;
 		users.push({
 			id: socket.id,
 			name: socket.name,
@@ -184,7 +190,24 @@ Protocol.prototype.bindIO = function bindIO () {
 				} else if (message.indexOf("/help") == 0) {
 					var helpText = [
 						"The following commands are avaialble:",
-						"/me [text] - Emote"
+						"/me [text] - Emote",
+						"/shortcuts - Show the shortcuts"
+					];
+					for (var k = 0; k < helpText.length; k++) {
+						socket.emit("chatmessage", {
+							user: "SERVER",
+							message: helpText[k]
+						});
+					}
+				} else if (message.indexOf("/shortcuts")) {
+					var helpText = [
+						"The following shortcuts are avaialble:",
+						"0-9: Change transparency",
+						"[ and ]: Change brushsize",
+						"v or p: Color picker",
+						"b: brush",
+						"t: text",
+						"l: line"
 					];
 					for (var k = 0; k < helpText.length; k++) {
 						socket.emit("chatmessage", {
@@ -206,14 +229,17 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.lastMessage = Date.now();
 			if (message.length > 256) return;
 
+			if (protocol.gameRooms[socket.room]) {
+			 	if (protocol.gameRooms[socket.room].chatmessage(socket, message)) {
+			 		// Word was found, don't send the rest
+					return;
+			 	}
+			}
+
 			protocol.sendChatMessage(socket.room ,{
 				user: socket.name,
 				message: message
 			});
-
-			// if (protocol.gameRooms[socket.room]) {
-			// 	protocol.gameRooms[socket.room].chatmessage(socket, message);
-			// }
 		});
 
 		socket.on("uploadimage", function (base64, callback) {
@@ -421,7 +447,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 				socket.ink -= usage;
 			}
-			
+
+			drawing.socketid = socket.id;
 			protocol.drawTogether.addDrawing(socket.room, drawing, function () {
 				protocol.sendDrawing(socket.room, socket.id, drawing);
 				callback();
@@ -431,14 +458,14 @@ Protocol.prototype.bindIO = function bindIO () {
 		// Startpath, endpath and pathpoint handlers
 		socket.on("sp", function (color, size) {
 			if (size > 50 || size < 0) return;
-			protocol.drawTogether.addPath(socket.room, socket.id, {type: "path", color: color, size: size});
+			protocol.drawTogether.addPath(socket.room, socket.id, {socketid: socket.id, type: "path", color: color, size: size});
 			socket.lastPathSize = size;
 			delete socket.lastPathPoint;
 			socket.broadcast.to(socket.room).emit("sp", {id: socket.id, color: color, size: size});
 		});
 
 		socket.on("ep", function (callback) {
-			protocol.drawTogether.finalizePath(socket.room, socket.id, callback);
+			protocol.drawTogether.finalizePath(socket.room, socket.id, callback.bind(undefined, socket.id));
 			socket.broadcast.to(socket.room).emit("ep", socket.id);
 		});
 
@@ -498,8 +525,8 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (socket.room == room) {
-				callback("You are already in room " + room + "!");
+			if (room == socket.room) {
+				callback("You are already in " + socket.room);
 				return;
 			}
 
@@ -546,6 +573,11 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
+		socket.on("undo", function () {
+			protocol.drawTogether.undoDrawings(socket.room, socket.id);
+			protocol.io.to(socket.room).emit("undodrawings", socket.id);
+		});
+
 		socket.on("kickban", function (options, callback) {
 			// Options = [socketid, minutes, bantype]
 			callback = (typeof callback == "function") ? callback : function () {};
@@ -584,6 +616,9 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.informClient(socket, "You banned " + targetSocket.name);
 					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
+
+					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
+					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
 					targetSocket.disconnect();
 				});
 			}
@@ -597,6 +632,9 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.informClient(socket, "You banned " + targetSocket.ip);
 					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
+
+					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
+					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
 					targetSocket.disconnect();
 				});
 			}

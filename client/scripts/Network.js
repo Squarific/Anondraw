@@ -37,6 +37,7 @@ Network.prototype.loadRoom = function loadRoom (room, specific, override, callba
 		this.changeServer(server, function (err) {
 			if (err) {
 				callback(err);
+				return
 			}
 
 			// Change our room
@@ -45,15 +46,64 @@ Network.prototype.loadRoom = function loadRoom (room, specific, override, callba
 	}.bind(this));
 };
 
+// Join game
+// Join a random public game
+// callback: function (err, room, drawings)
+Network.prototype.joinGame = function joinGame (override, callback) {
+	this._joinGame(override, function (err, data) {
+		//data = {server: "", room: ""}
+		if (err) {
+			callback(err);
+			return;
+		}
+
+		console.log("We got gameroom " + data.room + " on server: " + data.server);
+
+		this.changeServer(data.server, function (err) {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			// Change our room
+			this.socket.emit("changeroom", data.room, callback);
+		});
+	}.bind(this));
+};
+
+Network.prototype._joinGame = function _joinGame (override, callback) {
+	var req = new XMLHttpRequest();
+
+	req.addEventListener("readystatechange", function (event) {
+		if (req.status == 200 && req.readyState == 4) {
+			var data = JSON.parse(req.responseText);
+			if (data.error) {
+				callback(data.error);
+				return;
+			}
+			callback(null, data);
+		} else if (req.readyState == 4) {
+			callback("Error creating gameroom. Are you connected to the internet? Status code: " + req.status);
+		}
+	});
+
+	req.open("GET", this.mainServer + "/getgameroom?maxoverride=" + encodeURIComponent(override));
+	req.send();
+};
+
 Network.prototype.getRooms = function getRooms (callback) {
 	var req = new XMLHttpRequest();
 
 	req.addEventListener("readystatechange", function (event) {
 		if (req.status == 200 && req.readyState == 4) {
 			var data = JSON.parse(req.responseText);
+			if (data.error) {
+				callback(data.error);
+				return;
+			}
 			callback(null, data.rooms);
 		} else if (req.readyState == 4) {
-			callback("There was an error trying to find a server to play on. Are you connected to the internet? Status code: " + req.status);
+			callback("There was an error getting the room. Are you conntected to the internet? Status code: " + req.status);
 		}
 	});
 
@@ -69,7 +119,7 @@ Network.prototype.getServerFromRoom = function getServerFromRoom (room, specific
 			var data = JSON.parse(req.responseText);
 
 			if (data.error) {
-				callback("There was an error trying to find a server to play on. Server response: " + data.error)						
+				callback("There was an error trying to find a server to play on. Server response: " + data.error);
 				return;
 			}
 
@@ -80,7 +130,11 @@ Network.prototype.getServerFromRoom = function getServerFromRoom (room, specific
 		}
 	});
 
-	req.open("GET", this.mainServer + "/getserver?room=" + encodeURIComponent(room) + "&specificoverride=" + specific + "&maxoverride=" + override);
+	var url = this.mainServer + "/getserver?room=" + encodeURIComponent(room);
+	if (specific) url += "&specificoverride=true";
+	if (override) url += "&maxoverride=true";
+
+	req.open("GET", url);
 	req.send();
 };
 

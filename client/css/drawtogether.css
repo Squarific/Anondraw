@@ -189,6 +189,7 @@ input.paint-texttool {
     background:#3A5774;
     min-height:17em;
     flex-wrap:wrap;
+    justify-content: space-between;
   }
 
   .drawtogether-redditpost {
@@ -301,6 +302,11 @@ input.paint-texttool {
 * RoomWindow
 */
 
+.drawtogether-publicroomscontainer {
+  max-width:85em;
+  text-align:left;
+}
+
 .drawtogether-roomwindow-content {
   padding:.4em;
   display:inline-block;
@@ -332,6 +338,11 @@ input.paint-texttool {
 .drawtogether-roomwindow .drawtogether-close-button, .drawtogether-roomwindow .drawtogether-room-button,
 .drawtogether-roomwindow .create-private-room {
   display:block;
+}
+
+.drawtogether-button.drawtogether-room-button {
+    display: inline-block;
+    min-width: 20em;
 }
 
 /**
@@ -663,9 +674,6 @@ input.paint-texttool {
   backface-visibility: hidden;
   perspective: 1000;
 }
-
-.paint-canvas-public {
-  background-image: url("images/transparent.png"); }
 
 .drawtogether-sharewindow {
   display: none;

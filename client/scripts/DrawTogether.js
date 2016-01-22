@@ -261,6 +261,10 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		}
 	});
 
+	this.network.on("finalize", function () {
+		self.paint.finalizeAll();
+	});
+
 	this.network.on("drawing", function (data) {
 		var drawing = self.decodeDrawings([data.drawing])[0];
 		self.paint.drawDrawing("public", drawing);
@@ -299,6 +303,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	});
 
 	this.network.on("playerlist", function (list) {
+
+		// Instead of reassigning, remove players who arent on the new list
+		// and update their data
 		self.playerList = list;
 		self.updatePlayerList();
 	});
@@ -323,6 +330,10 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 
 		self.playerList.push(player);
 		self.updatePlayerList();
+	});
+
+	this.network.on("undodrawings", function (id, all) {
+		self.paint.undodrawings(id, all);
 	});
 
 	this.network.on("reputation", function (player) {
@@ -356,9 +367,10 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		self.updatePlayerList();
 	});
 
-	this.network.on("gameword", function (word) {
-		self.chat.addMessage("GAME", "It is your turn now! Please draw " + word);
-		self.displayMessage("It is your turn now! Please draw '" + word + "' you have 60 seconds!");
+	this.network.on("gamewords", function (words) {
+		self.gui.prompt("It is your turn! Pick a word to draw.", words, function (word) {
+			self.network.socket.emit("word", word);
+		});
 	});
 
 	// chat events
@@ -452,35 +464,59 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, specific,
 	this.network.loadRoom(room + number, specific, override, function (err, drawings) {
 		this.changingRoom = false;
 		if (err && err.indexOf("Too many users") !== -1) {
+			this.chat.addMessage("Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
 			this.changeRoom(room, (number || 0) + 1);
-			this.chat.addMessage("SERVER", "Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
 			return;
 		} else if (err) {
-			this.chat.addMessage("SERVER", "Failed to load room '" + room + "'. Server error: " + err + ". Trying again in 5 seconds.");
+			this.chat.addMessage("Failed to load room '" + room + "'. Server error: " + err + ". Trying again in 5 seconds.");
 			setTimeout(this.changeRoom.bind(this, room, number), 5000);
+		} else {
+			this.setRoom(room + number);
+
+			this.paint.clear();
+			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
+			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
+
+			if (room !== "PLEASE_WAIT")
+				this.removeLoading();
+		}
+	}.bind(this));
+
+	this.setLoading(room);
+};
+
+DrawTogether.prototype.joinGame = function joinGame () {
+	this.network.joinGame(this.controls.byName.name.input.value == "Uberlord", function (err, room, drawings) {
+		if (err && err.indexOf("Too many users") !== -1) {
+			this.chat.addMessage("Couldn't join gameroom, too many users.");
+			this.gui.prompt("With whom would you like to play?", ["Join strangers", "Create private room", "Cancel"], function (whom) {
+				if (whom == "Cancel") this.openModeSelector();
+				else if (whom == "Join strangers") this.joinGame();
+				else if (whom == "Create private room") this.createPrivateGame();
+			}.bind(this));
+			return;
+		} else if (err) {
+			this.chat.addMessage("Failed to join game. Trying again in 5 seconds. Error: " + err);
+			setTimeout(this.joinGame.bind(this), 5000);
 		} else {
 			this.setRoom(room);
 
 			this.paint.clear();
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
-			this.chat.addMessage("CLIENT", "Welcome to anondraw, the free interactive group drawing app.");
-			this.chat.addMessage("CLIENT", "Invite: http://www.anondraw.com/#" + room + number);
+			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
+			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
 
 			this.removeLoading();
 		}
 	}.bind(this));
 
-	this.setLoading(room);
-	this.chat.addMessage("CLIENT", "Changing room to '" + room + number + "'");
+	this.setLoading("game");
+	this.chat.addMessage("Looking for game to join ...");
 };
 
-// DrawTogether.prototype.joinGame = function joinGame () {
-// 	this.socket.emit("joinnewgame", function (success) {
-// 		if (!success) {
-// 			this.chat.addMessage("CLIENT", "Something went wrong while trying to join a game.")
-// 		}
-// 	});
-// };
+DrawTogether.prototype.createPrivateGame = function createPrivateGame () {
+	this.changeRoom("private_game_" + Math.random().toString(36).substr(2, 5));
+};
 
 // DrawTogether.prototype.joinOneOnOne = function joinOneOnOne () {
 // 	this.socket.emit("joinprivaterandom");
@@ -516,7 +552,6 @@ DrawTogether.prototype.changeName = function changeName (name) {
 			return;
 		}
 
-		this.chat.addMessage("SERVER", "Your name is now " + realname);
 		localStorage.setItem("drawtogether-name", realname);
 	}.bind(this));
 };
@@ -621,8 +656,9 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 
 	this.preview.width = this.shareWindow.offsetWidth * 0.9;
 	this.preview.height = this.preview.width * (this.paint.public.canvas.height / this.paint.public.canvas.width);
-	
+
 	var ctx = this.preview.getContext("2d");
+	ctx.drawImage(this.paint.background.canvas, 0, 0, this.preview.width, this.preview.height);
 	ctx.drawImage(this.paint.public.canvas, 0, 0, this.preview.width, this.preview.height);
 };
 
@@ -634,7 +670,9 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 		while (this.publicRoomsContainer.firstChild)
 			this.publicRoomsContainer.removeChild(this.publicRoomsContainer.firstChild);
 
-		for (var name in rooms) {
+		var sorted = Object.keys(rooms).sort();
+		for (var k = 0; k < sorted.length; k++) {
+			var name = sorted[k];
 			var roomButton = this.publicRoomsContainer.appendChild(document.createElement("div"));
 			roomButton.className = "drawtogether-button drawtogether-room-button";
 			roomButton.appendChild(document.createTextNode(name + " (" + rooms[name] + " users)"))
@@ -799,6 +837,7 @@ DrawTogether.prototype.createChat = function createChat () {
 	chatContainer.className = "drawtogether-chat-container";
 	this.chat = new Chat(chatContainer, this.sendMessage.bind(this));
 	this.chatContainer = chatContainer;
+	this.chat.addMessage("Welcome to anondraw, the free interactive group drawing app.");
 };
 
 DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
@@ -806,7 +845,7 @@ DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
 	var loadImage = new Image();
 
 	loadImage.onload = function () {
-		this.paint.public.loadingImage = loadImage;
+		this.paint.background.loadingImage = loadImage;
 	}.bind(this);
 
 	loadImage.onerror = function () {
@@ -825,18 +864,20 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
 	this.setLoadImage();
 
-	this.paint.public.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
+	this.paint.background.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback, time) {
 		var image = new Image();
+		var time = time || 0;
+		time += 5000;
 
 		image.onload = function onChunkImageLoad (event) {
 			callback(image);
 		};
 
 		image.onerror = function onChunkImageError (event) {
-			console.error("Failed to load chunk ", chunkX, chunkY, " retrying in 5 seconds");
+			console.error("Failed to load chunk ", chunkX, chunkY, " retrying in " + Math.round(time / 1000) + " seconds");
 			setTimeout(function () {
-				this.paint.public.requestUserChunk(chunkX, chunkY, callback);
-			}.bind(this), 5000);
+				this.paint.background.requestUserChunk(chunkX, chunkY, callback, time);
+			}.bind(this), time);
 		}.bind(this);
 		
 		var room = encodeURIComponent(this.current_room);
@@ -844,7 +885,11 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		chunkY = encodeURIComponent(chunkY);
 
 		image.crossOrigin = "Anonymous";
-		image.src = this.settings.imageServer + "/chunk?room=" + room + "&x=" + chunkX + "&y=" + chunkY;
+		if (!this.current_room) {
+			callback(image);
+			return;
+		}
+		image.src = this.settings.imageServer + "/chunk?room=" + room + "&x=" + chunkX + "&y=" + chunkY + "&t=" + (this.lastImageUpdate || Date.now());
 	}.bind(this);
 
 	this.paint.addEventListener("userdrawing", function (event) {
@@ -876,6 +921,10 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		});
 	}.bind(this));
 
+	this.paint.addEventListener("undo", function (event) {
+		this.network.socket.emit("undo");
+	}.bind(this));
+
 	this.paint.addEventListener("startuserpath", function (event) {
 		// start path
 		this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size);
@@ -883,8 +932,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this));
 
 	this.paint.addEventListener("enduserpath", function (event) {
-		this.network.socket.emit("ep", function () {
-			event.removePath(true);
+		this.network.socket.emit("ep", function (id) {
+			event.removePath(true, id);
 		});
 	}.bind(this));
 
@@ -1065,7 +1114,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomButton.className = "drawtogether-button";
 	roomButton.addEventListener("click", function (event) {
 		if (this.roomInput.value == this.current_room)
-			this.changeRoom("main", undefined, true);
+			this.changeRoom("main", undefined, true, this.controls.byName.name.input.value == "Uberlord");
 		else
 			this.changeRoom(this.roomInput.value);
 		this.closeRoomWindow();
@@ -1163,7 +1212,7 @@ DrawTogether.prototype.uploadImage = function uploadImage () {
 
 	this.showShareMessage("Uploading...");
 	// Let the server upload the drawing to imgur and give us the url back
-	this.network.socket.emit("uploadimage", this.paint.public.canvas.toDataURL().split(",")[1], function (data) {
+	this.network.socket.emit("uploadimage", this.preview.toDataURL().split(",")[1], function (data) {
 		if (data.error) {
 			this.showShareError(data.error);
 			return;
@@ -1322,23 +1371,18 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
-	// var oneononeButton = selectWindow.appendChild(document.createElement("div"));
-	// oneononeButton.className = "drawtogether-modeselect-button";
-	// oneononeButton.innerHTML = '<img src="images/private.png"/><br/>Random One on One';
-	// oneononeButton.addEventListener("click", function () {
-	// 	this.settings.mode = "oneonone";
-	// 	this.joinOneOnOne() : this.connect();
-	// 	this.selectWindow.style.display = "";
-	// }.bind(this));
-
-	// var gameButton = selectWindow.appendChild(document.createElement("div"));
-	// gameButton.className = "drawtogether-modeselect-button";
-	// gameButton.innerHTML = '<img src="images/game.png"/><br/>Game';
-	// gameButton.addEventListener("click", function () {
-	// 	this.settings.mode = "game";
-	// 	(this.socket) ? this.joinGame() : this.connect();
-	// 	this.selectWindow.style.display = "";
-	// }.bind(this));
+	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	gameButton.className = "drawtogether-modeselect-button";
+	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word';
+	gameButton.addEventListener("click", function () {
+		this.gui.prompt("With whom would you like to play?", ["Join strangers", "Create private room", "Cancel"], function (whom) {
+			if (whom == "Cancel") this.openModeSelector();
+			else if (whom == "Join strangers") this.joinGame();
+			else if (whom == "Create private room") this.createPrivateGame();
+		}.bind(this));
+		ga("send", "event", "modeselector", "game");
+		this.selectWindow.style.display = "";
+	}.bind(this));*/
 
 	selectWindow.appendChild(this.createFAQDom());
 

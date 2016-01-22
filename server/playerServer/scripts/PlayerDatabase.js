@@ -126,7 +126,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 			return;
 		}
 
-		if (rows.length > 0) {
+		if (rows.length > 0 && fromId !== 1) {
 			callback("You already gave reputation!");
 			return;
 		}

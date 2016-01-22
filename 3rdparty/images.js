@@ -1,5 +1,5 @@
-var basex = 200;
-var basey = 200;
+var basex = 11049;
+var basey = -196;
  
 var img;
 var x = 0;
