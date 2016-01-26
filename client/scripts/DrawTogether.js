@@ -80,7 +80,7 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 
 
 	for (var k = 0; k < this.playerList.length; k++) {
-		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 3000) {
+		if (this.playerList[k].lastPosition && Date.now() - this.playerList[k].lastPosition.time < 6000) {
 			this.drawPlayerInteraction(this.playerList[k].name, this.playerList[k].lastPosition.pos);
 			this.needsClear = true;
 		}
@@ -415,6 +415,8 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 };
 
 DrawTogether.prototype.displayTip = function displayTip () {
+	if (!this.showTipsInput.checked) return;
+
 	var tips = [
 		"Did you know you can use shortcuts? Press C to toggle the color selection!",
 		"Tip: use B to switch to the brush tool. (Others: [l]ine, [c]olor, [p]icker, [g]rab, ...)",
@@ -650,6 +652,11 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 	location.hash = room;
 };
 
+DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
+	this.settingsWindow.style.display = "block";
+	ga("send", "event", "openwindow", "settings");
+};
+
 DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	this.shareWindow.style.display = "block";
 	ga("send", "event", "openwindow", "share");
@@ -693,6 +700,10 @@ DrawTogether.prototype.openModeSelector = function openModeSelector () {
 	this.selectWindow.style.display = "block";
 };
 
+DrawTogether.prototype.closeSettingsWindow = function closeSettingsWindow () {
+	this.settingsWindow.style.display = "";
+};
+
 DrawTogether.prototype.closeShareWindow = function closeShareWindow () {
 	this.shareWindow.style.display = "";
 };
@@ -718,6 +729,7 @@ DrawTogether.prototype.initDom = function initDom () {
 	this.createAccountWindow();
 	this.createRoomWindow();
 	this.createModeSelector();
+	this.createSettingsWindow();
 };
 
 DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid (socketid) {
@@ -1013,6 +1025,37 @@ DrawTogether.prototype.createGameInformation = function createGameInformation ()
 	var gameInfoContainer = this.container.appendChild(document.createElement("div"));
 	gameInfoContainer.className = "drawtogether-gameinfo-container";
 	this.gameInfoContainer = gameInfoContainer;
+};
+
+DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
+	if (this.settingsWindow)
+		this.settingsWindow.parentNode.removeChild(this.settingsWindow);
+
+	var settingsWindow = this.container.appendChild(document.createElement("div"));
+	settingsWindow.className = "drawtogether-window drawtogether-settingswindow";
+	this.settingsWindow = settingsWindow;
+
+	var settingsContainer = settingsWindow.appendChild(document.createElement("div"));
+	settingsContainer.className = "drawtogether-settingswindow-container";
+
+	settingsContainer.appendChild(document.createTextNode("Enable tips?"))
+
+	var tips = settingsContainer.appendChild(document.createElement("input"));
+	tips.type = "checkbox";
+	tips.title = "Do you want to see the tips?";
+	// Get the setting from localStorage, default to true if not set
+	// getItem returns a string so it will get taken even if 'false'. !! = cast
+	tips.checked = localStorage.getItem("drawtogether-settings-showtips") !== "false";
+	tips.addEventListener("change", function (event) {
+		localStorage.setItem("drawtogether-settings-showtips", event.target.checked);
+	});
+	this.showTipsInput = tips;
+
+	var close = settingsContainer.appendChild(document.createElement("div"));
+	close.innerText = "Close settings window";
+	close.textContent = "Close settings window";
+	close.className = "drawtogether-button drawtogether-close-button";
+	close.addEventListener("click", this.closeSettingsWindow.bind(this));
 };
 
 DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
@@ -1530,7 +1573,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "toggle-view",
 		type: "button",
 		value: "",
-		text: "Toggle Auto Camera",
+		text: "Auto Camera",
 		title: "Toggle the camera to follow where people are drawing.",
 		action: this.toggleFollow.bind(this)
 	}, {
@@ -1553,27 +1596,15 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 	}, {
 		name: "share-button",
 		type: "button",
-		text: "Put on imgur/reddit",
+		text: "Share",
 		action: this.openShareWindow.bind(this)
-	}, /*{
-		name: "private",
-		type: "button",
-		text: "Random one-on-one",
-		value: "private",
-		action: this.changeMode.bind(this)
 	}, {
-		name: "invite",
+		name: "settings",
 		type: "button",
-		text: "Friend room",
-		value: "invite",
-		action: this.changeMode.bind(this)
-	}, {
-		name: "game",
-		type: "button",
-		text: "Play game",
-		value: "game",
-		action: this.changeMode.bind(this)
-	}*/];
+		text: "Settings",
+		action: this.openSettingsWindow.bind(this)
+	}];
+
 	if (location.toString().indexOf("kongregate") == -1) {
 		buttonList.push({
 			name: "account",
@@ -1582,6 +1613,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 			action: this.openAccountWindow.bind(this)
 		});
 	}
+
 	return buttonList;
 };
 

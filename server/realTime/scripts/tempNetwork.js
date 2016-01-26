@@ -374,11 +374,6 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (name.length > 32)
 				name = name.substr(0, 32);
 
-			if (name == "DOLPHINE") {
-				protocol.players.kickbanIp(socket.ip, 1, 512640, "Ban evading isn't nice!", function (err) {});
-				return;
-			}
-
 			if (name.toLowerCase() == "server") {
 				callback("Don't steal my name!");
 				return;

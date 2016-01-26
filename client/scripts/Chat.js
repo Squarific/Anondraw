@@ -79,7 +79,7 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 		message = user;
 	} else {
 		var userSpan = messageDom.appendChild(document.createElement("span"));
-		userSpan.innerText = user + ": ";
+		userSpan.appendChild(document.createTextNode(user + ": "));
 		userSpan.style.color = this.string2Color(user);
 	}
 

@@ -33,6 +33,22 @@ var drawTogether = new DrawTogether(background);
 var imgur = require("imgur");
 imgur.setClientId("8fd93ca8e547c10");
 
-
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register);
+
+// Shut down, send drawings and stop all connections
+process.on("SIGTERM", function () {
+	var rooms = 0;
+	for (var room in drawTogether.drawings) {
+		rooms++;
+
+		background.sendDrawings(room, drawTogether.drawings[room], function () {
+			rooms--;
+			if (rooms == 0) process.exit(0);
+		});
+	}
+
+	io.emit("chatmessage", "===== SERVER IS RESTARTING =====");
+	io.emit("chatmessage", "You will automatically reconnect.");
+	server.close();
+});

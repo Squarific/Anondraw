@@ -299,6 +299,16 @@ input.paint-texttool {
 }
 
 /**
+* Settings window
+*/
+
+.drawtogether-settingswindow-container {
+  padding:.4em;
+  display:inline-block;
+  background:white;
+}
+
+/**
 * RoomWindow
 */
 
