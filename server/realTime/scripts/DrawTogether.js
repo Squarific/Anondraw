@@ -15,15 +15,15 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
 
-	if (this.drawings[room].currentParts > CACHE_LENGTH && !this.drawings[room].sending) {
+	if (this.drawings[room].currentParts > CACHE_LENGTH && this.drawings[room].length > 200 && !this.drawings[room].sending) {
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
-		this.drawings[room].sendLength = this.drawings[room].length;
+		this.drawings[room].sendLength = this.drawings[room].length - 200;
 
-		if (typeof this.onFinalize == "function") this.onFinalize(room);
+		if (typeof this.onFinalize == "function") this.onFinalize(room, 200);
 		else console.log("No finalize handler");
 
-		this.background.sendDrawings(room, this.drawings[room], function (err) {
+		this.background.sendDrawings(room, this.drawings[room].slice(0, this.drawings[room].sendLength), function (err) {
 			this.drawings[room].splice(0, this.drawings[room].sendLength);
 
 			// Reset the amount of parts, we recount instead of
