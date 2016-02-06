@@ -1,5 +1,6 @@
-var CACHE_LENGTH = 4000; //How many drawings are saved
+var CACHE_LENGTH = 4000; //How many drawingparts are held before being send to permanent
 var PARTS_PER_DRAWING = 10;
+var CACHE_IGNORE = 200; // How many drawings we ignore in the cache count
 
 function DrawTogether (background) {
 	this.drawings = {};
@@ -15,12 +16,12 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
 
-	if (this.drawings[room].currentParts > CACHE_LENGTH && this.drawings[room].length > 200 && !this.drawings[room].sending) {
+	if (this.drawings[room].currentParts > CACHE_LENGTH && this.drawings[room].length > CACHE_IGNORE && !this.drawings[room].sending) {
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
-		this.drawings[room].sendLength = this.drawings[room].length - 200;
+		this.drawings[room].sendLength = this.drawings[room].length - CACHE_IGNORE;
 
-		if (typeof this.onFinalize == "function") this.onFinalize(room, 200);
+		if (typeof this.onFinalize == "function") this.onFinalize(room, CACHE_IGNORE);
 		else console.log("No finalize handler");
 
 		this.background.sendDrawings(room, this.drawings[room].slice(0, this.drawings[room].sendLength), function (err) {
@@ -44,6 +45,8 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 };
 
 DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all) {
+	this.removePath(room, socketid);
+
 	var stop = 0;
 	if (this.drawings[room].sending) {
 		stop = this.drawings[room].sendLength;
@@ -61,7 +64,7 @@ DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all
 DrawTogether.prototype.countParts = function countParts (drawingList) {
 	var size = 0;
 
-	for (var k = 0; k < drawingList.length; k++)
+	for (var k = 0; k < drawingList.length - CACHE_IGNORE; k++)
 		size += drawingList[k].points ? drawingList[k].points.length : 1;
 
 	return size;
@@ -88,7 +91,7 @@ DrawTogether.prototype.finalizePath = function finalizePath (room, id, callback)
 };
 
 DrawTogether.prototype.removePath = function removePath (room, id) {
-	delete this.paths[room][id];
+	this.paths[room] && delete this.paths[room][id];
 };
 
 DrawTogether.prototype.sqDistance = function sqDistance (point1, point2) {

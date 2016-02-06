@@ -10,9 +10,9 @@ var MAX_USERS_IN_GAMEROOM = 12;
 // Reputation settings
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
-var UPVOTE_MIN_REP = 6;
-var MEMBER_MIN_REP = UPVOTE_MIN_REP;
-var SHARE_IP_MIN_REP = UPVOTE_MIN_REP;
+var UPVOTE_MIN_REP = 10;
+var MEMBER_MIN_REP = UPVOTE_MIN_REP * 2;
+var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
@@ -31,8 +31,8 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.register = register;
 	this.bindIO();
 
-	this.drawTogether.onFinalize = function (room) {
-		this.io.to(room).emit("finalize");
+	this.drawTogether.onFinalize = function (room, amountToKeep) {
+		this.io.to(room).emit("finalize", amountToKeep);
 		console.log(room + " has been finalized. And we send it.");
 	}.bind(this);
 
@@ -91,13 +91,12 @@ Protocol.prototype.informClient = function informClient (socket, message) {
 };
 
 Protocol.prototype.getUserList = function getUserList (room) {
-	// Callback gets err as first param, if success returns null
-	// Second argument is array of objects of the form {
+	// Returns [{
 	//     id: socketid,
 	//     name: username,
 	//     reputation: accountrep //optional
 	//     gamescore: score //Only in gamerooms
-	// }
+	// }, ...]
 	var sroom = this.io.nsps['/'].adapter.rooms[room];
 	var users = [];
 
@@ -120,9 +119,12 @@ Protocol.prototype.socketFromId = function socketFromId (id) {
 
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
+
 	this.io.on("connection", function (socket) {
 		socket.ink = 500;
+		socket.permissions = {}; //{someid: true/false}
 		socket.ip = socket.client.conn.remoteAddress;
+
 		if (!socket.ip) {
 			socket.emit("chatmessage", {
 				user: "SERVER",
@@ -435,6 +437,15 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (socket.room.indexOf("user_") == 0 && !socket.permissions[parseInt(socket.room.slice(5))]) {
+				if (!socket.lastNoUserPermissionWarning || Date.now() - socket.lastNoUserPermissionWarning > 5000) {
+					protocol.informClient(socket, "You don't have permission for this room. Ask the owner to grant it to you.");
+					socket.lastNoUserPermissionWarning = Date.now();
+				}
+				callback();
+				return;
+			}
+
 			if (DRAWING_TYPES.indexOf(drawing.type) == -1) {
 				callback();
 				return;
@@ -493,6 +504,15 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (socket.room.indexOf("user_") == 0 && !socket.permissions[parseInt(socket.room.slice(5))]) {
+				if (!socket.lastNoUserPermissionWarning || Date.now() - socket.lastNoUserPermissionWarning > 5000) {
+					protocol.informClient(socket, "You don't have permission for this room. Ask the owner to grant it to you.");
+					socket.lastNoUserPermissionWarning = Date.now();
+				}
+				callback();
+				return;
+			}
+
 			if (!point || point.length !== 2) {
 				callback(false);
 				return;
@@ -540,42 +560,53 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			// Check if this room should be on this server
-			protocol.register.isOurs(room, function (err, ours) {
-				if (err) {
-					callback("Unknown error, try again later. (Error asking the loadbalancer if we are on the right server)");
-					console.log("[JOIN][ERROR]", err);
-					return;
-				}
+			if (room.indexOf("user_") == 0) {
+				protocol.players.getPermission(parseInt(socket.room.slice(5)), function (permission) {
+					socket.permissions[parseInt(socket.room.slice(5))] = permission;
+					handleRoom();
+				});
+			} else {
+				handleRoom();
+			}
 
-				if (!ours) {
-					callback("Wrong server");
-					console.log("[JOIN] Someone tried joining a room that wasn't ours", room)
-					return;
-				}
+			function handleRoom () {
+				// Check if this room should be on this server
+				protocol.register.isOurs(room, function (err, ours) {
+					if (err) {
+						callback("Unknown error, try again later. (Error asking the loadbalancer if we are on the right server)");
+						console.log("[JOIN][ERROR]", err);
+						return;
+					}
 
-				// Leave our current room
-				protocol.io.to(socket.room).emit("leave", { id: socket.id });
-				socket.leave(socket.room);
-				protocol.drawTogether.finalizePath(socket.room, socket.id);
-				socket.broadcast.to(socket.room).emit("ep", socket.id);
+					if (!ours) {
+						callback("Wrong server");
+						console.log("[JOIN] Someone tried joining a room that wasn't ours", room)
+						return;
+					}
 
-				// Join this room
-				socket.join(room);
-				socket.room = room;
+					// Leave our current room
+					protocol.io.to(socket.room).emit("leave", { id: socket.id });
+					socket.leave(socket.room);
+					protocol.drawTogether.finalizePath(socket.room, socket.id);
+					socket.broadcast.to(socket.room).emit("ep", socket.id);
 
-				console.log("[CHANGEROOM] " + socket.name + " changed room to " + room);
+					// Join this room
+					socket.join(room);
+					socket.room = room;
 
-				protocol.register.updatePlayerCount();
-				protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(room));
+					console.log("[CHANGEROOM] " + socket.name + " changed room to " + room);
 
-				protocol.drawTogether.getDrawings(room, function (err, drawings) {
-					callback(null, drawings);
-					protocol.drawTogether.getPaths(room, function (err, paths) {
-						socket.emit("paths", paths);
+					protocol.register.updatePlayerCount();
+					protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(room));
+
+					protocol.drawTogether.getDrawings(room, function (err, drawings) {
+						callback(null, drawings);
+						protocol.drawTogether.getPaths(room, function (err, paths) {
+							socket.emit("paths", paths);
+						});
 					});
 				});
-			});
+			}
 		});
 
 		socket.on("undo", function () {
