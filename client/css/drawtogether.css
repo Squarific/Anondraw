@@ -437,7 +437,7 @@ input.paint-texttool {
   padding:.5em;
 }
 
-.drawtogether-player {
+.drawtogether-info-playerlist .drawtogether-player {
   display:inline-block;
   cursor:pointer;
   width:100%;
@@ -449,7 +449,7 @@ input.paint-texttool {
   transition-duration:.2s;
 }
 
-.drawtogether-player:hover {
+.drawtogether-info-playerlist  .drawtogether-player:hover {
   background:#426283;
 }
 
@@ -459,6 +459,7 @@ input.paint-texttool {
   padding:.4em;
   margin-right:.2em;
   cursor:pointer;
+  color:white;
 }
 
 .drawtogether-player-button img {

@@ -92,6 +92,20 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	}
 };
 
+Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
+	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
+	
+	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
+	messageDom.classList.add("chat-message");
+
+	messageDom.appendChild(elem);
+
+	if (max_scroll <= old_scroll) {
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+	}
+};
+
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
 	var messages = [];
 	var temp;

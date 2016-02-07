@@ -11,8 +11,9 @@ function DrawTogether (container, settings) {
 	this.moveQueue = [];
 	this.ink = 2500;
 
-	this.lastInkWarning = Date.now();    // Last time we showed that we are out of ink
-	this.lastViewDeduction = Date.now(); // Time since we last deducted someones viewscore
+	this.lastInkWarning = Date.now();        // Last time we showed that we are out of ink
+	this.lastBrushSizeWarning = Date.now();  // Last time we showed the warning that our brush is too big
+	this.lastViewDeduction = Date.now();     // Time since we last deducted someones viewscore
 
 	this.lastScreenMove = Date.now();    // Last time we moved the screen
 	this.lastScreenMoveStartPosition;    // Last start position
@@ -261,8 +262,8 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		}
 	});
 
-	this.network.on("finalize", function () {
-		self.paint.finalizeAll();
+	this.network.on("finalize", function (amountToKeep) {
+		self.paint.finalizeAll(amountToKeep);
 	});
 
 	this.network.on("drawing", function (data) {
@@ -305,7 +306,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("playerlist", function (list) {
 
 		// Instead of reassigning, remove players who arent on the new list
-		// and update their data
+		// and update their data TODO
 		self.playerList = list;
 		self.updatePlayerList();
 	});
@@ -313,6 +314,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("leave", function (player) {
 		for (var k = 0; k < self.playerList.length; k++) {
 			if (self.playerList[k].id == player.id) {
+				self.chat.addElementAsMessage(self.createPlayerLeftDom(self.playerList[k]));
 				self.playerList.splice(k, 1);
 				k--;
 			}
@@ -590,9 +592,13 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 DrawTogether.prototype.updateInk = function updateInk () {
 	// Remove the previous text
 	while (this.inkDom.firstChild) this.inkDom.removeChild(this.inkDom.firstChild);
-
 	this.inkDom.appendChild(document.createTextNode("Ink: " + Math.floor(this.ink) + "/50000"));
-	this.inkDom.style.width = Math.floor(Math.max(this.ink / 500, 0)) + "%";
+
+	var width = Math.floor(Math.max(this.ink / 500, 0));
+	if (!this.lastInkWidth || this.lastInkWidth == width) {
+		this.inkDom.style.width = width + "%";
+		this.lastInkWidth = width;
+	}
 
 	// If ink is below 3000 => set class low
 	// if ink is below 8000 => set class middle
@@ -752,7 +758,51 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	return null;
 };
 
-DrawTogether.prototype.createPlayerDom = function (player) {
+DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+	var playerDom = document.createElement("div");
+	playerDom.className = "drawtogether-player";
+
+	if (this.reputation >= this.KICKBAN_MIN_REP) {
+		var kickbanButton = document.createElement("span");
+		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
+
+		kickbanButton.innerText = "B";
+		kickbanButton.textContent = "B";
+
+		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
+
+		playerDom.appendChild(kickbanButton);
+	}
+
+	var upvoteButton = document.createElement("span");
+	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button"
+	upvoteButton.appendChild(document.createTextNode("▲"));
+
+	upvoteButton.addEventListener("click", function (playerid, event) {
+		this.network.socket.emit("upvote", playerid);
+	}.bind(this, player.id));
+
+	var nameText = document.createElement("span");
+	nameText.className = "drawtogether-player-name";
+
+	var rep = "", score = "";
+	if (typeof player.reputation !== "undefined") {
+		var rep = " (" + player.reputation + " R)";
+	}
+
+	if (typeof player.gamescore !== "undefined") {
+		score = " [" + player.gamescore + " Points]";
+	}
+
+	nameText.appendChild(document.createTextNode(player.name + rep + score + " has left."))
+
+	playerDom.appendChild(upvoteButton);
+	playerDom.appendChild(nameText);
+
+	return playerDom;
+};
+
+DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
 
@@ -812,8 +862,7 @@ DrawTogether.prototype.createPlayerDom = function (player) {
 		score = " [" + player.gamescore + " Points]";
 	}
 
-	nameText.innerText = player.name + rep + score;
-	nameText.textContent = player.name + rep + score;
+	nameText.appendChild(document.createTextNode(player.name + rep + score))
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
@@ -908,14 +957,23 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0) {
+			if (!this.account.uKey && (event.drawing.size > 10 && typeof event.drawing.text == "undefined" || event.drawing.size > 20)) {
+				if (Date.now() - this.lastBrushSizeWarning > 5000) {
+					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account! Registering is free and easy. You don't even need to confirm your email!");
+					this.lastBrushSizeWarning = Date.now();
+				}
+
+				event.removeDrawing();
+				return;
+			}
 
 			// When a drawing is made check if we have ink left
 			var usage = this.inkUsageFromDrawing(event.drawing);
 			if (this.ink < usage) {
 				if (Date.now() - this.lastInkWarning > 20000) {
-					this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
-					this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
-					this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
+					this.chat.addMessage("Not enough ink! You will regain ink every 20 seconds.");
+					this.chat.addMessage("Tip: Small brushes use less ink.");
+					this.chat.addMessage("Tip: logged in users receive more ink");
 					this.lastInkWarning = Date.now();
 				}
 				event.removeDrawing();
@@ -950,10 +1008,19 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this));
 
 	this.paint.addEventListener("userpathpoint", function (event) {
+		if (!this.account.uKey && this.lastPathSize > 10) {
+			if (Date.now() - this.lastBrushSizeWarning > 5000) {
+				this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account! Registering is free and easy. You don't even need to confirm your email!");
+				this.lastBrushSizeWarning = Date.now();
+			}
+
+			event.removePathPoint();
+			return;
+		}
+
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0) {
-
 			// When a drawing is made check if we have ink left
 			var usage = this.inkUsageFromPath(event.point, this.lastPathPoint, this.lastPathSize);
 			if (this.ink < usage) {
@@ -1488,7 +1555,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var questions = [{
 		question: "What is anondraw?",
-		answer: "It's a website where you can draw or doodle in group with friends or strangers. Join one of the room and start drawing and collaborating with the group. The interactive drawing works on the iPad and other android tablets. You can also doodle on phones."
+		answer: "It's a website where you can draw or doodle in group with friends or strangers. Join one of the rooms and start drawing and collaborating with the group. The interactive drawing works on the iPad and other android tablets. You can also doodle on phones."
 	}, {
 		question: "How do I chat?",
 		answer: "There is a chat to the right or if you are on mobile you can click on the chat button."
