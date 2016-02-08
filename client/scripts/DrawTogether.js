@@ -268,7 +268,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 
 	this.network.on("drawing", function (data) {
 		var drawing = self.decodeDrawings([data.drawing])[0];
-		self.paint.drawDrawing("public", drawing);
+		self.paint.addPublicDrawing(drawing);
 		self.setPlayerPosition(data.socketid, [drawing.x, drawing.y], Date.now());
 	});
 
@@ -595,7 +595,7 @@ DrawTogether.prototype.updateInk = function updateInk () {
 	this.inkDom.appendChild(document.createTextNode("Ink: " + Math.floor(this.ink) + "/50000"));
 
 	var width = Math.floor(Math.max(this.ink / 500, 0));
-	if (!this.lastInkWidth || this.lastInkWidth == width) {
+	if (!this.lastInkWidth || this.lastInkWidth !== width) {
 		this.inkDom.style.width = width + "%";
 		this.lastInkWidth = width;
 	}

@@ -48,6 +48,7 @@ function Register (server, key, io, port, listenServer) {
 			}
 			
 			res.end('{"success": "Disconnected all clients in room ' + room + '"}');
+			return;
 		}
 	}.bind(this));
 }
@@ -107,14 +108,31 @@ Register.prototype.register = function register () {
 	req.end();
 };
 
+Register.prototype.getUserListCount = function getUserListCount (room) {
+	// Returns [{
+	//     id: socketid,
+	//     name: username,
+	//     reputation: accountrep //optional
+	//     gamescore: score //Only in gamerooms
+	// }, ...]
+	var sroom = this.io.nsps['/'].adapter.rooms[room];
+	var users = 0;
+
+	for (var id in sroom) {
+		if (!this.io.nsps['/'].connected[id]) continue;
+		users++;
+	}
+
+	return users;
+};
+
 Register.prototype.updatePlayerCount = function updatePlayerCount () {
 	var rooms = {};
 
 	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
 		var socket = this.io.sockets.sockets[sKey];
-		if (rooms[socket.room] || !socket.room) continue;
-
-		rooms[socket.room] = Object.keys(this.io.nsps['/'].adapter.rooms[socket.room] || {}).length;
+		if (!socket.room || rooms[socket.room]) continue;
+		rooms[socket.room] = this.getUserListCount(socket.room);
 	}
 
 	var req = http.request({

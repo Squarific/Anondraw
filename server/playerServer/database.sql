@@ -10,6 +10,13 @@ ALTER TABLE users ADD COLUMN last_username VARCHAR(32);
 ALTER TABLE users ADD COLUMN bio TEXT;
 ALTER TABLE users ADD COLUMN last_online DATETIME;
 
+CREATE TABLE IF NOT EXISTS permissions (
+    roomid INT UNSIGNED,
+    userid INT UNSIGNED,
+    level INT UNSIGNED,
+    INDEX(roomid, userid)
+);
+
 CREATE TABLE IF NOT EXISTS reputations (
     id INT UNSIGNED AUTO_INCREMENT,
     from_id INT UNSIGNED,

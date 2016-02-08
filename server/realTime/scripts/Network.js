@@ -21,6 +21,9 @@ var MAX_INK = 50000;
 var BASE_GEN = 2000;
 var PER_REP_GEN = 500;
 
+// When do we forget the sockets that left
+var FORGET_SOCKET_AFTER = 5 * 60 * 1000;
+
 var SAME_IP_INK_MESSAGE = "You will not get any ink because someone else on your ip has already gotten some.";
 
 function Protocol (io, drawtogether, imgur, players, register) {
@@ -37,8 +40,18 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	}.bind(this);
 
 	this.gameRooms = {};
+	this.leftSocketIpAndId = {};  // socketid: {ip: "", uKey: "", rep: rep, time: Date.now()}
 	setInterval(this.inkTick.bind(this), 10 * 1000);
+	setInterval(this.clearLeftTick.bind(this, 120 * 1000));
 }
+
+Protocol.prototype.clearLeftTick = function clearLeftTick () {
+	for (var socketId in this.leftSocketIpAndId) {
+		if (Date.now() - this.leftSocketIpAndId[socketId].time > FORGET_SOCKET_AFTER) {
+			delete this.leftSocketIpAndId[socketId];
+		}
+	}
+};
 
 Protocol.prototype.inkTick = function inkTick () {
 	var ips = [];
@@ -114,7 +127,10 @@ Protocol.prototype.getUserList = function getUserList (room) {
 };
 
 Protocol.prototype.socketFromId = function socketFromId (id) {
-	return this.io.nsps['/'].connected[id];
+	if (this.io.nsps['/'].connected[id])
+		return this.io.nsps['/'].connected[id];
+
+	return this.leftSocketIpAndId[id];
 };
 
 Protocol.prototype.bindIO = function bindIO () {
@@ -431,7 +447,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (socket.room.indexOf("member_") == 0 && (!socket.reputation || socket.reputation < MEMBER_MIN_REP)) {
 				callback();
 				if (!socket.lastMemberOnlyWarning || Date.now() - socket.lastMemberOnlyWarning > 5000) {
-					protocol.informClient(socket, "This is a member only room, you need at least 5 rep!")
+					protocol.informClient(socket, "This is a member only room, you need at least " + MEMBER_MIN_REP + " rep!")
 					socket.lastMemberOnlyWarning = Date.now();
 				}
 				return;
@@ -624,7 +640,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (!socket.uKey) {
+			if (!socket.uKey || typeof socket.reputation !== "number") {
 				callback({error: "You can only kickban someone if you are logged in!"});
 				return;
 			}
@@ -678,7 +694,18 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
+
+			protocol.leftSocketIpAndId[socket.id] = {
+				ip: socket.ip,
+				reputation: socket.reputation,
+				uKey: socket.uKey,
+				time: Date.now(),
+				name: socket.name,
+				emit: function () {}
+			};
+
 			setTimeout(protocol.register.updatePlayerCount.bind(protocol.register), 500);
+
 			protocol.drawTogether.finalizePath(socket.room, socket.id);
 			socket.broadcast.to(socket.room).emit("ep", socket.id);
 		});

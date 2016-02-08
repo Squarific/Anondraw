@@ -138,4 +138,41 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 	}.bind(this));
 };
 
+PlayerDatabase.prototype.setName = function setName (id, name) {
+	this.database.query("UPDATE users SET last_username = ?, last_online = ? WHERE id = ?", [name, new Date(), id]);
+};
+
+PlayerDatabase.prototype.setOnline = function setOnline (id) {
+	this.database.query("UPDATE users SET last_online = ? WHERE id = ?", [new Date(), id]);
+};
+
+PlayerDatabase.prototype.reputationList = function reputationList (id, callback) {
+	var query = "SELECT u.last_username, u.last_online FROM reputations ";
+	query += "JOIN users u ON to_id = u.id ";
+	query += "WHERE from_id = ?";
+
+	this.database.query(query, id, callback);
+};
+
+PlayerDatabase.prototype.setPermission = function setPermission (roomid, userid, level, callback) {
+	this.database.query("SELECT roomid FROM permissions WHERE roomid = ? AND userid = ?",
+	                    [roomid, userid], function (err, rows) {
+		if (err) {
+			callback(err);
+			return;
+		}
+
+		if (rows.length > 1) {
+			console.log("REPUTATION ERROR: Too many rows", roomid, userid);
+			callback("An internal error occured.");
+		} else if (rows.length == 1) {
+			this.database.query("UPDATE premissions SET level = ? WHERE roomid = ? AND userid = ?",
+			                    [level, roomid, userid], callback);
+		} else {
+			this.database.query("INSERT INTO permissions VALUES (?, ?, ?)",
+			                    [roomid, userid, level], callback);
+		}
+	});
+};
+
 module.exports = PlayerDatabase;

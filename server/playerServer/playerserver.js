@@ -56,6 +56,7 @@ var server = http.createServer(function (req, res) {
 			}
 
 			var uKey = sessions.addSession(id, email);
+			playerDatabase.setOnline(id);
 			res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
 		});
 
@@ -90,6 +91,7 @@ var server = http.createServer(function (req, res) {
 				}
 
 				var uKey = sessions.addSession(id, email);
+				playerDatabase.setOnline(id);
 				res.end('{"success": "Logged in", "uKey": "' + uKey + '"}');
 			});
 		});
@@ -97,8 +99,23 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/setname") {
+		var uKey = parsedUrl.query.ukey;
+		var user = sessions.getUser("uKey", uKey);
+		var name = parsedUrl.query.name;
+
+		if (!user) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		playerDatabase.setName(user.id, name);
+		res.end('{"success": "done"}');
+		return;
+	}
+
 	if (parsedUrl.pathname == "/reputationlist") {
-		var uKey = parsedUrl.query.uKey;
+		var uKey = parsedUrl.query.ukey;
 		var user = sessions.getUser("uKey", uKey);
 
 		if (!user) {
@@ -126,11 +143,14 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		if (!sessions.loggedIn(uKey)) {
-			res.end('{"error": "Not logged in"}');
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end('{"error": "Not logged in."}');
 			return;
 		}
 
+		playerDatabase.setOnline(user.id);
 		res.end('{"success": "Logged in"}');
 		return;
 	}
