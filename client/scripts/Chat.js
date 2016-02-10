@@ -22,6 +22,7 @@ function Chat (container, onmessage) {
 	button.addEventListener("click", this.sendChat.bind(this));
 
 	this.onMessage = onmessage || function () {};
+	this.messageSound = new Audio("sounds/message.wav");
 }
 
 Chat.prototype.string2Color = function string2Color (str) {
@@ -90,6 +91,10 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	if (max_scroll <= old_scroll) {
 		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 	}
+
+	// Only play audio if it was a normal message
+	if (user !== message)
+		this.messageSound.play();
 };
 
 Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
