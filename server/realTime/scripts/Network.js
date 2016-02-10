@@ -149,16 +149,16 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.disconnect();
 		}
 
-		protocol.players.isBanned(socket.ip, function (err, banned, enddate, reason) {
+		protocol.players.isBanned(socket.ip, function (err, data) {
 			if (err) {
 				console.error("Error checking if banned on connect", err);
 				return;
 			}
 
-			if (banned) {
+			if (data.banned) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
-					message: "You have been banned till " + new Date(enddate) + ". Reason: " + reason
+					message: "You have been banned till " + new Date(data.enddate) + ". Reason: " + data.reason
 				});
 				console.log("[BANNED] " + socket.ip + " tried to join.");
 				socket.disconnect();
@@ -294,12 +294,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 			
 			socket.uKey = uKey;
-			protocol.players.getReputationFromUKey(uKey, function (err, rep) {
-				socket.reputation = rep;
+			protocol.players.getReputationFromUKey(uKey, function (err, data) {
+				socket.reputation = data.rep;
 				socket.emit("setreputation", socket.reputation);
 				protocol.io.to(socket.room).emit("reputation", {
 					id: socket.id,
-					reputation: rep
+					reputation: data.rep
 				});
 			});
 		});
@@ -367,7 +367,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					message: socket.name + " gave " + targetSocket.name + " positive reputation! :D"
 				});
 	
-				protocol.players.getReputationFromUKey(targetSocket.uKey, function (err, reputation) {
+				protocol.players.getReputationFromUKey(targetSocket.uKey, function (err, data) {
 					if (err) {
 						console.error("[VOTE][GETREPUTATION]", err);
 						return;
@@ -375,9 +375,9 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.io.to(socket.room).emit("reputation", {
 						id: targetSocket.id,
-						reputation: reputation
+						reputation: data.reputation
 					});
-					targetSocket.reputation = reputation;
+					targetSocket.reputation = data.reputation;
 					targetSocket.emit("setreputation", targetSocket.reputation);
 				});
 			});
@@ -391,11 +391,6 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			if (name.length > 32)
 				name = name.substr(0, 32);
-
-			if (name == "DOLPHINE") {
-				protocol.players.kickbanIp(socket.ip, 1, 512640, "Ban evading isn't nice!", function (err) {});
-				return;
-			}
 
 			if (name.toLowerCase() == "server") {
 				callback("Don't steal my name!");
@@ -429,6 +424,9 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.name = name;
 			socket.lastNameChange = Date.now();
 			callback(null, name);
+
+			if (socket.uKey)
+				players.setName(socket.uKey, socket.name);
 		});
 
 		socket.on("drawing", function (drawing, callback) {

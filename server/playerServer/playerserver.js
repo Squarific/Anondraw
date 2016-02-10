@@ -99,8 +99,23 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/setpermission") {
+		res.end();
+		return;
+	}
+
+	if (parsedUrl.pathname == "/getpermission") {
+		res.end();
+		return;
+	}
+
+	if (parsedUrl.pathname == "/getpermissionlist") {
+		res.end();
+		return;
+	}
+
 	if (parsedUrl.pathname == "/setname") {
-		var uKey = parsedUrl.query.ukey;
+		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var name = parsedUrl.query.name;
 
@@ -115,7 +130,7 @@ var server = http.createServer(function (req, res) {
 	}
 
 	if (parsedUrl.pathname == "/reputationlist") {
-		var uKey = parsedUrl.query.ukey;
+		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 
 		if (!user) {

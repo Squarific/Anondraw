@@ -6,81 +6,75 @@ function Players (server) {
 	this.server = server;
 }
 
-Players.prototype._kickban = function _kickban (options, callback) {
-	var req = http.request({
-		hostname: this.server,
-		port: 4552,
-		method: "GET",
-		path: "/kickban?" + options
-	}, function (res) {
-		res.on("data", function (chunk) {
-			data = JSON.parse(chunk);
-
-			if (data.error) {
-				callback(data.error);
-				return;
-			}
-
-			callback(null);
-		});
-	});
-
-	req.on("error", function (e) {
-		callback(e.message);
-	});
-
-	req.end();
-};
-
 // Kickban the given uKey
 // callback()
 Players.prototype.kickbanAccount = function kickbanAccount (target, by, minutes, reason, callback) {
-	var options = querystring.stringify({
+	this.request("kickban", {
 		target: target,
 		by: by,
 		minutes: minutes,
 		reason: reason,
 		kickbancode: kickbancode
-	});
-
-	this._kickban(options, callback);	
+	}, callback);
 };
 
 // Kickban the given ip
 // callback()
 Players.prototype.kickbanIp = function kickbanAccount (target, by, minutes, reason, callback) {
-	var options = querystring.stringify({
+	this.request("kickban", {
 		ip: target,
 		by: by,
 		minutes: minutes,
 		reason: reason,
 		kickbancode: kickbancode
-	});
-
-	this._kickban(options, callback);	
+	}, callback);
 };
 
 // Callback (err, banned, till)
 Players.prototype.isBanned = function isBanned (ip, callback) {
+	this.request("isbanned", {
+		ip: ip
+	}, callback);
+};
+
+Players.prototype.getReputationFromUKey = function getReputationFromUKey (uKey, callback) {
+	this.request("getreputation", {
+		uKey: uKey
+	}, callback);
+};
+
+Players.prototype.giveReputation = function giveReputation (fromUkey, toUkey, callback) {
+	this.requet("givereputation", {
+		uKey: fromUkey,
+		uKeyTo: toUkey
+	}, callback);
+};
+
+Player.prototype.setName = function setName (uKey, name, callback) {
+	this.request("setname", {
+		uKey: uKey,
+		name: name
+	}, callback);
+};
+
+Player.prototype.request = function request (method, urlArguments, callback) {
+	typeof callback !== "function" && callback = function () {};
+	
 	var req = http.request({
 		hostname: this.server,
 		port: 4552,
 		method: "GET",
-		path: "/isbanned?ip=" + encodeURIComponent(ip)
+		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments)
 	}, function (res) {
+		var data = "";
 		res.on("data", function (chunk) {
-			data = JSON.parse(chunk);
-
-			if (data.error) {
-				callback(data.error);
-				return;
-			}
-
-			if (data.info)
-				callback(null, data.banned, data.info.enddate, data.info.reason);
-			else
-				callback(null, data.banned);
+			data += chunk;
 		});
+
+		res.on("done", function () {
+			var parsed = JSON.parse(data);
+			callback(parsed.error, parsed);
+		})
 	});
 
 	req.on("error", function (e) {
@@ -89,50 +83,5 @@ Players.prototype.isBanned = function isBanned (ip, callback) {
 
 	req.end();
 };
-
-Players.prototype.getReputationFromUKey = function getReputationFromUKey (uKey, callback) {
-	var req = http.request({
-		hostname: this.server,
-		port: 4552,
-		method: "GET",
-		path: "/getreputation?uKey=" + encodeURIComponent(uKey)
-	}, function (res) {
-		res.on("data", function (chunk) {
-			data = JSON.parse(chunk);
-
-			if (data.error) {
-				callback(data.error)
-				return;
-			}
-
-			callback(null, data.rep);
-		});
-	});
-
-	req.on("error", function (e) {
-		callback(e.message);
-	});
-
-	req.end();
-}
-
-Players.prototype.giveReputation = function giveReputation (fromUkey, toUkey, callback) {
-	var req = http.request({
-		hostname: this.server,
-		port: 4552,
-		method: "GET",
-		path: "/givereputation?uKey=" + encodeURIComponent(fromUkey) + "&uKeyTo=" + encodeURIComponent(toUkey)
-	}, function (res) {
-		res.on("data", function (chunk) {
-			callback(JSON.parse(chunk).error);
-		});
-	});
-
-	req.on("error", function (e) {
-		callback(e.message);
-	});
-
-	req.end();
-}
 
 module.exports = Players;

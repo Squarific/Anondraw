@@ -175,4 +175,22 @@ PlayerDatabase.prototype.setPermission = function setPermission (roomid, userid,
 	});
 };
 
+PlayerDatabase.prototype.getPermissionList = function getPermissionList (roomid, callback) {
+	this.database.query(
+		"SELECT userid, level FROM permissions WHERE roomid = ?",
+		[roomid],
+		callback
+	);
+};
+
+PlayerDatabase.prototype.getPermission = function getPermission (roomid, userid, callback) {
+	this.database.query(
+		"SELECT level FROM permissions WHERE roomid = ? AND userid = ?",
+		[roomid, userid],
+		function (err, rows) {
+			callback(err, rows && rows[0] && rows[0].level);
+		}
+	);
+};
+
 module.exports = PlayerDatabase;
