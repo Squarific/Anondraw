@@ -6,6 +6,10 @@ function DrawTogether (container, settings) {
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
+	this.userSettings = QuickSettings.create(0, 0, "settings");
+	this.userSettings.setDraggable(false);
+	this.userSettings.setCollapsible(false);
+
 	// Set default values untill we receive them from the server
 	this.playerList = [];
 	this.moveQueue = [];
@@ -68,6 +72,17 @@ DrawTogether.prototype.defaultSettings = {
 	accountServer: "http://direct.anondraw.com:4552",
 	imageServer: "http://direct.anondraw.com:5552"
 };
+
+DrawTogether.prototype.defaultUserSettings = [{
+		title: "Mute chat",
+		type: "boolean",
+		value: false
+	}, {
+		title: "Show tips",
+		type: "boolean",
+		value: true
+	}
+];
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
 DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
@@ -417,7 +432,7 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 };
 
 DrawTogether.prototype.displayTip = function displayTip () {
-	if (!this.showTipsInput.checked) return;
+	if (!this.userSettings.getBoolean("Show tips")) return;
 
 	var tips = [
 		"Did you know you can use shortcuts? Press C to toggle the color selection!",
@@ -896,7 +911,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 DrawTogether.prototype.createChat = function createChat () {
 	var chatContainer = this.container.appendChild(document.createElement("div"));
 	chatContainer.className = "drawtogether-chat-container";
-	this.chat = new Chat(chatContainer, this.sendMessage.bind(this));
+	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings);
 	this.chatContainer = chatContainer;
 	this.chat.addMessage("Welcome to anondraw, the free interactive group drawing app.");
 };
@@ -1105,18 +1120,38 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var settingsContainer = settingsWindow.appendChild(document.createElement("div"));
 	settingsContainer.className = "drawtogether-settingswindow-container";
 
-	settingsContainer.appendChild(document.createTextNode("Enable tips?"))
+	for (var k = 0; k < this.defaultUserSettings.length; k++) {
+		this.userSettings.addControl(this.defaultUserSettings[k]);
+	}
 
-	var tips = settingsContainer.appendChild(document.createElement("input"));
-	tips.type = "checkbox";
-	tips.title = "Do you want to see the tips?";
-	// Get the setting from localStorage, default to true if not set
-	// getItem returns a string so it will get taken even if 'false'. !! = cast
-	tips.checked = localStorage.getItem("drawtogether-settings-showtips") !== "false";
-	tips.addEventListener("change", function (event) {
-		localStorage.setItem("drawtogether-settings-showtips", event.target.checked);
-	});
-	this.showTipsInput = tips;
+	settingsContainer.appendChild(this.userSettings._panel);
+
+	//settingsContainer.appendChild(document.createTextNode("Enable tips?"))
+
+	// var tips = settingsContainer.appendChild(document.createElement("input"));
+	// tips.type = "checkbox";
+	// tips.title = "Do you want to see the tips?";
+	// // Get the setting from localStorage, default to true if not set
+	// // getItem returns a string so it will get taken even if 'false'. !! = cast
+	// tips.checked = localStorage.getItem("drawtogether-settings-showtips") !== "false";
+	// tips.addEventListener("change", function (event) {
+	// 	localStorage.setItem("drawtogether-settings-showtips", event.target.checked);
+	// });
+	// this.showTipsInput = tips;
+
+	// settingsContainer.appendChild(document.createElement("br"));
+	// settingsContainer.appendChild(document.createTextNode("Mute chat?"))
+
+	// var tips = settingsContainer.appendChild(document.createElement("input"));
+	// tips.type = "checkbox";
+	// tips.title = "Mute chat?";
+	// // Get the setting from localStorage, default to true if not set
+	// // getItem returns a string so it will get taken even if 'false'. !! = cast
+	// tips.checked = localStorage.getItem("drawtogether-settings-mute") === "true";
+	// tips.addEventListener("change", function (event) {
+	// 	localStorage.setItem("drawtogether-settings-mute", event.target.checked);
+	// });
+	// this.showTipsInput = tips;
 
 	var close = settingsContainer.appendChild(document.createElement("div"));
 	close.innerText = "Close settings window";

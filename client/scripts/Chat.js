@@ -1,6 +1,8 @@
-function Chat (container, onmessage) {
+function Chat (container, onmessage, userSettings) {
 	this.messagesDom = container.appendChild(document.createElement("div"));
 	this.messagesDom.classList.add("messagecontainer");
+
+	this.userSettings = userSettings;
 
 	this.inputContainerDom = container.appendChild(document.createElement("div"));
 	this.inputContainerDom.classList.add("inputcontainer");
@@ -93,7 +95,7 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	}
 
 	// Only play audio if it was a normal message
-	if (user !== message)
+	if (user !== message && !this.userSettings.getBoolean("Mute chat"))
 		this.messageSound.play();
 };
 
