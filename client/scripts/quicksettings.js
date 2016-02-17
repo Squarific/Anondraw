@@ -321,10 +321,11 @@
 			return this._controls[title].control.value;
 		},
 
-		setRangeValue: function(title, value) {
+		setRangeValue: function(title, value, notify) {
 			var control = this._controls[title];
 			control.control.value = value;
 			control.label.innerHTML = "<b>" + title + ":</b> " + control.control.value;
+			if (!notify) return;
 			if(control.callback) {
 				control.callback(parseFloat(control.control.value));
 			}
@@ -398,8 +399,9 @@
 			return this._controls[title].control.checked;
 		},
 
-		setBoolean: function(title, value) {
+		setBoolean: function(title, value, notify) {
 			this._controls[title].control.checked = value;
+			if (!notify) return;
 			if(this._controls[title].callback) {
 				this._controls[title].callback(value);
 			}
@@ -487,10 +489,11 @@
 			return this._controls[title].control.value;
 		},
 
-		setColor: function(title, value) {
+		setColor: function(title, value, notify) {
 			var control = this._controls[title];
 			control.control.value = value;
 			control.label.innerHTML = "<b>" + title + ":</b> " + control.control.value;
+			if (!notify) return;
 			if(control.callback) {
 				control.callback(control.control.value);
 			}
@@ -580,9 +583,10 @@
 			return this._controls[title].control.value;
 		},
 
-		setText: function(title, text) {
+		setText: function(title, text, notify) {
 			var control = this._controls[title];
 			control.control.value = text;
+			if (!notify) return;
 			if(control.callback) {
 				control.callback(text);
 			}
@@ -665,10 +669,11 @@
 			}
 		},
 
-		setDropDownIndex: function(title, index) {
+		setDropDownIndex: function(title, index, notify) {
 			var control = this._controls[title],
 				options = control.control.options;
 			control.control.selectedIndex = index;
+			if (!notify) return;
 			if(control.callback) {
 				control.callback({
 					index: index,

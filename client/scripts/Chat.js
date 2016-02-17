@@ -182,6 +182,7 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 Chat.prototype.createUrl = function createUrl (url) {
 	var a = document.createElement("a");
 	a.href = url;
+	a.target = "_blank";
 	a.appendChild(document.createTextNode(url));
 	return a;
 };

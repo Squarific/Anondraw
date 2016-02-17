@@ -53,11 +53,17 @@ function DrawTogether (container, settings) {
 	this.needsClear = false;
 
 	document.addEventListener("keydown", function (event) {
+		if (event.target !== document.body) return;
 		// On "esc"
 		if (event.keyCode == 27) {
 			this.closeAccountWindow();
 			this.closeShareWindow();
 			this.closeRoomWindow();
+			this.closeSettingsWindow();
+		}
+
+		if (event.keyCode == 65) {
+			this.advancedOptions.toggleVisibility();
 		}
 	}.bind(this));
 
@@ -914,6 +920,13 @@ DrawTogether.prototype.createChat = function createChat () {
 	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings);
 	this.chatContainer = chatContainer;
 	this.chat.addMessage("Welcome to anondraw, the free interactive group drawing app.");
+
+	var snapper = new Snap({
+		element: chatContainer,
+		disable: "left",
+		minPosition: -250,
+		maxPosition: 0
+	});
 };
 
 DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
@@ -1101,6 +1114,13 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 
 	this.playerListDom = infoContainer.appendChild(document.createElement("div"));
 	this.playerListDom.className = "drawtogether-info-playerlist";
+
+	var snapper = new Snap({
+		element: infoContainer,
+		disable: "left",
+		minPosition: -250,
+		maxPosition: 0
+	});
 };
 
 DrawTogether.prototype.createGameInformation = function createGameInformation () {
@@ -1124,35 +1144,49 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
 
+	var advancedOptions = QuickSettings.create(150, 150, "Advanced options");
+	advancedOptions.hide();
+	this.advancedOptions = advancedOptions;
+
+	var rotation = 0;
+	var horizontal = false;
+	var vertical = false;
+
+	advancedOptions.addRange("Rotation (r)", -180, 180, 0, 1, function (value) {
+		this.paint.setRotation(value);
+	}.bind(this));
+
+	advancedOptions.addBoolean("Flip horizontal (m)", false, function (value) {
+		this.paint.setHorizontalMirror(value);
+	}.bind(this));
+
+	advancedOptions.addBoolean("Flip vertical (k)", false, function (value) {
+		this.paint.setVerticalMirror(value);
+	}.bind(this));
+
+	advancedOptions.addButton("Close", function () {
+		advancedOptions.hide();
+	});
+
+	this.paint.addEventListener("canvaschange", function (event) {
+		var rotation = event.rotation;
+		if (event.rotation > 180) rotation = -360 + event.rotation;
+		advancedOptions.setRangeValue("Rotation (r)", rotation, false);
+		advancedOptions.setBoolean("Flip horizontal (m)", event.scale[0] == -1, false);
+		advancedOptions.setBoolean("Flip vertical (k)", event.scale[1] == -1, false);
+	})
+
 	settingsContainer.appendChild(this.userSettings._panel);
 
-	//settingsContainer.appendChild(document.createTextNode("Enable tips?"))
-
-	// var tips = settingsContainer.appendChild(document.createElement("input"));
-	// tips.type = "checkbox";
-	// tips.title = "Do you want to see the tips?";
-	// // Get the setting from localStorage, default to true if not set
-	// // getItem returns a string so it will get taken even if 'false'. !! = cast
-	// tips.checked = localStorage.getItem("drawtogether-settings-showtips") !== "false";
-	// tips.addEventListener("change", function (event) {
-	// 	localStorage.setItem("drawtogether-settings-showtips", event.target.checked);
-	// });
-	// this.showTipsInput = tips;
-
-	// settingsContainer.appendChild(document.createElement("br"));
-	// settingsContainer.appendChild(document.createTextNode("Mute chat?"))
-
-	// var tips = settingsContainer.appendChild(document.createElement("input"));
-	// tips.type = "checkbox";
-	// tips.title = "Mute chat?";
-	// // Get the setting from localStorage, default to true if not set
-	// // getItem returns a string so it will get taken even if 'false'. !! = cast
-	// tips.checked = localStorage.getItem("drawtogether-settings-mute") === "true";
-	// tips.addEventListener("change", function (event) {
-	// 	localStorage.setItem("drawtogether-settings-mute", event.target.checked);
-	// });
-	// this.showTipsInput = tips;
-
+	var openAdvancedButton = settingsContainer.appendChild(document.createElement("div"));
+	openAdvancedButton.innerText = "Open advanced settings";
+	openAdvancedButton.textContent = "Open advanced settings";
+	openAdvancedButton.className = "drawtogether-button";
+	openAdvancedButton.addEventListener("click", function () {
+		this.closeSettingsWindow();
+		advancedOptions.show();
+	}.bind(this));
+	
 	var close = settingsContainer.appendChild(document.createElement("div"));
 	close.innerText = "Close settings window";
 	close.textContent = "Close settings window";
@@ -1287,9 +1321,16 @@ DrawTogether.prototype.createControls = function createControls () {
 	var sharediv = controlContainer.appendChild(document.createElement("div"));
 	sharediv.className = "addthis_sharing_toolbox";
 
-	this.controls.byName["share-button"].input.classList.add("drawtogether-flashy");
-	this.controls.byName["toggle-chat"].input.classList.add("drawtogether-display-on-small");
-	this.controls.byName["toggle-info"].input.classList.add("drawtogether-display-on-small");
+	for (var name in this.controls.byName) {
+		this.controls.byName[name].input.setAttribute("data-snap-ignore", "true");
+	}
+
+	var snapper = new Snap({
+		element: controlContainer,
+		disable: "right",
+		minPosition: 0,
+		maxPosition: 250
+	});
 };
 
 DrawTogether.prototype.formLogin = function formLogin () {
@@ -1399,20 +1440,6 @@ DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
 
 	this.shareToRedditButton.target = "_blank";
 	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?url=" + encodeURIComponent(url);
-};
-
-DrawTogether.prototype.toggleChat = function toggleChat () {
-	if (this.chatContainer.classList.contains("drawtogether-unhide-on-mobile"))
-		this.chatContainer.classList.remove("drawtogether-unhide-on-mobile");
-	else
-		this.chatContainer.classList.add("drawtogether-unhide-on-mobile");
-};
-
-DrawTogether.prototype.toggleInfo = function toggleInfo () {
-	if (this.infoContainer.classList.contains("drawtogether-unhide-on-mobile"))
-		this.infoContainer.classList.remove("drawtogether-unhide-on-mobile");
-	else
-		this.infoContainer.classList.add("drawtogether-unhide-on-mobile");
 };
 
 DrawTogether.prototype.toggleFollow = function toggleFollow () {
@@ -1598,7 +1625,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		question: "How big is the canvas?",
 		answer: "The interactive canvas has an infinite size. You could move as far away from the center as you'd like."
 	}, {
-		question: "I want to draw privatly with some people, is that possible?",
+		question: "I want to draw privately with some people, is that possible?",
 		answer: "Yes, in the home screen click on draw with friends and then share the invite url printed in the chat. If you are already in a room, simply click on the room button and then click create private room after giving it a name."
 	}, /* {
 		question: "How do you play the game?",
@@ -1614,7 +1641,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
 	},*/ {
 		question: "What benefits does reputation give you?",
-		answer: "\n At " + this.KICKBAN_MIN_REP + "+ reputation you can kickban people for a certain amount of time when they misbehave. \n At 6 reputation, you can join the member only rooms, give others reputation and share with multiple users under one ip."
+		answer: "At 15 reputation, you can join the member only rooms and share an ip with other users without affecting your ink. \n" +
+		        "At 30 reputation, you can give upvotes to other people. \n" +
+		        "At " + this.KICKBAN_MIN_REP + "+ reputation, you can kickban people for a certain amount of time when they misbehave. \n "
 	}, {
 		question: "How do I get reputation?",
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
@@ -1657,20 +1686,6 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Home",
 		title: "Go to home menu",
 		action: this.openModeSelector.bind(this)
-	},{
-		name: "toggle-chat",
-		type: "button",
-		value: "",
-		text: "Chat",
-		title: "Toggle chat",
-		action: this.toggleChat.bind(this)
-	}, {
-		name: "toggle-info",
-		type: "button",
-		value: "",
-		text: "Info",
-		title: "Toggle room info",
-		action: this.toggleInfo.bind(this)
 	}, {
 		name: "toggle-view",
 		type: "button",

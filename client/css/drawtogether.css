@@ -1,7 +1,7 @@
 @import url("http://fonts.googleapis.com/css?family=Open+Sans");
 html, body {
   margin: 0;
-  padding: 0; }
+  padding: 0; overflow:hidden;}
 
 body, input, textarea, button {
   font-family: "Open Sans";
@@ -577,6 +577,12 @@ input.paint-texttool {
   left: 0;
   width: calc(100% - 20rem); }
 
+.control-container .control-integer,
+.control-container .control-color-input,
+.control-container .sp-replacer {
+  margin-left:1em;
+  margin-right:1em;
+}
 
 /**
  * Canvas container
@@ -764,6 +770,14 @@ input.paint-texttool {
   display:none;
 }
 
+@media (min-width: 1175px) {
+  .drawtogether-info-container,
+  .drawtogether-chat-container,
+  .drawtogether-control-container {
+    transform:none !important;
+  }
+}
+
 @media (max-width: 1175px) {
   .furjbqy {
     display:none;
@@ -776,48 +790,89 @@ input.paint-texttool {
     overflow-x:hidden;
   }
 
-  .drawtogether-info-container {
-    position:absolute;
-    height:calc(100% - 3em);
-    width:100%;
-    right:-100%;
-    z-index:125;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    transition-duration: 0.3s;
-  }
-
+  .drawtogether-info-container,
   .drawtogether-chat-container {
-    position:absolute;
-    top:0;
-    right:-100%;
-    z-index:150;
-    width:100%;
-    height:calc(100% - 3em);
+    z-index:125;
+    width:300px;
+    right:-250px;
     -webkit-transition-duration: 0.3s;
     -moz-transition-duration: 0.3s;
     transition-duration: 0.3s;
-  }
-
-  .drawtogether-unhide-on-mobile {
-    right:0;
-  }
-
-  .drawtogether-display-on-small {
-    display:inline-block;
   }
 
   .drawtogether-paint-container {
-    position:relative;
+    position:absolute;
     width:auto;
-    height:calc(100% - 3em);
+    height:100%;
     top:0;
+    left:50px;
+    right:50px;
+  }
+
+  .control-container {
+    border-radius:0 !important;
+    margin-left:0 !important;
+  }
+
+  .control-container .control-button,
+  .control-container .control-integer {
+    margin:0;
+    margin-bottom:.2em;
   }
 
   .drawtogether-control-container {
-    width: 100%;
+    width:300px;
+    left:-250px;
     height: auto;
     background:white;
+    position:absolute;
+    top:0;
+    bottom:0;
+    padding:0;
+    z-index:200;
+    overflow-y:auto;
+  }
+
+  .drawtogether-chat-container,
+  .drawtogether-info-container,
+  .drawtogether-control-container {
+    overflow-y: auto;
+    -webkit-transition-property: top, bottom;
+    transition-property: top, bottom;
+    -webkit-transition-duration: .2s, .2s;
+    transition-duration: .2s, .2s;
+    -webkit-transition-timing-function: linear, linear;
+    transition-timing-function: linear, linear;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .drawtogether-control-container .control-button {
+    display:block;
+    margin:0;
+    padding:1em;
+    border:none;
+    height:initial;
+    line-height:initial;
+    margin:0;
+    border-radius:0;
+    margin-bottom:0.1em;
+    width:90%;
+  }
+
+  .drawtogether-control-container input {
+    width: 45% !important;
+    margin:0 !important;
+    margin-bottom:1em !important;
+    margin-top:1em !important;
+    height: 3.35em!important;
+    vertical-align: top;
+  }
+
+  .drawtogether-control-container input + .control-button {
+    display:inline-block !important;
+    width: 45% !important;
+    margin-bottom:1em !important;
+    margin-top:1em !important;
   }
 
   .messagecontainer {
@@ -901,16 +956,4 @@ input.paint-texttool {
 
 .gui-prompt-button:hover {
   background-color: #233445;
-}
-
-/* ADS */
-
-.drawtogether-ad-container {
-  text-align: center;
-}
-
-.chitikaAdContainer {
-  display:inline-block;
-  margin-top:1em;
-  margin-bottom:1em;
 }
