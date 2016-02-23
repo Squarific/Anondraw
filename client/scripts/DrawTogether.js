@@ -33,16 +33,21 @@ function DrawTogether (container, settings) {
 	// Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
+
 	this.updateInk();
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
 		this.openModeSelector();
 	} else if (this.settings.mode == "join") {
-		this.changeRoom(this.settings.room, undefined, true);
+		this.changeRoom(this.settings.room,
+			            undefined,
+			            this.settings.leftTopX,
+			            this.settings.leftTopY,
+			            true);
 	} else  if (this.settings.mode == "private") {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
-		this.changeRoom(this.settings.room, undefined, true);
+		this.changeRoom(this.settings.room, undefined, 0, 0, true);
 	} else if (this.settings.mode == "member") {
 		this.changeRoom("member-main");
 	} else if (this.settings.mode == "auto") {
@@ -74,6 +79,8 @@ function DrawTogether (container, settings) {
 DrawTogether.prototype.defaultSettings = {
 	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
 	room: "main",                          // Room to join at startup
+	leftTopX: 0,
+	leftTopY: 0,
 	loadbalancer: "http://direct.anondraw.com:3552",
 	accountServer: "http://direct.anondraw.com:4552",
 	imageServer: "http://direct.anondraw.com:5552"
@@ -271,7 +278,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		if (self.current_room) {
 			var room = self.current_room;
 			delete self.current_room;
-			self.changeRoom(room, undefined, true);
+			self.changeRoom(room, undefined, 0, 0, true);
 		}
 	});
 
@@ -470,7 +477,7 @@ DrawTogether.prototype.displayTip = function displayTip () {
 // If you make the third parameter true we will tell the server we really want
 // to join that particular room and the fourth is a "secret" override that 
 // ignores if a room is full
-DrawTogether.prototype.changeRoom = function changeRoom (room, number, specific, override) {
+DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, specific, override) {
 	// Change the room to room + number, if not possible try to join
 	// room + (number + 1), if not possible repeat
 	if (room === this.current_room) {
@@ -490,15 +497,16 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, specific,
 		this.changingRoom = false;
 		if (err && err.indexOf("Too many users") !== -1) {
 			this.chat.addMessage("Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
-			this.changeRoom(room, (number || 0) + 1);
+			this.changeRoom(room, (number || 0) + 1, x, y);
 			return;
 		} else if (err) {
 			this.chat.addMessage("Failed to load room '" + room + "'. Server error: " + err + ". Trying again in 5 seconds.");
-			setTimeout(this.changeRoom.bind(this, room, number), 5000);
+			setTimeout(this.changeRoom.bind(this, room, number, x, y, specific, override), 5000);
 		} else {
 			this.setRoom(room + number);
 
 			this.paint.clear();
+			this.paint.goto(x || 0, y || 0);
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 
@@ -676,7 +684,9 @@ DrawTogether.prototype.setName = function setName (name) {
 DrawTogether.prototype.setRoom = function setRoom (room) {
 	this.current_room = room;
 	this.roomInput.value = room;
-	location.hash = room;
+	location.hash = room + "," +
+	                this.paint.public.leftTopX + "," +
+	                this.paint.public.leftTopY + ",lol";
 };
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
@@ -711,7 +721,7 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 			roomButton.className = "drawtogether-button drawtogether-room-button";
 			roomButton.appendChild(document.createTextNode(name + " (" + rooms[name] + " users)"))
 			roomButton.addEventListener("click", function (name, event) {
-				this.changeRoom(name, undefined, true);
+				this.changeRoom(name, undefined, 0, 0, true);
 				this.closeRoomWindow();
 			}.bind(this, name));
 		}
@@ -924,8 +934,9 @@ DrawTogether.prototype.createChat = function createChat () {
 	var snapper = new Snap({
 		element: chatContainer,
 		disable: "left",
-		minPosition: -250,
-		maxPosition: 0
+		minPosition: -275,
+		maxPosition: 0,
+		slideIntent: 40
 	});
 };
 
@@ -1072,6 +1083,12 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		this.lastPathPoint = event.point;
 	}.bind(this));
 
+	this.paint.addEventListener("move", function (event) {
+		location.hash = this.current_room + "," +
+	                    this.paint.public.leftTopX + "," +
+	                    this.paint.public.leftTopY;
+	}.bind(this));
+
 	this.paint.changeTool("grab");
 };
 
@@ -1118,8 +1135,9 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 	var snapper = new Snap({
 		element: infoContainer,
 		disable: "left",
-		minPosition: -250,
-		maxPosition: 0
+		minPosition: -275,
+		maxPosition: 0,
+		slideIntent: 40
 	});
 };
 
@@ -1152,6 +1170,8 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var horizontal = false;
 	var vertical = false;
 
+	advancedOptions.addInfo("Tip:", "Press ESC to undo anything out of this menu.");
+
 	advancedOptions.addRange("Rotation (r)", -180, 180, 0, 1, function (value) {
 		this.paint.setRotation(value);
 	}.bind(this));
@@ -1164,7 +1184,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.setVerticalMirror(value);
 	}.bind(this));
 
-	advancedOptions.addButton("Close", function () {
+	advancedOptions.addButton("Close (a)", function () {
 		advancedOptions.hide();
 	});
 
@@ -1179,8 +1199,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	settingsContainer.appendChild(this.userSettings._panel);
 
 	var openAdvancedButton = settingsContainer.appendChild(document.createElement("div"));
-	openAdvancedButton.innerText = "Open advanced settings";
-	openAdvancedButton.textContent = "Open advanced settings";
+	openAdvancedButton.appendChild(document.createTextNode("Open advanced settings (a)"));
 	openAdvancedButton.className = "drawtogether-button";
 	openAdvancedButton.addEventListener("click", function () {
 		this.closeSettingsWindow();
@@ -1188,8 +1207,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	}.bind(this));
 	
 	var close = settingsContainer.appendChild(document.createElement("div"));
-	close.innerText = "Close settings window";
-	close.textContent = "Close settings window";
+	settingsContainer.appendChild(document.createTextNode("Close settings window"))
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeSettingsWindow.bind(this));
 };
@@ -1258,8 +1276,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 		}
 		
 		var close = formContainer.appendChild(document.createElement("div"));
-		close.innerText = "Close room window";
-		close.textContent = "Close room window";
+		close.appendChild(document.createTextNode("Close room window"));
 		close.className = "drawtogether-button drawtogether-close-button";
 		close.addEventListener("click", this.closeAccountWindow.bind(this));
 	}.bind(this));
@@ -1293,7 +1310,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomButton.className = "drawtogether-button";
 	roomButton.addEventListener("click", function (event) {
 		if (this.roomInput.value == this.current_room)
-			this.changeRoom("main", undefined, true, this.controls.byName.name.input.value == "Uberlord");
+			this.changeRoom("main", undefined, 0, 0, true, this.controls.byName.name.input.value == "Uberlord");
 		else
 			this.changeRoom(this.roomInput.value);
 		this.closeRoomWindow();
@@ -1303,7 +1320,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	roomButton.appendChild(document.createTextNode("Create private room"));
 	roomButton.className = "drawtogether-button create-private-room";
 	roomButton.addEventListener("click", function (event) {
-		this.changeRoom("private_" + Math.random().toString(36).substr(2, 5), undefined, true);
+		this.changeRoom("private_" + Math.random().toString(36).substr(2, 5), undefined, 0, 0, true);
 		this.closeRoomWindow();
 	}.bind(this));
 
@@ -1329,7 +1346,8 @@ DrawTogether.prototype.createControls = function createControls () {
 		element: controlContainer,
 		disable: "right",
 		minPosition: 0,
-		maxPosition: 250
+		maxPosition: 275,
+		slideIntent: 40
 	});
 };
 
@@ -1414,8 +1432,7 @@ DrawTogether.prototype.showShareError = function showShareError (error) {
 	}
 
 	var errorMessage = this.shareError.appendChild(document.createElement("div"));
-	errorMessage.innerText = error;
-	errorMessage.textContent = error;
+	errorMessage.appendChild(document.createTextNode(error));
 	errorMessage.className = "drawtogether-error drawtogether-share-error";
 };
 
@@ -1467,14 +1484,12 @@ DrawTogether.prototype.createShareWindow = function createShareWindow () {
 
 	var upload = shareWindow.appendChild(document.createElement("div"));
 	upload.className = "drawtogether-button drawtogether-upload-button";
-	upload.innerText = "Upload image to imgur";
-	upload.textContent = "Upload image to imgur";
+	upload.appendChild(document.createTextNode("Upload image to imgur"))
 	upload.addEventListener("click", this.uploadImage.bind(this));
 
 	var share = shareWindow.appendChild(document.createElement("a"));
 	share.className = "drawtogether-button drawtogether-share-button";
-	share.innerText = "Share image to reddit";
-	share.textContent = "Share image to reddit";
+	share.appendChild(document.createTextNode("Share image to reddit"))
 	share.href = "#";
 	this.shareToRedditButton = share;
 	share.addEventListener("click", function (shareButton) {
@@ -1484,8 +1499,7 @@ DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	}.bind(this, share));
 
 	var close = shareWindow.appendChild(document.createElement("div"));
-	close.innerText = "Close share window";
-	close.textContent = "Close share window";
+	close.appendChild(document.createTextNode("Close share window"));
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeShareWindow.bind(this));
 };
@@ -1529,7 +1543,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Alone or with friends';
 	privateButton.addEventListener("click", function () {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room
-		this.changeRoom(this.settings.room, undefined, true);
+		this.changeRoom(this.settings.room, undefined, 0, 0, true);
 		ga("send", "event", "modeselector", "private");
 		this.selectWindow.style.display = "";
 	}.bind(this));

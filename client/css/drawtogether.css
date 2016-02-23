@@ -1,7 +1,7 @@
 @import url("http://fonts.googleapis.com/css?family=Open+Sans");
 html, body {
   margin: 0;
-  padding: 0; overflow:hidden;}
+  padding: 0;}
 
 body, input, textarea, button {
   font-family: "Open Sans";
@@ -44,8 +44,18 @@ input.paint-texttool {
 }
 
 .mouse-coords {
+  display:inline-block;
 	left:initial !important;
 	right:0;
+  padding-left:1em !important;
+}
+
+.mouse-coords input {
+  width: 6em;
+  background: #e6e6e6;
+  text-align: right;
+  margin:0.3em;
+  padding:0.3em;
 }
 
 .drawtogether-welcome-text-error {
@@ -790,11 +800,15 @@ input.paint-texttool {
     overflow-x:hidden;
   }
 
+  .control-container .sp-replacer {
+    margin:0 !important;
+  }
+
   .drawtogether-info-container,
   .drawtogether-chat-container {
     z-index:125;
     width:300px;
-    right:-250px;
+    right:-275px;
     -webkit-transition-duration: 0.3s;
     -moz-transition-duration: 0.3s;
     transition-duration: 0.3s;
@@ -805,24 +819,26 @@ input.paint-texttool {
     width:auto;
     height:100%;
     top:0;
-    left:50px;
-    right:50px;
+    left:25px;
+    right:25px;
   }
 
   .control-container {
     border-radius:0 !important;
     margin-left:0 !important;
+    padding:0 !important;
   }
 
   .control-container .control-button,
   .control-container .control-integer {
     margin:0;
-    margin-bottom:.2em;
+    border:none;
+    min-width:2em;
   }
 
   .drawtogether-control-container {
     width:300px;
-    left:-250px;
+    left:-275px;
     height: auto;
     background:white;
     position:absolute;

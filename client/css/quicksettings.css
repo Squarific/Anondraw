@@ -150,9 +150,8 @@ body > .msettings_main {
   background-color: #456789;
   color: #fff;
   cursor: pointer;
-  margin:.3em;
-  margin-left:.5em;
-  margin-right:.5em;
+  margin:0;
+  width:100%;
   -webkit-transition-duration: 0.3s;
   -moz-transition-duration: 0.3s;
   transition-duration: 0.3s;
