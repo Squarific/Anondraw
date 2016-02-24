@@ -685,8 +685,8 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 	this.current_room = room;
 	this.roomInput.value = room;
 	location.hash = room + "," +
-	                this.paint.public.leftTopX + "," +
-	                this.paint.public.leftTopY + ",lol";
+	                this.paint.public.leftTopX.toFixed() + "," +
+	                this.paint.public.leftTopY.toFixed();
 };
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
@@ -1083,11 +1083,19 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		this.lastPathPoint = event.point;
 	}.bind(this));
 
-	this.paint.addEventListener("move", function (event) {
+	function setHash () {
 		location.hash = this.current_room + "," +
-	                    this.paint.public.leftTopX + "," +
-	                    this.paint.public.leftTopY;
-	}.bind(this));
+		                this.paint.public.leftTopX.toFixed() + "," +
+		                this.paint.public.leftTopY.toFixed();
+	}
+
+	var hashTimeout;
+	var boundSetHash = setHash.bind(this);
+
+	this.paint.addEventListener("move", function (event) {
+		clearTimeout(hashTimeout);
+		hashTimeout = setTimeout(boundSetHash, 100);
+	});
 
 	this.paint.changeTool("grab");
 };
@@ -1207,7 +1215,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	}.bind(this));
 	
 	var close = settingsContainer.appendChild(document.createElement("div"));
-	settingsContainer.appendChild(document.createTextNode("Close settings window"))
+	close.appendChild(document.createTextNode("Close settings window"))
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeSettingsWindow.bind(this));
 };
