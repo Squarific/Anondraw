@@ -230,7 +230,7 @@ Chat.prototype.emotesHash = {
 	"twitchRaid": "images/emotes/twitchRaid.png"
 };
 
-Chat.prototype.urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+Chat.prototype.urlRegex = /((https?|ftps?):\/\/)?[^\s]+(\.[^\s]+)/;
 
 Chat.prototype.addMessage = function addMessage (user, message) {
 	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
@@ -281,78 +281,44 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
-	var messages = [];
+	var messages = message.split(" ");
 	var temp;
 	var result;
 
-	// Split the message on all urls
-	while (result = this.urlRegex.exec(message)) {
-		messages.push(message.slice(0, result.index));                  // Add the part before the url
-		messages.push({url: result[0]});                                // Add the url
-		message = message.slice(result.index + result[0].length);       // Prepare to search after the url
+	for (var k = 0; k < messages.length; k++) {
+		// Replace if url
+		if (this.urlRegex.test(messages[k]))
+			messages[k] = { url: messages[k] };
 	}
 
-	// Add the last part that didnt contain any urls
-	messages.push(message);
-
-	// Run trough all the emotes
-	for (var eKey = 0; eKey < this.emotesOrder.length; eKey++) {
-		var emoteName = this.emotesOrder[eKey];
-		temp = [];
-
-		// Replace in all messages the current emotetext
-		for (var mKey = 0; mKey < messages.length; mKey++) {
-			// Don't replace if emote or url
-			if (messages[mKey].url || this.emotesHash[messages[mKey]]) {
-				temp.push(messages[mKey]);
-				continue;
-			}
-
-			// Take out all the emote text
-			var split = messages[mKey].split(emoteName);
-
-			// Add them to the temp list
-			for (var k = 0; k < split.length; k++) {
-				temp.push(split[k]);
-				temp.push(emoteName);
-			}
-
-			// Remove the last push
-			temp.pop();
-		}
-
-		messages = temp;
-	}
-
-	this.addMessageList(messageDom, messages);	
+	this.addMessageList(messageDom, messages);
 };
 
-// messages = ["a lit of messages", "unlimited", "with urls: ", {url: "http://wwww.google.com"}]
+// messages = ["a", "space", "splitted", "array", "with", "urls:", {url: "http://wwww.google.com"}]
+// Replaces emotes with image
 Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 	for (var k = 0; k < messages.length; k++) {
 		var emoteUrl = this.emotesHash[messages[k]];
 
 		if (emoteUrl) {
 			messageDom.appendChild(this.createEmote(messages[k], emoteUrl));
+			messageDom.appendChild(document.createTextNode(" "));
 			continue;
 		}
 
 		if (messages[k].url) {
-			var a = messageDom.appendChild(this.createUrl(messages[k].url));
+			messageDom.appendChild(this.createUrl(messages[k].url));
+			messageDom.appendChild(document.createTextNode(" "));
 			continue;
 		}
 
-		messageDom.appendChild(document.createTextNode(messages[k]));
+		messageDom.appendChild(document.createTextNode(messages[k] + " "));
 	}
 };
 
 Chat.prototype.createUrl = function createUrl (url) {
 	var a = document.createElement("a");
-	if (url.indexOf("://") == -1) {
-		url = "http://" + url;
-	}
-
-	a.href = url;
+	a.href = url.indexOf("://") == -1 ? "http://" + url : url;
 	a.target = "_blank";
 	a.appendChild(document.createTextNode(url));
 	return a;
