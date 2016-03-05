@@ -1,7 +1,4 @@
 function DrawTogether (container, settings) {
-	// Hardcoded values who should probably be refactored
-	this.KICKBAN_MIN_REP = 50;
-
 	// Normalize settings, set container
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
@@ -75,6 +72,10 @@ function DrawTogether (container, settings) {
 	setInterval(this.displayTip.bind(this), 5 * 60 * 1000);
 	setTimeout(this.autoMoveScreen.bind(this), 0);
 }
+
+// Hardcoded values who should probably be refactored to the server
+DrawTogether.prototype.KICKBAN_MIN_REP = 50;
+DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 
 DrawTogether.prototype.defaultSettings = {
 	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
@@ -254,9 +255,11 @@ DrawTogether.prototype.getMaxViewScorePlayer = function getMaxViewScorePlayer ()
 
 DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (name, position) {
 	this.userCtx.font = "12px monospace";
-	this.userCtx.strokeStyle = 'black';
     this.userCtx.lineWidth = 3;
+
+	this.userCtx.strokeStyle = 'black';
     this.userCtx.strokeText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
+
     this.userCtx.fillStyle = 'white';
     this.userCtx.fillText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
 };
@@ -382,9 +385,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 
 	this.network.on("gamestatus", function (status) {
 		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing. You have " + Math.round(status.timeLeft / 1000) + " seconds left.");
-		self.chat.addMessage("GAME", "The word contains some of the following letters: " + status.letters.join(", "));
+		self.chat.addMessage("GAME", "The word contains some of the following letters: " + status.letters.join(" "));
 
-		self.displayMessage("The word contains some of the following letters: " + status.letters.join(", "));
+		self.displayMessage("The word contains some of the following letters: " + status.letters.join(" "));
 
 		for (var k = 0; k < status.players.length; k++) {
 			for (var nk = 0; nk < self.playerList.length; nk++) {
@@ -397,10 +400,19 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		self.updatePlayerList();
 	});
 
-	this.network.on("gamewords", function (words) {
-		self.gui.prompt("It is your turn! Pick a word to draw.", words, function (word) {
+	this.network.on("words", function (words) {
+		var promptContainer = self.gui.prompt("It is your turn! Pick a word to draw. You have 10 seconds.", words, function (word) {
 			self.network.socket.emit("word", word);
 		});
+
+		setTimeout(function () {
+			if (promptContainer.parentNode)
+				promptContainer.parentNode.removeChild(promptContainer);
+		}, 10 * 1000);
+	});
+
+	this.network.on("gameword", function (word) {
+		self.displayMessage("Please draw the word " + word);
 	});
 
 	// chat events
@@ -587,6 +599,11 @@ DrawTogether.prototype.changeName = function changeName (name) {
 
 		localStorage.setItem("drawtogether-name", realname);
 	}.bind(this));
+};
+
+DrawTogether.prototype.changeNameDelayed = function () {
+	clearTimeout(this.changeNameTimeout);
+	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 150);
 };
 
 DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
@@ -967,7 +984,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint.background.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback, time) {
 		var image = new Image();
 		var time = time || 0;
-		time += 5000;
+		time += 5000 * Math.random() + 2500;
 
 		image.onload = function onChunkImageLoad (event) {
 			callback(image);
@@ -996,9 +1013,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0) {
-			if (!this.account.uKey && (event.drawing.size > 10 && typeof event.drawing.text == "undefined" || event.drawing.size > 20)) {
+			if (!(this.reputation > this.BIG_BRUSH_MIN_REP) && (event.drawing.size > 10 && typeof event.drawing.text == "undefined" || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
-					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account! Registering is free and easy. You don't even need to confirm your email!");
+					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 					this.lastBrushSizeWarning = Date.now();
 				}
 
@@ -1284,7 +1301,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 		}
 		
 		var close = formContainer.appendChild(document.createElement("div"));
-		close.appendChild(document.createTextNode("Close room window"));
+		close.appendChild(document.createTextNode("Close account window"));
 		close.className = "drawtogether-button drawtogether-close-button";
 		close.addEventListener("click", this.closeAccountWindow.bind(this));
 	}.bind(this));
@@ -1565,7 +1582,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
-	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
 	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word';
 	gameButton.addEventListener("click", function () {
@@ -1576,7 +1593,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		}.bind(this));
 		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-	}.bind(this));*/
+	}.bind(this));
 
 	selectWindow.appendChild(this.createFAQDom());
 
@@ -1721,12 +1738,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
-		action: function () {}
-	}, {
-		name: "name-button",
-		type: "button",
-		text: "Change name",
-		action: this.changeName.bind(this)
+		action: this.changeNameDelayed.bind(this)
 	}, {
 		name: "room-button",
 		type: "button",

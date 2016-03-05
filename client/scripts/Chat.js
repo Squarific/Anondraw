@@ -230,7 +230,7 @@ Chat.prototype.emotesHash = {
 	"twitchRaid": "images/emotes/twitchRaid.png"
 };
 
-Chat.prototype.urlRegex = /((https?|ftps?):\/\/)?[^\s]+(\.[^\s]+)/;
+Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
 
 Chat.prototype.addMessage = function addMessage (user, message) {
 	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);

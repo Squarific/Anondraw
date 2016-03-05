@@ -58,6 +58,8 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 			}.bind(this));
 		}
 	}
+
+	return promptContainer;
 };
 
 Gui.prototype.createFreePick = function createFreePick (question, callback) {
