@@ -543,6 +543,10 @@ input.paint-texttool {
     background: rgba(0, 0, 0, 0.05);
   }
 
+  .chat-message span {
+    margin-right:1em;
+  }
+
   .chat-message a {
     color:#2d455d;
   }

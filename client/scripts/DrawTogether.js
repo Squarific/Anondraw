@@ -1196,9 +1196,10 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var horizontal = false;
 	var vertical = false;
 
-	advancedOptions.addInfo("Tip:", "Press ESC to undo anything out of this menu.");
+	advancedOptions.addInfo("Tip 1:", "Press ESC to undo anything out of this menu.");
+	advancedOptions.addInfo("Tip 2:", "U can also use the keys mentioned between the ( and ).");
 
-	advancedOptions.addRange("Rotation (r)", -180, 180, 0, 1, function (value) {
+	advancedOptions.addRange("Rotation (e and r)", -180, 180, 0, 1, function (value) {
 		this.paint.setRotation(value);
 	}.bind(this));
 
@@ -1583,7 +1584,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
-	var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
 	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word';
 	gameButton.addEventListener("click", function () {
@@ -1594,7 +1595,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		}.bind(this));
 		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-	}.bind(this));
+	}.bind(this));*/
 
 	selectWindow.appendChild(this.createFAQDom());
 
