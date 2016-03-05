@@ -603,7 +603,7 @@ DrawTogether.prototype.changeName = function changeName (name) {
 
 DrawTogether.prototype.changeNameDelayed = function () {
 	clearTimeout(this.changeNameTimeout);
-	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 150);
+	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 750);
 };
 
 DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
@@ -853,6 +853,7 @@ DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (playe
 DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
+	playerDom.setAttribute("data-snap-ignore", "true");
 
 	playerDom.addEventListener("click", function (playerid, event) {
 		this.moveQueue.length = 0;

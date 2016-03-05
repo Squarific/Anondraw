@@ -16,9 +16,11 @@ function Chat (container, onmessage, userSettings) {
 		}
 	}.bind(this));
 	this.input.maxLength = 255;
+	this.input.setAttribute("data-snap-ignore", "true");
 
 	button = this.inputContainerDom.appendChild(document.createElement("div"));
 	button.classList.add("button-small");
+	button.setAttribute("data-snap-ignore", "true");
 
 	button.appendChild(document.createTextNode("Send"));
 	button.addEventListener("click", this.sendChat.bind(this));

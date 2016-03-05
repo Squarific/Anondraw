@@ -433,10 +433,10 @@ input.paint-texttool {
   width: 20rem;
   overflow: hidden;
   overflow-y: auto;
-  border-left: 0.2em solid #233445;
   border-bottom: 0.2em solid #799ABB;
-  background: #456789;
-  font-family:monospace;
+  background: #233445;
+  font-family: "Open Sans", sans-serif;
+  font-size: .8em;
 }
 
 .drawtogether-pl-title {
@@ -445,27 +445,28 @@ input.paint-texttool {
   color:#fff;
   font-size:1.2em;
   padding:.5em;
+  display: none;
 }
 
 .drawtogether-info-playerlist .drawtogether-player {
   display:inline-block;
   cursor:pointer;
   width:100%;
-  color:#fff;
+  color:#bdcddd;
   font-size:1em;
   padding-left:.8em;
   margin-bottom:.1em;
-  background:#456789;
+  background:#233445;
   transition-duration:.2s;
 }
 
 .drawtogether-info-playerlist  .drawtogether-player:hover {
-  background:#426283;
+  background:#293C50;
 }
 
 .drawtogether-player-button {
   display:inline-block;
-  background:rgb(39, 56, 73);
+  background:#233445;
   padding:.4em;
   margin-right:.2em;
   cursor:pointer;
@@ -493,27 +494,26 @@ input.paint-texttool {
   position:relative;
   margin:0.2em;
   border:0.2em solid #233445;
-  background:#799abb;
+  background:#2c4156;
   text-align:center;
 }
 
 .drawtogether-ink {
   color:white;
-  background:green;
+  background:#789170;
   font-size:1em;
-  height:1.8em;
-  line-height:1.8em;
+  padding:0.5em;
   white-space: nowrap;
 }
 
 .drawtogether-ink-low {
-  background:red;
+  background:#BA1D1D;
   color:white;
 }
 
 .drawtogether-ink-middle {
-  background:orange;
-  color:rgb(134, 36, 2);
+  background:white;
+  color:#BA651D;
 }
 
 /**
@@ -527,33 +527,35 @@ input.paint-texttool {
   width: 20rem;
   overflow: hidden;
   border-left: 0.2em solid #233445;
-  background: #B5C6D1; }
+  background: #E0E5E7;
+  font-family: "Open Sans", sans-serif;
+  font-size: 0.8em; }
   .drawtogether-chat-container .messagecontainer {
     height: calc(100% - 3rem);
     overflow-y: auto; 
 	overflow-x: hidden;}
   .drawtogether-chat-container .chat-message {
     padding: .5em;
-    font-family: monospace;
     font-size: 1.2em;
     color: rgb(37, 38, 43); 
     word-wrap:break-word;
+    margin: .8em;
+    background: rgba(0, 0, 0, 0.05);
   }
 
   .chat-message a {
     color:#2d455d;
   }
-    .drawtogether-chat-container .chat-message:not(:last-child) {
+    /*.drawtogether-chat-container .chat-message:not(:last-child) {
       border-bottom: 0.1em solid #799abb; }
     .drawtogether-chat-container .chat-message:nth-child(even) {
-      background-color: #C3CFD9; }
+      background-color: #C3CFD9; }*/
   .drawtogether-chat-container .inputcontainer {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3rem;
-    border-top: 1px solid #233445; }
+    height: 3rem; }
   .drawtogether-chat-container .drawtogheter-chat-input {
     position: absolute;
     top: 0;
