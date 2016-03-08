@@ -1,0 +1,113 @@
+.gui-window {
+  position: absolute;
+  left: 50px;
+  top: 50px;
+  z-index: 150;
+  background: #ddd;
+}
+
+.gui-window .titlecontainer {
+  display: block;
+  background-color: #456789;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: all-scroll;
+  cursor: move;
+  cursor: grabbing;
+  cursor: webkit-grab;
+  cursor: grab;
+  color: white;
+  text-align: center;
+  line-height:3em;
+}
+
+.titlecontainer .close {
+  display: block;
+  float: right;
+  background: #894545;
+  padding-left: 2em;
+  padding-right: 2em;
+  cursor:pointer;
+}
+
+.titlecontainer .close:hover {
+  background:#733A3A;
+}
+
+.welcome-window {
+  max-width:40em;
+}
+
+.welcome-window h2 {
+  color:#233445;
+}
+
+.welcome-window .content {
+  margin:1em;
+  background: #eee;
+  padding: 1em;
+  font-size: 1.1em;
+}
+
+.gui-prompt-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2em;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.gui-prompt-content {
+  padding:.8em;
+  display:inline-block;
+  background:white;
+  border-radius: .2em;
+}
+
+.gui-prompt-question {
+  display:inline-block;
+  margin-bottom:.2em;
+  padding: .4em;
+  margin: .4em;
+  margin-bottom: .8em;
+  font-size:1.2em;
+}
+
+.gui-prompt-content input {
+  width:100%;
+  width:calc(100% - 1em);
+  display:inline-block;
+  min-width:300px;
+  padding: .25em .5em;
+  height: 2.3rem;
+  line-height: 2.3rem;
+  margin: .5em;
+  border-radius: .2em;
+  background-color: #e6e6e6;
+}
+
+.gui-prompt-button {
+  padding: .5em;
+  border-bottom: 0.2em solid #233445;
+  background-color: #456789;
+  color: #fff;
+  cursor: pointer;
+  margin:.3em;
+  margin-left:.5em;
+  margin-right:.5em;
+  -webkit-transition-duration: 0.3s;
+  -moz-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: background-color;
+  -moz-transition-property: background-color;
+  transition-property: background-color;
+}
+
+.gui-prompt-button:hover {
+  background-color: #233445;
+}

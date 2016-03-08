@@ -87,3 +87,79 @@ Gui.prototype.createFreePick = function createFreePick (question, callback) {
 
 	return container;
 };
+
+Gui.prototype.makeDraggable = function makeDraggable (targetElement, handleElement) {
+	if (!handleElement) handleElement = targetElement;
+
+	var startPos = [];
+	var elementStartPos = [];
+	var dragging = false;
+
+	function handleStart () {
+		dragging = true;
+		startPos = [event.clientX || 0, event.clientY || 0];
+
+		if (event.changedTouches && event.changedTouches[0])
+			startPos = [event.changedTouches[0].clientX || 0,
+			            event.changedTouches[0].clientY || 0]
+
+		var boundingRect = targetElement.getBoundingClientRect();
+		elementStartPos = [boundingRect.left, boundingRect.top];
+
+		event.preventDefault();
+	}
+
+	function handleMove () {
+		if (dragging) {
+			targetElement.style.left = elementStartPos[0] - startPos[0] + (event.clientX || event.changedTouches[0].clientX) + "px";
+			targetElement.style.top = elementStartPos[1] - startPos[1] + (event.clientY || event.changedTouches[0].clientY) + "px";
+			event.preventDefault();
+		}
+	}
+
+	handleElement.addEventListener("mousedown", handleStart);
+	handleElement.addEventListener("touchstart", handleStart);
+
+	document.addEventListener("mousemove", handleMove);
+	document.addEventListener("touchmove", handleMove);
+
+	handleElement.addEventListener("mouseup", function (event) {
+		dragging = false;
+	});
+
+	handleElement.addEventListener("touchend", function (event) {
+		dragging = false;
+	});
+};
+
+/*
+	Default settings = {
+		title: "window",
+		close: true
+	}
+*/
+Gui.prototype.createWindow = function createWindow (settings) {
+	var windowContainer = this.container.appendChild(document.createElement("div"));
+	windowContainer.className = "gui-window";
+
+	var titleContainer = windowContainer.appendChild(document.createElement("div"));
+	titleContainer.className = "titlecontainer";
+
+	var title = titleContainer.appendChild(document.createElement("span"));
+	title.className = "title";
+	title.appendChild(document.createTextNode(settings.title || "window"));
+
+	if (typeof settings.close == "undefined" || settings.close) {
+		var close = titleContainer.appendChild(document.createElement("span"));
+		close.appendChild(document.createTextNode("X"))
+		close.className = "close";
+		close.addEventListener("click", function () {
+			if (windowContainer.parentNode)
+				windowContainer.parentNode.removeChild(windowContainer);
+		});
+	}
+
+	this.makeDraggable(windowContainer, titleContainer);
+
+	return windowContainer;
+};

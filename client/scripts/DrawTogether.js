@@ -10,11 +10,13 @@ function DrawTogether (container, settings) {
 	// Set default values untill we receive them from the server
 	this.playerList = [];
 	this.moveQueue = [];
-	this.ink = 2500;
+	this.ink = 0;
+	this.previousInk = Infinity;
 
-	this.lastInkWarning = Date.now();        // Last time we showed that we are out of ink
-	this.lastBrushSizeWarning = Date.now();  // Last time we showed the warning that our brush is too big
-	this.lastViewDeduction = Date.now();     // Time since we last deducted someones viewscore
+	this.lastInkWarning = 0;        // Last time we showed that we are out of ink
+	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
+	this.lastZoomWarning = 0;       // Last time we showed the zoom warning
+	this.lastViewDeduction = 0;     // Time since we last deducted someones viewscore
 
 	this.lastScreenMove = Date.now();    // Last time we moved the screen
 	this.lastScreenMoveStartPosition;    // Last start position
@@ -75,7 +77,10 @@ function DrawTogether (container, settings) {
 
 // Hardcoded values who should probably be refactored to the server
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
+
+// Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
+DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
 
 DrawTogether.prototype.defaultSettings = {
 	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
@@ -93,6 +98,10 @@ DrawTogether.prototype.defaultUserSettings = [{
 		value: false
 	}, {
 		title: "Show tips",
+		type: "boolean",
+		value: true
+	}, {
+		title: "Show welcome",
 		type: "boolean",
 		value: true
 	}
@@ -297,6 +306,10 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		self.paint.finalizeAll(amountToKeep);
 	});
 
+	this.network.on("clear", function () {
+		self.paint.clear();
+	});
+
 	this.network.on("drawing", function (data) {
 		var drawing = self.decodeDrawings([data.drawing])[0];
 		self.paint.addPublicDrawing(drawing);
@@ -385,9 +398,13 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 
 	this.network.on("gamestatus", function (status) {
 		self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is now drawing. You have " + Math.round(status.timeLeft / 1000) + " seconds left.");
-		self.chat.addMessage("GAME", "The word contains some of the following letters: " + status.letters.join(" "));
 
-		self.displayMessage("The word contains some of the following letters: " + status.letters.join(" "));
+		if (status.letters == 0) {
+			self.chat.addMessage("GAME", self.usernameFromSocketid(status.currentPlayer) + " is picking a word.");
+		} else {
+			self.chat.addMessage("GAME", "The word: " + Array(status.letters + 1).join("_ ") + "(" + status.letters + " letters)");
+			self.displayMessage("The word: " + Array(status.letters + 1).join("_ ") + "(" + status.letters + " letters)");
+		}
 
 		for (var k = 0; k < status.players.length; k++) {
 			for (var nk = 0; nk < self.playerList.length; nk++) {
@@ -412,7 +429,8 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	});
 
 	this.network.on("gameword", function (word) {
-		self.displayMessage("Please draw the word " + word);
+		self.displayMessage("You picked " + word);
+		self.chat.addMessage("GAME", "You picked " + word);
 	});
 
 	// chat events
@@ -522,8 +540,13 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 
-			if (room !== "PLEASE_WAIT")
-				this.removeLoading();
+			// If we are new and not in a private or a gameroom, show the welcome window
+			if (room.indexOf("private_") !== 0 && room.indexOf("game_") !== 0 && this.userSettings.getBoolean("Show welcome")) {
+				this.openWelcomeWindow();
+				this.userSettings.setBoolean("Show welcome", false, true);
+			}
+
+			this.removeLoading();
 		}
 	}.bind(this));
 
@@ -920,12 +943,15 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "1 year", "1 week", "1 day", "1 hour", "Cancel"], function (minutes) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
+		if (minutes == "10 year") minutes = 10 * 356 * 24 * 60;
 		if (minutes == "1 year") minutes = 356 * 24 * 60;
 		if (minutes == "1 week") minutes = 7 * 24 * 60;
 		if (minutes == "1 day") minutes = 24 * 60;
 		if (minutes == "1 hour") minutes = 60;
+		if (minutes == "5 minutes") minutes = 5;
+		if (minutes == "1 minute") minutes = 1;
 		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both", "Cancel"], function (type) {
 			if (type == "Cancel") return;
 			this.gui.prompt("What is the reason you want to ban him?", ["freepick", "Drawings swastikas", "Destroying drawings", "Being a dick in chat", "Spam", "Cancel"], function (reason) {
@@ -1013,8 +1039,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint.addEventListener("userdrawing", function (event) {
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.current_room.indexOf("private_") !== 0) {
-			if (!(this.reputation > this.BIG_BRUSH_MIN_REP) && (event.drawing.size > 10 && typeof event.drawing.text == "undefined" || event.drawing.size > 20)) {
+		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+			if (!(this.reputation > this.BIG_BRUSH_MIN_REP) &&
+			    ((event.drawing.size > 10 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
 					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 					this.lastBrushSizeWarning = Date.now();
@@ -1027,12 +1054,23 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			// When a drawing is made check if we have ink left
 			var usage = this.inkUsageFromDrawing(event.drawing);
 			if (this.ink < usage) {
-				if (Date.now() - this.lastInkWarning > 20000) {
-					this.chat.addMessage("Not enough ink! You will regain ink every 20 seconds.");
+				if (Date.now() - this.lastInkWarning > 5000) {
+					this.chat.addMessage("Not enough ink! You will regain ink every few seconds.");
 					this.chat.addMessage("Tip: Small brushes use less ink.");
 					this.chat.addMessage("Tip: logged in users receive more ink");
 					this.lastInkWarning = Date.now();
 				}
+				event.removeDrawing();
+				return;
+			}
+
+			// If we are logged out we aren't allowed to draw zoomed out
+			if (this.reputation < this.ZOOMED_OUT_MIN_REP && this.paint.public.zoom < 1) {
+				if (Date.now() - this.lastZoomWarning > 5000) {
+					this.chat.addMessage("Drawing while zoomed out this far is only allowed if you have more than " + this.ZOOMED_OUT_MIN_REP + " reputation.");
+				}
+				this.lastZoomWarning = Date.now();
+
 				event.removeDrawing();
 				return;
 			}
@@ -1077,7 +1115,17 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.current_room.indexOf("private_") !== 0) {
+		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+			if (!(this.reputation > this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 10) {
+				if (Date.now() - this.lastBrushSizeWarning > 5000) {
+					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
+					this.lastBrushSizeWarning = Date.now();
+				}
+
+				event.removePathPoint();
+				return;
+			}
+
 			// When a drawing is made check if we have ink left
 			var usage = this.inkUsageFromPath(event.point, this.lastPathPoint, this.lastPathSize);
 			if (this.ink < usage) {
@@ -1087,6 +1135,17 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 					this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
 					this.lastInkWarning = Date.now();
 				}
+				event.removePathPoint();
+				return;
+			}
+
+			// If we are logged out we aren't allowed to draw zoomed out
+			if (this.reputation < this.ZOOMED_OUT_MIN_REP && this.paint.public.zoom < 1) {
+				if (Date.now() - this.lastZoomWarning > 5000) {
+					this.chat.addMessage("Drawing while zoomed out this far is only allowed if you have more than " + this.ZOOMED_OUT_MIN_REP + " reputation.");
+					this.lastZoomWarning = Date.now();
+				}
+
 				event.removePathPoint();
 				return;
 			}
@@ -1141,7 +1200,7 @@ DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawi
 	if (typeof drawing.text == "string")
 		length *= drawing.text.length;
 
-	return Math.ceil(drawing.size * length / 100);
+	return Math.ceil(drawing.size * length);
 };
 
 DrawTogether.prototype.createRoomInformation = function createRoomInformation () {
@@ -1151,12 +1210,14 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 
 	var inkContainer = infoContainer.appendChild(document.createElement("div"));
 	inkContainer.className = "drawtogether-ink-container";
+	inkContainer.setAttribute("data-intro", "Here you can see how much ink you have left. Drawing uses ink and once you hit 0 you can no longer draw.");
 
 	this.inkDom = inkContainer.appendChild(document.createElement("div"));
 	this.inkDom.className = "drawtogether-ink";
 
 	this.playerListDom = infoContainer.appendChild(document.createElement("div"));
 	this.playerListDom.className = "drawtogether-info-playerlist";
+	this.playerListDom.setAttribute("data-intro", "Here is a list of people currently in the room. If you want to watch them you can click their name. The eye icon can be used as a stalker mode.");
 
 	var snapper = new Snap({
 		element: infoContainer,
@@ -1221,7 +1282,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		advancedOptions.setRangeValue("Rotation (r)", rotation, false);
 		advancedOptions.setBoolean("Flip horizontal (m)", event.scale[0] == -1, false);
 		advancedOptions.setBoolean("Flip vertical (k)", event.scale[1] == -1, false);
-	})
+	});
 
 	settingsContainer.appendChild(this.userSettings._panel);
 
@@ -1549,9 +1610,9 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	text.appendChild(document.createTextNode("Realtime in private or public chat rooms with an unlimited canvas. Choose with whom you want to draw:"));
 	text.className = "drawtogether-welcome-text-box";
 
-	var text = selectWindow.appendChild(document.createElement("div"));
-	text.appendChild(document.createTextNode("New feature: autocam and go to peoples position"));
-	text.className = "drawtogether-notification-text-box";
+	//var text = selectWindow.appendChild(document.createElement("div"));
+	//text.appendChild(document.createTextNode("New feature (march 2016): zoom tool, tiles now also fade in! And we got a new chat layout."));
+	//text.className = "drawtogether-notification-text-box";
 
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
 	buttonContainer.className = "drawtogether-buttoncontainer";
@@ -1575,18 +1636,18 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));
 
-	var privateButton = buttonContainer.appendChild(document.createElement("div"));
+	/*var privateButton = buttonContainer.appendChild(document.createElement("div"));
 	privateButton.className = "drawtogether-modeselect-button";
 	privateButton.innerHTML = '<img src="images/member.png"/><br/>Members only room';
 	privateButton.addEventListener("click", function () {
 		this.changeRoom("member_main");
 		ga("send", "event", "modeselector", "member");
 		this.selectWindow.style.display = "";
-	}.bind(this));
+	}.bind(this));*/
 
-	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
-	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word';
+	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word (NEW!)';
 	gameButton.addEventListener("click", function () {
 		this.gui.prompt("With whom would you like to play?", ["Join strangers", "Create private room", "Cancel"], function (whom) {
 			if (whom == "Cancel") this.openModeSelector();
@@ -1595,7 +1656,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		}.bind(this));
 		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-	}.bind(this));*/
+	}.bind(this));
 
 	selectWindow.appendChild(this.createFAQDom());
 
@@ -1652,6 +1713,43 @@ DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
 	return container;
 };
 
+DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
+	var welcomeWindow = this.gui.createWindow({ title: "Welcome!"});
+	welcomeWindow.classList.add("welcome-window");
+
+	var container = welcomeWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Hey you seem to be new!"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("First of all welcome on anondraw." +
+		"Anondraw is a website where artists of all skill levels come together to draw." +
+		"All drawings are allowed so that means this website might contain NSFW (18+) images." +
+		"If you do not feel comfortable with that, you should not join the public rooms."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Lastly we like to create, not destroy. Griefing will result in a ban of up to 10 years."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Regards,"));
+	p.appendChild(document.createElement("br"));
+	p.appendChild(document.createTextNode("Anondraw Team"));
+
+	var tutorial = container.appendChild(document.createElement("div"));
+	tutorial.appendChild(document.createTextNode("Tutorial"))
+	tutorial.className = "drawtogether-button";
+	tutorial.addEventListener("click", function () {
+		if (welcomeWindow.parentNode) welcomeWindow.parentNode.removeChild(welcomeWindow)
+		introJs()
+		.setOptions({ 'tooltipPosition': 'auto', 'showProgress': true })
+		.onexit(this.openWelcomeWindow.bind(this))
+		.oncomplete(this.openWelcomeWindow.bind(this))
+		.start();
+	}.bind(this));
+};
+
 DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	var faq = document.createElement("div");
 	faq.className = "drawtogether-faq";
@@ -1682,7 +1780,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
 	},*/ {
 		question: "What benefits does reputation give you?",
-		answer: "At 15 reputation, you can join the member only rooms and share an ip with other users without affecting your ink. \n" +
+		answer: "At " + this.ZOOMED_OUT_MIN_REP + " reputation, you are allowed to draw while zoomed out. \n" +
+		        "At " + this.BIG_BRUSH_MIN_REP + " reputation, you are allowed to use brush sizes bigger than 10. \n" +
+		        "At 15 reputation, you can join the member only rooms and share an ip with other users without affecting your ink. \n" +
 		        "At 30 reputation, you can give upvotes to other people. \n" +
 		        "At " + this.KICKBAN_MIN_REP + "+ reputation, you can kickban people for a certain amount of time when they misbehave. \n "
 	}, {
@@ -1726,36 +1826,54 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		value: "",
 		text: "Home",
 		title: "Go to home menu",
-		action: this.openModeSelector.bind(this)
+		action: this.openModeSelector.bind(this),
+		data: {
+			intro: "Use this to return to the FAQ and mode selection."
+		}
 	}, {
 		name: "toggle-view",
 		type: "button",
 		value: "",
 		text: "Auto Camera",
 		title: "Toggle the camera to follow where people are drawing.",
-		action: this.toggleFollow.bind(this)
+		action: this.toggleFollow.bind(this),
+		data: {
+			intro: "This button toggles auto view, in auto view mode the camera will switch between everyone who is drawing."
+		}
 	}, {
 		name: "name",
 		type: "text",
 		text: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
-		action: this.changeNameDelayed.bind(this)
+		action: this.changeNameDelayed.bind(this),
+		data: {
+			intro: "This is your current guest name. Change this to something you like!"
+		}
 	}, {
 		name: "room-button",
 		type: "button",
 		text: "Room",
-		action: this.openRoomWindow.bind(this)
+		action: this.openRoomWindow.bind(this),
+		data: {
+			intro: "Click here if you want to change the room."
+		}
 	}, {
 		name: "share-button",
 		type: "button",
 		text: "Share",
-		action: this.openShareWindow.bind(this)
+		action: this.openShareWindow.bind(this),
+		data: {
+			intro: "Made something nice? Use this to upload to imgur. Then you can share the imgur link to reddit if you want. Sharing it to reddit will also put it on the frontpage."
+		}
 	}, {
 		name: "settings",
 		type: "button",
 		text: "Settings",
-		action: this.openSettingsWindow.bind(this)
+		action: this.openSettingsWindow.bind(this),
+		data: {
+			intro: "In this window you can mute the chat, hide tips and open the advanced settings window where you can rotate and mirror the canvas."
+		}
 	}];
 
 	if (location.toString().indexOf("kongregate") == -1) {
@@ -1763,7 +1881,10 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 			name: "account",
 			type: "button",
 			text: "Account",
-			action: this.openAccountWindow.bind(this)
+			action: this.openAccountWindow.bind(this),
+			data: {
+				intro: "Creating an account gives you the option to earn reputation. Reputation gives certain benefits like bigger brushes, drawing while zoomed out, member room access, banning, ..."
+			}
 		});
 	}
 

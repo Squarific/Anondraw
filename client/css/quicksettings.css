@@ -18,7 +18,7 @@ body > .msettings_main {
 	background-color: #456789;
 	user-select: none;
 	-webkit-user-select: none;
-	cursor: pointer;
+	cursor: grab;
 	padding: 1em;
   color:white;
   text-align:center;

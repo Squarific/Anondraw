@@ -53,6 +53,7 @@
 			this._titleBar.className = "msettings_title_bar";
 
 			this._titleBar.addEventListener("mousedown", this._startDrag);
+			this._titleBar.addEventListener("touchstart", this._startDrag);
 			this._titleBar.addEventListener("dblclick", this._doubleClickTitle);
 
 			this._panel.appendChild(this._titleBar);
@@ -103,10 +104,12 @@
 		_startDrag: function(event) {
 			if(this._draggable) {
 				this._panel.style.zIndex = ++QuickSettings._topZ;
+				document.addEventListener("touchmove", this._drag);
 				document.addEventListener("mousemove", this._drag);
+				document.addEventListener("touchend", this._endDrag);
 				document.addEventListener("mouseup", this._endDrag);
-				this._startX = event.clientX;
-				this._startY = event.clientY;
+				this._startX = event.clientX || event.changedTouches[0].clientX;
+				this._startY = event.clientY || event.changedTouches[0].clientY;
 			}
 			event.preventDefault();
 		},
@@ -114,8 +117,8 @@
 		_drag: function(event) {
 			var x = parseInt(this._panel.style.left),
 				y = parseInt(this._panel.style.top),
-				mouseX = event.clientX,
-				mouseY = event.clientY;
+				mouseX = event.clientX || event.changedTouches[0].clientX,
+				mouseY = event.clientY || event.changedTouches[0].clientY;
 
 			this.setPosition(x + mouseX - this._startX, y + mouseY - this._startY);
 			this._startX = mouseX;
@@ -124,7 +127,9 @@
 		},
 
 		_endDrag: function(event) {
+			document.removeEventListener("touchmove", this._drag);
 			document.removeEventListener("mousemove", this._drag);
+			document.removeEventListener("touchend", this._endDrag);
 			document.removeEventListener("mouseup", this._endDrag);
 			event.preventDefault();
 		},

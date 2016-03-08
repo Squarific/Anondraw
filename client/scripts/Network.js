@@ -66,7 +66,9 @@ Network.prototype.joinGame = function joinGame (override, callback) {
 			}
 
 			// Change our room
-			this.socket.emit("changeroom", data.room, callback);
+			this.socket.emit("changeroom", data.room, function (err, drawings) {
+				callback(err, data.room, drawings);
+			});
 		}.bind(this));
 	}.bind(this));
 };
