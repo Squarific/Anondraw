@@ -1186,7 +1186,7 @@ DrawTogether.prototype.createMessage = function createMessage () {
 // (point1, point2, size) or (point1, undefined, size)
 DrawTogether.prototype.inkUsageFromPath = function inkUsageFromPath (point1, point2, size) {
 	var length = size + (point2 ? this.utils.distance(point1[0], point1[1], point2[0], point2[1]) : 0);
-	return Math.ceil(size * length / 100);
+	return Math.ceil(size * length / 25);
 };
 
 DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
@@ -1200,7 +1200,7 @@ DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawi
 	if (typeof drawing.text == "string")
 		length *= drawing.text.length;
 
-	return Math.ceil(drawing.size * length);
+	return Math.ceil(drawing.size * length / 25);
 };
 
 DrawTogether.prototype.createRoomInformation = function createRoomInformation () {
@@ -1645,7 +1645,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));*/
 
-	var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
 	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word (NEW!)';
 	gameButton.addEventListener("click", function () {
@@ -1656,7 +1656,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		}.bind(this));
 		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-	}.bind(this));
+	}.bind(this));*/
 
 	selectWindow.appendChild(this.createFAQDom());
 
@@ -1724,9 +1724,9 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 	title.appendChild(document.createTextNode("Hey you seem to be new!"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("First of all welcome on anondraw." +
-		"Anondraw is a website where artists of all skill levels come together to draw." +
-		"All drawings are allowed so that means this website might contain NSFW (18+) images." +
+	p.appendChild(document.createTextNode(
+		"Anondraw is a website where artists of all skill levels come together to draw. " +
+		"All drawings are allowed so that means this website might contain NSFW (18+) images. " +
 		"If you do not feel comfortable with that, you should not join the public rooms."));
 
 	var p = container.appendChild(document.createElement("p"));
@@ -1741,13 +1741,32 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 	tutorial.appendChild(document.createTextNode("Tutorial"))
 	tutorial.className = "drawtogether-button";
 	tutorial.addEventListener("click", function () {
-		if (welcomeWindow.parentNode) welcomeWindow.parentNode.removeChild(welcomeWindow)
+		if (welcomeWindow.parentNode) 
+			welcomeWindow.parentNode.removeChild(welcomeWindow);
+
 		introJs()
 		.setOptions({ 'tooltipPosition': 'auto', 'showProgress': true })
-		.onexit(this.openWelcomeWindow.bind(this))
-		.oncomplete(this.openWelcomeWindow.bind(this))
+		.onchange(function () {
+			ga("send", "event", "tutorial", "next");
+		})
+		.onexit(function () {
+			ga("send", "event", "tutorial", "exit");
+			this.openWelcomeWindow();
+		}.bind(this))
+		.oncomplete(function () {
+			ga("send", "event", "tutorial", "complete");
+			this.openWelcomeWindow();
+		}.bind(this))
 		.start();
 	}.bind(this));
+
+	var close = container.appendChild(document.createElement("div"));
+	close.appendChild(document.createTextNode("Close welcome window"))
+	close.className = "drawtogether-button drawtogether-close-button";
+	close.addEventListener("click", function () {
+		if (welcomeWindow.parentNode)
+			welcomeWindow.parentNode.removeChild(welcomeWindow);
+	});
 };
 
 DrawTogether.prototype.createFAQDom = function createFAQDom () {
