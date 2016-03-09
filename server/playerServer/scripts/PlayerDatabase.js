@@ -84,7 +84,7 @@ PlayerDatabase.prototype.login = function login (email, pass, callback) {
 };
 
 PlayerDatabase.prototype.register = function register (email, pass, callback) {
-	this.database.query("INSERT INTO users (email, pass) VALUES (?, ?)", [email, SHA256(pass).toString()], function (err, result) {
+	this.database.query("INSERT INTO users (email, pass, register_datetime) VALUES (?, ?, ?)", [email, SHA256(pass).toString(), new Date()], function (err, result) {
 		if (err) {
 			if (err.code == "ER_DUP_ENTRY") {
 				callback("Already registered!");
@@ -177,7 +177,7 @@ PlayerDatabase.prototype.setPermission = function setPermission (roomid, userid,
 
 PlayerDatabase.prototype.getPermissionList = function getPermissionList (roomid, callback) {
 	this.database.query(
-		"SELECT userid, level FROM permissions WHERE roomid = ?",
+		"SELECT last_username, last_online, level FROM permissions JOIN users ON id = userid WHERE roomid = ?",
 		[roomid],
 		callback
 	);

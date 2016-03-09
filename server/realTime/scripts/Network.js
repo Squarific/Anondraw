@@ -4,27 +4,65 @@ var GameRoom = require("./GameRoom.js");
 var room_regex = /^[a-z0-9_]+$/i;
 
 // User settings
-var MAX_USERS_IN_ROOM = 40;
+var MAX_USERS_IN_ROOM = 18;
 var MAX_USERS_IN_GAMEROOM = 12;
 
 // Reputation settings
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
-var UPVOTE_MIN_REP = 10;
-var MEMBER_MIN_REP = UPVOTE_MIN_REP * 2;
+
+var BIG_BRUSH_MIN_REP = 5;
+var MEMBER_MIN_REP = 15;
+var UPVOTE_MIN_REP = 30;
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
 // Ink settings
 var MAX_INK = 50000;
-var BASE_GEN = 2000;
-var PER_REP_GEN = 500;
+var MAX_GUEST_INK = 5000;
+
+var BASE_GEN = 300;
+var PER_REP_GEN = 1500;
 
 // When do we forget the sockets that left
-var FORGET_SOCKET_AFTER = 5 * 60 * 1000;
+var FORGET_SOCKET_AFTER = 18 * 60 * 1000;
 
 var SAME_IP_INK_MESSAGE = "You will not get any ink because someone else on your ip has already gotten some.";
+
+var PERMISSIONS = {
+	DRAWING: 1,
+	KICKBAN: 2,
+	CHANGE_PERMISSIONS: 4
+};
+
+function deepCopyWithoutFunctions (target, alreadyDone) {
+	var newObject = {};
+	if (!alreadyDone) alreadyDone = [];
+
+	if (typeof target !== "object" || target == null) return target;
+
+	if (target.length) {
+		newObject = [];
+		for (var k = 0; k < target.length; k++) {
+			newObject[k] = target[k];
+		}
+	}
+
+	for (var key in target) {
+		if (typeof target[key] == "function"){
+			newObject[key] = function () {};
+		// } else if (typeof target[key] == "object") {
+		// 	if (alreadyDone.indexOf(target[key]) !== -1) continue;
+		// 	alreadyDone.push(target[key]);
+		// 	newObject[key] = deepCopyWithoutFunctions(target[key], alreadyDone)
+		} else {
+			newObject[key] = target[key]
+		}
+	}
+
+	return newObject;
+}
 
 function Protocol (io, drawtogether, imgur, players, register) {
 	this.io = io;
@@ -41,8 +79,8 @@ function Protocol (io, drawtogether, imgur, players, register) {
 
 	this.gameRooms = {};
 	this.leftSocketIpAndId = {};  // socketid: {ip: "", uKey: "", rep: rep, time: Date.now()}
-	setInterval(this.inkTick.bind(this), 10 * 1000);
-	setInterval(this.clearLeftTick.bind(this, 120 * 1000));
+	setInterval(this.inkTick.bind(this), 5 * 1000);
+	setInterval(this.clearLeftTick.bind(this, 180 * 1000));
 }
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
@@ -71,7 +109,7 @@ Protocol.prototype.inkTick = function inkTick () {
 		if (socket.ink !== socket.ink) socket.ink = 0;
 
 		var extra = BASE_GEN + PER_REP_GEN * (socket.reputation || 0);
-		socket.ink = Math.min(socket.ink + extra, MAX_INK);
+		socket.ink = Math.min(socket.ink + extra, socket.uKey ? MAX_INK : MAX_GUEST_INK);
 
 		socket.emit("setink", socket.ink);
 		ips.push(socket.ip);
@@ -133,11 +171,34 @@ Protocol.prototype.socketFromId = function socketFromId (id) {
 	return this.leftSocketIpAndId[id];
 };
 
+Protocol.prototype.setPermission = function setPermission (fromsocket, socketid, level) {
+	var targetSocket = this.socketFromId(socketid);
+	if (!targetSocket) {
+		fromsocket.emit("chatmessage", "Could not set permission. Player was not online.");
+		return;
+	}
+
+	if (!targetSocket.uKey) {
+		fromsocket.emit("chatmessage", "You can only set the permission for logged in users. Ask the other person to create an account first.")
+		return;
+	}
+
+	this.players.request("setpermission", {
+		uKey: targetSocket.uKey,
+		roomid: socketid,
+		level: level
+	}, function (err, data) {
+
+	});
+};
+
 Protocol.prototype.bindIO = function bindIO () {
 	var protocol = this;
 
 	this.io.on("connection", function (socket) {
-		socket.ink = 500;
+		socket.ink = 50;
+		socket.emit("setink", socket.ink);
+
 		socket.permissions = {}; //{someid: true/false}
 		socket.ip = socket.client.conn.remoteAddress;
 
@@ -270,7 +331,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			console.log("Imgur upload request from " + socket.ip);
 
 			callback = (typeof callback == "function") ? callback : function () {};
-			protocol.imgur.uploadBase64(base64, "HwxiL5OnjizcwpD")
+			protocol.imgur.uploadBase64(base64, "L3ntm")
 			.then(function (json) {
 				console.log("[IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
 				callback({
@@ -294,7 +355,10 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 			
 			socket.uKey = uKey;
+			protocol.players.setName(socket.uKey, socket.name);
 			protocol.players.getReputationFromUKey(uKey, function (err, data) {
+				if (err) console.log("GET REP ERROR:", err);
+				console.log("[REPUTATION] ", socket.name, " has ", data.rep);
 				socket.reputation = data.rep;
 				socket.emit("setreputation", socket.reputation);
 				protocol.io.to(socket.room).emit("reputation", {
@@ -375,9 +439,9 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.io.to(socket.room).emit("reputation", {
 						id: targetSocket.id,
-						reputation: data.reputation
+						reputation: data.rep
 					});
-					targetSocket.reputation = data.reputation;
+					targetSocket.reputation = data.rep;
 					targetSocket.emit("setreputation", targetSocket.reputation);
 				});
 			});
@@ -397,7 +461,13 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (Date.now() - socket.lastNameChange < 5000) {
+			if (name == "CRYSTALSNOW") {
+				callback("You are banned, stop comming back.");
+				socket.disconnect();
+				return;
+			}
+
+			if (Date.now() - socket.lastNameChange < 1000) {
 				callback("You are changing your name too quickly!");
 				return;
 			}
@@ -426,7 +496,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			callback(null, name);
 
 			if (socket.uKey)
-				players.setName(socket.uKey, socket.name);
+				protocol.players.setName(socket.uKey, socket.name);
 		});
 
 		socket.on("drawing", function (drawing, callback) {
@@ -451,7 +521,10 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (socket.room.indexOf("user_") == 0 && !socket.permissions[parseInt(socket.room.slice(5))]) {
+			var permission = socket.permissions[parseInt(socket.room.slice(5))];
+			// If this is a user room and we don't have a permission set or we aren't allowed to draw
+			// Notify the client
+			if (socket.room.indexOf("user_") == 0 && (!permission || !(permission & PERMISSIONS.DRAWING) )) {
 				if (!socket.lastNoUserPermissionWarning || Date.now() - socket.lastNoUserPermissionWarning > 5000) {
 					protocol.informClient(socket, "You don't have permission for this room. Ask the owner to grant it to you.");
 					socket.lastNoUserPermissionWarning = Date.now();
@@ -465,8 +538,14 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (protocol.gameRooms[socket.room] && protocol.gameRooms[socket.room].currentPlayer !== socket) {
+				callback();
+				protocol.informClient(socket, "Not your turn!");
+				return;
+			}
+
 			// If we aren't in a private room, check our ink
-			if (socket.room.indexOf("private_") !== 0) {
+			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromDrawing(drawing);
 
 				if (socket.ink < usage) {
@@ -509,6 +588,8 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+
+
 			if (socket.room.indexOf("member_") == 0 && (!socket.reputation || socket.reputation < MEMBER_MIN_REP)) {
 				callback(false);
 				if (!socket.lastMemberOnlyWarning || Date.now() - socket.lastMemberOnlyWarning > 5000) {
@@ -518,7 +599,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (socket.room.indexOf("user_") == 0 && !socket.permissions[parseInt(socket.room.slice(5))]) {
+			if (socket.room.indexOf("user_") == 0 && (!permission || !(permission & PERMISSIONS.DRAWING) )) {
 				if (!socket.lastNoUserPermissionWarning || Date.now() - socket.lastNoUserPermissionWarning > 5000) {
 					protocol.informClient(socket, "You don't have permission for this room. Ask the owner to grant it to you.");
 					socket.lastNoUserPermissionWarning = Date.now();
@@ -532,8 +613,14 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			if (protocol.gameRooms[socket.room] && protocol.gameRooms[socket.room].currentPlayer !== socket) {
+				callback();
+				protocol.informClient(socket, "Not your turn!");
+				return;
+			}
+
 			// If we aren't in a private room, check our ink
-			if (socket.room.indexOf("private_") !== 0) {
+			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
 
 				// Always set latpathpoint even if we failed to draw
@@ -575,8 +662,16 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			if (room.indexOf("user_") == 0) {
-				protocol.players.getPermission(parseInt(socket.room.slice(5)), function (permission) {
-					socket.permissions[parseInt(socket.room.slice(5))] = permission;
+				protocol.players.request("getpermission", {
+					roomid: parseInt(socket.room.slice(5)),
+					uKey: socket.uKey
+				}, function (err, data) {
+					if (err || data.err)
+						console.log("Get permission error", data.err);
+					
+					if (data && typeof data.permission !== "undefined")
+						socket.permissions[parseInt(socket.room.slice(5))] = parseInt(data.permission);
+
 					handleRoom();
 				});
 			} else {
@@ -604,6 +699,17 @@ Protocol.prototype.bindIO = function bindIO () {
 					protocol.drawTogether.finalizePath(socket.room, socket.id);
 					socket.broadcast.to(socket.room).emit("ep", socket.id);
 
+					// If this is a GameRoom, create one for it
+					// or register our socket if it exists, we should also
+					// leave the previous one
+					if (protocol.gameRooms[socket.room]) {
+						protocol.gameRooms[socket.room].leave(socket);
+
+						if (protocol.gameRooms[socket.room].players.length == 0) {
+							delete protocol.gameRooms[socket.room];
+						}
+					}
+
 					// Join this room
 					socket.join(room);
 					socket.room = room;
@@ -612,6 +718,17 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.register.updatePlayerCount();
 					protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(room));
+
+					if (protocol.gameRooms[room])
+						protocol.gameRooms[room].join(socket);
+					else if (room.indexOf("game_") == 0 || room.indexOf("private_game_") == 0) {
+						protocol.gameRooms[room] = new GameRoom(room, protocol.io);
+						protocol.gameRooms[room].addEventListener("newgame", function (event) {
+							protocol.drawTogether.clear();
+							protocol.io.to(room).emit("clear");
+						});
+						protocol.gameRooms[room].join(socket);
+					}
 
 					protocol.drawTogether.getDrawings(room, function (err, drawings) {
 						callback(null, drawings);
@@ -690,17 +807,21 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 		});
 
+		socket.on("setpermission", function (socketid, level) {
+			protocol.setPermission(socket, socketId, level);
+		});
+
 		socket.on("disconnect", function () {
 			protocol.io.to(socket.room).emit("leave", { id: socket.id });
 
-			protocol.leftSocketIpAndId[socket.id] = {
-				ip: socket.ip,
-				reputation: socket.reputation,
-				uKey: socket.uKey,
-				time: Date.now(),
-				name: socket.name,
-				emit: function () {}
-			};
+			if (protocol.gameRooms[socket.room]) {
+				protocol.gameRooms[socket.room].leave(socket);
+				if (protocol.gameRooms[socket.room].players.length == 0) {
+					delete protocol.gameRooms[socket.room];
+				}
+			}
+
+			protocol.leftSocketIpAndId[socket.id] = deepCopyWithoutFunctions(socket);
 
 			setTimeout(protocol.register.updatePlayerCount.bind(protocol.register), 500);
 

@@ -100,17 +100,55 @@ var server = http.createServer(function (req, res) {
 	}
 
 	if (parsedUrl.pathname == "/setpermission") {
-		res.end();
+		return; // TODO: ONLY ALLOW ROOMID IF USER.ID == roomid or if got permission
+		var roomid = parsedUrl.query.roomid;
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+
+		if (user) {
+			res.end(JSON.stringify({err: "You are not logged in!"}));
+			return;
+		}
+
+		playerDatabase.setPermission(roomid, user.id, level, function (err) {
+			if (err) {
+				res.end(JSON.stringify({err: err}));
+				return;
+			}
+
+			res.end(JSON.stringify({success: "Permission set!"}));
+		});
 		return;
 	}
 
 	if (parsedUrl.pathname == "/getpermission") {
-		res.end();
+		var uKey = parsedUrl.query.uKey;
+		var roomid = parsedUrl.query.roomid;
+		var user = sessions.getUser("uKey", uKey);
+
+		if (user) {
+			res.end(JSON.stringify({err: "User not logged in!"}));
+			return;
+		}
+
+		playerDatabase.getPermission(roomid, user.id, function (err, level) {
+			res.end(JSON.stringify({
+				err: err,
+				level: level
+			}));
+		});
 		return;
 	}
 
 	if (parsedUrl.pathname == "/getpermissionlist") {
-		res.end();
+		var roomid = parsedUrl.query.roomid;
+		
+		playerDatabase.getPermissionList(roomid, function (err, list) {
+			res.end(JSON.stringify({
+				err: err,
+				list: list
+			}));
+		});
 		return;
 	}
 
@@ -124,6 +162,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
+		console.log("[SET NAME]", user.id, name);
 		playerDatabase.setName(user.id, name);
 		res.end('{"success": "done"}');
 		return;

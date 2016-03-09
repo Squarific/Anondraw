@@ -406,11 +406,11 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 			self.displayMessage("The word: " + Array(status.letters + 1).join("_ ") + "(" + status.letters + " letters)");
 		}
 
-		for (var k = 0; k < status.players.length; k++) {
-			for (var nk = 0; nk < self.playerList.length; nk++) {
-				if (self.playerList[nk].id == status.players[k].id) {
-					self.playerList[nk].gamescore = status.players[k].score;
-				}
+		for (var k = 0; k < self.playerList.length; k++) {
+			if (self.playerList[k].id == status.currentPlayer) {
+				self.playerList[k].currentPlayer = true;
+			} else {
+				self.playerList[k].currentPlayer = false;
 			}
 		}
 
@@ -431,6 +431,11 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("gameword", function (word) {
 		self.displayMessage("You picked " + word);
 		self.chat.addMessage("GAME", "You picked " + word);
+		self.weAreCurrentPlayer = true;
+	});
+
+	this.network.on("endturn", function () {
+		self.weAreCurrentPlayer = false;
 	});
 
 	// chat events
@@ -875,7 +880,7 @@ DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (playe
 
 DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	var playerDom = document.createElement("div");
-	playerDom.className = "drawtogether-player";
+	playerDom.className = "drawtogether-player " + (player.currentPlayer ? "currentplayer" : "");
 	playerDom.setAttribute("data-snap-ignore", "true");
 
 	playerDom.addEventListener("click", function (playerid, event) {
@@ -925,7 +930,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	var nameText = document.createElement("span");
 	nameText.className = "drawtogether-player-name";
 
-	var rep = "", score = "";
+	var rep = "", score = "", drawing = "";
 	if (typeof player.reputation !== "undefined") {
 		var rep = " (" + player.reputation + " R)";
 	}
@@ -934,7 +939,11 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 		score = " [" + player.gamescore + " Points]";
 	}
 
-	nameText.appendChild(document.createTextNode(player.name + rep + score))
+	if (player.currentPlayer) {
+		drawing = " | DRAWING"
+	}
+
+	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
@@ -1037,6 +1046,14 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this);
 
 	this.paint.addEventListener("userdrawing", function (event) {
+		if ((this.current_room.indexOf("game_") === 0 ||
+		    this.current_room.indexOf("private_game_") === 0) &&
+		    !this.weAreCurrentPlayer) {
+			this.displayMessage("Not your turn!");
+			event.removeDrawing();
+			return;
+		}
+
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
@@ -1103,12 +1120,10 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this));
 
 	this.paint.addEventListener("userpathpoint", function (event) {
-		if (!this.account.uKey && this.lastPathSize > 10) {
-			if (Date.now() - this.lastBrushSizeWarning > 5000) {
-				this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account! Registering is free and easy. You don't even need to confirm your email!");
-				this.lastBrushSizeWarning = Date.now();
-			}
-
+		if ((this.current_room.indexOf("game_") === 0 ||
+		    this.current_room.indexOf("private_game_") === 0) &&
+		    !this.weAreCurrentPlayer) {
+			this.displayMessage("Not your turn!");
 			event.removePathPoint();
 			return;
 		}
@@ -1645,7 +1660,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));*/
 
-	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
 	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word (NEW!)';
 	gameButton.addEventListener("click", function () {
@@ -1656,7 +1671,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		}.bind(this));
 		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-	}.bind(this));*/
+	}.bind(this));
 
 	selectWindow.appendChild(this.createFAQDom());
 

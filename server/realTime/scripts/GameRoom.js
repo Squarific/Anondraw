@@ -1,5 +1,8 @@
 var words = require("./words.js");
-var TIME_PER_WORD = 90 * 1000;
+
+var TIME_PER_WORD = 90 * 1000; // How long can we draw
+var TIME_TO_PICK = 15 * 1000; // How long we can pick
+var WORD_PICK_COUNT = 3; // Amount of words we can pick from
 
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex ;
@@ -28,17 +31,19 @@ function GameRoom (name, io) {
 	this.io = io;
 	this.name = name;
 	this.players = [];
+	this.boundword = this.assignWord.bind(this);
 }
 
 GameRoom.prototype.join = function join (socket) {
 	this.players.push(socket);
 	socket.gamescore = 0;
+	socket.on("word", this.boundword);
 
 	if (!this.currentPlayer) {
 		this.nextGame();
 	} else {
 		this.io.to(this.name).emit("gamestatus", this.getStatus());
-	}	
+	}
 };
 
 GameRoom.prototype.leave = function (socket) {
@@ -49,6 +54,8 @@ GameRoom.prototype.leave = function (socket) {
 	if (this.currentPlayer == socket) {
 		this.nextGame();
 	}
+
+	socket.removeListener("word", this.boundword);
 };
 
 GameRoom.prototype.chatmessage = function chatmessage (socket, message) {
@@ -58,11 +65,11 @@ GameRoom.prototype.chatmessage = function chatmessage (socket, message) {
 		// Word has been guessed, get a new word and assign next player
 		this.io.to(socket.room).emit("chatmessage", {
 			user: "GAME",
-			message: "The word " + this.currentWord + " has been guessed by " + socket.username
+			message: "The word " + this.currentWord + " has been guessed by " + socket.name
 		});
 
-		socket.gamescore++;
-		this.currentPlayer.gamescore++;
+		socket.gamescore += 5;
+		this.currentPlayer.gamescore += 2;
 
 		this.nextGame(true);
 	}
@@ -77,14 +84,19 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 		return;
 	}
 
+	if (!this.currentWord && this.currentPlayer) {
+		this.io.to(this.name).emit("chatmessage", {
+			user: "GAME",
+			message: this.currentPlayer.name + " did not pick a word."
+		});	
+	}
+
 	// Was the previous game succesful?
-	if (!guessed && this.currentPlayer) {
+	if (!guessed && this.currentPlayer && this.currentWord) {
 		this.io.to(this.name).emit("chatmessage", {
 			user: "GAME",
 			message: "The word " + this.currentWord + " has not been guessed!"
-		});
-
-		
+		});		
 	}
 
 	if (!guessed && this.currentPlayer && !this.currentPlayerDrew) {
@@ -96,20 +108,22 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 
 			this.io.to(this.name).emit("chatmessage", {
 				user: "GAME",
-				message: this.currentPlayer.username + " didn't draw again. He got kicked!"
+				message: this.currentPlayer.name + " didn't draw again. He got kicked!"
 			});
 
 			this.currentPlayer.disconnect();
 		} else {
 			this.io.to(this.name).emit("chatmessage", {
 				user: "GAME",
-				message: this.currentPlayer.username + " didn't draw. Next time he will be kicked!"
+				message: this.currentPlayer.name + " didn't draw. Next time he will be kicked!"
 			});
 			this.currentPlayer.hasNotDrawn = true;
 		}
 	} else {
 		if (this.currentPlayer) delete this.currentPlayer.hasNotDrawn;
 	}
+
+	if (this.currentPlayer) this.currentPlayer.emit("endturn");
 
 	// Assign new drawer
 	var newAssigned = false;
@@ -128,34 +142,49 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 	}
 
 	// The new play has not drawn yet
-	this.currentPlayerDrew = false;
+	// CURRENTLY REMOVED
+	this.currentPlayerDrew = true;
+
+	var sendWords = [];
+	for (var k = 0; k < WORD_PICK_COUNT; k++)
+		sendWords.push(words[Math.floor(Math.random() * words.length)]);
+
+	this.currentPlayer.emit("words", sendWords);
+	this.sendWords = sendWords;
+	this.waitForWordsTimeout = setTimeout(this.forceWord.bind(this), TIME_TO_PICK);
+	this.dispatchEvent({
+		type: "newgame"
+	});
+};
+
+GameRoom.prototype.assignWord = function assignWord (word) {
+	clearTimeout(this.waitForWordsTimeout);
+
+	if (this.sendWords.indexOf(word) === -1) {
+		console.log("[CHEATER] ", this.currentPlayer.ip, this.sendWords, word);
+		this.nextGame();
+		this.io.to(this.currentPlayer.room).emit("chatmessage", {user: "GAME", message: this.currentPlayer.name + " cheated!"});
+		return;
+	}
 
 	// Assign new word
-	this.currentWord = words[Math.floor(Math.random() * words.length)];
-	this.letters = [];
-
-	// Add the letters of the current word
-	for (var k = 0; k < this.currentWord.length; k++) {
-		this.letters.push(this.currentWord[k]);
-	}
-
-	// Add 6 random letters
-	for (var k = 0; k < 6; k++) {
-		var random = Math.floor(Math.random() * 26);
-		this.letters.push((10 + random).toString(36));
-	}
-
-	shuffle(this.letters);
+	this.currentWord = word;
 
 	// Arrange the time stuff
 	this.gameTimeout = setTimeout(this.nextGame.bind(this), TIME_PER_WORD);
 	this.endTime = Date.now() + TIME_PER_WORD;
 
-	console.log("[GAME][" + this.name + "] Current player (" + this.currentPlayer.username + ") current word '" + this.currentWord + "' playercount " + this.players.length);
+	console.log("[GAME][" + this.name + "] Current player (" + this.currentPlayer.name + ") current word '" + this.currentWord + "' playercount " + this.players.length);
 
 	// Send the current state
 	this.io.to(this.currentPlayer.room).emit("gamestatus", this.getStatus());
 	this.currentPlayer.emit("gameword", this.currentWord);
+};
+
+GameRoom.prototype.forceWord = function forceWord () {
+	if (!this.currentWord) {
+		this.nextGame()
+	}
 };
 
 GameRoom.prototype.addedDrawing = function addedDrawing (socket) {
@@ -165,20 +194,124 @@ GameRoom.prototype.addedDrawing = function addedDrawing (socket) {
 };
 
 GameRoom.prototype.getStatus = function getStatus () {
-	var players = [];
-	for (var k = 0; k < this.players.length; k++) {
-		players.push({
-			id: this.players[k].id,
-			score: this.players[k].gamescore
-		});
-	}
-
 	return {
 		currentPlayer: this.currentPlayer.id,
-		players: players,
-		letters: this.letters,
+		letters: this.currentWord ? this.currentWord.length : 0,
 		timeLeft: this.endTime - Date.now()
 	};
 };
+
+/**
+ * Event dispatcher
+ * License mit
+ * https://github.com/mrdoob/eventdispatcher.js
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+var EventDispatcher = function () {}
+
+EventDispatcher.prototype = {
+
+	constructor: EventDispatcher,
+
+	apply: function ( object ) {
+
+		object.addEventListener = EventDispatcher.prototype.addEventListener;
+		object.hasEventListener = EventDispatcher.prototype.hasEventListener;
+		object.removeEventListener = EventDispatcher.prototype.removeEventListener;
+		object.dispatchEvent = EventDispatcher.prototype.dispatchEvent;
+
+	},
+
+	addEventListener: function ( type, listener ) {
+
+		if ( this._listeners === undefined ) this._listeners = {};
+
+		var listeners = this._listeners;
+
+		if ( listeners[ type ] === undefined ) {
+
+			listeners[ type ] = [];
+
+		}
+
+		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+
+			listeners[ type ].push( listener );
+
+		}
+
+	},
+
+	hasEventListener: function ( type, listener ) {
+
+		if ( this._listeners === undefined ) return false;
+
+		var listeners = this._listeners;
+
+		if ( listeners[ type ] !== undefined && listeners[ type ].indexOf( listener ) !== - 1 ) {
+
+			return true;
+
+		}
+
+		return false;
+
+	},
+
+	removeEventListener: function ( type, listener ) {
+
+		if ( this._listeners === undefined ) return;
+
+		var listeners = this._listeners;
+		var listenerArray = listeners[ type ];
+
+		if ( listenerArray !== undefined ) {
+
+			var index = listenerArray.indexOf( listener );
+
+			if ( index !== - 1 ) {
+
+				listenerArray.splice( index, 1 );
+
+			}
+
+		}
+
+	},
+
+	dispatchEvent: function ( event ) {
+			
+		if ( this._listeners === undefined ) return;
+
+		var listeners = this._listeners;
+		var listenerArray = listeners[ event.type ];
+
+		if ( listenerArray !== undefined ) {
+
+			event.target = this;
+
+			var array = [];
+			var length = listenerArray.length;
+
+			for ( var i = 0; i < length; i ++ ) {
+
+				array[ i ] = listenerArray[ i ];
+
+			}
+
+			for ( var i = 0; i < length; i ++ ) {
+
+				array[ i ].call( this, event );
+
+			}
+
+		}
+
+	}
+
+};
+
+EventDispatcher.prototype.apply(GameRoom.prototype);
 
 module.exports = GameRoom;

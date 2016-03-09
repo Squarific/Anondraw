@@ -44,11 +44,23 @@ TiledCanvas.prototype.drawDrawings = function drawDrawings (drawings, callback) 
 };
 
 TiledCanvas.prototype.drawDrawing = function drawDrawing (decodedDrawing, callback) {
+    if (!decodedDrawing) {
+        callback();
+        return;
+    }
+    
     this.drawFunctions[decodedDrawing.type](this.context, decodedDrawing, this, callback);
 };
 
 TiledCanvas.prototype.drawFunctions = {
     brush: function (context, drawing, tiledCanvas, callback) {
+        if (typeof drawing.x !== "number" ||
+            typeof drawing.y !== "number" ||
+            typeof drawing.size !== "number") {
+            callback();
+            return;
+        }
+
         context.beginPath();
         context.arc(drawing.x, drawing.y, drawing.size, 0, 2 * Math.PI, true);
         context.fillStyle = drawing.color;
@@ -60,6 +72,13 @@ TiledCanvas.prototype.drawFunctions = {
         }
     },
     block: function (context, drawing, tiledCanvas, callback) {
+        if (typeof drawing.x !== "number" ||
+            typeof drawing.y !== "number" ||
+            typeof drawing.size !== "number") {
+            callback();
+            return;
+        }
+
         context.fillStyle = drawing.color;
         context.fillRect(drawing.x, drawing.y, drawing.size, drawing.size);
 
@@ -68,13 +87,22 @@ TiledCanvas.prototype.drawFunctions = {
             tiledCanvas.executeNoRedraw(callback);
         }
     },
-    line: function (context, drawing, tiledCanvas, callback) {
+    line: function (context, drawing, tiledCanvas, callback) {        
+        if (typeof drawing.x !== "number" ||
+            typeof drawing.y !== "number" ||
+            typeof drawing.x1 !== "number" ||
+            typeof drawing.y1 !== "number" ||
+            typeof drawing.size !== "number") {
+            callback();
+            return;
+        }
+
         context.beginPath();
 
         context.moveTo(drawing.x, drawing.y);
         context.lineTo(drawing.x1, drawing.y1);
         
-        context.strokeStyle = drawing.color;
+        context.strokeStyle = drawing.color.toRgbString();
         context.lineWidth = drawing.size;
 
         context.lineCap = "round";
@@ -87,6 +115,11 @@ TiledCanvas.prototype.drawFunctions = {
         }
     },
     path: function (ctx, path, tiledCanvas, callback) {
+        if (typeof path.size !== "number") {
+            callback();
+            return;
+        }
+
         if (!path.points || path.points.length < 2) {
             callback();
             return;
@@ -99,10 +132,19 @@ TiledCanvas.prototype.drawFunctions = {
 
         // Start on the first point
         ctx.beginPath();
+        if (typeof path.points[0][0] !== "number" || typeof path.points[0][1] !== "number") {
+            callback();
+            return;
+        }
+
         ctx.moveTo(path.points[0][0], path.points[0][1]);
 
         // Connect a line between all points
         for (var pointId = 1; pointId < path.points.length; pointId++) {
+            if (typeof path.points[pointId][0] !== "number" ||
+                typeof path.points[pointId][1] !== "number")
+                continue;
+
             ctx.lineTo(path.points[pointId][0], path.points[pointId][1]);
 
             minX = Math.min(path.points[pointId][0], minX);
@@ -122,6 +164,12 @@ TiledCanvas.prototype.drawFunctions = {
         tiledCanvas.executeNoRedraw(callback);
     },
     text: function (ctx, drawing, tiledCanvas, callback) {
+        if (typeof drawing.size !== "number" ||
+            typeof drawing.x !== "number" ||
+            typeof drawing.y !== "number") {
+            callback();
+            return;
+        }
         ctx.font = drawing.size + "px Verdana, Geneva, sans-serif";
         ctx.fillStyle = drawing.color.toRgbString();
 
@@ -290,7 +338,13 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
     this.chunks[chunkX] = this.chunks[chunkX] || {};
     this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
 
-    if (image) this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
+    if (image) {
+        try {
+            this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
+        } catch (e) {
+            console.log(chunkX, chunkY, "Failed to draw.");
+        }
+    }
 
     // Run all callbacks
     var callbackList = this.requestChunkCallbackList[chunkX][chunkY];

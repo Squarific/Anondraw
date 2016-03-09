@@ -452,10 +452,14 @@ input.paint-texttool {
   width:100%;
   color:#bdcddd;
   font-size:1em;
-  padding-left:.8em;
+  padding:.8em;
   margin-bottom:.1em;
   background:#233445;
   transition-duration:.2s;
+}
+
+.drawtogether-info-playerlist .currentplayer {
+  background:#1A2632;
 }
 
 .drawtogether-info-playerlist  .drawtogether-player:hover {
@@ -510,8 +514,8 @@ input.paint-texttool {
 }
 
 .drawtogether-ink-middle {
-  background:white;
-  color:#BA651D;
+  background:#BA651D;
+  color:white;
 }
 
 /**

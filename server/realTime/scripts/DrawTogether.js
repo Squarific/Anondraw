@@ -13,10 +13,19 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	this.drawings[room] = this.drawings[room] || [];
 	this.drawings[room].currentParts = this.drawings[room].currentParts || 0;
 	this.drawings[room].push(drawing);
+
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
 
-	if (this.drawings[room].currentParts > CACHE_LENGTH && this.drawings[room].length > CACHE_IGNORE && !this.drawings[room].sending) {
+	// If we have enough drawings and they are long enough
+	// and if we are not yet sending anything and this is not a gameroom
+	// then we will sync the drawings with the background server
+	if (this.drawings[room].currentParts > CACHE_LENGTH &&
+	    this.drawings[room].length > CACHE_IGNORE &&
+	    !this.drawings[room].sending &&
+	    !room.indexOf("game_") == 0 &&
+	    !room.indexOf("private_game_") == 0) {
+
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
 		this.drawings[room].sendLength = this.drawings[room].length - CACHE_IGNORE;
@@ -42,6 +51,16 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	}
 
 	callback();
+};
+
+DrawTogether.prototype.clear = function clear (room) {
+	if (!room) {
+		this.drawings = {};
+		this.paths = {};
+	} else {
+		delete this.drawings[room];
+		delete this.paths[room];
+	}
 };
 
 DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all) {
@@ -117,14 +136,14 @@ DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawi
 	if (typeof drawing.x1 == "number")
 		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1) * 2;
 
-	return Math.ceil(drawing.size * length / 100);
+	return Math.ceil(drawing.size * length / 25);
 };
 
 // Returns the inkusage for a pathpoint
 // (point1, point2, size) or (point1, undefined, size)
 DrawTogether.prototype.inkUsageFromPath = function inkUsageFromPath (point1, point2, size) {
 	var length = size + (point2 ? this.utils.distance(point1[0], point1[1], point2[0], point2[1]) : 0);
-	return Math.ceil(size * length / 100);
+	return Math.ceil(size * length / 25);
 };
 
 DrawTogether.prototype.utils = {

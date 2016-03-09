@@ -44,21 +44,21 @@ Players.prototype.getReputationFromUKey = function getReputationFromUKey (uKey, 
 };
 
 Players.prototype.giveReputation = function giveReputation (fromUkey, toUkey, callback) {
-	this.requet("givereputation", {
+	this.request("givereputation", {
 		uKey: fromUkey,
 		uKeyTo: toUkey
 	}, callback);
 };
 
-Player.prototype.setName = function setName (uKey, name, callback) {
+Players.prototype.setName = function setName (uKey, name, callback) {
 	this.request("setname", {
 		uKey: uKey,
 		name: name
 	}, callback);
 };
 
-Player.prototype.request = function request (method, urlArguments, callback) {
-	typeof callback !== "function" && callback = function () {};
+Players.prototype.request = function request (method, urlArguments, callback) {
+	if (typeof callback !== "function") callback = function () {};
 	
 	var req = http.request({
 		hostname: this.server,
@@ -66,15 +66,10 @@ Player.prototype.request = function request (method, urlArguments, callback) {
 		method: "GET",
 		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments)
 	}, function (res) {
-		var data = "";
 		res.on("data", function (chunk) {
-			data += chunk;
-		});
-
-		res.on("done", function () {
-			var parsed = JSON.parse(data);
+			var parsed = JSON.parse(chunk);
 			callback(parsed.error, parsed);
-		})
+		});
 	});
 
 	req.on("error", function (e) {

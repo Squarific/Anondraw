@@ -180,8 +180,6 @@ Servers.prototype.rebalance = function rebalance () {
 	var least = this.getLeastLoad();
 	var most = this.getMostLoad();
 
-	console.log("Checking balance!");
-
 	// Not enough servers
 	if (!least || !most || least == most) return;
 

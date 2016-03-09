@@ -73,7 +73,9 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 				}
 
 				if (err) {
+					console.log("Chunk error:", err, x, y);
 					res.writeHead(502);
+					res.end();
 					return;
 				}
 

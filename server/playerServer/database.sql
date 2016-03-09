@@ -9,6 +9,14 @@ CREATE TABLE IF NOT EXISTS users (
 ALTER TABLE users ADD COLUMN last_username VARCHAR(32);
 ALTER TABLE users ADD COLUMN bio TEXT;
 ALTER TABLE users ADD COLUMN last_online DATETIME;
+ALTER TABLE users ADD COLUMN register_datetime DATETIME;
+
+CREATE TABLE IF NOT EXISTS premium (
+    userid INT UNSIGNED,
+    startdate DATETIME,
+    enddate DATETIME,
+    level INT
+);
 
 CREATE TABLE IF NOT EXISTS permissions (
     roomid INT UNSIGNED,
