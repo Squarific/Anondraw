@@ -8,3 +8,6 @@ node_modules
 # Passwords
 *_password.js
 *_private.sql
+
+# Generated files
+*.css

@@ -1,0 +1,23 @@
+{
+  "name": "client",
+  "private": "true",
+  "dependencies": {},
+  "devDependencies": {
+    "node-sass": "^3.4.2"
+  },
+  "scripts": {
+    "build": "npm run build-styles",
+    "build-styles": "node-sass --output-style compressed css/style.scss styles.min.css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Squarific/Anondraw.git"
+  },
+  "author": "Filip Smets <alemaaltevinden@gmail.com>",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/Squarific/Anondraw/issues"
+  },
+  "homepage": "http://www.anondraw.com"
+}
