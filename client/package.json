@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "npm run build-styles",
-    "build-styles": "node-sass --output-style compressed css/style.scss styles.min.css",
+    "build-styles": "node-sass --output-style compressed css/style.scss DrawTogether.min.css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
