@@ -1,0 +1,143 @@
+/**
+*     All windows
+*/
+
+.drawtogether-window {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2em;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.9);
+    overflow-y: auto;
+    z-index: 200;
+}
+
+.drawtogether-button {
+    padding: .5em;
+    border-bottom: 0.2em solid #233445;
+    background-color: #456789;
+    color: #fff;
+    cursor: pointer;
+    margin: .3em;
+    margin-left: .5em;
+    margin-right: .5em;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-property: background-color;
+    -moz-transition-property: background-color;
+    transition-property: background-color;
+    &:hover {
+        background-color: #233445;
+    }
+}
+
+/**
+* Settings window
+*/
+
+.drawtogether-settingswindow-container {
+    padding: .4em;
+    display: inline-block;
+    background: #fff;
+}
+
+/**
+* RoomWindow
+*/
+
+.drawtogether-publicroomscontainer {
+    max-width: 85em;
+    text-align: left;
+}
+
+.drawtogether-roomwindow-content {
+    padding: .4em;
+    display: inline-block;
+    background: #fff;
+}
+
+.drawtogether-room-text {
+    font-size: 2em;
+    font-weight: 800;
+    text-align: left;
+    padding: .25em .5em;
+}
+
+.drawtogether-roomwindow {
+    input {
+        display: inline-block;
+        min-width: 300px;
+        padding: .25em .5em;
+        height: 2.3rem;
+        line-height: 2.3rem;
+        margin: .5em;
+        border-radius: .2em;
+        background-color: #e6e6e6;
+    }
+    .drawtogether-button {
+        display: inline-block;
+    }
+    .drawtogether-close-button, .drawtogether-room-button, .create-private-room {
+        display: block;
+    }
+}
+
+.drawtogether-button.drawtogether-room-button {
+    display: inline-block;
+    min-width: 20em;
+}
+
+/**
+* Account window
+*/
+
+.drawtogether-accountwindow input {
+    display: block;
+    min-width: 300px;
+    width: calc(100% - 1em);
+    padding: .25em .5em;
+    height: 2.3rem;
+    line-height: 2.3rem;
+    margin: .5em;
+    border-radius: .2em;
+    background-color: #e6e6e6;
+}
+
+.drawtogether-account-formcontainer {
+    display: inline-block;
+    padding: .5em;
+    background: #fff;
+    border-radius: .2em;
+}
+
+.drawtogether-error {
+    background: #b95555;
+    color: #fff;
+    border: #9b4545 .2em solid;
+    padding: 1em;
+}
+
+.drawtogether-success {
+    background: #448449;
+    color: #fff;
+    border: #163a19 .2em solid;
+}
+
+.drawtogether-login-error, .drawtogether-login-success {
+    display: inline-block;
+    padding: .5em;
+    margin-bottom: 1em;
+}
+
+.drawtogether-login-message {
+    margin: .3em;
+}
+
+.drawtogether-register-button {
+    margin-bottom: 1.7em !important;
+}

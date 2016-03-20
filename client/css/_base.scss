@@ -1,0 +1,218 @@
+html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body, input, textarea, button {
+    font-family: "Open Sans";
+    font-size: 1em;
+}
+
+input, button, textarea {
+    border: none;
+    outline: none;
+}
+
+h1 {
+    color: #fff;
+    margin: 0;
+    padding: 1em;
+    background: #3A5774;
+}
+
+h2 {
+    color: #fff;
+}
+
+.contactinfo {
+    padding: 2em;
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: 800;
+}
+
+.furjbqy td {
+    background: #2d455d;
+}
+
+.at4-share-outer-right {
+    display: none;
+}
+
+.drawtogether-welcome-text-error {
+    background: #5a2121;
+    padding: 2em;
+}
+
+.drawtogether-welcome-text-box {
+    background: #21374D;
+    padding: 1em;
+    color: #fff;
+}
+
+.drawtogether-notification-text-box {
+    background: #214D4D;
+    margin-top: 1em;
+    padding: 1em;
+    color: #fff;
+}
+
+.drawtogether-emote {
+    height: 2em;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.drawtogether-loading {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: #26394b;
+    color: #fff;
+    font-size: 3em;
+    padding-left: 2em;
+    padding-top: .3em;
+    z-index: 200;
+}
+
+.drawtogether-general-message {
+    display: none;
+    position: absolute;
+    right: 1em;
+    top: 0.8em;
+    max-width: 100em;
+    background: rgba(10, 56, 78, 0.8);
+    color: #fff;
+    border: 0.05em solid rgba(143, 163, 182, 0.8);
+    padding: .8em;
+    font-size: 1.5em;
+    z-index: 1000;
+    &:hover {
+        background: rgba(10, 56, 78, 0.2);
+        border: 0.1em solid rgba(143, 163, 182, 0.2);
+        color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+.drawtogether-display-on-small {
+    display: none;
+}
+
+@media (min-width: 1175px) {
+    .drawtogether-info-container, .drawtogether-chat-container, .drawtogether-control-container {
+        transform: none !important;
+    }
+}
+
+@media (max-width: 1175px) {
+    .furjbqy {
+        display: none;
+    }
+    #fullscreen {
+        left: auto;
+        right: auto;
+        bottom: auto;
+        overflow-x: hidden;
+    }
+    .control-container .sp-replacer {
+        margin: 0 !important;
+    }
+    .drawtogether-info-container, .drawtogether-chat-container {
+        z-index: 125;
+        width: 300px;
+        right: -275px;
+        -webkit-transition-duration: 0.3s;
+        -moz-transition-duration: 0.3s;
+        transition-duration: 0.3s;
+    }
+    .drawtogether-paint-container {
+        position: absolute;
+        width: auto;
+        height: 100%;
+        top: 0;
+        left: 25px;
+        right: 25px;
+    }
+    .control-container {
+        border-radius: 0 !important;
+        margin-left: 0 !important;
+        padding: 0 !important;
+        .control-button, .control-integer {
+            margin: 0;
+            border: none;
+            min-width: 2em;
+        }
+    }
+    .drawtogether-control-container {
+        width: 300px;
+        left: -275px;
+        height: auto;
+        background: #fff;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        padding: 0;
+        z-index: 200;
+        overflow-y: auto;
+    }
+    .drawtogether-chat-container, .drawtogether-info-container {
+        overflow-y: auto;
+        -webkit-transition-property: top, bottom;
+        transition-property: top, bottom;
+        -webkit-transition-duration: .2s, .2s;
+        transition-duration: .2s, .2s;
+        -webkit-transition-timing-function: linear, linear;
+        transition-timing-function: linear, linear;
+        -webkit-overflow-scrolling: touch;
+    }
+    .drawtogether-control-container {
+        overflow-y: auto;
+        -webkit-transition-property: top, bottom;
+        transition-property: top, bottom;
+        -webkit-transition-duration: .2s, .2s;
+        transition-duration: .2s, .2s;
+        -webkit-transition-timing-function: linear, linear;
+        transition-timing-function: linear, linear;
+        -webkit-overflow-scrolling: touch;
+        .control-button {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border: none;
+            height: initial;
+            line-height: initial;
+            margin: 0;
+            border-radius: 0;
+            margin-bottom: 0.1em;
+            width: 90%;
+        }
+    }
+    .messagecontainer {
+        margin-bottom: 3rem;
+    }
+    .drawtogether-sharewindow {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-height: none;
+    }
+}
+
+.addthis_sharing_toolbox {
+    float: right;
+    margin: .3rem .5em 0;
+}

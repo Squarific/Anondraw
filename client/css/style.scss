@@ -1,8 +1,17 @@
+// Fonts
 @import url("//fonts.googleapis.com/css?family=Open+Sans");
 
-@import "_drawtogether";
-@import "_gui";
-@import "_introjs";
+// Design
+@import "_base";
+@import "_modeselection";
+@import "_controls";
+@import "_canvas";
+@import "_sidebar";
+@import "_windows";
 @import "_paint";
-@import "_quicksettings";
-@import "_spectrum";
+@import "_gui";
+
+// Libraries
+@import "lib/_introjs";
+@import "lib/_quicksettings";
+@import "lib/_spectrum";

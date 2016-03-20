@@ -1,0 +1,61 @@
+.drawtogether-paint-container {
+    top: 3rem;
+    bottom: 0;
+    overflow: hidden; 
+
+    .control-container {
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        padding: .5em;
+        background-color: #fff;
+        border-bottom-right-radius: .5em;
+        box-shadow: 0 0 .5em #000;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -moz-touch-callout: none;
+        touch-callout: none;
+        z-index: 100; 
+        margin-left: 38px;
+
+        [class^='control-'], .sp-replacer {
+            float: left;
+            height: 2rem; 
+
+            &:not(.control-integer-input) {
+                line-height: 2rem;
+            }
+        }
+    }
+
+    .control-button {
+        z-index: 9999;
+        min-width: 3em;
+        text-align: center; 
+        
+        img {
+            height: 1em;
+        }
+    }
+
+    .mouse-coords {
+        position: absolute;
+        right: 1em;
+        bottom: 1em;
+        padding: .5em 0 .5em .5em;
+
+        border: 1px solid #e6e6e6;
+        background: #fff;
+
+        
+        input {
+            width: 6em;
+            background: #e6e6e6;
+            text-align: right;
+            margin: 0 .5em;
+            padding: .3em;
+        }
+    }
+}

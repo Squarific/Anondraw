@@ -1,0 +1,186 @@
+/**
+ * Sidebar containing chat
+ */
+
+.drawtogether-chat-container {
+    position: absolute;
+    top: 40%;
+    bottom: 0;
+    right: 0;
+    width: 20rem;
+    overflow: hidden;
+    background: #E0E5E7;
+    font-family: "Open Sans", sans-serif;
+    font-size: 0.8em;
+    .messagecontainer {
+        height: calc(100% - 3rem);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .chat-message {
+        padding: .5em;
+        font-size: 1.2em;
+        color: #25262b;
+        word-wrap: break-word;
+        margin: .8em;
+        background: rgba(0, 0, 0, 0.05);
+    }
+}
+
+.chat-message {
+    span {
+        margin-right: 1em;
+    }
+    a {
+        color: #2d455d;
+    }
+}
+
+/*.drawtogether-chat-container .chat-message:not(:last-child) {
+    border-bottom: 0.1em solid #799abb; }
+.drawtogether-chat-container .chat-message:nth-child(even) {
+    background-color: #C3CFD9; }*/
+
+.drawtogether-chat-container {
+    .inputcontainer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3rem;
+    }
+    .drawtogheter-chat-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 80%;
+        height: 100%;
+        padding: 0 1em;
+        background: #F9F9F9;
+    }
+    .button-small {
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 20%;
+        line-height: 3rem;
+        text-align: center;
+        color: #fff;
+        background: #456789;
+        cursor: pointer;
+        -webkit-transition-duration: 0.3s;
+        -moz-transition-duration: 0.3s;
+        transition-duration: 0.3s;
+        -webkit-transition-property: background-color;
+        -moz-transition-property: background-color;
+        transition-property: background-color;
+        &:hover {
+            background-color: #233445;
+        }
+    }
+}
+
+.drawtogether-paint-container, .drawtogether-control-container {
+    position: absolute;
+    left: 0;
+    width: calc(100% - 20rem);
+}
+
+.control-container {
+    .control-integer, .control-color-input, .sp-replacer {
+        margin-left: 1em;
+        margin-right: 1em;
+    }
+}
+
+/**
+* Room information
+*/
+
+.drawtogether-info-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 60%;
+    width: 20rem;
+    overflow: hidden;
+    overflow-y: auto;
+    background: #233445;
+    font-family: "Open Sans", sans-serif;
+    font-size: .8em;
+}
+
+.drawtogether-pl-title {
+    display: inline-block;
+    width: 100%;
+    color: #fff;
+    font-size: 1.2em;
+    padding: .5em;
+    display: none;
+}
+
+.drawtogether-info-playerlist .drawtogether-player {
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
+    color: #bdcddd;
+    font-size: 1em;
+    padding-left: .8em;
+    margin-bottom: .1em;
+    background: #233445;
+    transition-duration: .2s;
+    &:hover {
+        background: #293C50;
+    }
+}
+
+.drawtogether-player-button {
+    display: inline-block;
+    background: #233445;
+    padding: .4em;
+    margin-right: .2em;
+    cursor: pointer;
+    color: #fff;
+    img {
+        height: 1em;
+        vertical-align: bottom;
+    }
+    &:hover {
+        background: #32475b;
+    }
+}
+
+.drawtogether-activated {
+    background: #374E65;
+}
+
+.drawtogether-player-name {
+    padding: .4em;
+}
+
+.drawtogether-ink-container {
+    position: relative;
+    margin: 0.2em;
+    border: 0.2em solid #233445;
+    background: #2c4156;
+    text-align: center;
+}
+
+.drawtogether-ink {
+    color: #fff;
+    background: #789170;
+    font-size: 1em;
+    padding: 0.5em;
+    white-space: nowrap;
+}
+
+.drawtogether-ink-low {
+    background: #BA1D1D;
+    color: #fff;
+}
+
+.drawtogether-ink-middle {
+    background: #fff;
+    color: #BA651D;
+}

@@ -1,0 +1,164 @@
+.drawtogether-control-container {
+    height: 3rem;
+    padding-left: 38px;
+    overflow: hidden;
+    box-shadow: 0 0 .5em #000;
+
+    .control-button {
+        height: 2.3rem;
+        line-height: 2.3rem;
+        margin: .3rem .5em 0;
+        border-radius: .2em;
+    }
+
+    .control-text-input {
+        height: 2.3rem;
+        line-height: 2.3rem;
+        margin: .3rem .5em 0;
+        border-radius: .2em;
+        width: 9em;
+    }
+}
+
+.control-button {
+    display: inline-block;
+    padding: 0 .5em;
+    border-bottom: 0.2em solid #233445;
+    background-color: #456789;
+    color: #fff;
+    cursor: pointer;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-property: background-color;
+    -moz-transition-property: background-color;
+    transition-property: background-color;
+}
+
+.control-integer {
+    display: inline-block;
+}
+
+.control-integer-input, .control-text-input {
+    padding: .25em .5em;
+    background-color: #e6e6e6;
+}
+
+.sp-preview {
+    height: 100% !important;
+}
+
+.paint-selected-tool {
+    background: #607E9D !important;
+
+    &:hover {
+        background: #384D63 !important;
+    }
+}
+
+.paint-canvas {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    /* Performance tricks
+            http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance/10114994#10114994
+    */
+    -webkit-transform: translatez(rotateZ(360deg));
+    -moz-transform: translatez(0);
+    -ms-transform: translatez(0);
+    -o-transform: translatez(0);
+    transform: translatez(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    backface-visibility: hidden;
+    perspective: 1000;
+}
+
+.drawtogether-sharewindow {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2em;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.9);
+    overflow-y: auto;
+    z-index: 200;
+
+    .drawtogether-preview-canvas {
+        display: block;
+        max-height: 80%;
+        max-width: 80%;
+        margin: 2em auto;
+        border-radius: .3em;
+        background-image: url("images/transparent.png");
+    }
+
+    .drawtogether-button {
+        display: inline-block;
+        margin: 0 .2em;
+        padding: 1em;
+        text-decoration: none;
+        cursor: pointer;
+        background-color: #456789;
+        color: #fff;
+        -webkit-transition-duration: 0.3s;
+        -moz-transition-duration: 0.3s;
+        transition-duration: 0.3s;
+        -webkit-transition-property: background-color;
+        -moz-transition-property: background-color;
+        transition-property: background-color;
+
+        &:hover {
+            background-color: #5780aa;
+        }
+    }
+
+    .drawtogether-share-url {
+        background-color: #589A56;
+        padding: 1em;
+        color: #fff;
+        font-size: 1.5em;
+
+        a {
+            color: #fff;
+        }
+    }
+}
+
+.addthis_sharing_toolbox {
+    display: inline-block;
+}
+
+.drawtogether-flashy {
+    /*transition-duration:0;
+    -webkit-animation: flashy 120s infinite;
+    animation: flashy 120s infinite;*/
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes flashy {
+    8%  { background: #456789; }
+    9%  { background: #C59034; }
+    10% { background: #456789; }
+    11% { background: #C59034; }
+    12% { background: #456789; }
+}
+
+/* Standard syntax */
+@keyframes flashy {
+    8%  { background: #456789; }
+    9%  { background: #C59034; }
+    10% { background: #456789; }
+    11% { background: #C59034; }
+    12% { background: #456789; }
+}
+
+.control-button:hover {
+    background-color: #233445;
+}
