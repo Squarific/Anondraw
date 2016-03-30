@@ -1,5 +1,10 @@
 var SHA256 = require("crypto-js/sha256");
 
+// Hardcoded list of ids of the people allowed to give unlimited reputation
+// Will be removed once the title system is in place
+var MULTIPLE_REP_GIVE = [1, 27, 1529];
+var UPVOTE_MIN_REP = 20;
+
 function PlayerDatabase (database) {
 	this.database = database;
 }
@@ -126,15 +131,35 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 			return;
 		}
 
-		if (rows.length > 0 && fromId !== 1) {
+		if (rows.length > 0 && MULTIPLE_REP_GIVE.indexOf(fromId) == -1) {
 			callback("You already gave reputation!");
 			return;
 		}
 
-		this.database.query("INSERT INTO reputations (from_id, to_id) VALUES (?, ?)", [fromId, toId], function (err, rows) {
-			if (err) console.log("[GIVEREPUTATION] Database error inserting reputation");
-			callback(err ? "Database error (#2) trying to give reputation." : null);
-		});
+		this.database.query("SELECT COUNT(*) as fromcount FROM reputations WHERE from_id = ?", [fromId], function (err, rows1) {
+			if (err) {
+				callback("Database error (#3) trying to give reputation.");
+				console.log("[GIVEREPUTATION] Database error while getting fromcount: ", err);
+				return;
+			}
+
+			if (rows1[0].fromcount < UPVOTE_MIN_REP) {
+				callback("Not enough reputation, you need at least " + UPVOTE_MIN_REP);
+				return;
+			}
+
+			this.database.query("SELECT COUNT(*) as tocount FROM reputations WHERE to_id = ?", [toId], function (err, rows2) {
+				if (rows2[0].tocount >= rows1[0].fromcount) {
+					callback("You can only give reputation to people that have less than you.");
+					return;
+				}
+
+				this.database.query("INSERT INTO reputations (from_id, to_id) VALUES (?, ?)", [fromId, toId], function (err, rows) {
+					if (err) console.log("[GIVEREPUTATION] Database error inserting reputation");
+					callback(err ? "Database error (#2) trying to give reputation." : null);
+				});
+			}.bind(this));
+		}.bind(this));		
 	}.bind(this));
 };
 
@@ -144,6 +169,20 @@ PlayerDatabase.prototype.setName = function setName (id, name) {
 
 PlayerDatabase.prototype.setOnline = function setOnline (id) {
 	this.database.query("UPDATE users SET last_online = ? WHERE id = ?", [new Date(), id]);
+};
+
+PlayerDatabase.prototype.friendList = function friendList (id, callback) {
+	// TODO: reputation and premium level
+	var query = "SELECT u.last_username, u.last_online FROM friendlist ";
+	query += "JOIN users u ON to_id = u.id ";
+	query += "WHERE from_id = ?";
+
+	this.database.query(query, id, callback);
+};
+
+// Get reputation, premium level
+PlayerDatabase.prototype.getUserInfo = function getUserInfo (id, callback) {
+	var query = "";
 };
 
 PlayerDatabase.prototype.reputationList = function reputationList (id, callback) {

@@ -59,7 +59,7 @@ Servers.prototype.getFreePublicGameRoom = function getFreePublicGameRoom () {
 			if (this.servers[k].rooms[name] >= MAX_GAME_MEMBERS) continue;
 			return {
 				room: name,
-				server: this.servers[k].url
+				server: this.servers[k]
 			};
 		}
 	}

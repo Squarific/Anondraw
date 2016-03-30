@@ -13,13 +13,13 @@ var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to b
 
 var BIG_BRUSH_MIN_REP = 5;
 var MEMBER_MIN_REP = 15;
-var UPVOTE_MIN_REP = 30;
+var UPVOTE_MIN_REP = 20;                  // Has to be changed in the playerserver too
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
 // Ink settings
-var MAX_INK = 50000;
+var MAX_INK = 200000;
 var MAX_GUEST_INK = 5000;
 
 var BASE_GEN = 300;
@@ -157,7 +157,8 @@ Protocol.prototype.getUserList = function getUserList (room) {
 		users.push({
 			id: socket.id,
 			name: socket.name,
-			reputation: socket.reputation
+			reputation: socket.reputation,
+			gamescore: socket.gamescore
 		});
 	}
 
@@ -217,9 +218,13 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			if (data.banned) {
+				if (typeof data.info !== "object") {
+					console.log("ERROR: No info object in ban data", data);
+					return;
+				}
 				socket.emit("chatmessage", {
 					user: "SERVER",
-					message: "You have been banned till " + new Date(data.enddate) + ". Reason: " + data.reason
+					message: "You have been banned till " + new Date(data.info.enddate) + ". Reason: " + data.info.reason + ". Unjustified? Email: banned@anondraw.com include your enddate + time!"
 				});
 				console.log("[BANNED] " + socket.ip + " tried to join.");
 				socket.disconnect();
@@ -278,7 +283,7 @@ Protocol.prototype.bindIO = function bindIO () {
 							message: helpText[k]
 						});
 					}
-				} else if (message.indexOf("/shortcuts")) {
+				} else if (message.indexOf("/shortcuts") == 0) {
 					var helpText = [
 						"The following shortcuts are avaialble:",
 						"0-9: Change transparency",
@@ -311,6 +316,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (protocol.gameRooms[socket.room]) {
 			 	if (protocol.gameRooms[socket.room].chatmessage(socket, message)) {
 			 		// Word was found, don't send the rest
+			 		// We should update the playerlist
+			 		protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(socket.room));
 					return;
 			 	}
 			}
@@ -331,7 +338,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			console.log("Imgur upload request from " + socket.ip);
 
 			callback = (typeof callback == "function") ? callback : function () {};
-			protocol.imgur.uploadBase64(base64, "L3ntm")
+			protocol.imgur.uploadBase64(base64/*, "L3ntm"*/)
 			.then(function (json) {
 				console.log("[IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
 				callback({
@@ -461,7 +468,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (name == "CRYSTALSNOW") {
+			if (name == "Art Gabriel") {
 				callback("You are banned, stop comming back.");
 				socket.disconnect();
 				return;
@@ -538,9 +545,11 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (protocol.gameRooms[socket.room] && protocol.gameRooms[socket.room].currentPlayer !== socket) {
+			if (protocol.gameRooms[socket.room] && protocol.gameRooms[socket.room].currentPlayer !== socket &&
+			    (Date.now() - socket.lastTurnMessage > 5000 || !socket.lastTurnMessage)) {
 				callback();
 				protocol.informClient(socket, "Not your turn!");
+				socket.lastTurnMessage = Date.now();
 				return;
 			}
 
@@ -768,7 +777,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			if (socket.reputation < (targetSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE) {
 				callback({error: "You need to have at least " + REQUIRED_REP_DIFFERENCE + " more reputation than the person you are trying to kickban."});
-				console.error("[KICKBAN][ERROR] " + socket.userid + " (rep: " + rep + ") tried to ban " + targetSocket.userid + " (rep: " + targetrep + ") rep difference " + (rep - targetrep) + " required " + REQUIRED_REP_DIFFERENCE);
+				console.error("[KICKBAN][ERROR] " + socket.userid + " (rep: " + socket.reputation + ") tried to ban " + targetSocket.userid + " (rep: " + targetSocket.reputation + ") rep difference " + (socket.reputation - targetSocket.reputation) + " required " + REQUIRED_REP_DIFFERENCE);
 				return;
 			}
 

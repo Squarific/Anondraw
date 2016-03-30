@@ -189,6 +189,28 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/friendlist") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		playerDatabase.friendList(user.id, function (err, list) {
+			if (err) {
+				res.end('{"error": "' + err + '"}');
+				console.log("[FRIENDLIST][ERROR]", err);
+				return;
+			}
+
+			res.end('{"friendlist": ' + JSON.stringify(list) + '}');
+		});
+		return;
+	}
+
+
 	if (parsedUrl.pathname == "/checklogin") {
 		var uKey = parsedUrl.query.uKey;
 

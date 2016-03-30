@@ -11,6 +11,12 @@ ALTER TABLE users ADD COLUMN bio TEXT;
 ALTER TABLE users ADD COLUMN last_online DATETIME;
 ALTER TABLE users ADD COLUMN register_datetime DATETIME;
 
+CREATE TABLE IF NOT EXISTS friendlist (
+    from_id INT,
+    to_id INT,
+    friendtime DATETIME
+);
+
 CREATE TABLE IF NOT EXISTS premium (
     userid INT UNSIGNED,
     startdate DATETIME,

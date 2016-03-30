@@ -72,6 +72,7 @@ GameRoom.prototype.chatmessage = function chatmessage (socket, message) {
 		this.currentPlayer.gamescore += 2;
 
 		this.nextGame(true);
+		return true;
 	}
 };
 
