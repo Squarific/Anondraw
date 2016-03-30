@@ -38,7 +38,21 @@ function DrawTogether (container, settings) {
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
 		this.openModeSelector();
+	} else if (this.settings.mode == "askjoin") {
+		this.changeRoom("main");
+		this.openModeSelector();
 	} else if (this.settings.mode == "join") {
+		if (this.settings.room.indexOf("private_") == 0) {
+			if (this.settings.room.indexOf("private_game_") == 0) {
+				ga("send", "event", "autojoin", "privategame");
+			} else {
+				ga("send", "event", "autojoin", "private");
+			}
+		} else if (this.settings.room.indexOf("game_")) {
+			ga("send", "event", "autojoin", "game");
+		} else {
+			ga("send", "event", "autojoin", "public");
+		}
 		this.changeRoom(this.settings.room,
 			            undefined,
 			            this.settings.leftTopX,
@@ -542,13 +556,13 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 
 			this.paint.clear();
 			this.paint.goto(x || 0, y || 0);
+			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 
 			// If we are new and not in a private or a gameroom, show the welcome window
-			if (room.indexOf("private_") !== 0 && room.indexOf("game_") !== 0 && this.userSettings.getBoolean("Show welcome")) {
+			if (this.userSettings.getBoolean("Show welcome")) {
 				this.openWelcomeWindow();
-				this.userSettings.setBoolean("Show welcome", false, true);
 			}
 
 			this.removeLoading();
@@ -559,6 +573,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 };
 
 DrawTogether.prototype.joinGame = function joinGame () {
+	ga("send", "event", "modeselector", "publicgame");
 	this.network.joinGame(this.controls.byName.name.input.value == "Uberlord", function (err, room, drawings) {
 		if (err && err.indexOf("Too many users") !== -1) {
 			this.chat.addMessage("Couldn't join gameroom, too many users.");
@@ -588,6 +603,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 };
 
 DrawTogether.prototype.createPrivateGame = function createPrivateGame () {
+	ga("send", "event", "modeselector", "newprivategame");
 	this.changeRoom("private_game_" + Math.random().toString(36).substr(2, 5));
 };
 
@@ -666,9 +682,9 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 DrawTogether.prototype.updateInk = function updateInk () {
 	// Remove the previous text
 	while (this.inkDom.firstChild) this.inkDom.removeChild(this.inkDom.firstChild);
-	this.inkDom.appendChild(document.createTextNode("Ink: " + Math.floor(this.ink) + "/50000"));
+	this.inkDom.appendChild(document.createTextNode("Ink: " + Math.floor(this.ink) + "/200000"));
 
-	var width = Math.floor(Math.max(this.ink / 500, 0));
+	var width = Math.floor(Math.max(this.ink / 2000, 0));
 	if (!this.lastInkWidth || this.lastInkWidth !== width) {
 		this.inkDom.style.width = width + "%";
 		this.lastInkWidth = width;
@@ -930,7 +946,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	var nameText = document.createElement("span");
 	nameText.className = "drawtogether-player-name";
 
-	var rep = "", score = "", drawing = "";
+	var rep = "", score = "", drawing = "", icons = "";
 	if (typeof player.reputation !== "undefined") {
 		var rep = " (" + player.reputation + " R)";
 	}
@@ -941,6 +957,10 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 
 	if (player.currentPlayer) {
 		drawing = " | DRAWING"
+	}
+
+	if (player.memberlevel == 1) {
+		icons += "♥";
 	}
 
 	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
@@ -1264,7 +1284,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
 
-	var advancedOptions = QuickSettings.create(150, 150, "Advanced options");
+	var advancedOptions = QuickSettings.create(0, 0, "Advanced options");
 	advancedOptions.hide();
 	this.advancedOptions = advancedOptions;
 
@@ -1660,7 +1680,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 	}.bind(this));*/
 
-	var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
 	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word (NEW!)';
 	gameButton.addEventListener("click", function () {
@@ -1671,7 +1691,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		}.bind(this));
 		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-	}.bind(this));
+	}.bind(this));*/
 
 	selectWindow.appendChild(this.createFAQDom());
 
@@ -1692,17 +1712,37 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 			
 			var title = this.redditDrawings.appendChild(document.createElement("a"));
 			title.appendChild(document.createTextNode("Reddit gallery (/r/anondraw)"))
-			title.href = "http://www.reddit.com/r/AnonDraw";
+			title.href = "http://www.reddit.com/r/anondraw";
 			title.className = "drawtogether-redditdrawings-title";
 
+			this.redditDrawings.appendChild(this.createThumbLink("http://nyrrti.tumblr.com/", "Nyrrtis tumblr", "http://40.media.tumblr.com/fafb08a2535fa9e32cd54d5add9321d0/tumblr_o3w1sm1NYg1tyibijo1_1280.png"));
+			this.redditDrawings.appendChild(this.createThumbLink("http://dojaboys.tumblr.com/", "Dojaboys (alien) tumblr", "http://40.media.tumblr.com/222bcca3dcd8d86ba27d02a9e8cba560/tumblr_o3zfyfHJfj1u8vwn5o1_1280.png"));
+
 			for (var k = 0; k < posts.length; k++) {
-				if (posts[k].data.thumbnail == "self" || posts[k].data.thumbnail == "default" || posts[k].data.thumbnail == "nsfw") continue;
+				//if (posts[k].data.thumbnail == "self" || posts[k].data.thumbnail == "default" || posts[k].data.thumbnail == "nsfw") continue;
 				this.redditDrawings.appendChild(this.createRedditPost(posts[k].data));
 			}
 		}
 	}.bind(this));
-	req.open("GET", "http://www.reddit.com/r/AnonDraw/.json");
+	req.open("GET", "https://www.reddit.com/r/anondraw/.json");
 	req.send();
+};
+
+DrawTogether.prototype.createThumbLink = function createThumbLink (url, text, imageurl) {
+	var container = document.createElement("a");
+	container.href = url;
+	container.target = "_blank";
+	container.className = "drawtogether-redditpost";
+
+	var title = container.appendChild(document.createElement("span"));
+	title.className = "drawtogether-redditpost-title";
+	title.appendChild(document.createTextNode(text));
+
+	var thumb = container.appendChild(document.createElement("img"))
+	thumb.className = "drawtogether-redditpost-thumb";
+	thumb.src = imageurl;
+
+	return container;
 };
 
 DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
@@ -1720,16 +1760,23 @@ DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
 		thumb.className = "drawtogether-redditpost-thumb";
 		thumb.src = data.thumbnail;
 	} else {
-		var filler = container.appendChild(document.createElement("div"));
-		filler.className = "drawtogether-redditpost-thumbfiller";
-		filler.appendChild(document.createTextNode("Text post"));
+		if (data.thumbnail == "nsfw") {
+			var thumb = container.appendChild(document.createElement("img"))
+			thumb.className = "drawtogether-redditpost-thumb";
+			thumb.src = data.url;
+		} else {
+			var filler = container.appendChild(document.createElement("div"));
+			filler.className = "drawtogether-redditpost-thumbfiller";
+		}
 	}
 
 	return container;
 };
 
 DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
-	var welcomeWindow = this.gui.createWindow({ title: "Welcome!"});
+	var welcomeWindow = this.gui.createWindow({ title: "Welcome!", onclose: function () {
+		this.userSettings.setBoolean("Show welcome", false, true);
+	}.bind(this)});
 	welcomeWindow.classList.add("welcome-window");
 
 	var container = welcomeWindow.appendChild(document.createElement("div"))
@@ -1743,6 +1790,9 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 		"Anondraw is a website where artists of all skill levels come together to draw. " +
 		"All drawings are allowed so that means this website might contain NSFW (18+) images. " +
 		"If you do not feel comfortable with that, you should not join the public rooms."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("License: You give us the non-exclusive, transferable right to display and modify all the content you create using this website. In the public rooms, aka the rooms that do not start with private_ you also give everyone the Creative Commons share alike license for non commercial use."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Lastly we like to create, not destroy. Griefing will result in a ban of up to 10 years."));
@@ -1781,7 +1831,9 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 	close.addEventListener("click", function () {
 		if (welcomeWindow.parentNode)
 			welcomeWindow.parentNode.removeChild(welcomeWindow);
-	});
+
+		this.userSettings.setBoolean("Show welcome", false, true);
+	}.bind(this));
 };
 
 DrawTogether.prototype.createFAQDom = function createFAQDom () {
@@ -1817,7 +1869,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		answer: "At " + this.ZOOMED_OUT_MIN_REP + " reputation, you are allowed to draw while zoomed out. \n" +
 		        "At " + this.BIG_BRUSH_MIN_REP + " reputation, you are allowed to use brush sizes bigger than 10. \n" +
 		        "At 15 reputation, you can join the member only rooms and share an ip with other users without affecting your ink. \n" +
-		        "At 30 reputation, you can give upvotes to other people. \n" +
+		        "At 20 reputation, you can give upvotes to other people who have less reputation than you. \n" +
 		        "At " + this.KICKBAN_MIN_REP + "+ reputation, you can kickban people for a certain amount of time when they misbehave. \n "
 	}, {
 		question: "How do I get reputation?",

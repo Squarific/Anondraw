@@ -1,6 +1,6 @@
 (function() {
 	var QuickSettings = {
-		_topZ: 1,
+		_topZ: 500,
 
 		_panel: null,
 		_titleBar: null,
@@ -188,12 +188,12 @@
 		},
 
 		hide: function() {
-			this._panel.style.visibility = "hidden";
+			this._panel.style.display = "none";
 			this._hidden = true;
 		},
 
 		show: function() {
-			this._panel.style.visibility = "visible";
+			this._panel.style.display = "";
 			this._panel.style.zIndex = ++QuickSettings._topZ;
 			this._hidden = false;
 		},

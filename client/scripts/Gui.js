@@ -156,6 +156,9 @@ Gui.prototype.createWindow = function createWindow (settings) {
 		close.addEventListener("click", function () {
 			if (windowContainer.parentNode)
 				windowContainer.parentNode.removeChild(windowContainer);
+
+			if (typeof settings.onclose == "function")
+				settings.onclose();
 		});
 	}
 

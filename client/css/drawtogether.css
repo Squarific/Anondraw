@@ -109,8 +109,8 @@ input.paint-texttool {
   display:none;
 
   position:absolute;
-  right:1em;
-  top:0.8em;
+  right:15em;
+  top:1em;
   max-width:100em;
 
   background:rgba(10, 56, 78, 0.8);
@@ -217,6 +217,7 @@ input.paint-texttool {
 
   .drawtogether-redditpost-thumbfiller {
     height:10em;
+    min-width:10em;
     padding:1em;
     text-align:center;
     background:rgba(0, 0, 0, 0.1);
@@ -452,7 +453,9 @@ input.paint-texttool {
   width:100%;
   color:#bdcddd;
   font-size:1em;
-  padding:.8em;
+  padding-left:.8em;
+  padding-bottom:0.4em;
+  padding-top:0.4em;
   margin-bottom:.1em;
   background:#233445;
   transition-duration:.2s;
@@ -799,6 +802,10 @@ input.paint-texttool {
 @media (max-width: 1175px) {
   .furjbqy {
     display:none;
+  }
+
+  .drawtogether-general-message {
+    right:1em;
   }
 
   #fullscreen {

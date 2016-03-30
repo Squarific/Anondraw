@@ -127,7 +127,7 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 			var data = JSON.parse(req.responseText);
 
 			if (data.error) {
-				if (data.error == "Not logged in") {
+				if (data.error == "Not logged in.") {
 					delete this.uKey;
 					localStorage.removeItem("drawtogether-uKey");
 
