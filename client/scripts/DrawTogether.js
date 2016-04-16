@@ -463,8 +463,14 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		self.chat.addMessage(data.user + " " + data.message);
 	});
 
+	this.network.on("setmemberlevel", function (level) {
+		self.memberlevel = level;
+		console.log("We have memberlevel ", level);
+	});
+
 	this.network.on("setreputation", function (rep) {
 		self.reputation = rep;
+		console.log("Our reputation is ", rep);
 	});
 
 	this.network.on("setink", function (ink) {
@@ -961,12 +967,18 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 
 	if (player.memberlevel == 1) {
 		icons += "♥";
+		nameText.className += " premium";
 	}
 
 	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
+
+	var iconDom = document.createElement("span");
+	iconDom.appendChild(document.createTextNode(icons));
+	iconDom.className = "icons";
+	playerDom.appendChild(iconDom);
 
 	return playerDom;
 };
@@ -1284,7 +1296,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
 
-	var advancedOptions = QuickSettings.create(0, 0, "Advanced options");
+	var advancedOptions = QuickSettings.create(30, 10, "Advanced options");
 	advancedOptions.hide();
 	this.advancedOptions = advancedOptions;
 
@@ -1382,6 +1394,14 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 			registerButton.className = "drawtogether-button drawtogether-register-button";
 			registerButton.addEventListener("click", this.formRegister.bind(this));
 		} else {
+			var premiumButton = formContainer.appendChild(document.createElement("div"));
+			premiumButton.appendChild(document.createTextNode("Premium"));
+			premiumButton.className = "drawtogether-button";
+			premiumButton.addEventListener("click", function () {
+				this.closeAccountWindow();
+				this.openPremiumBuyWindow();
+			}.bind(this));
+
 			var logoutButton = formContainer.appendChild(document.createElement("div"));
 			logoutButton.appendChild(document.createTextNode("Logout"));
 			logoutButton.className = "drawtogether-button drawtogether-logout-button";
@@ -1771,6 +1791,68 @@ DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
 	}
 
 	return container;
+};
+
+DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
+	var premiumBuyWindow = this.gui.createWindow({ title: "Premium" });
+
+	var container = premiumBuyWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Getting premium."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Anondraw runs on very expensive unicorn juice, for that we need your help!"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Going premium costs 20 euro which will forever grant you extra features. It will also help us build new and better tools."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Current features:"));
+
+	var ol = container.appendChild(document.createElement("ol"));
+
+	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Server hosting", "Future development"];
+	for (var k = 0; k < features.length; k++) {
+		var li = ol.appendChild(document.createElement("li"));
+		li.appendChild(document.createTextNode(features[k]));
+	}
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Have any premium feature ideas? Let us know!"));
+
+	var p = container.appendChild(document.createElement("p"));
+	if (!this.account.uKey) {
+		html = "You should first login!";
+	} else if (typeof this.memberlevel !== "undefined") {
+		html = "Thank you for supporting us!";
+	} else {
+		var html = 'You are paying for the account: ' + this.account.mail + ' <br/><br/>';
+
+		    html += 'This takes up to 1 day to confirm. If it takes longer contact premium@squarific.com <br/><br/>';
+		 
+		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">';
+	    	html +=	'<input type="hidden" name="cmd" value="_s-xclick">';
+	    	html += '<input type="hidden" name="hosted_button_id" value="RU7EGGG6RH4AG">';
+	    	html += '<table style="display:none;">';
+		    	html += '<tr><td><input type="hidden" name="on0" value="Account/Email">Account/Email</td></tr><tr><td><input type="text" value="' + this.account.mail + '" name="os0" maxlength="200"></td></tr>';
+	    	html += '</table>';
+	    	html += '<input type="image" style="margin-top:0.5em;" src="https://www.paypalobjects.com/en_US/BE/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">';
+	    	html += '<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">';
+	    html += '</form>';
+
+	    html += '<br/>';
+	    html += '<a class="coinbase-button" data-code="8be6985bf22cfd01ca0877cb6fb97249" data-button-style="custom_small" href="https://www.coinbase.com/checkouts/8be6985bf22cfd01ca0877cb6fb97249">Pay With Bitcoin</a>';
+	}
+
+	p.innerHTML = html;
+
+	// Coinbase code
+	(function(){var getHost,loadCookie,loadJQuery,main;loadJQuery=function(version,callback){var compatible,d,j,jMajor,jMinor,loaded,ref,script,vMajor,vMinor;ref=[null,null,false],j=ref[0],d=ref[1],loaded=ref[2];if(j=window.jQuery){vMajor=parseInt(version.split('.')[0])||0;vMinor=parseInt(version.split('.')[1])||0;jMajor=parseInt(j.fn.jquery.split('.')[0])||0;jMinor=parseInt(j.fn.jquery.split('.')[1])||0;compatible=(jMajor>vMajor)||(jMajor===vMajor&&jMinor>=vMinor);}
+	if(!j||!compatible){script=document.createElement("script");script.type="text/javascript";script.src="https://code.jquery.com/jquery-1.8.3.min.js";script.onload=script.onreadystatechange=function(){if(!loaded&&(!(d=this.readyState)||d==="loaded"||d==="complete")){callback((j=window.jQuery).noConflict(1));return j(script).remove();}};return(document.getElementsByTagName("head")[0]||document.documentElement).appendChild(script);}else{return callback(j);}};getHost=function(env){if(env==='development'||env==='test'){return document.location.protocol+"//"+ document.location.host;}else if(env==='sandbox'){return"https://sandbox.coinbase.com";}else{return"https://www.coinbase.com";}};loadCookie=function($,callback){var host,script;if(window.coinbaseCookieLoaded){return callback($);}else if(window.coinbaseCookieLoading){return setTimeout((function(){return loadCookie($,callback);}),200);}else{host=getHost($('body').data('env'));window.coinbaseCookieLoading=true;script=document.createElement("script");script.src=host+"/checkouts/get_cookie.js";script.onload=script.onreadystatechange=function(){window.coinbaseCookieLoaded=true;window.coinbaseCookieLoading=false;$(script).remove();return callback($);};return(document.getElementsByTagName("head")[0]||document.documentElement).appendChild(script);}};main=function($){var buttonFrameLoaded,checkoutsFrameLoaded,default_height,default_width,host,receive_message;buttonFrameLoaded=false;checkoutsFrameLoaded=false;host=getHost($('body').data('env'));receive_message=function(e){var buttonId,command,ref;ref=e.data.split('|'),command=ref[0],buttonId=ref[1];buttonId=escape(buttonId);if(e.origin!==host){return;}
+	if(command==="show modal iframe"){return $('#coinbase_modal_iframe_'+ buttonId).show();}else if(command==="coinbase_payment_complete"){$('#coinbase_button_iframe_'+ buttonId).attr('src',host+"/buttons/paid");return $(document).trigger('coinbase_payment_complete',buttonId);}else if(command==="coinbase_payment_mispaid"){return $(document).trigger('coinbase_payment_mispaid',buttonId);}else if(command==='coinbase_payment_expired'){return $(document).trigger('coinbase_payment_expired',buttonId);}else if(command==="hide modal"){$('#coinbase_modal_iframe_'+ buttonId).hide();return $(document).trigger('coinbase_modal_closed',buttonId);}else if(command==="signup redirect"){return document.location=host+"/users/verify";}else if(command==="button frame loaded"){buttonFrameLoaded=true;if(checkoutsFrameLoaded){return $(document).trigger('coinbase_button_loaded',buttonId);}}else if(command==="checkouts frame loaded"){checkoutsFrameLoaded=true;if(buttonFrameLoaded){return $(document).trigger('coinbase_button_loaded',buttonId);}}};default_width=function(button_style){switch(button_style){case'custom_large':return 276;case'custom_small':return 210;case'subscription_large':return 263;case'subscription_small':return 210;case'donation_large':return 189;case'donation_small':return 148;case'buy_now_large':return 211;case'buy_now_small':return 170;default:return 211;}};default_height=function(button_style){switch(button_style){case'custom_large':return 62;case'custom_small':return 48;default:return 46;}};window.addEventListener("message",receive_message,false);$('.coinbase-button').each((function(_this){return function(index,elem){var button,buttonFrame,buttonId,data,height,modalFrame,params,width;button=$(elem);data=button.data();data['referrer']=document.domain;params=$.param(data);buttonId=button.data('code');width=button.data('width')||default_width(button.data('button-style'));height=button.data('height')||default_height(button.data('button-style'));host=getHost(button.data('env'));buttonFrame="<iframe src='"+ host+"/buttons/"+ buttonId+"?"+ params+"' id='coinbase_button_iframe_"+ buttonId+"' name='coinbase_button_iframe_"+ buttonId+"' style='width: "+ width+"px; height: "+ height+"px; border: none; overflow: hidden;' scrolling='no' allowtransparency='true' frameborder='0'></iframe>";modalFrame="<iframe src='"+ host+"/checkouts/"+ buttonId+"/widget?"+ params+"' id='coinbase_modal_iframe_"+ buttonId+"' name='coinbase_modal_iframe_"+ buttonId+"' style='background-color: transparent; border: 0px none transparent; display: none; position: fixed; visibility: visible; margin: 0px; padding: 0px; left: 0px; top: 0px; width: 100%; height: 100%; z-index: 9999;' scrolling='no' allowtransparency='true' frameborder='0'></iframe>";if(button.data('button-style')==='none'){buttonFrameLoaded=true;}else{button.replaceWith(buttonFrame);}
+	return $('body').append(modalFrame);};})(this));return $(document).on('coinbase_show_modal',function(e,buttonId){if($("#coinbase_modal_iframe_"+ buttonId).length>0){$("#coinbase_modal_iframe_"+ buttonId).show();return frames["coinbase_modal_iframe_"+ buttonId].postMessage("show modal|"+ buttonId,host);}});};loadJQuery("1.7",function($){return loadCookie($,main);});}).call(this);
 };
 
 DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {

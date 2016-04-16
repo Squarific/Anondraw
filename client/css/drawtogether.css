@@ -27,6 +27,27 @@ input.paint-texttool {
   display:block;
 }
 
+.icons {
+  color:white;
+}
+
+.premium {
+  font-weight:800;
+/*  background-image: -webkit-gradient(linear,left top,right top,color-stop(0,#FFD0D0),color-stop(0.15,#FFCFFF),color-stop(0.3,#D0D0FF),color-stop(0.45,#A9FFFF),color-stop(0.6,#95FF95),color-stop(0.75,#A1FFA1),color-stop(0.9,#FFFF9C),color-stop(1,#FFA4A4));
+  background-image: gradient(linear,left top,right top,color-stop(0,#FFD0D0),color-stop(0.15,#FFCFFF),color-stop(0.3,#D0D0FF),color-stop(0.45,#A9FFFF),color-stop(0.6,#95FF95),color-stop(0.75,#A1FFA1),color-stop(0.9,#FFFF9C),color-stop(1,#FFA4A4));
+  color: transparent !important;
+  -webkit-background-clip: text;
+  background-clip: text;*/
+}
+
+.random-button {
+  padding:0.3em !important;
+}
+
+.random-button img {
+  vertical-align: middle;
+}
+
 .contactinfo {
     padding: 2em;
     color: white;

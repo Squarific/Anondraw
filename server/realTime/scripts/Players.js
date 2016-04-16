@@ -58,8 +58,8 @@ Players.prototype.setName = function setName (uKey, name, callback) {
 };
 
 Players.prototype.request = function request (method, urlArguments, callback) {
-	if (typeof callback !== "function") callback = function () {};
-	
+	if (typeof callback !== "function")	callback = function () {};
+
 	var req = http.request({
 		hostname: this.server,
 		port: 4552,
@@ -69,6 +69,12 @@ Players.prototype.request = function request (method, urlArguments, callback) {
 		res.on("data", function (chunk) {
 			var parsed = JSON.parse(chunk);
 			callback(parsed.error, parsed);
+		});
+
+		// Here because the docs are too hard
+		// Just wanna make sure everything can be garbagecollected
+		res.on("end", function () {
+			
 		});
 	});
 

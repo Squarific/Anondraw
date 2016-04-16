@@ -49,7 +49,15 @@ process.on("SIGTERM", function () {
 		});
 	}
 
-	io.emit("chatmessage", "===== SERVER IS RESTARTING =====");
-	io.emit("chatmessage", "You will automatically reconnect.");
+	io.emit("chatmessage", {
+		user: "SERVER",
+		message: "===== SERVER IS RESTARTING ====="
+	});
+
+	io.emit("chatmessage", {
+		user: "SERVER",
+		message: "You will automatically reconnect."
+	});
+	
 	server.close();
 });

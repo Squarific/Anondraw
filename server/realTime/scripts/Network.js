@@ -2,6 +2,7 @@ var names = require("./names.js");
 var GameRoom = require("./GameRoom.js");
 
 var room_regex = /^[a-z0-9_]+$/i;
+var shadowbanned = ["luke merle", "luke 2 merle", "luke 3 merle"];
 
 // User settings
 var MAX_USERS_IN_ROOM = 18;
@@ -158,6 +159,7 @@ Protocol.prototype.getUserList = function getUserList (room) {
 			id: socket.id,
 			name: socket.name,
 			reputation: socket.reputation,
+			memberlevel: socket.memberlevel,
 			gamescore: socket.gamescore
 		});
 	}
@@ -358,20 +360,40 @@ Protocol.prototype.bindIO = function bindIO () {
 				delete socket.uKey;
 				socket.reputation = 0;
 				socket.emit("setreputation", socket.reputation);
+				socket.emit("setmemberlevel", socket.memberlevel);
 				return;
 			}
 			
 			socket.uKey = uKey;
 			protocol.players.setName(socket.uKey, socket.name);
+
 			protocol.players.getReputationFromUKey(uKey, function (err, data) {
-				if (err) console.log("GET REP ERROR:", err);
+				if (err) {
+					console.log("GET REP ERROR:", err); 
+					return;
+				}
+
 				console.log("[REPUTATION] ", socket.name, " has ", data.rep);
 				socket.reputation = data.rep;
+
 				socket.emit("setreputation", socket.reputation);
 				protocol.io.to(socket.room).emit("reputation", {
 					id: socket.id,
 					reputation: data.rep
 				});
+			});
+
+			protocol.players.request("getmemberlevel", {
+				uKey: uKey
+			}, function (err, data) {
+				if (err || data.err || data.error) {
+					console.log("Error getting member level", socket, err, data);
+					return;
+				}
+
+				socket.memberlevel = data.memberlevel;
+				socket.emit("setmemberlevel", socket.memberlevel);
+				protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(socket.room));
 			});
 		});
 
@@ -468,12 +490,6 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (name == "Art Gabriel") {
-				callback("You are banned, stop comming back.");
-				socket.disconnect();
-				return;
-			}
-
 			if (Date.now() - socket.lastNameChange < 1000) {
 				callback("You are changing your name too quickly!");
 				return;
@@ -494,7 +510,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			protocol.io.to(socket.room).emit("playernamechange", {
 				id: socket.id,
-				oldname: socket.username,
+				oldname: socket.name,
 				newname: name
 			});
 
@@ -597,7 +613,11 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-
+			// Shadow bans
+			if (shadowbanned.indexOf(socket.name) != -1) {
+				callback(true);
+				return;
+			}
 
 			if (socket.room.indexOf("member_") == 0 && (!socket.reputation || socket.reputation < MEMBER_MIN_REP)) {
 				callback(false);
@@ -726,7 +746,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					console.log("[CHANGEROOM] " + socket.name + " changed room to " + room);
 
 					protocol.register.updatePlayerCount();
-					protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(room));
+					protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(socket.room));
 
 					if (protocol.gameRooms[room])
 						protocol.gameRooms[room].join(socket);

@@ -66,6 +66,8 @@ DrawTogether.prototype.clear = function clear (room) {
 DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all) {
 	this.removePath(room, socketid);
 
+	if (!this.drawings || !this.drawings[room]) return;
+
 	var stop = 0;
 	if (this.drawings[room].sending) {
 		stop = this.drawings[room].sendLength;

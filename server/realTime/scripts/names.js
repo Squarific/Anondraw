@@ -208,7 +208,7 @@ var names = [
   "Jordan",
   "Johnie",
   "Kasey",
-  "Merle",
+  "Merlee",
   "Alejandro",
   "Rhett",
   "Kyle",

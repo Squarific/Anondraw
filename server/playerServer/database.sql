@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS friendlist (
 CREATE TABLE IF NOT EXISTS premium (
     userid INT UNSIGNED,
     startdate DATETIME,
-    enddate DATETIME,
     level INT
 );
 

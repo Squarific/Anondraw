@@ -2,7 +2,7 @@ var SHA256 = require("crypto-js/sha256");
 
 // Hardcoded list of ids of the people allowed to give unlimited reputation
 // Will be removed once the title system is in place
-var MULTIPLE_REP_GIVE = [1, 27, 1529];
+var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028]; // Filip, Lukas, Nyrrti, Corro, Sonny
 var UPVOTE_MIN_REP = 20;
 
 function PlayerDatabase (database) {
@@ -136,7 +136,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 			return;
 		}
 
-		this.database.query("SELECT COUNT(*) as fromcount FROM reputations WHERE from_id = ?", [fromId], function (err, rows1) {
+		this.database.query("SELECT COUNT(*) as fromcount FROM reputations WHERE to_id = ?", [fromId], function (err, rows1) {
 			if (err) {
 				callback("Database error (#3) trying to give reputation.");
 				console.log("[GIVEREPUTATION] Database error while getting fromcount: ", err);
@@ -230,6 +230,12 @@ PlayerDatabase.prototype.getPermission = function getPermission (roomid, userid,
 			callback(err, rows && rows[0] && rows[0].level);
 		}
 	);
+};
+
+PlayerDatabase.prototype.getMemberLevel = function getMemberLevel (userid, callback) {
+	this.database.query("SELECT level FROM premium WHERE userid = ?", [userid], function (err, rows) {
+		callback(err, rows && rows[0] && rows[0].level);
+	});
 };
 
 module.exports = PlayerDatabase;

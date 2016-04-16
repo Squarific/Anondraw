@@ -34,19 +34,23 @@
   background:#733A3A;
 }
 
-.welcome-window {
+.gui-window {
   max-width:40em;
 }
 
-.welcome-window h2 {
+.gui-window h2 {
   color:#233445;
 }
 
-.welcome-window .content {
+.gui-window .content {
   margin:1em;
   background: #eee;
   padding: 1em;
   font-size: 1.1em;
+}
+
+.gui-window ol {
+  list-style-type:square;
 }
 
 .gui-prompt-container {

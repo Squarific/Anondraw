@@ -99,13 +99,37 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/getmemberlevel") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+
+		console.log("getmemberlevel");
+
+		if (!user) {
+			res.end(JSON.stringify({ error: "User not logged in!" }));
+			return;
+		}
+
+		playerDatabase.getMemberLevel(user.id, function (err, memberlevel) {
+			if (err) {
+				res.end(JSON.stringify({ error: err }));
+				return;
+			}
+			res.end(JSON.stringify({ memberlevel: memberlevel }));
+		});
+
+		return;
+	}
+
 	if (parsedUrl.pathname == "/setpermission") {
+		res.end();
 		return; // TODO: ONLY ALLOW ROOMID IF USER.ID == roomid or if got permission
+
 		var roomid = parsedUrl.query.roomid;
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 
-		if (user) {
+		if (!user) {
 			res.end(JSON.stringify({err: "You are not logged in!"}));
 			return;
 		}
@@ -126,7 +150,7 @@ var server = http.createServer(function (req, res) {
 		var roomid = parsedUrl.query.roomid;
 		var user = sessions.getUser("uKey", uKey);
 
-		if (user) {
+		if (!user) {
 			res.end(JSON.stringify({err: "User not logged in!"}));
 			return;
 		}
@@ -426,7 +450,7 @@ var server = http.createServer(function (req, res) {
 				return;
 			}
 
-			console.log("[PAYMENT]", data.customer.email);
+			console.log("[PAYMENT]", data, data.customer.email);
 			res.end('{"success": "Payment applied!"}');
 			return;
 		});
