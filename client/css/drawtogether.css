@@ -309,6 +309,7 @@ input.paint-texttool {
 }
 
 .drawtogether-button {
+  text-align:center;
   padding: .5em;
   border-bottom: 0.2em solid #233445;
   background-color: #456789;

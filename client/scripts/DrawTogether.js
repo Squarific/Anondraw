@@ -95,6 +95,7 @@ DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
+DrawTogether.prototype.CLIENT_VERSION = 1;
 
 DrawTogether.prototype.defaultSettings = {
 	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
@@ -566,9 +567,13 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 
-			// If we are new and not in a private or a gameroom, show the welcome window
+			// If we are new show the welcome window
 			if (this.userSettings.getBoolean("Show welcome")) {
 				this.openWelcomeWindow();
+
+			// We are not new, check if we already saw all the awesome new features
+			} else if (parseInt(localStorage.getItem("newfeaturewindowversion")) !== this.CLIENT_VERSION) {
+				this.openNewFeatureWindow();
 			}
 
 			this.removeLoading();
@@ -1915,6 +1920,51 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 			welcomeWindow.parentNode.removeChild(welcomeWindow);
 
 		this.userSettings.setBoolean("Show welcome", false, true);
+	}.bind(this));
+};
+
+DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
+	localStorage.setItem("newfeaturewindowversion", this.CLIENT_VERSION);
+	var featureWindow = this.gui.createWindow({ title: "New features!"});
+
+	featureWindow.classList.add("feature-window");
+
+	var container = featureWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("We just had an update!"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Current new features:"));
+
+	var ol = container.appendChild(document.createElement("ol"));
+
+	var features = ["Premium membership (bold name, heart icon)", "Jump to random coords"];
+	for (var k = 0; k < features.length; k++) {
+		var li = ol.appendChild(document.createElement("li"));
+		li.appendChild(document.createTextNode(features[k]));
+	}
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Regards,"));
+	p.appendChild(document.createElement("br"));
+	p.appendChild(document.createTextNode("Anondraw Team"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Ps. want more features?"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Getting premium helps us pay for development time and the server hosting."));
+
+	var premiumButton = container.appendChild(document.createElement("div"));
+	premiumButton.appendChild(document.createTextNode("Get premium!"));
+	premiumButton.className = "drawtogether-button";
+	premiumButton.addEventListener("click", function () {
+		if (featureWindow.parentNode)
+			featureWindow.parentNode.removeChild(featureWindow);
+
+		this.openPremiumBuyWindow();
 	}.bind(this));
 };
 
