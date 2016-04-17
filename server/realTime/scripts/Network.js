@@ -340,7 +340,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			console.log("Imgur upload request from " + socket.ip);
 
 			callback = (typeof callback == "function") ? callback : function () {};
-			protocol.imgur.uploadBase64(base64/*, "L3ntm"*/)
+			protocol.imgur.uploadBase64(base64, "L3ntm")
 			.then(function (json) {
 				console.log("[IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
 				callback({

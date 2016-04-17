@@ -15,7 +15,14 @@ h1 {
   color:white;
   margin:0;
   padding:1em;
-  background: #3A5774;
+
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#5b84a3+0,3a5774+100 */
+  background: #5b84a3; /* Old browsers */
+  background: -moz-linear-gradient(-45deg,  #5b84a3 0%, #3a5774 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg,  #5b84a3 0%,#3a5774 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(135deg,  #5b84a3 0%,#3a5774 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5b84a3', endColorstr='#3a5774',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
 }
 
 h2 {
@@ -33,11 +40,11 @@ input.paint-texttool {
 
 .premium {
   font-weight:800;
-/*  background-image: -webkit-gradient(linear,left top,right top,color-stop(0,#FFD0D0),color-stop(0.15,#FFCFFF),color-stop(0.3,#D0D0FF),color-stop(0.45,#A9FFFF),color-stop(0.6,#95FF95),color-stop(0.75,#A1FFA1),color-stop(0.9,#FFFF9C),color-stop(1,#FFA4A4));
+  background-image: -webkit-gradient(linear,left top,right top,color-stop(0,#FFD0D0),color-stop(0.15,#FFCFFF),color-stop(0.3,#D0D0FF),color-stop(0.45,#A9FFFF),color-stop(0.6,#95FF95),color-stop(0.75,#A1FFA1),color-stop(0.9,#FFFF9C),color-stop(1,#FFA4A4));
   background-image: gradient(linear,left top,right top,color-stop(0,#FFD0D0),color-stop(0.15,#FFCFFF),color-stop(0.3,#D0D0FF),color-stop(0.45,#A9FFFF),color-stop(0.6,#95FF95),color-stop(0.75,#A1FFA1),color-stop(0.9,#FFFF9C),color-stop(1,#FFA4A4));
   color: transparent !important;
   -webkit-background-clip: text;
-  background-clip: text;*/
+  background-clip: text;
 }
 
 .random-button {
@@ -160,9 +167,18 @@ input.paint-texttool {
   right: 0;
   left: 0;
   min-height:100%;
-  background: #A7BDD3;
   text-align: center;
-  z-index: 300; }
+  z-index: 300;
+
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#a7bdd3+0,67a9bf+100 */
+  background: #a7bdd3; /* Old browsers */
+
+  background: -moz-linear-gradient(-45deg, #a7bdd3 0%, #67a9bf 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg, #a7bdd3 0%,#67a9bf 100%);  Chrome10-25,Safari5.1-6 
+  background: linear-gradient(135deg, #a7bdd3 0%,#67a9bf 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a7bdd3', endColorstr='#67a9bf',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+}
   .drawtogether-selectwindow .drawtogether-modeselect-button {
     display: inline-block;
     margin: 2em 2em 0;

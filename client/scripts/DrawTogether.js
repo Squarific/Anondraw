@@ -1830,7 +1830,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	var p = container.appendChild(document.createElement("p"));
 	if (!this.account.uKey) {
 		html = "You should first login!";
-	} else if (typeof this.memberlevel !== "undefined") {
+	} else if (this.memberlevel == 1) {
 		html = "Thank you for supporting us!";
 	} else {
 		var html = 'You are paying for the account: ' + this.account.mail + ' <br/><br/>';
