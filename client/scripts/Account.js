@@ -175,6 +175,11 @@ Account.prototype.getReputationList = function getReputationList (callback) {
 	}));
 };
 
+// Send the feedback
+Account.prototype.feedback = function feedback (feedbackText) {
+
+};
+
 // Make a get request to the account server to the given path with the given options
 // Options will be appended with {uKey: "The current ukey"}
 // Callback returns (err, request) with error being a string with the http error (human readable)

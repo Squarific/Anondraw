@@ -1849,6 +1849,11 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 	    html += '<br/>';
 	    html += '<a class="coinbase-button" data-code="8be6985bf22cfd01ca0877cb6fb97249" data-button-style="custom_small" href="https://www.coinbase.com/checkouts/8be6985bf22cfd01ca0877cb6fb97249">Pay With Bitcoin</a>';
+
+	    html += '<br/>';
+	    html += 'Or via bank transfer: IBAN: BE59 0014 7710 8926<br/>';
+	    html += 'Be sure to include your username/email!<br/>';
+	    html += 'This might take a few days to clear, if you mail to premium@anondraw.com we will clear you faster.';
 	}
 
 	p.innerHTML = html;
@@ -1921,6 +1926,38 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 
 		this.userSettings.setBoolean("Show welcome", false, true);
 	}.bind(this));
+};
+
+DrawTogether.prototype.openFeedbackWindow = function openFeedbackWindow () {
+	var feedbackWindow = this.gui.createWindow({title: "Feedback"});
+	feedbackWindow.classList.add("feedback-window");
+
+	var container = welcomeWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Feedback"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Hey we would like to ask you a question!"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("What feature would you want before you'd consider becoming a premium user?"));
+
+	var form = container.appendChild(document.createElement("form"));
+	var textarea = form.appendChild(document.createElement("textarea"));
+
+	var send = container.appendChild(document.createElement("div"));
+	send.appendChild(document.createTextNode("Send"))
+	send.className = "drawtogether-button";
+	send.addEventListener("click", function () {
+		this.account.feedback(textarea);
+	}.bind(this));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Regards,"));
+	p.appendChild(document.createElement("br"));
+	p.appendChild(document.createTextNode("Anondraw Team"));
 };
 
 DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {

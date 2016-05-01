@@ -14,7 +14,7 @@ var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to b
 
 var BIG_BRUSH_MIN_REP = 5;
 var MEMBER_MIN_REP = 15;
-var UPVOTE_MIN_REP = 20;                  // Has to be changed in the playerserver too
+var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserver too
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
@@ -149,7 +149,7 @@ Protocol.prototype.getUserList = function getUserList (room) {
 	//     reputation: accountrep //optional
 	//     gamescore: score //Only in gamerooms
 	// }, ...]
-	var sroom = this.io.nsps['/'].adapter.rooms[room];
+	var sroom = this.io.nsps['/'].adapter.rooms[room].sockets;
 	var users = [];
 
 	for (var id in sroom) {

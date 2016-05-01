@@ -160,6 +160,14 @@ Gui.prototype.createWindow = function createWindow (settings) {
 			if (typeof settings.onclose == "function")
 				settings.onclose();
 		});
+
+		close.addEventListener("touchstart", function () {
+			if (windowContainer.parentNode)
+				windowContainer.parentNode.removeChild(windowContainer);
+
+			if (typeof settings.onclose == "function")
+				settings.onclose();
+		});
 	}
 
 	this.makeDraggable(windowContainer, titleContainer);

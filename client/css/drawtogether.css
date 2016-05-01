@@ -245,6 +245,7 @@ input.paint-texttool {
     text-align:left;
     vertical-align: bottom;
     overflow:hidden;
+    min-width:20em;
   }
 
   .drawtogether-redditpost-thumb {
