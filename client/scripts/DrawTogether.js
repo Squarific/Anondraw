@@ -95,7 +95,7 @@ DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 1;
+DrawTogether.prototype.CLIENT_VERSION = 2;
 
 DrawTogether.prototype.defaultSettings = {
 	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
@@ -239,7 +239,6 @@ DrawTogether.prototype.moveScreenTo = function moveScreenTo (playerid) {
 	this.moveScreenToPosition(targetPosStart, 500);
 	this.moveScreenToPosition(targetPosMiddle, 0);
 	this.moveScreenToPosition(targetPosEnd, 500);
-	console.log(this.moveQueue);
 };
 
 DrawTogether.prototype.moveScreenToPosition = function moveScreenToPosition (position, duration) {
@@ -467,6 +466,12 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("setmemberlevel", function (level) {
 		self.memberlevel = level;
 		console.log("We have memberlevel ", level);
+
+		if (self.memberlevel > 0 && !localStorage.getItem("buyreported")) {
+			goog_report_buy();
+			ga("send", "event", "conversion", "buypremium");
+			localStorage.setItem("buyreported", true);
+		}
 	});
 
 	this.network.on("setreputation", function (rep) {
@@ -1156,61 +1161,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		});
 	}.bind(this));
 
-	this.paint.addEventListener("userpathpoint", function (event) {
-		if ((this.current_room.indexOf("game_") === 0 ||
-		    this.current_room.indexOf("private_game_") === 0) &&
-		    !this.weAreCurrentPlayer) {
-			this.displayMessage("Not your turn!");
-			event.removePathPoint();
-			return;
-		}
+	this.paint.addEventListener("userpathpoint", this.handlePaintUserPathPoint.bind(this));
 
-		// Lower our ink with how much it takes to draw this
-		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
-			if (!(this.reputation > this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 10) {
-				if (Date.now() - this.lastBrushSizeWarning > 5000) {
-					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
-					this.lastBrushSizeWarning = Date.now();
-				}
-
-				event.removePathPoint();
-				return;
-			}
-
-			// When a drawing is made check if we have ink left
-			var usage = this.inkUsageFromPath(event.point, this.lastPathPoint, this.lastPathSize);
-			if (this.ink < usage) {
-				if (Date.now() - this.lastInkWarning > 20000) {
-					this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
-					this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
-					this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
-					this.lastInkWarning = Date.now();
-				}
-				event.removePathPoint();
-				return;
-			}
-
-			// If we are logged out we aren't allowed to draw zoomed out
-			if (this.reputation < this.ZOOMED_OUT_MIN_REP && this.paint.public.zoom < 1) {
-				if (Date.now() - this.lastZoomWarning > 5000) {
-					this.chat.addMessage("Drawing while zoomed out this far is only allowed if you have more than " + this.ZOOMED_OUT_MIN_REP + " reputation.");
-					this.lastZoomWarning = Date.now();
-				}
-
-				event.removePathPoint();
-				return;
-			}
-
-			this.ink -= usage;
-			this.updateInk();
-		}
-		
-		this.network.socket.emit("pp", event.point, function (success) {
-			if (!success) event.removePathPoint();
-		});
-		this.lastPathPoint = event.point;
-	}.bind(this));
+	this.paint.addEventListener("select", this.handlePaintSelection.bind(this));
 
 	function setHash () {
 		location.hash = this.current_room + "," +
@@ -1227,6 +1180,101 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	});
 
 	this.paint.changeTool("grab");
+};
+
+DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
+	if ((this.current_room.indexOf("game_") === 0 ||
+	    this.current_room.indexOf("private_game_") === 0) &&
+	    !this.weAreCurrentPlayer) {
+		this.displayMessage("Not your turn!");
+		event.removePathPoint();
+		return;
+	}
+
+	// Lower our ink with how much it takes to draw this
+	// Only do that if we are connected and in a room that does not start with private_ or game_
+	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+		if (!(this.reputation > this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 10) {
+			if (Date.now() - this.lastBrushSizeWarning > 5000) {
+				this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
+				this.lastBrushSizeWarning = Date.now();
+			}
+
+			event.removePathPoint();
+			return;
+		}
+
+		// When a drawing is made check if we have ink left
+		var usage = this.inkUsageFromPath(event.point, this.lastPathPoint, this.lastPathSize);
+		if (this.ink < usage) {
+			if (Date.now() - this.lastInkWarning > 20000) {
+				this.chat.addMessage("CLIENT", "Not enough ink! You will regain ink every 20 seconds.");
+				this.chat.addMessage("CLIENT", "Tip: Small brushes use less ink.");
+				this.chat.addMessage("CLIENT", "Tip: logged in users receive more ink");
+				this.lastInkWarning = Date.now();
+			}
+			event.removePathPoint();
+			return;
+		}
+
+		// If we are logged out we aren't allowed to draw zoomed out
+		if (this.reputation < this.ZOOMED_OUT_MIN_REP && this.paint.public.zoom < 1) {
+			if (Date.now() - this.lastZoomWarning > 5000) {
+				this.chat.addMessage("Drawing while zoomed out this far is only allowed if you have more than " + this.ZOOMED_OUT_MIN_REP + " reputation.");
+				this.lastZoomWarning = Date.now();
+			}
+
+			event.removePathPoint();
+			return;
+		}
+
+		this.ink -= usage;
+		this.updateInk();
+	}
+	
+	this.network.socket.emit("pp", event.point, function (success) {
+		if (!success) event.removePathPoint();
+	});
+	this.lastPathPoint = event.point;
+};
+
+DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (event) {
+	this.gui.prompt("What do you want to do with your selection?", [
+		"Export in high quality",
+		"Create protected region",
+		"Cancel"
+	], function (answer) {
+		if (answer === "Cancel") return;
+
+		var handlers = {
+			"Export in high quality": this.exportImage.bind(this),
+			"Create protected region": this.createProtectedRegion.bind(this)
+		};
+
+		handlers[answer](event.from, event.to);
+	}.bind(this));
+};
+
+DrawTogether.prototype.createProtectedRegion = function (from, to) {
+	this.chat.addMessage("This feature is not ready yet, check back soon!");
+	return;
+
+	if (!this.memberlevel) {
+		this.chat.addMessage("Creating a protected region is a member only feature.");
+		return;
+	}
+
+	this.network.emit("createprotectedregion", from, to);
+};
+
+DrawTogether.prototype.exportImage = function (from, to) {
+	var img = document.createElement("img");
+	img.src = this.paint.exportImage(from, to);
+	img.alt = "Exported image";
+	
+	var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
+	exportwindow.classList.add("exportwindow");
+	exportwindow.appendChild(img);
 };
 
 DrawTogether.prototype.createMessage = function createMessage () {
@@ -1529,6 +1577,8 @@ DrawTogether.prototype.formRegister = function formRegister () {
 			return;
 		}
 
+		goog_report_register();
+		ga("send", "event", "conversion", "register");
 		this.network.socket.emit("uKey", this.account.uKey);
 		this.createAccountWindow();
 	}.bind(this));
@@ -1684,6 +1734,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.changeRoom("main");
 		ga("send", "event", "modeselector", "strangers");
 		this.selectWindow.style.display = "";
+		goog_report_join();
 	}.bind(this));
 
 	var privateButton = buttonContainer.appendChild(document.createElement("div"));
@@ -1694,6 +1745,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.changeRoom(this.settings.room, undefined, 0, 0, true);
 		ga("send", "event", "modeselector", "private");
 		this.selectWindow.style.display = "";
+		goog_report_join();
 	}.bind(this));
 
 	/*var privateButton = buttonContainer.appendChild(document.createElement("div"));
@@ -1703,9 +1755,10 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.changeRoom("member_main");
 		ga("send", "event", "modeselector", "member");
 		this.selectWindow.style.display = "";
+		goog_report_join();
 	}.bind(this));*/
 
-	/*var gameButton = buttonContainer.appendChild(document.createElement("div"));
+	var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
 	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word (NEW!)';
 	gameButton.addEventListener("click", function () {
@@ -1716,7 +1769,8 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		}.bind(this));
 		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-	}.bind(this));*/
+		goog_report_join();
+	}.bind(this));
 
 	selectWindow.appendChild(this.createFAQDom());
 
@@ -1740,8 +1794,11 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 			title.href = "http://www.reddit.com/r/anondraw";
 			title.className = "drawtogether-redditdrawings-title";
 
-			this.redditDrawings.appendChild(this.createThumbLink("http://nyrrti.tumblr.com/", "Nyrrtis tumblr", "http://40.media.tumblr.com/fafb08a2535fa9e32cd54d5add9321d0/tumblr_o3w1sm1NYg1tyibijo1_1280.png"));
-			this.redditDrawings.appendChild(this.createThumbLink("http://dojaboys.tumblr.com/", "Dojaboys (alien) tumblr", "http://40.media.tumblr.com/222bcca3dcd8d86ba27d02a9e8cba560/tumblr_o3zfyfHJfj1u8vwn5o1_1280.png"));
+			//this.redditDrawings.appendChild(this.createThumbLink("http://nyrrti.tumblr.com/", "Nyrrtis tumblr", "http://40.media.tumblr.com/fafb08a2535fa9e32cd54d5add9321d0/tumblr_o3w1sm1NYg1tyibijo1_1280.png"));
+			//this.redditDrawings.appendChild(this.createThumbLink("http://dojaboys.tumblr.com/", "Dojaboys (alien) tumblr", "http://40.media.tumblr.com/222bcca3dcd8d86ba27d02a9e8cba560/tumblr_o3zfyfHJfj1u8vwn5o1_1280.png"));
+			var div = document.createElement("div");
+			div.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/VOxqb3_0IpE?start=261" frameborder="0" allowfullscreen></iframe>';
+			this.redditDrawings.appendChild(div);
 
 			for (var k = 0; k < posts.length; k++) {
 				//if (posts[k].data.thumbnail == "self" || posts[k].data.thumbnail == "default" || posts[k].data.thumbnail == "nsfw") continue;
@@ -1796,6 +1853,13 @@ DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
 	}
 
 	return container;
+};
+
+DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
+	var discordWindow = this.gui.createWindow({ title: "Voice chat: Discord"});
+
+	var container = discordWindow.appendChild(document.createElement("div"));
+	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
 };
 
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
@@ -1977,7 +2041,7 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Premium membership (bold name, heart icon)", "Jump to random coords"];
+	var features = ["Export in high quality"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
@@ -2142,6 +2206,16 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 			}
 		});
 	}
+
+	buttonList.push({
+		name: "discord",
+		type: "button",
+		text: "Voice chat",
+		action: this.openDiscordWindow.bind(this),
+		data: {
+			intro: "We also have a voice chat using discord!"
+		}
+	});
 
 	return buttonList;
 };

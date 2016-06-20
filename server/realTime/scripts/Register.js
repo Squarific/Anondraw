@@ -118,7 +118,7 @@ Register.prototype.getUserListCount = function getUserListCount (room) {
 	var sroom = this.io.nsps['/'].adapter.rooms[room];
 	var users = 0;
 
-	for (var id in sroom) {
+	for (var id in sroom.sockets) {
 		if (!this.io.nsps['/'].connected[id]) continue;
 		users++;
 	}
@@ -129,8 +129,8 @@ Register.prototype.getUserListCount = function getUserListCount (room) {
 Register.prototype.updatePlayerCount = function updatePlayerCount () {
 	var rooms = {};
 
-	for (var sKey = 0; sKey < this.io.sockets.sockets.length; sKey++) {
-		var socket = this.io.sockets.sockets[sKey];
+	for (var id in this.io.sockets.sockets) {
+		var socket = this.io.sockets.sockets[id];
 		if (!socket.room || rooms[socket.room]) continue;
 		rooms[socket.room] = this.getUserListCount(socket.room);
 	}

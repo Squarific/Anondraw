@@ -1,3 +1,14 @@
+.exportwindow {
+  border-left: 5px solid rgb(69, 103, 137);
+  border-right: 5px solid rgb(69, 103, 137);
+  border-bottom: 5px solid rgb(69, 103, 137);
+  max-width:30%;
+}
+
+.exportwindow img {
+  max-width:100%;
+}
+
 .gui-window {
   position: absolute;
   left: 50px;

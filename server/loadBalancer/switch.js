@@ -143,6 +143,8 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/update") {
 		var id = parsedUrl.query.id;
 
+		console.log(parsedUrl.query.rooms);
+
 		try {
 			var rooms = JSON.parse(parsedUrl.query.rooms);
 		} catch (e) {

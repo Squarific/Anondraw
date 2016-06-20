@@ -7,7 +7,7 @@
 			It allows you to draw with friends in group
 			Readable version: https://github.com/Squarific/anondraw/
 		-->
-		<link rel="stylesheet" href="DrawTogether.min.css?v=94">
+		<link rel="stylesheet" href="DrawTogether.min.css?v=95">
 		<title>AnonDraw - Draw online in group together with friends and strangers</title>
 
 		<meta name="viewport" content="width=device-width">
@@ -35,7 +35,7 @@
 		<img src="http://www.anondraw.com/images/screens/square_doodles.png?v=1" alt="Anon Draw" style="display:none;">
 		<div id="fullscreen" style="position:absolute; left:0; right:0; top:0; bottom:0; background:white;"></div>
 		<script src="jquery.js"></script>
-		<script src="DrawTogether.min.js?v=251"></script>
+		<script src="DrawTogether.min.js?v=262"></script>
 		<script type="text/javascript">
 			// Draw and paint online
 			var urlInfo = location.hash.substr(1, location.hash.length).split(",")
@@ -74,5 +74,78 @@
 		</script>
 		<style type="text/css">.furjbqy {z-index:1000 !important;} .furjbqy a {padding: .5em;} .furjbqy table {background:#273849;}</style>
 		<script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=anondraw"></script><noscript><a href="http://anondraw.idea.informer.com">Anondraw feedback </a> <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a></noscript>
+		<!-- Google Code for Register Conversion Page
+		In your html page, add the snippet and call
+		goog_report_conversion when someone clicks on the
+		chosen link or button. -->
+		<script type="text/javascript">
+		  /* <![CDATA[ */
+		  goog_snippet_register_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "bCA4CICTj2cQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  goog_snippet_join_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "lIFsCNzQomcQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  goog_snippet_buy_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "99KuCPC3nmcQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  // DO NOT CHANGE THE CODE BELOW.
+		  goog_report_register = function(url) {
+		    goog_snippet_register_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+			    window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		  goog_report_join = function(url) {
+		    goog_snippet_join_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+		    	 window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		  goog_report_buy = function(url) {
+		    goog_snippet_buy_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+			    window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		/* ]]> */
+		</script>
+		<script type="text/javascript"
+		  src="//www.googleadservices.com/pagead/conversion_async.js">
+		</script>
+
 	</body>
 </html>

@@ -150,6 +150,7 @@ GameRoom.prototype.nextGame = function nextGame (guessed) {
 	for (var k = 0; k < WORD_PICK_COUNT; k++)
 		sendWords.push(words[Math.floor(Math.random() * words.length)]);
 
+	delete this.currentWord;
 	this.currentPlayer.emit("words", sendWords);
 	this.sendWords = sendWords;
 	this.waitForWordsTimeout = setTimeout(this.forceWord.bind(this), TIME_TO_PICK);

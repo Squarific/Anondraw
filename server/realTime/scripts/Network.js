@@ -113,7 +113,9 @@ Protocol.prototype.inkTick = function inkTick () {
 		socket.ink = Math.min(socket.ink + extra, socket.uKey ? MAX_INK : MAX_GUEST_INK);
 
 		socket.emit("setink", socket.ink);
-		ips.push(socket.ip);
+
+		if (socket.reputation < SHARE_IP_MIN_REP)
+			ips.push(socket.ip);
 	}
 };
 
@@ -149,6 +151,10 @@ Protocol.prototype.getUserList = function getUserList (room) {
 	//     reputation: accountrep //optional
 	//     gamescore: score //Only in gamerooms
 	// }, ...]
+	if (!this.io.nsps['/'].adapter.rooms[room]) {
+		console.log("Room", room, "does not exist");
+		return [];
+	}
 	var sroom = this.io.nsps['/'].adapter.rooms[room].sockets;
 	var users = [];
 

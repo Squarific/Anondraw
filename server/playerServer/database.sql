@@ -47,6 +47,16 @@ CREATE TABLE IF NOT EXISTS ipbans (
     INDEX (ip, enddate)
 );
 
+CREATE TABLE IF NOT EXISTS protected_regions (
+    owner_id INT UNSIGNED,
+    from_x BIGINT,
+    from_y BIGINT,
+    to_x BIGINT,
+    to_y BIGINT,
+    room VARCHAR(255),
+    INDEX (room, owner_id)
+);
+
 ALTER TABLE ipbans ADD INDEX banned_by (banned_by);
 
 CREATE TABLE IF NOT EXISTS accountbans (

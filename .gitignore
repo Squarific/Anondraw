@@ -9,5 +9,8 @@ node_modules
 *_password.js
 *_private.sql
 
+# Private files
+private/
+
 # Image from the mainroom
 server/imageServer/images/main

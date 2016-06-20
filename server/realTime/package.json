@@ -6,7 +6,7 @@
   "main": "anondraw.js",
   "dependencies": {
     "external-ip": "^0.2.3",
-    "socket.io": "^1.3.5",
+    "socket.io": "1.4.6",
     "imgur": ">=0.1.7"
   },
   "devDependencies": {},
