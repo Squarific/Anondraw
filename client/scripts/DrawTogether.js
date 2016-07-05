@@ -1267,6 +1267,10 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 	this.network.emit("createprotectedregion", from, to);
 };
 
+DrawTogether.prototype.resetProtectedRegions = function () {
+	this.network.emit("resetprotectedregions");
+};
+
 DrawTogether.prototype.exportImage = function (from, to) {
 	var img = document.createElement("img");
 	img.src = this.paint.exportImage(from, to);
@@ -1447,6 +1451,13 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 			registerButton.className = "drawtogether-button drawtogether-register-button";
 			registerButton.addEventListener("click", this.formRegister.bind(this));
 		} else {
+			var resetButton = formContainer.appendChild(document.createElement("div"));
+			resetButton.appendChild(document.createTextNode("Reset protected regions"));
+			resetButton.className = "drawtogether-button";
+			resetButton.addEventListener("click", function () {
+				this.resetProtectedRegions();
+			}.bind(this));
+
 			var premiumButton = formContainer.appendChild(document.createElement("div"));
 			premiumButton.appendChild(document.createTextNode("Premium"));
 			premiumButton.className = "drawtogether-button";

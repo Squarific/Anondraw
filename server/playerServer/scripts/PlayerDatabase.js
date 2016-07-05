@@ -3,7 +3,7 @@ var SHA256 = require("crypto-js/sha256");
 // Hardcoded list of ids of the people allowed to give unlimited reputation
 // Will be removed once the title system is in place
 var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028]; // Filip, Lukas, Nyrrti, Corro, Sonny
-var UPVOTE_MIN_REP = 20;
+var UPVOTE_MIN_REP = 7;
 
 function PlayerDatabase (database) {
 	this.database = database;
