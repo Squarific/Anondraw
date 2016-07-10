@@ -238,4 +238,42 @@ PlayerDatabase.prototype.getMemberLevel = function getMemberLevel (userid, callb
 	});
 };
 
+PlayerDatabase.prototype.addProtectedRegions = function addProtectedRegions (userid, from, to, callback) {
+	var minX = Math.min(from[0], to[0]);
+	var minY = Math.min(from[1], to[1]);
+
+	var maxX = Math.max(from[0], to[0]);
+	var maxY = Math.max(from[1], to[1]);
+
+	var collisionString = "? < maxX AND";
+	   collisionString += "? > minX AND";
+	   collisionString += "? < maxY AND";
+	   collisionString += "? > minY";
+
+	this.database.query("SELECT * FROM regions WHERE owner != ? AND NOT(" + collisionString + ")",
+		[userid, minX, maxX, minY, maxY],
+		function (err, rows) {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			if (rows.length > 0) {
+				callback('Someone already claimed this region!');
+				return;
+			}
+
+			this.database.query("INSERT INTO regions (owner, minX, minY, maxX, maxY) VALUES (?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY], function (err) {
+				callback(err);
+			});
+		}
+	);
+};
+
+PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions (userid) {
+	this.database.query("DELETE FROM regions WHERE owner = ?", [userid], function (callback) {
+		callback(err);
+	});
+};
+
 module.exports = PlayerDatabase;
