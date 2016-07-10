@@ -405,6 +405,59 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/createprotectedregion") {
+		var from = parsedUrl.query.from || "";
+		from = from.split(',');
+
+		var to = parsedUrl.query.to || "";
+		to = to.split(',');
+
+		var uKey = parsedUrl.query.uKey;
+
+		if (from.length !== 2 || to.length !== 2) {
+			res.end(JSON.stringify({
+				error: "From or to was not an array of length 2, format: from=5,4"
+			});
+			return;
+		}
+
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end(JSON.stringify({
+				error: "No user found with that uKey!"
+			}));
+			return;
+		}
+
+		from = [parseInt(from[0]), parseInt(from[1])];
+		to = [parseInt(to[0]), parseInt(to[1])];
+
+		if (from[0] !== from[0] || from[1] !== from[1] || to[0] !== to[0] || to[1] !== to[1]) {
+			res.end(JSON.stringify({
+				error: "Bad number in from or to array!"
+			}));
+			return;
+		}
+
+		playerDatabase.createProtectedRegion(user.id, from, to);
+	}
+
+	if (parsedUrl.pathname == "/resetprotectedregions") {
+		var uKey = parsedUrl.query.uKey;
+
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end(JSON.stringify({
+				error: "No user found with that uKey!"
+			}));
+			return;
+		}
+
+		playerDatabase.resetProtectedRegions(user.id);
+	}
+
 	if (parsedUrl.pathname == "/payment") {
 		if (ALLOWED_PAYMENT_IPS.indexOf(req.connection.remoteAddress) == -1) {
 			res.end('{"error": "This method is restricted to certain ips"}');
