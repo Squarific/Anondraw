@@ -440,7 +440,20 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		playerDatabase.createProtectedRegion(user.id, from, to);
+		playerDatabase.createProtectedRegion(user.id, from, to, function (err) {
+			if (err) {
+				console.log('Creat protected region database error', err, user.id, from, to);
+				res.end(JSON.stringify({
+					error: 'Something went wrong while creating your region. Contact an admin.'
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: 'Added region.'
+			}));
+		});
+		return;
 	}
 
 	if (parsedUrl.pathname == "/resetprotectedregions") {
@@ -455,7 +468,20 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		playerDatabase.resetProtectedRegions(user.id);
+		playerDatabase.resetProtectedRegions(user.id, function (err) {
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					error: 'Something went wrong while deleting your regions. Contact an admin.'
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: 'Reset your regions.'
+			}));
+		});
+		return;
 	}
 
 	if (parsedUrl.pathname == "/payment") {
