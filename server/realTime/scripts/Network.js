@@ -84,6 +84,10 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	setInterval(this.clearLeftTick.bind(this, 180 * 1000));
 }
 
+Protocol.prototype.updateProtectedRegions = function updateProtectedRegions () {
+
+};
+
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
 	for (var socketId in this.leftSocketIpAndId) {
 		if (Date.now() - this.leftSocketIpAndId[socketId].time > FORGET_SOCKET_AFTER) {
@@ -844,6 +848,30 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("setpermission", function (socketid, level) {
 			protocol.setPermission(socket, socketId, level);
+		});
+
+		socket.on("createprotectedregion", function (from, to, callback) {
+			if (!from || typeof from.join !== 'function') return;
+			if (!to || typeof to.join !== 'function') return;
+			if (typeof callback !== 'function') return;
+
+			protocol.players.request('createprotectedregion', {
+				uKey: socket.uKey,
+				from: from.join(','),
+				to: to.join(',')
+			}, function (err, data) {
+				callback(err, data);
+				protocol.updateProtectedRegions();
+			});
+		});
+
+		socket.on("resetprotectedregions", function () {
+			protocol.players.request('resetprotectedregions', {
+				uKey: socket.uKey
+			}, function (err, data) {
+				callback(err, data);
+				protocol.updateProtectedRegions();
+			});
 		});
 
 		socket.on("disconnect", function () {
