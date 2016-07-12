@@ -36,21 +36,26 @@ imgur.setCredentials("anondraw", require("./imgur_password.js"));
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register);
 
-// Shut down, send drawings and stop all connections
-process.on("SIGTERM", function () {
-	var rooms = 0;
-	for (var room in drawTogether.drawings) {
-		rooms++;
+function saveAndShutdown () {
+	console.log("SAVING AND SHUTTING DOWN");
+	var rooms = Object.keys(drawTogether.drawings);
+	var roomCount = rooms.length;
 
-		background.sendDrawings(room, drawTogether.drawings[room], function () {
-			rooms--;
-			if (rooms == 0) process.exit(0);
-		});
+	for (var k = 0; k < rooms.length; k++) {
+		var room = rooms[k];
+
+		console.log("SAVING ROOM", room);
+		background.sendDrawings(room, drawTogether.drawings[room], function (room) {
+			roomCount--;
+			console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
+			if (roomCount == 0) process.exit(0);
+		}.bind(this, room));
 	}
 
+	console.log("LETTING THE CLIENTS KNOW");
 	io.emit("chatmessage", {
 		user: "SERVER",
-		message: "===== SERVER IS RESTARTING ====="
+		message: "SERVER IS RESTARTING"
 	});
 
 	io.emit("chatmessage", {
@@ -59,4 +64,15 @@ process.on("SIGTERM", function () {
 	});
 	
 	server.close();
-});
+
+	// If there were no rooms, just shutdown now
+	if (rooms.length === 0) {
+		process.exit(0);
+	}
+}
+
+// Shut down, send drawings and stop all connections
+process.on("SIGTERM", saveAndShutdown);
+
+// Restart the server every so often
+setTimeout(saveAndShutdown, 60 * 1000);

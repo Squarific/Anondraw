@@ -397,7 +397,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				uKey: uKey
 			}, function (err, data) {
 				if (err || data.err || data.error) {
-					console.log("Error getting member level", socket, err, data);
+					console.log("Error getting member level", uKey, err, data);
 					return;
 				}
 
