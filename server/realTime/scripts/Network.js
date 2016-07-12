@@ -71,6 +71,7 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.imgur = imgur;
 	this.players = players;
 	this.register = register;
+	this.protectedRegions = {};
 	this.bindIO();
 
 	this.drawTogether.onFinalize = function (room, amountToKeep) {
@@ -82,10 +83,20 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.leftSocketIpAndId = {};  // socketid: {ip: "", uKey: "", rep: rep, time: Date.now()}
 	setInterval(this.inkTick.bind(this), 5 * 1000);
 	setInterval(this.clearLeftTick.bind(this, 180 * 1000));
+
+	this.updateProtectedRegions();
 }
 
-Protocol.prototype.updateProtectedRegions = function updateProtectedRegions () {
+Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (room) {
+	this.players.request('getprotectedregions', {
+		room: room
+	}, function (err, data) {
+		if (err) {
+			throw "Can't get protected regions " + err;
+		}
 
+		this.protectedRegions[room] = data;
+	}.bind(this));
 };
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
