@@ -238,7 +238,7 @@ PlayerDatabase.prototype.getMemberLevel = function getMemberLevel (userid, callb
 	});
 };
 
-PlayerDatabase.prototype.addProtectedRegions = function addProtectedRegions (userid, from, to, callback) {
+PlayerDatabase.prototype.addProtectedRegions = function addProtectedRegions (userid, from, to, room, callback) {
 	var minX = Math.min(from[0], to[0]);
 	var minY = Math.min(from[1], to[1]);
 
@@ -263,7 +263,7 @@ PlayerDatabase.prototype.addProtectedRegions = function addProtectedRegions (use
 				return;
 			}
 
-			this.database.query("INSERT INTO regions (owner, minX, minY, maxX, maxY) VALUES (?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY], function (err) {
+			this.database.query("INSERT INTO protected_regions (owner, minX, minY, maxX, maxY, room) VALUES (?, ?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY, room], function (err) {
 				callback(err);
 			});
 		}
@@ -271,14 +271,14 @@ PlayerDatabase.prototype.addProtectedRegions = function addProtectedRegions (use
 };
 
 PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions (userid, room, callback) {
-	this.database.query("DELETE FROM regions WHERE owner = ? AND room = ?", [userid, room], function (callback) {
+	this.database.query("DELETE FROM protected_regions WHERE owner = ? AND room = ?", [userid, room], function (callback) {
 		callback(err);
 	});
 };
 
 PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
 	// TODO: Select permissions
-	this.database.query("SELECT owner, minX, minY, maxX, maxY FROM regions WHERE room = ?", [room], function (err, rows, fields) {
+	this.database.query("SELECT owner, minX, minY, maxX, maxY FROM protected_regions WHERE room = ?", [room], function (err, rows, fields) {
 		if (err) {
 			callback(err);
 			return;

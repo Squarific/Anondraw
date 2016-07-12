@@ -48,11 +48,11 @@ CREATE TABLE IF NOT EXISTS ipbans (
 );
 
 CREATE TABLE IF NOT EXISTS protected_regions (
-    owner_id INT UNSIGNED,
-    from_x BIGINT,
-    from_y BIGINT,
-    to_x BIGINT,
-    to_y BIGINT,
+    owner INT UNSIGNED,
+    minX BIGINT,
+    minY BIGINT,
+    maxX BIGINT,
+    maxY BIGINT,
     room VARCHAR(255),
     INDEX (room, owner_id)
 );

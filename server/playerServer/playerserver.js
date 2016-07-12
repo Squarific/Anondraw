@@ -440,7 +440,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		playerDatabase.createProtectedRegion(user.id, from, to, function (err) {
+		playerDatabase.addProtectedRegion(user.id, from, to, function (err) {
 			if (err) {
 				console.log('Creat protected region database error', err, user.id, from, to);
 				res.end(JSON.stringify({
