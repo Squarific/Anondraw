@@ -458,6 +458,7 @@ var server = http.createServer(function (req, res) {
 
 	if (parsedUrl.pathname == "/resetprotectedregions") {
 		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
 
 		var user = sessions.getUser("uKey", uKey);
 
@@ -468,7 +469,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		playerDatabase.resetProtectedRegions(user.id, function (err) {
+		playerDatabase.resetProtectedRegions(user.id, room, function (err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({

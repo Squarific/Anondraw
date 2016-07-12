@@ -270,9 +270,21 @@ PlayerDatabase.prototype.addProtectedRegions = function addProtectedRegions (use
 	);
 };
 
-PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions (userid) {
-	this.database.query("DELETE FROM regions WHERE owner = ?", [userid], function (callback) {
+PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions (userid, room, callback) {
+	this.database.query("DELETE FROM regions WHERE owner = ? AND room = ?", [userid, room], function (callback) {
 		callback(err);
+	});
+};
+
+PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
+	// TODO: Select permissions
+	this.database.query("SELECT owner, minX, minY, maxX, maxY FROM regions WHERE room = ?", [room], function (err, rows, fields) {
+		if (err) {
+			callback(err);
+			return;
+		}
+
+		callback(null, rows);
 	});
 };
 
