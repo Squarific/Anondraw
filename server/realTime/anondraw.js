@@ -75,4 +75,4 @@ function saveAndShutdown () {
 process.on("SIGTERM", saveAndShutdown);
 
 // Restart the server every so often
-setTimeout(saveAndShutdown, 60 * 1000);
+setTimeout(saveAndShutdown, 6 * 60 * 60 * 1000);
