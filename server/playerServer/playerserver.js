@@ -484,6 +484,23 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/getprotectedregions") {
+		var room = parsedUrl.query.room;
+
+		playerDatabase.getProtectedRegions(room, function (err, regions) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify(regions));
+		});
+
+		return;
+	}
+
 	if (parsedUrl.pathname == "/payment") {
 		if (ALLOWED_PAYMENT_IPS.indexOf(req.connection.remoteAddress) == -1) {
 			res.end('{"error": "This method is restricted to certain ips"}');
