@@ -95,11 +95,27 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 		room: room
 	}, function (err, data) {
 		if (err) {
-			throw "Can't get protected regions " + err;
+			throw "Can't get protected regions for room " + room + " Err:" + err;
 		}
 
-		this.protectedRegions[room] = data;
+		if (typeof data.length !== "number") {
+			throw "";
+		}
+
+		this.protectedRegions[room] = rbush();
+
+		for (var k = 0; k < data.length; k++) {
+			this.protectedRegions[room].insert(data[k]);
+		}
 	}.bind(this));
+};
+
+Protocol.prototype.satObjectFromBrush = function satObjectFromBrush () {
+
+};
+
+Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion () {
+
 };
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
