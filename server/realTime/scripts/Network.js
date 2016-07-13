@@ -111,7 +111,8 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 			var height = data.maxY - data.minY;
 
 			var box = new SAT.Box(base, width, height);
-			this.protectedRegions[room].insert(box);
+			data[k].satBox = box;
+			this.protectedRegions[room].insert(data[k]);
 		}
 	}.bind(this));
 };
