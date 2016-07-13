@@ -760,6 +760,11 @@ Protocol.prototype.bindIO = function bindIO () {
 						}
 					}
 
+					// Update the rooms protected regions
+					if (!protocol.protectedRegions[room]) {
+						protocol.updateProtectedRegions();
+					}
+
 					// Join this room
 					socket.join(room);
 					socket.room = room;
@@ -862,9 +867,23 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("createprotectedregion", function (from, to, callback) {
-			if (!from || typeof from.join !== 'function') return;
-			if (!to || typeof to.join !== 'function') return;
 			if (typeof callback !== 'function') return;
+
+			if (!from || typeof from.join !== 'function') {
+				callback("From array was not in the correct format");
+				return;
+			}
+
+			if (!to || typeof to.join !== 'function') {
+				callback("To array was not in the correct format");
+				return;
+			}
+
+
+			if (!socket.memberlevel) {
+				callback("This feature is premium only!");
+				return;
+			}
 
 			protocol.players.request('createprotectedregion', {
 				uKey: socket.uKey,
