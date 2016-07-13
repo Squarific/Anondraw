@@ -1,6 +1,9 @@
 var names = require("./names.js");
 var GameRoom = require("./GameRoom.js");
 
+var rbush = require("rbush");
+var SAT = require('sat');
+
 var room_regex = /^[a-z0-9_]+$/i;
 var shadowbanned = ["luke merle", "luke 2 merle", "luke 3 merle"];
 
