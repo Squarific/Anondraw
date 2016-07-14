@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS ipbans (
     INDEX (ip, enddate)
 );
 
-CREATE TABLE IF NOT EXISTS protected_regions (
+CREATE TABLE IF NOT EXISTS regions (
     owner INT UNSIGNED,
     minX BIGINT,
     minY BIGINT,

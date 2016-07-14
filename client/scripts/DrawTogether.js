@@ -1267,8 +1267,8 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 			return;
 		}
 
-		if (result) {
-			this.chat.addMessage("Regions", result);
+		if (result.success) {
+			this.chat.addMessage("Regions", result.success);
 		}
 	}.bind(this));
 };
@@ -1280,10 +1280,8 @@ DrawTogether.prototype.resetProtectedRegions = function () {
 			return;
 		}
 
-		if (result) {
-			this.chat.addMessage("Regions", result);
-		}
-	});
+		this.chat.addMessage("Regions", "Reset your regions");
+	}.bind(this));
 };
 
 DrawTogether.prototype.exportImage = function (from, to) {

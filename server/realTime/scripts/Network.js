@@ -280,7 +280,7 @@ Protocol.prototype.informClient = function informClient (socket, message) {
 Protocol.prototype.getUserList = function getUserList (room) {
 	// Returns [{
 	//     id: socketid,
-	//     name: username,
+	//     name: name,
 	//     reputation: accountrep //optional
 	//     gamescore: score //Only in gamerooms
 	// }, ...]
@@ -956,13 +956,13 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			if (socket.reputation < KICKBAN_MIN_REP) {
 				callback({error: "You need at least " + KICKBAN_MIN_REP + " reputation to kickban someone."});
-				console.error("[KICKBAN][ERROR] " + socket.username + " tried to ban " + targetSocket.username + " but only had " + rep + " reputation.");
+				console.error("[KICKBAN][ERROR] " + socket.name + " tried to ban " + targetSocket.name + " but only had " + rep + " reputation.");
 				return;
 			}
 
 			if (socket.reputation < (targetSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE) {
 				callback({error: "You need to have at least " + REQUIRED_REP_DIFFERENCE + " more reputation than the person you are trying to kickban."});
-				console.error("[KICKBAN][ERROR] " + socket.username + " (rep: " + socket.reputation + ") tried to ban " + targetSocket.username + " (rep: " + targetSocket.reputation + ") rep difference " + (socket.reputation - targetSocket.reputation) + " required " + REQUIRED_REP_DIFFERENCE);
+				console.error("[KICKBAN][ERROR] " + socket.name + " (rep: " + socket.reputation + ") tried to ban " + targetSocket.name + " (rep: " + targetSocket.reputation + ") rep difference " + (socket.reputation - targetSocket.reputation) + " required " + REQUIRED_REP_DIFFERENCE);
 				return;
 			}
 
@@ -1024,7 +1024,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			console.log("[REGIONS] Adding protected region for", socket.username, from, to);
+			console.log("[REGIONS] Adding protected region for", socket.name, from, to);
 			protocol.players.request('createprotectedregion', {
 				uKey: socket.uKey,
 				from: from.join(','),

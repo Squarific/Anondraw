@@ -266,12 +266,12 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 			this.database.query("INSERT INTO protected_regions (owner, minX, minY, maxX, maxY, room) VALUES (?, ?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY, room], function (err) {
 				callback(err);
 			});
-		}
+		}.bind(this)
 	);
 };
 
 PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions (userid, room, callback) {
-	this.database.query("DELETE FROM protected_regions WHERE owner = ? AND room = ?", [userid, room], function (callback) {
+	this.database.query("DELETE FROM protected_regions WHERE owner = ? AND room = ?", [userid, room], function (err) {
 		callback(err);
 	});
 };
