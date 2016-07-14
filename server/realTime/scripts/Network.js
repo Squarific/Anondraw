@@ -103,12 +103,18 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 		this.protectedRegions[room] = rbush();
 
 		for (var k = 0; k < data.length; k++) {
-			var base = new SAT.Vector(data.minX, data.minY);
+			var base = new SAT.Vector(data[k].minX, data[k].minY);
 
-			var width = data.maxX - data.minX;
-			var height = data.maxY - data.minY;
+			var width = data[k].maxX - data[k].minX;
+			var height = data[k].maxY - data[k].minY;
 
-			data[k].satBox = (new SAT.Box(base, width, height)).toPolygon();
+			data[k].satBox = new SAT.Polygon(new SAT.Vector(), [
+				new SAT.Vector(data[k].minX, data[k].minY),
+				new SAT.Vector(data[k].maxX, data[k].minY),
+				new SAT.Vector(data[k].maxX, data[k].maxY),
+				new SAT.Vector(data[k].minX, data[k].maxY),
+			]);
+			console.log(data[k].satBox);
 			this.protectedRegions[room].insert(data[k]);
 		}
 	}.bind(this));
