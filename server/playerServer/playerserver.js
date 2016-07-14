@@ -417,7 +417,7 @@ var server = http.createServer(function (req, res) {
 		if (from.length !== 2 || to.length !== 2) {
 			res.end(JSON.stringify({
 				error: "From or to was not an array of length 2, format: from=5,4"
-			});
+			}));
 			return;
 		}
 
