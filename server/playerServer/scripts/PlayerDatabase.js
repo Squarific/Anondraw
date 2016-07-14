@@ -238,7 +238,7 @@ PlayerDatabase.prototype.getMemberLevel = function getMemberLevel (userid, callb
 	});
 };
 
-PlayerDatabase.prototype.addProtectedRegions = function addProtectedRegions (userid, from, to, room, callback) {
+PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
 	var minX = Math.min(from[0], to[0]);
 	var minY = Math.min(from[1], to[1]);
 

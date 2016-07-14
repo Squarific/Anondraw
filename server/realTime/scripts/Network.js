@@ -119,20 +119,20 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 
 	satObjects.push(
 		new SAT.Circle(
-			new Sat.vector(point1[0], point1[1]),
+			new SAT.Vector(point1[0], point1[1]),
 			size
 		)
 	);
 
 	satObjects.push(
 		new SAT.Circle(
-			new Sat.vector(point2[0], point2[1]),
+			new SAT.Vector(point2[0], point2[1]),
 			size
 		)
 	);
 
 	// Move the points such that point1 is at 0, 0
-	var newPoint2 = new SAT.vector(point2[0] - point1[0],
+	var newPoint2 = new SAT.Vector(point2[0] - point1[0],
 	                               point2[1] - point1[1]);
 
 	// Rotate such that the line is on the x axis
@@ -141,10 +141,10 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 
 	// Calculate the 4 points
 	var points = [
-		new SAT.vector(0, -size / 2),
-		new SAT.vector(0, size / 2),
-		new SAT.vector(newPoint2.x, size / 2),
-		new SAT.vector(newPoint2.x, -size / 2)
+		new SAT.Vector(0, -size / 2),
+		new SAT.Vector(0, size / 2),
+		new SAT.Vector(newPoint2.x, size / 2),
+		new SAT.Vector(newPoint2.x, -size / 2)
 	];
 
 	// Rotate back and move to the original location
@@ -167,10 +167,10 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 Protocol.prototype.getRegionSearchFromSat = function getRegionSearchFromSat (satObject) {
 	if (satObject.r) {
 		return {
-			minX: satObject.pos.x - radius,
-			minY: satObject.pos.y - radius,
-			maxX: satObject.pos.x + radius,
-			maxY: satObject.pos.y + radius,
+			minX: satObject.pos.x - satObject.r,
+			minY: satObject.pos.y - satObject.r,
+			maxX: satObject.pos.x + satObject.r,
+			maxY: satObject.pos.y + satObject.r,
 		};
 	} else {
 		var minX = Infinity,
@@ -195,6 +195,8 @@ Protocol.prototype.getRegionSearchFromSat = function getRegionSearchFromSat (sat
 };
 
 Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (owner, satObjects, room) {
+	if (!this.protectedRegions[room]) return false;
+
 	for (var k = 0; k < satObjects.length; k++) {
 		var serachRegion = this.getRegionSearchFromSat(satObjects[k]);
 		var relevantRegions = this.protectedRegions[room].search(serachRegion);
@@ -529,6 +531,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 
 				socket.memberlevel = data.memberlevel;
+				socket.userid = data.userid;
 				socket.emit("setmemberlevel", socket.memberlevel);
 				protocol.io.to(socket.room).emit("playerlist", protocol.getUserList(socket.room));
 			});
@@ -813,7 +816,13 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 
-			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, lastPathSize);
+			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, socket.lastPathSize);
+
+			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
+				protocol.informClient(socket, "This region is protected!");
+				callback();
+				return;
+			}
 
 			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
 			callback(true);
@@ -892,7 +901,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					// Update the rooms protected regions
 					if (!protocol.protectedRegions[room]) {
-						protocol.updateProtectedRegions();
+						protocol.updateProtectedRegions(room);
 					}
 
 					// Join this room
@@ -947,13 +956,13 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			if (socket.reputation < KICKBAN_MIN_REP) {
 				callback({error: "You need at least " + KICKBAN_MIN_REP + " reputation to kickban someone."});
-				console.error("[KICKBAN][ERROR] " + socket.userid + " tried to ban " + targetSocket.userid + " but only had " + rep + " reputation.");
+				console.error("[KICKBAN][ERROR] " + socket.username + " tried to ban " + targetSocket.username + " but only had " + rep + " reputation.");
 				return;
 			}
 
 			if (socket.reputation < (targetSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE) {
 				callback({error: "You need to have at least " + REQUIRED_REP_DIFFERENCE + " more reputation than the person you are trying to kickban."});
-				console.error("[KICKBAN][ERROR] " + socket.userid + " (rep: " + socket.reputation + ") tried to ban " + targetSocket.userid + " (rep: " + targetSocket.reputation + ") rep difference " + (socket.reputation - targetSocket.reputation) + " required " + REQUIRED_REP_DIFFERENCE);
+				console.error("[KICKBAN][ERROR] " + socket.username + " (rep: " + socket.reputation + ") tried to ban " + targetSocket.username + " (rep: " + targetSocket.reputation + ") rep difference " + (socket.reputation - targetSocket.reputation) + " required " + REQUIRED_REP_DIFFERENCE);
 				return;
 			}
 
@@ -1015,22 +1024,27 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			console.log("[REGIONS] Adding protected region for", socket.username, from, to);
 			protocol.players.request('createprotectedregion', {
 				uKey: socket.uKey,
 				from: from.join(','),
-				to: to.join(',')
+				to: to.join(','),
+				room: socket.room
 			}, function (err, data) {
 				callback(err, data);
-				protocol.updateProtectedRegions();
+				protocol.updateProtectedRegions(socket.room);
 			});
 		});
 
-		socket.on("resetprotectedregions", function () {
+		socket.on("resetprotectedregions", function (callback) {
+			if (typeof callback !== 'function') return;
+
 			protocol.players.request('resetprotectedregions', {
-				uKey: socket.uKey
+				uKey: socket.uKey,
+				room: socket.room
 			}, function (err, data) {
 				callback(err, data);
-				protocol.updateProtectedRegions();
+				protocol.updateProtectedRegions(socket.room);
 			});
 		});
 

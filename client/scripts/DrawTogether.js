@@ -1256,19 +1256,34 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {
-	this.chat.addMessage("This feature is not ready yet, check back soon!");
-	return;
-
 	if (!this.memberlevel) {
 		this.chat.addMessage("Creating a protected region is a member only feature.");
 		return;
 	}
 
-	this.network.emit("createprotectedregion", from, to);
+	this.network.socket.emit("createprotectedregion", from, to, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Regions", "Error: " + err);
+			return;
+		}
+
+		if (result) {
+			this.chat.addMessage("Regions", result);
+		}
+	}.bind(this));
 };
 
 DrawTogether.prototype.resetProtectedRegions = function () {
-	this.network.emit("resetprotectedregions");
+	this.network.socket.emit("resetprotectedregions", function (err, result) {
+		if (err) {
+			this.chat.addMessage("Regions", "Reset Error: " + err);
+			return;
+		}
+
+		if (result) {
+			this.chat.addMessage("Regions", result);
+		}
+	});
 };
 
 DrawTogether.prototype.exportImage = function (from, to) {

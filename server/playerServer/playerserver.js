@@ -103,19 +103,17 @@ var server = http.createServer(function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 
-		console.log("getmemberlevel");
-
 		if (!user) {
 			res.end(JSON.stringify({ error: "User not logged in!" }));
 			return;
 		}
 
-		playerDatabase.getMemberLevel(user.id, function (err, memberlevel) {
+		playerDatabase.getMemberLevel(user.id, function (err, memberlevel, userid) {
 			if (err) {
 				res.end(JSON.stringify({ error: err }));
 				return;
 			}
-			res.end(JSON.stringify({ memberlevel: memberlevel }));
+			res.end(JSON.stringify({ memberlevel: memberlevel, userid: user.id }));
 		});
 
 		return;
@@ -413,6 +411,7 @@ var server = http.createServer(function (req, res) {
 		to = to.split(',');
 
 		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
 
 		if (from.length !== 2 || to.length !== 2) {
 			res.end(JSON.stringify({
@@ -440,7 +439,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		playerDatabase.addProtectedRegion(user.id, from, to, function (err) {
+		playerDatabase.addProtectedRegion(user.id, from, to, room, function (err) {
 			if (err) {
 				console.log('Creat protected region database error', err, user.id, from, to);
 				res.end(JSON.stringify({
@@ -449,6 +448,7 @@ var server = http.createServer(function (req, res) {
 				return;
 			}
 
+			console.log("[PROTECTED REGION ADDED]", user.id, from, to);
 			res.end(JSON.stringify({
 				success: 'Added region.'
 			}));
