@@ -117,26 +117,26 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, point2, size) {
 	var satObjects = [];
 
-	satObjects.push(
-		new SAT.Circle(
-			new SAT.Vector(point1[0], point1[1]),
-			size
-		)
-	);
+	// satObjects.push(
+	// 	new SAT.Circle(
+	// 		new SAT.Vector(point1[0], point1[1]),
+	// 		size
+	// 	)
+	// );
 
-	satObjects.push(
-		new SAT.Circle(
-			new SAT.Vector(point2[0], point2[1]),
-			size
-		)
-	);
+	// satObjects.push(
+	// 	new SAT.Circle(
+	// 		new SAT.Vector(point2[0], point2[1]),
+	// 		size
+	// 	)
+	// );
 
 	// Move the points such that point1 is at 0, 0
 	var newPoint2 = new SAT.Vector(point2[0] - point1[0],
 	                               point2[1] - point1[1]);
 
 	// Rotate such that the line is on the x axis
-	var angle = Math.atan2(newPoint2[0], newPoint2[1]);
+	var angle = Math.atan2(newPoint2.x, newPoint2.y);
 	newPoint2.rotate(-angle);
 
 	// Calculate the 4 points
@@ -160,6 +160,8 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 			points
 		)
 	);
+
+	console.log(JSON.stringify(satObjects[0].calcPoints));
 
 	return satObjects;
 };
@@ -204,6 +206,7 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (o
 		for (var i = 0; i < relevantRegions.length; i++) {
 			if (relevantRegions[i].owner === owner) continue;
 
+			console.log(satObjects[k], relevantRegions[i].satBox)
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k]))
 					return true;
