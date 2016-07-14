@@ -245,9 +245,9 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 	var maxX = Math.max(from[0], to[0]);
 	var maxY = Math.max(from[1], to[1]);
 
-	var collisionString = "? < maxX AND";
-	   collisionString += "? > minX AND";
-	   collisionString += "? < maxY AND";
+	var collisionString = "? < maxX AND ";
+	   collisionString += "? > minX AND ";
+	   collisionString += "? < maxY AND ";
 	   collisionString += "? > minY";
 
 	this.database.query("SELECT * FROM regions WHERE owner != ? AND NOT(" + collisionString + ")",
