@@ -117,12 +117,58 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 	}.bind(this));
 };
 
-Protocol.prototype.satObjectFromBrush = function satObjectFromBrush () {
+Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, point2, size) {
+	var satObjects = [];
 
+	satObjects.push(
+		new SAT.Circle(
+			new Sat.vector(point1[0], point1[1]),
+			size
+		)
+	);
+
+	satObjects.push(
+		new SAT.Circle(
+			new Sat.vector(point2[0], point2[1]),
+			size
+		)
+	);
+
+	// Move the points such that point1 is at 0, 0
+	var newPoint2 = new SAT.vector(point2[0] - point1[0],
+	                               point2[1] - point1[1]);
+
+	// Rotate such that the line is on the x axis
+	var angle = Math.atan2(newPoint2[0], newPoint2[1]);
+	newPoint2.rotate(-angle);
+
+	// Calculate the 4 points
+	var points = [
+		new SAT.vector(0, -size / 2)
+		new SAT.vector(0, size / 2);
+		new SAT.vector(newPoint2.x, size / 2);
+		new SAT.vector(newPoint2.x, -size / 2);
+	];
+
+	// Rotate back and move to the original location
+	var point1Sat = new SAT.Vector(point1[0], point1[1]);
+	for (var k = 0; k < points.length; k++) {
+		points[k].rotate(angle);
+		points[k].add(point1Sat);
+	}
+
+	satObjects.push(
+		new SAT.Polygon(
+			new SAT.Vector(),
+			points
+		)
+	);
+
+	return satObjects;
 };
 
-Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion () {
-
+Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (satObjects) {
+	
 };
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
@@ -629,6 +675,12 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 
+			var objects = protocol.satObjectsFromBrush(
+				[drawing.x, drawing.y],
+				[drawing.x1 || drawing.x, drawing.y1 || drawing.y],
+				drawing.size
+			);
+
 			drawing.socketid = socket.id;
 			protocol.drawTogether.addDrawing(socket.room, drawing, function () {
 				protocol.sendDrawing(socket.room, socket.id, drawing);
@@ -710,6 +762,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 				socket.ink -= usage;
 			}
+
+			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, lastPathSize);
 
 			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
 			callback(true);
