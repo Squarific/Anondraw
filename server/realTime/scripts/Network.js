@@ -86,8 +86,6 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.leftSocketIpAndId = {};  // socketid: {ip: "", uKey: "", rep: rep, time: Date.now()}
 	setInterval(this.inkTick.bind(this), 5 * 1000);
 	setInterval(this.clearLeftTick.bind(this, 180 * 1000));
-
-	this.updateProtectedRegions();
 }
 
 Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (room) {
@@ -95,11 +93,11 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 		room: room
 	}, function (err, data) {
 		if (err) {
-			throw "Can't get protected regions for room " + room + " Err:" + err;
+			throw "Can't get protected regions for room " + room + " Err:" + JSON.stringify(err);
 		}
 
 		if (typeof data.length !== "number") {
-			throw "";
+			throw "Data was not an array";
 		}
 
 		this.protectedRegions[room] = rbush();
@@ -143,10 +141,10 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 
 	// Calculate the 4 points
 	var points = [
-		new SAT.vector(0, -size / 2)
-		new SAT.vector(0, size / 2);
-		new SAT.vector(newPoint2.x, size / 2);
-		new SAT.vector(newPoint2.x, -size / 2);
+		new SAT.vector(0, -size / 2),
+		new SAT.vector(0, size / 2),
+		new SAT.vector(newPoint2.x, size / 2),
+		new SAT.vector(newPoint2.x, -size / 2)
 	];
 
 	// Rotate back and move to the original location
