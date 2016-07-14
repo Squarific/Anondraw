@@ -110,8 +110,7 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 			var width = data.maxX - data.minX;
 			var height = data.maxY - data.minY;
 
-			var box = new SAT.Box(base, width, height);
-			data[k].satBox = box;
+			data[k].satBox = (new SAT.Box(base, width, height)).toPolygon();
 			this.protectedRegions[room].insert(data[k]);
 		}
 	}.bind(this));
@@ -167,8 +166,55 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 	return satObjects;
 };
 
-Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (satObjects) {
-	
+Protocol.prototype.getRegionSearchFromSat = function getRegionSearchFromSat (satObject) {
+	if (satObject.r) {
+		return {
+			minX: satObject.pos.x - radius,
+			minY: satObject.pos.y - radius,
+			maxX: satObject.pos.x + radius,
+			maxY: satObject.pos.y + radius,
+		};
+	} else {
+		var minX = Infinity,
+		    maxX = -Infinity,
+		    minY = Infinity,
+		    maxY = -Infinity;
+
+		for (var k = 0; k < satObject.calcPoints.length; k++) {
+			minX = Math.min(minX, satObject.calcPoints[k].x);
+			maxX = Math.max(maxX, satObject.calcPoints[k].x);
+			minY = Math.min(minY, satObject.calcPoints[k].y);
+			maxY = Math.max(maxY, satObject.calcPoints[k].y);
+		}
+
+		return {
+			minX: minX,
+			maxX: maxX,
+			minY: minY,
+			maxY: maxY
+		};
+	}
+};
+
+Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (owner, satObjects, room) {
+	for (var k = 0; k < satObjects.length; k++) {
+		var serachRegion = this.getRegionSearchFromSat(satObjects[k]);
+		var relevantRegions = this.protectedRegions[room].search(serachRegion);
+
+		for (var i = 0; i < relevantRegions.length; i++) {
+			if (relevantRegions[i].owner === owner) continue;
+
+			if (satObjects[k].r) {
+				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k]))
+					return true;
+			} else {
+				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k]))
+					return true
+			}
+		}
+	}
+
+	return false;
 };
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
@@ -680,6 +726,12 @@ Protocol.prototype.bindIO = function bindIO () {
 				[drawing.x1 || drawing.x, drawing.y1 || drawing.y],
 				drawing.size
 			);
+
+			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
+				protocol.informClient(socket, "This region is protected!");
+				callback();
+				return;
+			}
 
 			drawing.socketid = socket.id;
 			protocol.drawTogether.addDrawing(socket.room, drawing, function () {
