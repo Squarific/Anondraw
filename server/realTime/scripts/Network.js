@@ -210,7 +210,6 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (o
 		for (var i = 0; i < relevantRegions.length; i++) {
 			if (relevantRegions[i].owner === owner) continue;
 
-			console.log(satObjects[k], relevantRegions[i].satBox)
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k]))
 					return true;
@@ -716,6 +715,18 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			var objects = protocol.satObjectsFromBrush(
+				[drawing.x, drawing.y],
+				[drawing.x1 || drawing.x, drawing.y1 || drawing.y],
+				drawing.size
+			);
+
+			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
+				protocol.informClient(socket, "This region is protected!");
+				callback();
+				return;
+			}
+
 			// If we aren't in a private room, check our ink
 			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromDrawing(drawing);
@@ -727,18 +738,6 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 
 				socket.ink -= usage;
-			}
-
-			var objects = protocol.satObjectsFromBrush(
-				[drawing.x, drawing.y],
-				[drawing.x1 || drawing.x, drawing.y1 || drawing.y],
-				drawing.size
-			);
-
-			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
-				protocol.informClient(socket, "This region is protected!");
-				callback();
-				return;
 			}
 
 			drawing.socketid = socket.id;
@@ -807,6 +806,14 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
+			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, socket.lastPathSize);
+
+			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
+				protocol.informClient(socket, "This region is protected!");
+				callback();
+				return;
+			}
+
 			// If we aren't in a private room, check our ink
 			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
@@ -821,14 +828,6 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 
 				socket.ink -= usage;
-			}
-
-			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, socket.lastPathSize);
-
-			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
-				protocol.informClient(socket, "This region is protected!");
-				callback();
-				return;
 			}
 
 			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
