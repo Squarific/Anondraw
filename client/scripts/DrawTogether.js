@@ -1906,7 +1906,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Server hosting", "Future development"];
+	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
