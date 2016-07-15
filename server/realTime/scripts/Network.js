@@ -114,7 +114,7 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 				new SAT.Vector(data[k].maxX, data[k].maxY),
 				new SAT.Vector(data[k].minX, data[k].maxY),
 			]);
-			console.log(data[k].satBox);
+
 			this.protectedRegions[room].insert(data[k]);
 		}
 	}.bind(this));
@@ -123,19 +123,19 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, point2, size) {
 	var satObjects = [];
 
-	// satObjects.push(
-	// 	new SAT.Circle(
-	// 		new SAT.Vector(point1[0], point1[1]),
-	// 		size
-	// 	)
-	// );
+	satObjects.push(
+		new SAT.Circle(
+			new SAT.Vector(point1[0], point1[1]),
+			size
+		)
+	);
 
-	// satObjects.push(
-	// 	new SAT.Circle(
-	// 		new SAT.Vector(point2[0], point2[1]),
-	// 		size
-	// 	)
-	// );
+	satObjects.push(
+		new SAT.Circle(
+			new SAT.Vector(point2[0], point2[1]),
+			size
+		)
+	);
 
 	// Move the points such that point1 is at 0, 0
 	var newPoint2 = new SAT.Vector(point2[0] - point1[0],
@@ -166,8 +166,6 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 			points
 		)
 	);
-
-	console.log(JSON.stringify(satObjects[0].calcPoints));
 
 	return satObjects;
 };
