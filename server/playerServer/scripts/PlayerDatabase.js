@@ -254,7 +254,8 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 		[userid, minX, maxX, minY, maxY, room],
 		function (err, rows) {
 			if (err) {
-				callback(err);
+				callback("Database error. Please contact an admin. (GETPREGIONOVERLAP)");
+				console.log("Get protected region overlap databse error", err);
 				return;
 			}
 
@@ -280,7 +281,8 @@ PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (roo
 	// TODO: Select permissions
 	this.database.query("SELECT owner, minX, minY, maxX, maxY FROM regions WHERE room = ?", [room], function (err, rows, fields) {
 		if (err) {
-			callback(err);
+			callback("Database error. Please contact an admin. (GETPREGION)");
+			console.log("Get protected region databse error", err);
 			return;
 		}
 

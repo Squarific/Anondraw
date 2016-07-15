@@ -443,7 +443,7 @@ var server = http.createServer(function (req, res) {
 			if (err) {
 				console.log('Creat protected region database error', err, user.id, from, to);
 				res.end(JSON.stringify({
-					error: 'Something went wrong while creating your region. Contact an admin.'
+					error: err
 				}));
 				return;
 			}
@@ -473,7 +473,7 @@ var server = http.createServer(function (req, res) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
-					error: 'Something went wrong while deleting your regions. Contact an admin.'
+					error: err
 				}));
 				return;
 			}
