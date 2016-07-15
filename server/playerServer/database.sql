@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS regions (
     maxY BIGINT,
     room VARCHAR(255),
     INDEX (room),
-    INDEX (owner, maxX, minX, maxY, minY)
+    INDEX (owner, maxX, minX, maxY, minY, room)
 );
 
 ALTER TABLE ipbans ADD INDEX banned_by (banned_by);

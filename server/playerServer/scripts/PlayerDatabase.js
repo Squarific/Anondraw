@@ -250,8 +250,8 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 	   collisionString += "? < maxY AND ";
 	   collisionString += "? > minY";
 
-	this.database.query("SELECT * FROM regions WHERE owner != ? AND NOT(" + collisionString + ")",
-		[userid, minX, maxX, minY, maxY],
+	this.database.query("SELECT * FROM regions WHERE owner != ? AND NOT(" + collisionString + ") AND room = ?",
+		[userid, minX, maxX, minY, maxY, room],
 		function (err, rows) {
 			if (err) {
 				callback(err);
