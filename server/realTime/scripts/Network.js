@@ -357,6 +357,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.emit("setink", socket.ink);
 
 		socket.permissions = {}; //{someid: true/false}
+		socket.messages = {};
 		socket.ip = socket.client.conn.remoteAddress;
 
 		if (!socket.ip) {
