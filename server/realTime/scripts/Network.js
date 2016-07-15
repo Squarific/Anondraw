@@ -5,7 +5,7 @@ var rbush = require("rbush");
 var SAT = require('sat');
 
 var room_regex = /^[a-z0-9_]+$/i;
-var shadowbanned = ["luke merle", "luke 2 merle", "luke 3 merle"];
+var shadowbanned = [];
 
 // User settings
 var MAX_USERS_IN_ROOM = 18;
@@ -31,6 +31,8 @@ var PER_REP_GEN = 1500;
 
 // When do we forget the sockets that left
 var FORGET_SOCKET_AFTER = 18 * 60 * 1000;
+
+var INFORM_CLIENT_TIME_BETWEEN_MESSAGE = 1000;
 
 var SAME_IP_INK_MESSAGE = "You will not get any ink because someone else on your ip has already gotten some.";
 
@@ -277,10 +279,17 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 };
 
 Protocol.prototype.informClient = function informClient (socket, message) {
+	if (socket.messages[message] &&
+	    Date.now() - socket.messages[message] < INFORM_CLIENT_TIME_BETWEEN_MESSAGE) {
+		return;
+	}
+
 	socket.emit("chatmessage", {
 		user: "SERVER",
 		message: message
 	});
+
+	socket.messages[message] = Date.now();
 };
 
 Protocol.prototype.getUserList = function getUserList (room) {
@@ -806,7 +815,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, socket.lastPathSize);
+			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint || point, socket.lastPathSize);
 
 			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
 				protocol.informClient(socket, "This region is protected!");
