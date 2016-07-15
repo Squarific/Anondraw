@@ -1732,7 +1732,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	this.selectWindow = selectWindow;
 
 	var text = selectWindow.appendChild(document.createElement("h1"));
-	text.appendChild(document.createTextNode("Draw with friends or strangers!"));
+	text.appendChild(document.createTextNode("Anondraw - Draw with friends or strangers!"));
 	text.className = "drawtogether-welcome-text";
 
 	// var text = selectWindow.appendChild(document.createElement("h1"));
@@ -1741,8 +1741,10 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	// text.className = "drawtogether-welcome-text-error";
 
 	var text = selectWindow.appendChild(document.createElement("div"));
-	text.appendChild(document.createTextNode("Realtime in private or public chat rooms with an unlimited canvas. Choose with whom you want to draw:"));
 	text.className = "drawtogether-welcome-text-box";
+	
+	var textContainer = text.appendChild(document.createElement("span"));
+	textContainer.appendChild(document.createTextNode("Realtime in private or public chat rooms with an unlimited canvas. Choose with whom you want to draw:"));
 
 	//var text = selectWindow.appendChild(document.createElement("div"));
 	//text.appendChild(document.createTextNode("New feature (march 2016): zoom tool, tiles now also fade in! And we got a new chat layout."));

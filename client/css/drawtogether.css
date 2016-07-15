@@ -14,7 +14,8 @@ input, button, textarea {
 h1 {
   color:white;
   margin:0;
-  padding:1em;
+  padding:0.5em;
+  font-size: 1.5em;
 
   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#5b84a3+0,3a5774+100 */
   background: #5b84a3; /* Old browsers */
@@ -95,8 +96,18 @@ input.paint-texttool {
 
 .drawtogether-welcome-text-box {
   background:#21374D;
-  padding:1em;
-  color:white;
+  padding: 5em;
+  font-size: 2em;
+  color: white;
+  background-image: url(images/header.png);
+  text-shadow: 2px 2px 4px rgb(3, 47, 64);
+  font-weight:bold;
+}
+
+.drawtogether-welcome-text-box span {
+  background: rgba(0,0,0,0.75);
+  display:inline-block;
+  padding:0.5em;
 }
 
 .drawtogether-notification-text-box {
