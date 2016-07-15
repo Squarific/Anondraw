@@ -2061,29 +2061,35 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	title.appendChild(document.createTextNode("We just had an update!"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Current new features:"));
+	p.appendChild(document.createTextNode("Current new feature:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Export in high quality"];
+	var features = ["Private regions for premium members"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
 	}
 
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Regards,"));
-	p.appendChild(document.createElement("br"));
-	p.appendChild(document.createTextNode("Anondraw Team"));
+	// var p = container.appendChild(document.createElement("p"));
+	// p.appendChild(document.createTextNode("Regards,"));
+	// p.appendChild(document.createElement("br"));
+	// p.appendChild(document.createTextNode("Anondraw Team"));
+
+	// var p = container.appendChild(document.createElement("p"));
+	// p.appendChild(document.createTextNode("Ps. want more features?"));
+
+	// var p = container.appendChild(document.createElement("p"));
+	// p.appendChild(document.createTextNode("Getting premium helps us pay for development time and the server hosting."));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Ps. want more features?"));
+	p.appendChild(document.createTextNode("If you are premium you can create a private region. Noone besides you can then draw there."));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Getting premium helps us pay for development time and the server hosting."));
+	p.appendChild(document.createTextNode("In the future you will be able to pick who gets to draw in it and who doesn't."));
 
 	var premiumButton = container.appendChild(document.createElement("div"));
-	premiumButton.appendChild(document.createTextNode("Get premium!"));
+	premiumButton.appendChild(document.createTextNode("Want to enjoy this feature? Get premium!"));
 	premiumButton.className = "drawtogether-button";
 	premiumButton.addEventListener("click", function () {
 		if (featureWindow.parentNode)
