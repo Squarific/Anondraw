@@ -1822,9 +1822,9 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 
 			//this.redditDrawings.appendChild(this.createThumbLink("http://nyrrti.tumblr.com/", "Nyrrtis tumblr", "http://40.media.tumblr.com/fafb08a2535fa9e32cd54d5add9321d0/tumblr_o3w1sm1NYg1tyibijo1_1280.png"));
 			//this.redditDrawings.appendChild(this.createThumbLink("http://dojaboys.tumblr.com/", "Dojaboys (alien) tumblr", "http://40.media.tumblr.com/222bcca3dcd8d86ba27d02a9e8cba560/tumblr_o3zfyfHJfj1u8vwn5o1_1280.png"));
-			var div = document.createElement("div");
-			div.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/VOxqb3_0IpE?start=261" frameborder="0" allowfullscreen></iframe>';
-			this.redditDrawings.appendChild(div);
+			// var div = document.createElement("div");
+			// div.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/VOxqb3_0IpE?start=261" frameborder="0" allowfullscreen></iframe>';
+			// this.redditDrawings.appendChild(div);
 
 			for (var k = 0; k < posts.length; k++) {
 				//if (posts[k].data.thumbnail == "self" || posts[k].data.thumbnail == "default" || posts[k].data.thumbnail == "nsfw") continue;

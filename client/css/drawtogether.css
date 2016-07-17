@@ -261,11 +261,10 @@ input.paint-texttool {
 
   .drawtogether-redditpost-thumb {
     display:block;
-    height:10em;
+    min-width:100%;
   }
 
   .drawtogether-redditpost-thumbfiller {
-    height:10em;
     min-width:10em;
     padding:1em;
     text-align:center;
@@ -300,6 +299,8 @@ input.paint-texttool {
     text-decoration: none;
     color:white;
     background:rgba(0, 0, 0, 0.1);
+    height:10em;
+    width:10em;
   }
 
   .drawtogether-redditdrawings a:hover {
@@ -309,7 +310,8 @@ input.paint-texttool {
 
   .drawtogether-redditdrawings-title {
     display:block !important;
-    width:100%;
+    width:100% !important;
+    height:initial !important;
     margin-bottom:1em;
     color:white;
     font-weight:800;

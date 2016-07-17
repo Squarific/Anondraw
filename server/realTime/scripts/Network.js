@@ -143,15 +143,9 @@ Protocol.prototype.satObjectsFromBrush = function satObjectsFromBrush (point1, p
 	var newPoint2 = new SAT.Vector(point2[0] - point1[0],
 	                               point2[1] - point1[1]);
 
-	console.log("Points", point2, point1);
-	console.log("NewPoint2", newPoint2);
-
 	// Rotate such that the line is on the x axis
 	var angle = Math.atan2(newPoint2.y, newPoint2.x);
 	newPoint2.rotate(-angle);
-
-	console.log("Angle", angle);
-	console.log("Rotate newpoint2", newPoint2);
 
 	// Calculate the 4 points
 	var points = [
@@ -213,7 +207,6 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (o
 
 	for (var k = 0; k < satObjects.length; k++) {
 		var searchRegion = this.getRegionSearchFromSat(satObjects[k]);
-		if (!satObjects[k].r) console.log(searchRegion, satObjects[k]);
 		var relevantRegions = this.protectedRegions[room].search(searchRegion);
 
 		for (var i = 0; i < relevantRegions.length; i++) {
