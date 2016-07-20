@@ -92,6 +92,9 @@ function DrawTogether (container, settings) {
 // Hardcoded values who should probably be refactored to the server
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 
+// After how much time should we remind moderators of their duty?
+DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
+
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
@@ -477,6 +480,18 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("setreputation", function (rep) {
 		self.reputation = rep;
 		console.log("Our reputation is ", rep);
+		if (self.reputation >= self.KICKBAN_MIN_REP) {
+			var lastOpen = localStorage.getItem('moderatorwelcomewindowlastopen');
+			if (lastOpen) {
+				lastOpen = parseInt(lastOpen);
+				var remindTime = lastOpen + self.MODERATORWELCOMEWINDOWOPENAFTER;
+				if (remindTime < Date.now()) {
+					drawTogether.openModeratorWelcomeWindow();
+				}
+			} else {
+				drawTogether.openModeratorWelcomeWindow();
+			}			
+		}
 	});
 
 	this.network.on("setink", function (ink) {
@@ -2022,7 +2037,7 @@ DrawTogether.prototype.openFeedbackWindow = function openFeedbackWindow () {
 	var feedbackWindow = this.gui.createWindow({title: "Feedback"});
 	feedbackWindow.classList.add("feedback-window");
 
-	var container = welcomeWindow.appendChild(document.createElement("div"))
+	var container = feedbackWindow.appendChild(document.createElement("div"))
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
@@ -2100,6 +2115,60 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 		this.openPremiumBuyWindow();
 	}.bind(this));
 };
+
+DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcomeWindow () {
+	localStorage.setItem('moderatorwelcomewindowlastopen', Date.now());
+	var moderatorWindow = this.gui.createWindow({ title: "You are a moderator!"});
+
+	moderatorWindow.classList.add("moderator-window");
+
+	var container = moderatorWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("You got more than " + this.KICKBAN_MIN_REP + " rep!"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode(
+		"That means you can now kick and ban people in all rooms. "+
+		"That gives you a lot of power, and with great power comes great responsibilty."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("To help you with that we will give you some tips!"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("A good moderator diffuses situations. Try to remain calm and have a thick skin."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Always assume good faith." +
+		"That means that if someone says or does something you have to assume they did not do it to be annoying." +
+		"It also means that you have to assume that if they do something that is not allowed you should assume they did it on accident."));
+
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("Ban times"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone blatently griefs, feel free to ban them for over a week."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone is spamming or being annoying, a 5 minute timeout should suffice."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If they come back after the timeout and repeat it, you can ban for longer periods."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone drew something that you might consider grief but might be a mistake, ask them to undo it."));
+
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("Questions"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If you have a question, feel free to mail info@anondraw.com or ask squarifc on discord."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("This is also the place you should direct users with questions you don't know the answer to."));
+};
+
 
 DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	var faq = document.createElement("div");
