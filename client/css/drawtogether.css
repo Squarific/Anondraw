@@ -56,6 +56,10 @@ input.paint-texttool {
   vertical-align: middle;
 }
 
+.favorites-button {
+  padding:0.3em !important;
+}
+
 .contactinfo {
     padding: 2em;
     color: white;
