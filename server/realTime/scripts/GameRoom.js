@@ -1,8 +1,8 @@
 var words = require("./words.js");
 
-var TIME_PER_WORD = 90 * 1000; // How long can we draw
+var TIME_PER_WORD = 120 * 1000; // How long can we draw
 var TIME_TO_PICK = 15 * 1000; // How long we can pick
-var WORD_PICK_COUNT = 3; // Amount of words we can pick from
+var WORD_PICK_COUNT = 5; // Amount of words we can pick from
 
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex ;
@@ -60,6 +60,8 @@ GameRoom.prototype.leave = function (socket) {
 
 GameRoom.prototype.chatmessage = function chatmessage (socket, message) {
 	if (socket == this.currentPlayer) return;
+
+	if (!message || typeof message.toLowerCase !== "function") return;
 
 	if (message.toLowerCase().indexOf(this.currentWord.toLowerCase()) !== -1) {
 		// Word has been guessed, get a new word and assign next player
