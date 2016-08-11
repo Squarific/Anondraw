@@ -2217,19 +2217,19 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "I want to draw privately with some people, is that possible?",
 		answer: "Yes, in the home screen click on draw with friends and then share the invite url printed in the chat. If you are already in a room, simply click on the room button and then click create private room after giving it a name."
-	}, /* {
+	},  {
 		question: "How do you play the game?",
 		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
-	},*/ {
+	}, {
 		question: "Why can't I draw? How do I regain Ink?",
 		answer: "You probably don't have any ink left. You can get more ink by waiting 30 seconds. If you still don't get enough ink try making an account, the more reputation you have the more ink you get."
 	}, {
 		question: "What is that number with an R behind peoples names?",
 		answer: "That is the amount of reputation someone has. The more they have the more benefits they get."
-	},/* {
+	}, {
 		question: "What are those points behind some peoples names?",
 		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
-	},*/ {
+	}, {
 		question: "What benefits does reputation give you?",
 		answer: "At " + this.ZOOMED_OUT_MIN_REP + " reputation, you are allowed to draw while zoomed out. \n" +
 		        "At " + this.BIG_BRUSH_MIN_REP + " reputation, you are allowed to use brush sizes bigger than 10. \n" +
@@ -2248,6 +2248,12 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "So this is basicly a ms paint multiplayer app?",
 		answer: "You could call it that yea, it's a draw pad where you can draw something online."
+	}, {
+		question: "How long will my sketches be saved?",
+		answer: "Your sketches should remain forever. All drawings are saved on the pads every 6 hours, after this period they should be permanent."
+	}, {
+		question: "Can I play this like draw something but online?",
+		answer: "Yes, there is a gamemode where you get words and other people have to guess what you just drew."
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
