@@ -1759,7 +1759,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	text.className = "drawtogether-welcome-text-box";
 	
 	var textContainer = text.appendChild(document.createElement("span"));
-	textContainer.appendChild(document.createTextNode("Realtime in private or public chat rooms with an unlimited canvas. Choose with whom you want to draw:"));
+	textContainer.appendChild(document.createTextNode("Realtime paint on an unlimited canvas."));
 
 	//var text = selectWindow.appendChild(document.createElement("div"));
 	//text.appendChild(document.createTextNode("New feature (march 2016): zoom tool, tiles now also fade in! And we got a new chat layout."));
@@ -1822,6 +1822,8 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	var contactInfo = selectWindow.appendChild(document.createElement("div"));
 	contactInfo.appendChild(document.createTextNode("Feedback/contact: info@anondraw.com"));
 	contactInfo.classList.add("contactinfo");
+
+	pw_load();
 };
 
 DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings () {
@@ -1829,11 +1831,6 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 	req.addEventListener("readystatechange", function (event) {
 		if (req.readyState == 4 && req.status == 200) {
 			var posts = JSON.parse(req.responseText).data.children;
-			
-			var title = this.redditDrawings.appendChild(document.createElement("a"));
-			title.appendChild(document.createTextNode("Reddit gallery (/r/anondraw)"))
-			title.href = "http://www.reddit.com/r/anondraw";
-			title.className = "drawtogether-redditdrawings-title";
 
 			//this.redditDrawings.appendChild(this.createThumbLink("http://nyrrti.tumblr.com/", "Nyrrtis tumblr", "http://40.media.tumblr.com/fafb08a2535fa9e32cd54d5add9321d0/tumblr_o3w1sm1NYg1tyibijo1_1280.png"));
 			//this.redditDrawings.appendChild(this.createThumbLink("http://dojaboys.tumblr.com/", "Dojaboys (alien) tumblr", "http://40.media.tumblr.com/222bcca3dcd8d86ba27d02a9e8cba560/tumblr_o3zfyfHJfj1u8vwn5o1_1280.png"));
@@ -1849,6 +1846,28 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 	}.bind(this));
 	req.open("GET", "https://www.reddit.com/r/anondraw/.json");
 	req.send();
+	
+	var title = this.redditDrawings.appendChild(document.createElement("a"));
+	title.appendChild(document.createTextNode("Reddit gallery (/r/anondraw)"))
+	title.href = "http://www.reddit.com/r/anondraw";
+	title.className = "drawtogether-redditdrawings-title";
+
+	//this.redditDrawings.appendChild(this.createRedditPostAd());
+};
+
+DrawTogether.prototype.createRedditPostAd = function createRedditPostAd () {
+	var ad = '<!-- Project Wonderful Ad Box Code -->' +
+	'<div id="pw_adbox_78948_4_0"></div>' +
+	'<script type="text/javascript"></script>' +
+	'<noscript><map name="admap78948" id="admap78948"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=78948&type=4" shape="rect" coords="0,0,125,125" title="" alt="" target="_blank" /></map>' +
+	'<table cellpadding="0" cellspacing="0" style="width:125px;border-style:none;background-color:#ffffff;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=78948&type=4" style="width:125px;height:125px;border-style:none;" usemap="#admap78948" alt="" /></td></tr><tr><td style="background-color:#ffffff;" colspan="1"><center><a style="font-size:10px;color:#0000ff;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=78948&type=4" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table>' +
+	'</noscript>' +
+	'<!-- End Project Wonderful Ad Box Code -->';
+
+	var adContainer = document.createElement("div");
+	adContainer.className = "adcontainer drawtogether-redditpost";
+	adContainer.innerHTML = ad;
+	return adContainer;
 };
 
 DrawTogether.prototype.createThumbLink = function createThumbLink (url, text, imageurl) {
@@ -2174,6 +2193,18 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	var faq = document.createElement("div");
 	faq.className = "drawtogether-faq";
 
+	var adContainer = faq.appendChild(document.createElement("div"));
+	adContainer.className = "adcontainer drawtogether-question";
+
+	var ad = '<!-- Project Wonderful Ad Box Code -->' +
+	         '<div style="text-align:center;"><div style="display:inline-block;" id="pw_adbox_78949_1_0"></div></div>' +
+	         '<script type="text/javascript"></script>' +
+	         '<noscript><div style="text-align:center;"><div style="display:inline-block;"><map name="admap78949" id="admap78949"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=78949&type=1" shape="rect" coords="0,0,468,60" title="" alt="" target="_blank" /></map>' +
+	         '<table cellpadding="0" cellspacing="0" style="width:468px;border-style:none;background-color:#3A5774;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=78949&type=1" style="width:468px;height:60px;border-style:none;" usemap="#admap78949" alt="" /></td></tr><tr><td style="background-color:#3A5774;" colspan="1"><center><a style="font-size:10px;color:#ffffff;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=78949&type=1" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table></div></div>' +
+	         '</noscript>' +
+	         '<!-- End Project Wonderful Ad Box Code -->';
+	adContainer.innerHTML = ad;
+
 	var questions = [{
 		question: "What is anondraw?",
 		answer: "It's a website where you can draw or doodle in group with friends or strangers. Join one of the rooms and start drawing and collaborating with the group. The interactive drawing works on the iPad and other android tablets. You can also doodle on phones."
@@ -2214,6 +2245,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "I want to draw in group but I don't want people to destroy my drawing/doodle.",
 		answer: "Move away from the center where there are less people then get some reputation from your drawings and use the member rooms."
+	}, {
+		question: "So this is basicly a ms paint multiplayer app?",
+		answer: "You could call it that yea, it's a draw pad where you can draw something online."
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
