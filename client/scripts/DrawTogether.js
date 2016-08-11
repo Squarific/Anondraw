@@ -1792,7 +1792,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 
 	var gameButton = buttonContainer.appendChild(document.createElement("div"));
 	gameButton.className = "drawtogether-modeselect-button";
-	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word (NEW!)';
+	gameButton.innerHTML = '<img src="images/game.png"/><br/>Play guess word';
 	gameButton.addEventListener("click", function () {
 		this.gui.prompt("With whom would you like to play?", ["Join strangers", "Create private room", "Cancel"], function (whom) {
 			if (whom == "Cancel") this.openModeSelector();
