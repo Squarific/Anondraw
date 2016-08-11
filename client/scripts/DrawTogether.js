@@ -1750,20 +1750,11 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	text.appendChild(document.createTextNode("Anondraw - Draw with friends or strangers!"));
 	text.className = "drawtogether-welcome-text";
 
-	// var text = selectWindow.appendChild(document.createElement("h1"));
-	// text.innerText = "There is some heavier than usual load, so the server might lagg a bit.";
-	// text.textContent = "There is some heavier than usual load, so the server might lagg a bit.";
-	// text.className = "drawtogether-welcome-text-error";
-
 	var text = selectWindow.appendChild(document.createElement("div"));
 	text.className = "drawtogether-welcome-text-box";
 	
 	var textContainer = text.appendChild(document.createElement("span"));
 	textContainer.appendChild(document.createTextNode("Realtime paint on an unlimited canvas."));
-
-	//var text = selectWindow.appendChild(document.createElement("div"));
-	//text.appendChild(document.createTextNode("New feature (march 2016): zoom tool, tiles now also fade in! And we got a new chat layout."));
-	//text.className = "drawtogether-notification-text-box";
 
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
 	buttonContainer.className = "drawtogether-buttoncontainer";
@@ -1780,7 +1771,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 
 	var privateButton = buttonContainer.appendChild(document.createElement("div"));
 	privateButton.className = "drawtogether-modeselect-button";
-	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Alone or with friends';
+	privateButton.innerHTML = '<img src="images/invite.png"/><br/>Sketch alone or with friends';
 	privateButton.addEventListener("click", function () {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room
 		this.changeRoom(this.settings.room, undefined, 0, 0, true);
