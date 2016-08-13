@@ -8,7 +8,7 @@ var room_regex = /^[a-z0-9_]+$/i;
 var shadowbanned = [];
 
 // User settings
-var MAX_USERS_IN_ROOM = 18;
+var MAX_USERS_IN_ROOM = 40;
 var MAX_USERS_IN_GAMEROOM = 12;
 
 // Reputation settings

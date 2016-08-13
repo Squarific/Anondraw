@@ -256,12 +256,13 @@ input.paint-texttool {
     text-align:left;
     vertical-align: bottom;
     overflow:hidden;
-    min-width:20em;
+    margin:5px;
   }
 
   .drawtogether-redditpost-thumb {
     display:block;
     min-width:100%;
+    min-height:100%;
   }
 
   .drawtogether-redditpost-thumbfiller {
@@ -292,15 +293,15 @@ input.paint-texttool {
     left: calc(0.5em);
   }
 
-  .drawtogether-redditdrawings a {
+  .drawtogether-redditdrawings > a {
     display:inline-block;
     text-align:center;
     position:relative;
     text-decoration: none;
     color:white;
     background:rgba(0, 0, 0, 0.1);
-    height:10em;
-    width:10em;
+    height:300px;
+    width:300px;
   }
 
   .drawtogether-redditdrawings a:hover {
@@ -841,6 +842,12 @@ input.paint-texttool {
 
 .drawtogether-display-on-small {
   display:none;
+}
+
+@media (max-width: 1550px) {
+  .adcontainer.drawtogether-question {
+    zoom: 0.5;
+  }
 }
 
 @media (min-width: 1175px) {
