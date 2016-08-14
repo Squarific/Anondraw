@@ -740,8 +740,6 @@ DrawTogether.prototype.updateInk = function updateInk () {
 };
 
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
-var num = 5;
-	console.warn('hey',num);
 	if (!this.network.socket) return;
 	this.network.socket.emit("drawing", this.encodeDrawing(drawing), callback);
 
@@ -1201,7 +1199,6 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
-	//this.chat.addMessage("test");
 	if ((this.current_room.indexOf("game_") === 0 ||
 	    this.current_room.indexOf("private_game_") === 0) &&
 	    !this.weAreCurrentPlayer) {
@@ -1252,12 +1249,8 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success) {
-			console.log("success:", success); 
 			if (!success) event.removePathPoint();
-		},1000)); // 1 second timeout which is a lot for a websocket
-
-
-
+		},10000)); // 10 second timeout which is a lot for a websocket
 	this.lastPathPoint = event.point;
 };
 
