@@ -17,7 +17,7 @@ function DrawTogether (container, settings) {
 	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
 	this.lastZoomWarning = 0;       // Last time we showed the zoom warning
 	this.lastViewDeduction = 0;     // Time since we last deducted someones viewscore
-	this.last_timeout_error = 0;    // Last time since a socket timed out
+	this.lastTimeoutError = 0;    // Last time since a socket timed out
 
 	this.lastScreenMove = Date.now();    // Last time we moved the screen
 	this.lastScreenMoveStartPosition;    // Last start position
@@ -99,7 +99,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 2;
+DrawTogether.prototype.CLIENT_VERSION = 3;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -1204,13 +1204,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint.changeTool("grab");
 
 	// Add the location button to the paint area
-	var locationButton = this.paint.coordDiv.appendChild(document.createElement("div"));
-	locationButton.className = "control-button";
+	// var locationButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	// locationButton.className = "control-button";
 
-	var locationImage = locationButton.appendChild(document.createElement("img"));
-	locationImage.src = "images/icons/locations.png";
-	locationImage.alt = "Locations";
-	locationImage.title = "Locations";
+	// var locationImage = locationButton.appendChild(document.createElement("img"));
+	// locationImage.src = "images/icons/locations.png";
+	// locationImage.alt = "Locations";
+	// locationImage.title = "Locations";
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
@@ -1266,7 +1266,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success) {
 			var curr_time = Date.now();
 
-			if(curr_time - this.last_timeout_error > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
+			if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
 				this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
 				this.last_error_timestamp = curr_time;
 			}
@@ -2111,11 +2111,11 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	title.appendChild(document.createTextNode("We just had an update!"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Current new feature:"));
+	p.appendChild(document.createTextNode("Current new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Private regions for premium members"];
+	var features = ["Private regions for premium members", "Thanks to intOrFloat the chat will now give you a warning if your drawings are not getting saved."];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));

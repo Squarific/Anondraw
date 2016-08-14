@@ -9,20 +9,20 @@
 // timeout: How long we wait in miliseconds for the library to respond
 
 // ctx: the this value for when the library failed
-// arguments: an array of arguments for when the library failed
+// args: an array of arguments for when the library failed
 
-function timeoutCallback(callback, timeout, ctx, arguments){
+function timeoutCallback(callback, timeout, ctx, args){
 	var called = false;
 	var interval = setTimeout(function(){
 		if(called)return;
 		called = true;		
-		callback.apply(ctx, arguments);
+		callback.apply(ctx, args);
 	}.bind(ctx),timeout); 
 
     return function(){
         if(called)return;
         called = true;
         clearTimeout(interval);
-        callback.apply(this, arguments);
+        callback.apply(this, args);
     }
 }
