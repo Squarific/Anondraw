@@ -742,6 +742,7 @@ DrawTogether.prototype.updateInk = function updateInk () {
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
 	if (!this.network.socket) return;
 	this.network.socket.emit("drawing", this.encodeDrawing(drawing), callback);
+
 };
 
 DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
@@ -1256,9 +1257,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 		this.updateInk();
 	}
 	
-	this.network.socket.emit("pp", event.point, function (success) {
-		if (!success) event.removePathPoint();
-	});
+	this.network.socket.emit("pp", event.point, timeoutCallback(function (success) {
+			if (!success) event.removePathPoint();
+		},10000,this));
 	this.lastPathPoint = event.point;
 };
 
