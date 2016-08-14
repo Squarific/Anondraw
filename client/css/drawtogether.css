@@ -48,11 +48,11 @@ input.paint-texttool {
   background-clip: text;
 }
 
-.random-button {
+.mouse-coords .control-button {
   padding:0.3em !important;
 }
 
-.random-button img {
+.mouse-coords .control-button img {
   vertical-align: middle;
 }
 
