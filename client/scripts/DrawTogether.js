@@ -17,6 +17,7 @@ function DrawTogether (container, settings) {
 	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
 	this.lastZoomWarning = 0;       // Last time we showed the zoom warning
 	this.lastViewDeduction = 0;     // Time since we last deducted someones viewscore
+	this.last_timeout_error = 0;    // Last time since a socket timed out
 
 	this.lastScreenMove = Date.now();    // Last time we moved the screen
 	this.lastScreenMoveStartPosition;    // Last start position
@@ -99,6 +100,11 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
 DrawTogether.prototype.CLIENT_VERSION = 2;
+
+// How many miliseconds does the server have to confirm our drawing
+DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
+
+DrawTogether.prototype.TIME_BETWEEN_TIMEOUT_WARNINGS = 5 * 1000;
 
 DrawTogether.prototype.defaultSettings = {
 	mode: "ask",                           // Mode: public, private, oneonone, join, game, main, ask, defaults to public
@@ -1258,8 +1264,15 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success) {
+			var curr_time = Date.now();
+
+			if(curr_time - this.last_timeout_error > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
+				this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
+				this.last_error_timestamp = curr_time;
+			}
+
 			if (!success) event.removePathPoint();
-		},10000,this));
+		}, this.SOCKET_TIMEOUT, [false]));
 	this.lastPathPoint = event.point;
 };
 
