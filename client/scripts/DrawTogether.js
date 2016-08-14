@@ -1250,7 +1250,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success) {
 			if (!success) event.removePathPoint();
-		},10000)); // 10 second timeout which is a lot for a websocket
+		},10000,this));
 	this.lastPathPoint = event.point;
 };
 

@@ -1,14 +1,6 @@
 //https://github.com/jakubknejzlik/node-timeout-callback
-function timeoutCallback(timeout,callback){
-	
-	//
-
-	var called = false;
-	if(typeof timeout === 'function'){// if timeCallback is called with only a function and no specific timeout time
-		callback = timeout; 
-		timeout = 10*1000; // default 10 seconds
-	}
-	
+function timeoutCallback(callback,timeout,ctx){
+	var called = false;	
 	var interval = setTimeout(function(){
 		if(called)return;
 			called = true;
@@ -19,13 +11,13 @@ function timeoutCallback(timeout,callback){
 			this.last_error_timestamp = curr_time;
 		}
 		
-		callback(false);
-	}.bind(drawTogether),timeout); 
+		callback.apply(this,[false]);
+	}.bind(ctx),timeout); 
 
     return function(){
         if(called)return;
         called = true;
-        clearTimeout(interval); // release setTimeout variable 
+        clearTimeout(interval);
         callback.apply(this,arguments);
     }
 }
