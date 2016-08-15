@@ -1263,16 +1263,18 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 		this.updateInk();
 	}
 	
-	this.network.socket.emit("pp", event.point, timeoutCallback(function (success) {
+	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
 			if (!success){ 
 				event.removePathPoint();
-				var curr_time = Date.now();
-				if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
-					this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
-					this.lastTimeoutError = curr_time;
+				if(typeof timeOut !== 'undefined' && timeOut){
+					var curr_time = Date.now();
+					if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
+						this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
+						this.lastTimeoutError = curr_time;
+					}
 				}
 			}
-		}, this.SOCKET_TIMEOUT, this, [false]));
+		}, this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
 	this.lastPathPoint = event.point;
 };
 
