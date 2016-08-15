@@ -1265,14 +1265,14 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success) {
 			var curr_time = Date.now();
-
+			console.log(this);
 			if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
 				this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
-				this.last_error_timestamp = curr_time;
+				this.lastTimeoutError = curr_time;
 			}
 
 			if (!success) event.removePathPoint();
-		}, this.SOCKET_TIMEOUT, [false]));
+		}, this.SOCKET_TIMEOUT, this, [false]));
 	this.lastPathPoint = event.point;
 };
 
