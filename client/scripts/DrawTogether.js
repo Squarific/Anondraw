@@ -1204,13 +1204,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint.changeTool("grab");
 
 	// Add the location button to the paint area
-	// var locationButton = this.paint.coordDiv.appendChild(document.createElement("div"));
-	// locationButton.className = "control-button";
+	var locationButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	locationButton.className = "control-button";
 
-	// var locationImage = locationButton.appendChild(document.createElement("img"));
-	// locationImage.src = "images/icons/locations.png";
-	// locationImage.alt = "Locations";
-	// locationImage.title = "Locations";
+	var locationImage = locationButton.appendChild(document.createElement("img"));
+	locationImage.src = "images/icons/locations.png";
+	locationImage.alt = "Locations";
+	locationImage.title = "Locations";
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
