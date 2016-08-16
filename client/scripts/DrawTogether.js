@@ -1121,7 +1121,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
-			if (!(this.reputation > this.BIG_BRUSH_MIN_REP) &&
+			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
 			    ((event.drawing.size > 10 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
 					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
@@ -1225,7 +1225,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	// Lower our ink with how much it takes to draw this
 	// Only do that if we are connected and in a room that does not start with private_ or game_
 	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
-		if (!(this.reputation > this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 10) {
+		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 10) {
 			if (Date.now() - this.lastBrushSizeWarning > 5000) {
 				this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 				this.lastBrushSizeWarning = Date.now();
@@ -2246,11 +2246,15 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		question: "What are those points behind some peoples names?",
 		answer: "If you play the gamemode you can earn points by guessing what other people are drawing."
 	}, {
+		question: "Are 3d party programs allowed?",
+		answer: 'They are as long as they are reasonable. So be cool about it. An example of drawing bots:' +
+		        ' <a href="http://anonbots.bitballoon.com/" alt="Anondraw bot">http://anonbots.bitballoon.com</a>'
+	}, {
 		question: "What benefits does reputation give you?",
 		answer: "At " + this.ZOOMED_OUT_MIN_REP + " reputation, you are allowed to draw while zoomed out. \n" +
 		        "At " + this.BIG_BRUSH_MIN_REP + " reputation, you are allowed to use brush sizes bigger than 10. \n" +
+		        "At 7 reputation, you can give upvotes to other people who have less reputation than you. \n" +
 		        "At 15 reputation, you can join the member only rooms and share an ip with other users without affecting your ink. \n" +
-		        "At 20 reputation, you can give upvotes to other people who have less reputation than you. \n" +
 		        "At " + this.KICKBAN_MIN_REP + "+ reputation, you can kickban people for a certain amount of time when they misbehave. \n "
 	}, {
 		question: "How do I get reputation?",
@@ -2270,10 +2274,6 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "Can I play this like draw something but online?",
 		answer: "Yes, there is a gamemode where you get words and other people have to guess what you just drew."
-	}, {
-		question: "Are 3d party programs allowed?",
-		answer: 'They are as long as they are reasonable. So be cool about it. An example of drawing bots:' +
-		        ' <a href="http://anonbots.bitballoon.com/" alt="Anondraw bot">http://anonbots.bitballoon.com</a>'
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
