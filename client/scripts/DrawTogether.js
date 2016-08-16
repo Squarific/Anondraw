@@ -1204,13 +1204,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint.changeTool("grab");
 
 	// Add the location button to the paint area
-	var locationButton = this.paint.coordDiv.appendChild(document.createElement("div"));
-	locationButton.className = "control-button";
+	// var locationButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	// locationButton.className = "control-button";
 
-	var locationImage = locationButton.appendChild(document.createElement("img"));
-	locationImage.src = "images/icons/locations.png";
-	locationImage.alt = "Locations";
-	locationImage.title = "Locations";
+	// var locationImage = locationButton.appendChild(document.createElement("img"));
+	// locationImage.src = "images/icons/locations.png";
+	// locationImage.alt = "Locations";
+	// locationImage.title = "Locations";
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
@@ -2270,6 +2270,10 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "Can I play this like draw something but online?",
 		answer: "Yes, there is a gamemode where you get words and other people have to guess what you just drew."
+	}, {
+		question: "Are 3d party programs allowed?",
+		answer: 'They are as long as they are reasonable. So be cool about it. An example of drawing bots:' +
+		        ' <a href="http://anonbots.bitballoon.com/" alt="Anondraw bot">http://anonbots.bitballoon.com</a>'
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
@@ -2278,8 +2282,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 		var qhead = question.appendChild(document.createElement("h2"));
 		qhead.className = "drawtogether-question-question";
-		qhead.innerText = questions[qKey].question;
-		qhead.textContent = questions[qKey].question;
+		qhead.innerHTML = questions[qKey].question;
 
 		var qText = question.appendChild(document.createElement("div"));
 		qText.className = "drawtogether-question-answer";
@@ -2287,8 +2290,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		var answerLines = questions[qKey].answer.split("\n");
 		for (var k = 0; k < answerLines.length; k++) {
 			var answerLine = qText.appendChild(document.createElement("div"));
-			answerLine.innerText = answerLines[k];
-			answerLine.textContent = answerLines[k];
+			answerLine.innerHTML = answerLines[k];
 		}
 	}
 
