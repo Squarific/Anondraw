@@ -82,7 +82,7 @@ Chat.prototype.emotesOrder = [
 	"DendiFace","WinWaker","PeteZarollTie","SoonerLater","VaultBoy","Kreygasm",
 	"Poooound","HumbleLife","JKanStyle","ResidentSleeper","StrawBeary",
 	"AthenaPMS","DatSheffy","deExcite","OSsloth","PazPazowitz","PJSalt",
-	"BibleThump","BionicBunion","DBstyle"
+	"BibleThump","BionicBunion","DBstyle", "WillDraw4Rep"
 ];
 Chat.prototype.emotesHash = {
 	"CasualLama": "images/emotes/CasualLama.png",
@@ -229,7 +229,8 @@ Chat.prototype.emotesHash = {
 	"mcaT": "images/emotes/mcaT.png",
 	"panicBasket": "images/emotes/panicBasket.png",
 	"riPepperonis": "images/emotes/riPepperonis.png",
-	"twitchRaid": "images/emotes/twitchRaid.png"
+	"twitchRaid": "images/emotes/twitchRaid.png",
+	"WillDraw4Rep": "images/emotes/WillDraw4Rep.png"
 };
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
