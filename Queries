@@ -1,0 +1,5 @@
+Rep count
+SELECT id, rep_count, last_username FROM users JOIN ((SELECT COUNT(*) as rep_count, to_id FROM reputations GROUP BY to_id ORDER BY COUNT(*)) AS rep) ON rep.to_id = users.id;
+
+
+

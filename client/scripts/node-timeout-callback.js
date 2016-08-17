@@ -23,6 +23,6 @@ function timeoutCallback(callback, timeout, ctx, args){
         if(called)return;
         called = true;
         clearTimeout(interval);
-        callback.apply(this, args);
+        callback.apply(this, arguments);
     }
 }
