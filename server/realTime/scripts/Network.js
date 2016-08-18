@@ -735,7 +735,6 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
 				protocol.informClient(socket, "This region is protected!");
-				console.log("CHECK FAILED");
 				callback();
 				return;
 			}
@@ -870,6 +869,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			if (room.indexOf("user_") == 0) {
+				if (parseInt(socket.room.slice(5)) === socket.id) {
+					socket.permissions[parseInt(socket.room.slice(5))] = Number.MAX_SAFE_INTEGER;
+					handleRoom();
+					return;
+				}
+
 				protocol.players.request("getpermission", {
 					roomid: parseInt(socket.room.slice(5)),
 					uKey: socket.uKey
@@ -877,8 +882,8 @@ Protocol.prototype.bindIO = function bindIO () {
 					if (err || data.err)
 						console.log("Get permission error", data.err);
 					
-					if (data && typeof data.permission !== "undefined")
-						socket.permissions[parseInt(socket.room.slice(5))] = parseInt(data.permission);
+					socket.permissions[parseInt(socket.room.slice(5))] =
+						parseInt((data && data.level) || 0);
 
 					handleRoom();
 				});

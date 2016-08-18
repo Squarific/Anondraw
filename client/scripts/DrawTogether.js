@@ -748,7 +748,6 @@ DrawTogether.prototype.updateInk = function updateInk () {
 DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
 	if (!this.network.socket) return;
 	this.network.socket.emit("drawing", this.encodeDrawing(drawing), callback);
-
 };
 
 DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
