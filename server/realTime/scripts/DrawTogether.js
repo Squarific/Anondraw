@@ -50,7 +50,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		}.bind(this));
 	}
 
-	callback();
+	callback(true);
 };
 
 DrawTogether.prototype.clear = function clear (room) {
@@ -105,7 +105,11 @@ DrawTogether.prototype.addPathPoint = function addPathPoint (room, id, point) {
 };
 
 DrawTogether.prototype.finalizePath = function finalizePath (room, id, callback) {
-	if (!this.paths[room] || !this.paths[room][id]) return;
+	if (!this.paths[room] || !this.paths[room][id]) {
+		callback(false);
+		return false;
+	}
+
 	callback = callback || function () {};
 	this.addDrawing(room, this.paths[room][id], callback);
 	this.removePath(room, id);

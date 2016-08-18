@@ -1177,8 +1177,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this));
 
 	this.paint.addEventListener("enduserpath", function (event) {
-		this.network.socket.emit("ep", function (id) {
-			event.removePath(true, id);
+		this.network.socket.emit("ep", function (id, success) {
+			event.removePath(success, id);
 		});
 	}.bind(this));
 
@@ -1263,7 +1263,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
-			if (!success){ 
+			if (!success){
 				event.removePathPoint();
 				if(typeof timeOut !== 'undefined' && timeOut){
 					var curr_time = Date.now();

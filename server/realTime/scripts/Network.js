@@ -830,7 +830,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
 
-				// Always set latpathpoint even if we failed to draw
+				// Always set lastpathpoint even if we failed to draw
+				// TODO: Should this happen?
 				socket.lastPathPoint = point;
 
 				if (socket.ink < usage) {
@@ -842,8 +843,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 
-			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
-			callback(true);
+			callback(protocol.drawTogether.addPathPoint(socket.room, socket.id, point));
 			socket.broadcast.to(socket.room).emit("pp", socket.id, point);
 		});
 
