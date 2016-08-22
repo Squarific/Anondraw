@@ -190,7 +190,7 @@ DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
 		}
 
 		var viewDeductionDelta = Date.now() - this.lastViewDeduction;
-		
+
 		for (var k = 0; k < this.playerList.length; k++) {
 			this.playerList[k].id == this._followingPlayer;
 			this.playerList[k].viewScore -= viewDeductionDelta;
@@ -496,7 +496,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 				}
 			} else {
 				drawTogether.openModeratorWelcomeWindow();
-			}			
+			}
 		}
 	});
 
@@ -557,7 +557,7 @@ DrawTogether.prototype.displayTip = function displayTip () {
 // We will change it to the first parameter, if thta doesn't work we will go to
 // room + number where number starts at 1 and raises with 1 for every full room
 // If you make the third parameter true we will tell the server we really want
-// to join that particular room and the fourth is a "secret" override that 
+// to join that particular room and the fourth is a "secret" override that
 // ignores if a room is full
 DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, specific, override) {
 	// Change the room to room + number, if not possible try to join
@@ -741,7 +741,7 @@ DrawTogether.prototype.updateInk = function updateInk () {
 		this.inkDom.classList.remove("drawtogether-ink-middle");
 		this.inkDom.classList.remove("drawtogether-ink-low");
 	}
-	
+
 	this.previousInk = this.ink;
 };
 
@@ -759,7 +759,7 @@ DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
 
 	newDrawing.color = drawing.color.toHex8();
 
-	return newDrawing; 
+	return newDrawing;
 };
 
 DrawTogether.prototype.decodeDrawings = function decodeDrawings (drawings) {
@@ -1015,10 +1015,11 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 month", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
 		if (minutes == "10 year") minutes = 10 * 356 * 24 * 60;
 		if (minutes == "1 year") minutes = 356 * 24 * 60;
+		if (minutes == "1 month") minutes = 30 * 24 * 60;
 		if (minutes == "1 week") minutes = 7 * 24 * 60;
 		if (minutes == "1 day") minutes = 24 * 60;
 		if (minutes == "1 hour") minutes = 60;
@@ -1095,7 +1096,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 				this.paint.background.requestUserChunk(chunkX, chunkY, callback, time);
 			}.bind(this), time);
 		}.bind(this);
-		
+
 		var room = encodeURIComponent(this.current_room);
 		chunkX = encodeURIComponent(chunkX);
 		chunkY = encodeURIComponent(chunkY);
@@ -1261,9 +1262,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 		this.ink -= usage;
 		this.updateInk();
 	}
-	
+
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
-			if (!success){ 
+			if (!success){
 				event.removePathPoint();
 				if(typeof timeOut !== 'undefined' && timeOut){
 					var curr_time = Date.now();
@@ -1327,7 +1328,7 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	var img = document.createElement("img");
 	img.src = this.paint.exportImage(from, to);
 	img.alt = "Exported image";
-	
+
 	var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
 	exportwindow.classList.add("exportwindow");
 	exportwindow.appendChild(img);
@@ -1449,7 +1450,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.closeSettingsWindow();
 		advancedOptions.show();
 	}.bind(this));
-	
+
 	var close = settingsContainer.appendChild(document.createElement("div"));
 	close.appendChild(document.createTextNode("Close settings window"))
 	close.className = "drawtogether-button drawtogether-close-button";
@@ -1533,7 +1534,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 				}.bind(this));
 			}.bind(this));
 		}
-		
+
 		var close = formContainer.appendChild(document.createElement("div"));
 		close.appendChild(document.createTextNode("Close account window"));
 		close.className = "drawtogether-button drawtogether-close-button";
@@ -1563,7 +1564,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	this.roomInput = roomWindowConentContainer.appendChild(document.createElement("input"));
 	this.roomInput.type = "text";
 	this.roomInput.placeholder = "Room name";
-	
+
 	var roomButton = roomWindowConentContainer.appendChild(document.createElement("div"));
 	roomButton.appendChild(document.createTextNode("Create public room"));
 	roomButton.className = "drawtogether-button";
@@ -1574,7 +1575,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 			this.changeRoom(this.roomInput.value);
 		this.closeRoomWindow();
 	}.bind(this));
-	
+
 	var roomButton = roomWindowConentContainer.appendChild(document.createElement("div"));
 	roomButton.appendChild(document.createTextNode("Create private room"));
 	roomButton.className = "drawtogether-button create-private-room";
@@ -1615,7 +1616,7 @@ DrawTogether.prototype.formLogin = function formLogin () {
 	var email = this.emailInput.value;
 	var pass = this.passInput.value;
 
-	this.accountError(undefined); // Reset account error	
+	this.accountError(undefined); // Reset account error
 
 	this.account.login(email, pass, function (err) {
 		if (err) {
@@ -1632,7 +1633,7 @@ DrawTogether.prototype.formRegister = function formRegister () {
 	var email = this.emailInput.value;
 	var pass = this.passInput.value;
 
-	this.accountError(undefined); // Reset account error	
+	this.accountError(undefined); // Reset account error
 
 	this.account.register(email, pass, function (err) {
 		if (err) {
@@ -1776,7 +1777,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 
 	var text = selectWindow.appendChild(document.createElement("div"));
 	text.className = "drawtogether-welcome-text-box";
-	
+
 	var textContainer = text.appendChild(document.createElement("span"));
 	textContainer.appendChild(document.createTextNode("Realtime paint on an unlimited canvas."));
 
@@ -1861,7 +1862,7 @@ DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings 
 	}.bind(this));
 	req.open("GET", "https://www.reddit.com/r/anondraw/.json");
 	req.send();
-	
+
 	var title = this.redditDrawings.appendChild(document.createElement("a"));
 	title.appendChild(document.createTextNode("Reddit gallery (/r/anondraw)"))
 	title.href = "http://www.reddit.com/r/anondraw";
@@ -1934,7 +1935,7 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 	var discordWindow = this.gui.createWindow({ title: "Voice chat: Discord"});
 
 	var container = discordWindow.appendChild(document.createElement("div"));
-	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
+	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';
 };
 
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
@@ -1975,7 +1976,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 		var html = 'You are paying for the account: ' + this.account.mail + ' <br/><br/>';
 
 		    html += 'This takes up to 1 day to confirm. If it takes longer contact premium@squarific.com <br/><br/>';
-		 
+
 		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">';
 	    	html +=	'<input type="hidden" name="cmd" value="_s-xclick">';
 	    	html += '<input type="hidden" name="hosted_button_id" value="RU7EGGG6RH4AG">';
@@ -2037,7 +2038,7 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 	tutorial.appendChild(document.createTextNode("Tutorial"))
 	tutorial.className = "drawtogether-button";
 	tutorial.addEventListener("click", function () {
-		if (welcomeWindow.parentNode) 
+		if (welcomeWindow.parentNode)
 			welcomeWindow.parentNode.removeChild(welcomeWindow);
 
 		introJs()
@@ -2285,7 +2286,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 		var qText = question.appendChild(document.createElement("div"));
 		qText.className = "drawtogether-question-answer";
-		
+
 		var answerLines = questions[qKey].answer.split("\n");
 		for (var k = 0; k < answerLines.length; k++) {
 			var answerLine = qText.appendChild(document.createElement("div"));
