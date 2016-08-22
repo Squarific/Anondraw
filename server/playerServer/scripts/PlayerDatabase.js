@@ -202,8 +202,8 @@ PlayerDatabase.prototype.setPermission = function setPermission (roomid, userid,
 		}
 
 		if (rows.length > 1) {
-			console.log("REPUTATION ERROR: Too many rows", roomid, userid);
-			callback("An internal error occured.");
+			console.log("PERMISSION ERROR: Too many rows", roomid, userid);
+			callback("An internal error occured. (Too many rows)");
 		} else if (rows.length == 1) {
 			this.database.query("UPDATE premissions SET level = ? WHERE roomid = ? AND userid = ?",
 			                    [level, roomid, userid], callback);

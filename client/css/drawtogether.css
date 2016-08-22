@@ -122,7 +122,9 @@ input.paint-texttool {
 }
 
 .drawtogether-emote {
-  height:2em;
+  max-height:6em;
+  max-width:6em;
+  vertical-align:bottom;
 }
 
 * {

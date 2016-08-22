@@ -120,15 +120,21 @@ var server = http.createServer(function (req, res) {
 	}
 
 	if (parsedUrl.pathname == "/setpermission") {
-		res.end();
-		return; // TODO: ONLY ALLOW ROOMID IF USER.ID == roomid or if got permission
-
 		var roomid = parsedUrl.query.roomid;
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 
 		if (!user) {
-			res.end(JSON.stringify({err: "You are not logged in!"}));
+			res.end(JSON.stringify({
+				err: "You are not logged in!"
+			}));
+			return;
+		}
+
+		if (user.id !== roomid) {
+			res.end(JSON.stringify({
+				err: "You can only change the premissions of your own room."
+			}));
 			return;
 		}
 
