@@ -1028,8 +1028,20 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("setpermission", function (socketid, level) {
 			protocol.setPermission(socket, socketId, level);
 		});
-
+		socket.on("createfavorite", function (x, y, name, callback) {
+			console.log("creating favorite network.js");
+			protocol.players.request('createfavorite', {
+				uKey: socket.uKey,
+				x: x,
+				y: y,
+				name: name,
+				room: socket.room
+			}, function (err, data) {
+				callback(err, data);
+			});
+		});
 		socket.on("createprotectedregion", function (from, to, callback) {
+			console.log("network.js" + Date.now());
 			if (typeof callback !== 'function') return;
 
 			if (!from || typeof from.join !== 'function') {

@@ -1294,6 +1294,20 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 	}.bind(this));
 };
 
+DrawTogether.prototype.createFavorite = function (x, y, name) {
+	this.chat.addMessage("Hey.");
+	this.network.socket.emit("createfavorite", x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Favorite", "Error: " + err);
+			return;
+		}
+
+		if (result.success) {
+			this.chat.addMessage("Favorite", result.success);
+		}
+	}.bind(this));
+};
+
 DrawTogether.prototype.createProtectedRegion = function (from, to) {
 	if (!this.memberlevel) {
 		this.chat.addMessage("Creating a protected region is a member only feature.");

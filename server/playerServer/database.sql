@@ -58,6 +58,15 @@ CREATE TABLE IF NOT EXISTS regions (
     INDEX (owner, maxX, minX, maxY, minY, room)
 );
 
+CREATE TABLE IF NOT EXISTS favorites (
+    owner INT UNSIGNED,
+    x BIGINT,
+    y BIGINT,
+    room VARCHAR(255),
+		name VARCHAR(255),
+    INDEX (room, owner, x, y)
+);
+
 ALTER TABLE ipbans ADD INDEX banned_by (banned_by);
 
 CREATE TABLE IF NOT EXISTS accountbans (

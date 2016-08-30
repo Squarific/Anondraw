@@ -237,8 +237,40 @@ PlayerDatabase.prototype.getMemberLevel = function getMemberLevel (userid, callb
 		callback(err, rows && rows[0] && rows[0].level);
 	});
 };
+PlayerDatabase.prototype.renameFavorite = function renameFavorite (userid, x, y, name, room, callback) {
+	
+};
+
+PlayerDatabase.prototype.getFavorites = function getFavorites (userid, room, callback) {
+	
+};
+
+PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name, room, callback) {
+	console.log("heeeya" + x);
+	this.database.query("SELECT * FROM favorites WHERE room = ? AND owner = ? AND x = ? AND y = ?",
+		[room, userid, x, y],
+		function (err, rows){
+			if(err) {
+				callback("Database error. Please contact an admin. (ADDFAVORITEEXIST)");
+				console.log("addFavorite database error", err);
+				return;
+			}
+			if (rows.length > 0){
+				callback("You've already created this favorite!");
+				return;
+			}
+			this.database.query("INSERT INTO favorites (owner, x, y, room, name) VALUES (?, ?, ?, ?, ?)",
+				[userid, x, y, room, name],
+				function (err, rows){
+					callback(err);
+					return;
+			});
+		}.bind(this)
+	);
+};
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
+	console.log("PlayerDatabase.prototype.addProtectedRegion" + Date.now());
 	var minX = Math.min(from[0], to[0]);
 	var minY = Math.min(from[1], to[1]);
 
