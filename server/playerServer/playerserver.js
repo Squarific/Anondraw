@@ -408,9 +408,30 @@ var server = http.createServer(function (req, res) {
 		res.end('{"players": ' + JSON.stringify(sessions.loggedInUsers) + '}');
 		return;
 	}
-	
+	if (parsedUrl.pathname == "/getfavorites") {
+		var room = parsedUrl.query.room;
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
+		playerDatabase.getFavorites(user.id, room, function (err, favorites) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify(favorites));
+		});
+
+		return;
+	}
 	if (parsedUrl.pathname == "/createfavorite") {
-		console.log("hey" );
 		var x = parseInt( parsedUrl.query.x || "" );
 		var y = parseInt( parsedUrl.query.y || "" );
 		var name = parsedUrl.query.name || "Favorite Area";

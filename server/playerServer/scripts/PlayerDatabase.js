@@ -242,11 +242,21 @@ PlayerDatabase.prototype.renameFavorite = function renameFavorite (userid, x, y,
 };
 
 PlayerDatabase.prototype.getFavorites = function getFavorites (userid, room, callback) {
-	
+	this.database.query("SELECT * FROM favorites WHERE room = ? AND owner = ?",
+		[room, userid],
+		function (err, rows){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETFAVORITES)");
+				console.log("Get favorites database error", err);
+				return;
+			}
+
+			callback(null, rows);
+		}.bind(this)
+	);
 };
 
 PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name, room, callback) {
-	console.log("heeeya" + x);
 	this.database.query("SELECT * FROM favorites WHERE room = ? AND owner = ? AND x = ? AND y = ?",
 		[room, userid, x, y],
 		function (err, rows){

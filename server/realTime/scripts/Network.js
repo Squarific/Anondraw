@@ -1028,6 +1028,14 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("setpermission", function (socketid, level) {
 			protocol.setPermission(socket, socketId, level);
 		});
+		socket.on("getfavorites", function (callback) {
+			protocol.players.request('getfavorites', {
+				uKey: socket.uKey,
+				room: socket.room
+			}, function (err, data) {
+				callback(err, data);
+			});
+		});
 		socket.on("createfavorite", function (x, y, name, callback) {
 			console.log("creating favorite network.js");
 			protocol.players.request('createfavorite', {

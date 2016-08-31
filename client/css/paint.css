@@ -101,8 +101,38 @@ input.paint-texttool {
 	width: 34px;
 	position: relative;
 }
+
+.fav-pencil-button:hover > div {
+    visibility: visible !important;
+    opacity: 1;
+    transition: opacity 0.5s;
+    width: 5px;
+}
+
 .fav-coor-button {
 	display: block;
 	width: calc(100% - 68px);
 	float: right;
 }
+
+.fav-rename-container {
+	position: absolute;
+	right: 34px;
+	bottom: 0px;
+	height: 23px;
+	visibility: hidden;
+	width: 0px;
+	opacity: 0;
+	transition: opacity 0.5s, visibility 0.5s;
+}
+
+.fav-rename-input { 
+	display: block;
+	width: 101px !important;
+	margin: 0px !important;
+	margin-top: 2px !important;
+	padding: 0px !important;
+	text-align: center !important;
+	float: right;
+}
+

@@ -10,6 +10,7 @@ function DrawTogether (container, settings) {
 	// Set default values untill we receive them from the server
 	this.playerList = [];
 	this.moveQueue = [];
+	this.favList = [];
 	this.ink = 0;
 	this.previousInk = Infinity;
 
@@ -573,7 +574,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 	var changingRoomTimeout = setTimeout(function () {
 		this.changingRoom = false;
 	}.bind(this), 2000);
-
+	
 	number = number || "";
 	this.network.loadRoom(room + number, specific, override, function (err, drawings) {
 		this.changingRoom = false;
@@ -785,6 +786,7 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 	location.hash = room + "," +
 	                this.paint.public.leftTopX.toFixed() + "," +
 	                this.paint.public.leftTopY.toFixed();
+	this.getFavorites();
 };
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
@@ -1293,7 +1295,16 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 		handlers[answer](event.from, event.to);
 	}.bind(this));
 };
-
+DrawTogether.prototype.getFavorites = function () {
+	this.network.socket.emit("getfavorites", function (err, result) {
+		if (err) {
+			this.chat.addMessage("Getting Favorites", "Error: " + err);
+			return;
+		}
+		this.favList = result;
+		return;
+	}.bind(this));
+};
 DrawTogether.prototype.createFavorite = function (x, y, name) {
 	this.chat.addMessage("Hey.");
 	this.network.socket.emit("createfavorite", x, y, name, function (err, result) {
