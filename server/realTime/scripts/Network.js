@@ -1028,6 +1028,41 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("setpermission", function (socketid, level) {
 			protocol.setPermission(socket, socketId, level);
 		});
+		socket.on("setcoordfavorite", function (newX, newY, x, y, name, callback) {
+			protocol.players.request('setcoordfavorite', {
+				uKey: socket.uKey,
+				newX: newX,
+				newY: newY,
+				x: x,
+				y: y,
+				name: name,
+				room: socket.room
+			}, function (err, data) {
+				callback(err, data);
+			});
+		});
+		socket.on("removefavorite", function (x, y, name, callback) {
+			protocol.players.request('removefavorite', {
+				uKey: socket.uKey,
+				x: x,
+				y: y,
+				name: name,
+				room: socket.room
+			}, function (err, data) {
+				callback(err, data);
+			});
+		});
+		socket.on("renamefavorite", function (x, y, name, callback) {
+			protocol.players.request('renamefavorite', {
+				uKey: socket.uKey,
+				x: x,
+				y: y,
+				name: name,
+				room: socket.room
+			}, function (err, data) {
+				callback(err, data);
+			});
+		});
 		socket.on("getfavorites", function (callback) {
 			protocol.players.request('getfavorites', {
 				uKey: socket.uKey,

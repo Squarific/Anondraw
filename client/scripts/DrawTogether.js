@@ -26,6 +26,8 @@ function DrawTogether (container, settings) {
 	this._forceFollow;      // The playerid that should be followed
 	this._autoMoveScreen;   // Boolean, should we move the screen automatically?
 	this._followingPlayer;  // The player the view is currently following
+	
+	this._favoriteRenameDelayTimeout;
 
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
@@ -499,6 +501,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 				drawTogether.openModeratorWelcomeWindow();
 			}			
 		}
+		drawTogether.getFavorites();
 	});
 
 	this.network.on("setink", function (ink) {
@@ -1295,6 +1298,52 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 		handlers[answer](event.from, event.to);
 	}.bind(this));
 };
+
+DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, element) {
+	this.network.socket.emit("setcoordfavorite", newX, newY, x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Changing coordinate of Favorite", "Error: " + err);
+			return;
+		}
+		if(result.success){
+			console.log("changed cord");
+			}
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
+	this.network.socket.emit("removefavorite", x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Removing Favorite", "Error: " + err);
+			return;
+		}
+		if(result.success){
+			console.log("deleted");
+			element.remove();
+			this.getFavorites();
+			}
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
+	this.network.socket.emit("renamefavorite", x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Renaming Favorite", "Error: " + err);
+			return;
+		}
+		if(result.success){
+			element.dataset.name = name;
+			var button = element.getElementsByClassName("fav-coor-button")[0];
+			button.innerHTML = name;
+			button.title = x + "," + y;
+			}
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.updateFavoriteDom = function () {
+	this.paint.updateFavoriteDom(this.favList);
+};
+
 DrawTogether.prototype.getFavorites = function () {
 	this.network.socket.emit("getfavorites", function (err, result) {
 		if (err) {
@@ -1314,7 +1363,9 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 		}
 
 		if (result.success) {
-			this.chat.addMessage("Favorite", result.success);
+			this.chat.addMessage("Favorite added", result.success);
+			this.getFavorites();
+			this.updateFavoriteDom();
 		}
 	}.bind(this));
 };

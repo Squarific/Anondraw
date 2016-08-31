@@ -56,11 +56,13 @@ input.paint-texttool {
 	border: solid 1px #ccc;
 	right: 1.4em;
 	bottom: 3.8em;
-	display: none;	
+	display: none;
+	max-height: 800px;
+	overflow-y: overlay;
 }
 
 .favorites-container {
-	min-width: 9em;
+	min-width: 14em;
 }
 
 .favorite-container { 
@@ -94,6 +96,13 @@ input.paint-texttool {
 	float: right;
 }
 
+.fav-minus-button {
+	display: block;
+	min-width: 0px;
+	width: 34px;
+	float: right;
+}
+
 .fav-pencil-button {
 	display: block;
 	min-width: 0px;
@@ -105,16 +114,25 @@ input.paint-texttool {
 .fav-pencil-button:hover > div {
     visibility: visible !important;
     opacity: 1;
-    transition: opacity 0.5s;
+    transition: opacity 0.4s;
     width: 5px;
 }
 
 .fav-coor-button {
 	display: block;
-	width: calc(100% - 68px);
+	width: calc(100% - 102px);
 	float: right;
 }
 
+.fav-add-new-fav {
+	width: 100%;
+	border-bottom-width: 5px;
+	font-size:smaller;
+	margin-bottom: 1px;
+}
+.fav-add-new-fav:hover {
+	font-weight: bold;
+}
 .fav-rename-container {
 	position: absolute;
 	right: 34px;
@@ -123,7 +141,7 @@ input.paint-texttool {
 	visibility: hidden;
 	width: 0px;
 	opacity: 0;
-	transition: opacity 0.5s, visibility 0.5s;
+	transition: opacity 0.2s, visibility 0.2s;
 }
 
 .fav-rename-input { 
