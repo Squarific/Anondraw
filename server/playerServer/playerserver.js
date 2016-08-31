@@ -545,7 +545,8 @@ var server = http.createServer(function (req, res) {
 
 			console.log("[FAVORITE ADDED]", user.id, x, y, err);
 			res.end(JSON.stringify({
-				success: 'Added favorite.'
+				success: 'Added favorite.',
+				owner: user.id
 			}));
 		});
 		return;

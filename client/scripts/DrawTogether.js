@@ -1307,6 +1307,8 @@ DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, elem
 		}
 		if(result.success){
 			console.log("changed cord");
+			this.paint.updateIndividualFavoriteDom(newX, newY, null, null, element);
+			this.getFavorites();		
 			}
 		return;
 	}.bind(this));
@@ -1332,10 +1334,8 @@ DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
 			return;
 		}
 		if(result.success){
-			element.dataset.name = name;
-			var button = element.getElementsByClassName("fav-coor-button")[0];
-			button.innerHTML = name;
-			button.title = x + "," + y;
+			this.paint.updateIndividualFavoriteDom(null, null, name, null, element);
+			this.getFavorites();
 			}
 		return;
 	}.bind(this));
@@ -1364,8 +1364,8 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 
 		if (result.success) {
 			this.chat.addMessage("Favorite added", result.success);
+			this.paint.insertOneFavorite(0, 0, "", result.owner);
 			this.getFavorites();
-			this.updateFavoriteDom();
 		}
 	}.bind(this));
 };

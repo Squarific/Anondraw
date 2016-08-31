@@ -89,6 +89,13 @@ input.paint-texttool {
 	transition-property: background-color;
 }
 
+.fav-button-confirmation { 
+	background-color: goldenrod;
+}
+.fav-button-confirmation:hover { 
+	background-color: #b1861a;
+}
+
 .fav-plus-button {
 	display: block;
 	min-width: 0px;
