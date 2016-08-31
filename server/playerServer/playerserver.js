@@ -533,7 +533,12 @@ var server = http.createServer(function (req, res) {
 		var room = parsedUrl.query.room;
 		
 		var user = sessions.getUser("uKey", uKey);
-		
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
 		playerDatabase.addFavorite(user.id, x, y, name, room, function (err) {
 			if (err) {
 				console.log('Create favorite database error', err, user.id, x, y);
@@ -553,7 +558,6 @@ var server = http.createServer(function (req, res) {
 	}
 
 	if (parsedUrl.pathname == "/createprotectedregion") {
-		console.log("playerserver.js"+ Date.now());
 		var from = parsedUrl.query.from || "";
 		from = from.split(',');
 

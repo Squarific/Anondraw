@@ -1355,13 +1355,22 @@ DrawTogether.prototype.getFavorites = function () {
 	}.bind(this));
 };
 DrawTogether.prototype.createFavorite = function (x, y, name) {
-	this.chat.addMessage("Hey.");
+	if (drawTogether.account.mail === null){
+		this.chat.addMessage("You must login to save or create favorites!");
+		return;
+	}
+		
+	if (!this.memberlevel && this.favList.length >= 5) {
+		this.chat.addMessage("Creating favorites past 5 is limited to Premium Users.");
+		return;
+	}
+	
 	this.network.socket.emit("createfavorite", x, y, name, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Favorite", "Error: " + err);
 			return;
 		}
-
+		
 		if (result.success) {
 			this.chat.addMessage("Favorite added", result.success);
 			this.paint.insertOneFavorite(0, 0, "", result.owner);
