@@ -1368,7 +1368,6 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		if(e.srcElement.classList.contains("fav-button-confirmation")){
 			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
 			coord.dataset.tempConf = coord.innerHTML;
-			coord.innerHTML = centerX + "," + centerY + "?";
 			e.srcElement.innerHTML = "-";
 			e.srcElement.classList.remove("fav-button-confirmation");
 			
@@ -1410,6 +1409,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		if(e.srcElement.classList.contains("fav-button-confirmation")){
 			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
 			coord.innerHTML = coord.dataset.tempConf;
+			coord.dataset.tempConf = "5215random_string_tempconf5152";
 			e.srcElement.innerHTML = "+";
 			e.srcElement.classList.remove("fav-button-confirmation");
 			
@@ -1424,7 +1424,8 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 			e.srcElement.innerHTML = "?";
 			setTimeout(function() {
 				var coord = this.parentElement.getElementsByClassName("fav-coor-button")[0];
-				coord.innerHTML = coord.dataset.tempConf;
+				if(coord.dataset.tempConf !== "5215random_string_tempconf5152")
+					coord.innerHTML = coord.dataset.tempConf;
 				e.srcElement.innerHTML = "+";
 				e.srcElement.classList.remove("fav-button-confirmation");
 			}.bind(e.srcElement), 2000);
@@ -2240,7 +2241,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions"];
+	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions", "Save more than five favorites at once"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));

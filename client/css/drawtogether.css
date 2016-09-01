@@ -980,7 +980,7 @@ input.paint-texttool {
 	right: 1.4em;
 	bottom: 3.8em;
 	display: none;
-	max-height: 800px;
+	max-height: 700px;
 	overflow-y: overlay;
 }
 
