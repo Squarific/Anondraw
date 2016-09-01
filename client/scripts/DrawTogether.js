@@ -1369,6 +1369,9 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteMinusButton.innerHTML = "-";
 	favoriteMinusButton.addEventListener("click", function (e) {
 		if(e.srcElement.classList.contains("fav-button-confirmation")){
+			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			coord.innerHTML = centerX + "," + centerY + "?";
 			e.srcElement.innerHTML = "-";
 			e.srcElement.classList.remove("fav-button-confirmation");
 			
@@ -1380,9 +1383,14 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 			this.removeFavorite(x, y, name, greatgrandfather);			
 		}
 		else {
+			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			coord.innerHTML = "Delete?";
 			e.srcElement.classList.add("fav-button-confirmation");
 			e.srcElement.innerHTML = "?";
 			setTimeout(function() {
+				var coord = this.parentElement.getElementsByClassName("fav-coor-button")[0];
+				coord.innerHTML = coord.dataset.tempConf;
 				e.srcElement.innerHTML = "-";
 				e.srcElement.classList.remove("fav-button-confirmation");
 			}.bind(e.srcElement), 4000);
@@ -1403,17 +1411,26 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
 		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                  
 		if(e.srcElement.classList.contains("fav-button-confirmation")){
+			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+			coord.innerHTML = coord.dataset.tempConf;
 			e.srcElement.innerHTML = "+";
 			e.srcElement.classList.remove("fav-button-confirmation");
+			
+			
 			this.setCoordFavorite(centerX, centerY, x, y, name, e.srcElement.parentElement);
 		}
 		else {
+			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			coord.innerHTML = centerX + "," + centerY + "?";
 			e.srcElement.classList.add("fav-button-confirmation");
 			e.srcElement.innerHTML = "?";
 			setTimeout(function() {
+				var coord = this.parentElement.getElementsByClassName("fav-coor-button")[0];
+				coord.innerHTML = coord.dataset.tempConf;
 				e.srcElement.innerHTML = "+";
 				e.srcElement.classList.remove("fav-button-confirmation");
-			}.bind(e.srcElement), 4000);
+			}.bind(e.srcElement), 2000);
 		}
 
 	}.bind(this));
