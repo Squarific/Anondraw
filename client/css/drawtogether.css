@@ -1014,6 +1014,10 @@ input.paint-texttool {
 .fav-button-confirmation { 
 	background-color: goldenrod;
 }
+.fav-button-confirmation ~ .fav-coor-button{ 
+	background-color: #b1861a;
+}
+
 .fav-button-confirmation:hover { 
 	background-color: #b1861a;
 }
