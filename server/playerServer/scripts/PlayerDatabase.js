@@ -237,8 +237,92 @@ PlayerDatabase.prototype.getMemberLevel = function getMemberLevel (userid, callb
 		callback(err, rows && rows[0] && rows[0].level);
 	});
 };
+PlayerDatabase.prototype.setCoordFavorite = function setCoordFavorite (userid, newX, newY, x, y, name, room, callback) {
+	this.database.query("UPDATE favorites SET x = ?, y = ? WHERE room = ? AND owner = ? AND x = ? AND y = ?",
+		[newX, newY, room, userid, x, y],
+		function (err, rows){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETFAVORITES)");
+				console.log("Get favorites database error", err);
+				return;
+			}
+
+			callback(null);
+		}.bind(this)
+	);
+};
+
+PlayerDatabase.prototype.removeFavorite = function removeFavorite (userid, x, y, name, room, callback) {
+	//delete from favorites where room = 'main' and owner = 2 and x = 0 and y = 0;
+	this.database.query("DELETE FROM favorites WHERE room = ? AND owner = ? AND x = ? AND y = ? AND name = ?",
+		[room, userid, x, y, name],
+		function (err, rows){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETFAVORITES)");
+				console.log("Get favorites database error", err);
+				return;
+			}
+
+			callback(null);
+		}.bind(this)
+	);
+};
+
+PlayerDatabase.prototype.renameFavorite = function renameFavorite (userid, x, y, name, room, callback) {
+	this.database.query("UPDATE favorites SET name = ? WHERE room = ? AND owner = ? AND x = ? AND y = ?",
+		[name, room, userid, x, y],
+		function (err, rows){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETFAVORITES)");
+				console.log("Get favorites database error", err);
+				return;
+			}
+
+			callback(null);
+		}.bind(this)
+	);
+};
+
+PlayerDatabase.prototype.getFavorites = function getFavorites (userid, room, callback) {
+	this.database.query("SELECT * FROM favorites WHERE room = ? AND owner = ?",
+		[room, userid],
+		function (err, rows){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETFAVORITES)");
+				console.log("Get favorites database error", err);
+				return;
+			}
+
+			callback(null, rows);
+		}.bind(this)
+	);
+};
+
+PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name, room, callback) {
+	this.database.query("SELECT * FROM favorites WHERE room = ? AND owner = ? AND x = ? AND y = ?",
+		[room, userid, x, y],
+		function (err, rows){
+			if(err) {
+				callback("Database error. Please contact an admin. (ADDFAVORITEEXIST)");
+				console.log("addFavorite database error", err);
+				return;
+			}
+			if (rows.length > 0){
+				callback("You've already created this favorite!");
+				return;
+			}
+			this.database.query("INSERT INTO favorites (owner, x, y, room, name) VALUES (?, ?, ?, ?, ?)",
+				[userid, x, y, room, name],
+				function (err, rows){
+					callback(err);
+					return;
+			});
+		}.bind(this)
+	);
+};
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
+	console.log("PlayerDatabase.prototype.addProtectedRegion" + Date.now());
 	var minX = Math.min(from[0], to[0]);
 	var minY = Math.min(from[1], to[1]);
 

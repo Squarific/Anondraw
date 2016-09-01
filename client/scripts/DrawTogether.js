@@ -10,6 +10,7 @@ function DrawTogether (container, settings) {
 	// Set default values untill we receive them from the server
 	this.playerList = [];
 	this.moveQueue = [];
+	this.favList = [];
 	this.ink = 0;
 	this.previousInk = Infinity;
 
@@ -25,6 +26,8 @@ function DrawTogether (container, settings) {
 	this._forceFollow;      // The playerid that should be followed
 	this._autoMoveScreen;   // Boolean, should we move the screen automatically?
 	this._followingPlayer;  // The player the view is currently following
+	
+	this._favoriteRenameDelayTimeout;
 
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
@@ -498,6 +501,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 				drawTogether.openModeratorWelcomeWindow();
 			}			
 		}
+		drawTogether.getFavorites();
 	});
 
 	this.network.on("setink", function (ink) {
@@ -573,7 +577,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 	var changingRoomTimeout = setTimeout(function () {
 		this.changingRoom = false;
 	}.bind(this), 2000);
-
+	
 	number = number || "";
 	this.network.loadRoom(room + number, specific, override, function (err, drawings) {
 		this.changingRoom = false;
@@ -785,6 +789,7 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 	location.hash = room + "," +
 	                this.paint.public.leftTopX.toFixed() + "," +
 	                this.paint.public.leftTopY.toFixed();
+	this.getFavorites();
 };
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
@@ -1292,6 +1297,86 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 		};
 
 		handlers[answer](event.from, event.to);
+	}.bind(this));
+};
+
+DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, element) {
+	this.network.socket.emit("setcoordfavorite", newX, newY, x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Changing coordinate of Favorite", "Error: " + err);
+			return;
+		}
+		if(result.success){
+			console.log("changed cord");
+			this.paint.updateIndividualFavoriteDom(newX, newY, null, null, element);
+			this.getFavorites();		
+			}
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
+	this.network.socket.emit("removefavorite", x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Removing Favorite", "Error: " + err);
+			return;
+		}
+		if(result.success){
+			console.log("deleted");
+			element.remove();
+			this.getFavorites();
+			}
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
+	this.network.socket.emit("renamefavorite", x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Renaming Favorite", "Error: " + err);
+			return;
+		}
+		if(result.success){
+			this.paint.updateIndividualFavoriteDom(null, null, name, null, element);
+			this.getFavorites();
+			}
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.updateFavoriteDom = function () {
+	this.paint.updateFavoriteDom(this.favList);
+};
+
+DrawTogether.prototype.getFavorites = function () {
+	this.network.socket.emit("getfavorites", function (err, result) {
+		if (err) {
+			this.chat.addMessage("Getting Favorites", "Error: " + err);
+			return;
+		}
+		this.favList = result;
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.createFavorite = function (x, y, name) {
+	if (drawTogether.account.mail === null){
+		this.chat.addMessage("You must login to save or create favorites!");
+		return;
+	}
+		
+	if (!this.memberlevel && this.favList.length >= 5) {
+		this.chat.addMessage("Creating favorites past 5 is limited to Premium Users.");
+		return;
+	}
+	
+	this.network.socket.emit("createfavorite", x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Favorite", "Error: " + err);
+			return;
+		}
+		
+		if (result.success) {
+			this.chat.addMessage("Favorite added", result.success);
+			this.paint.insertOneFavorite(0, 0, "", result.owner);
+			this.getFavorites();
+		}
 	}.bind(this));
 };
 

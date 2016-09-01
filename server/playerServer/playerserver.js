@@ -408,6 +408,154 @@ var server = http.createServer(function (req, res) {
 		res.end('{"players": ' + JSON.stringify(sessions.loggedInUsers) + '}');
 		return;
 	}
+	if (parsedUrl.pathname == "/setcoordfavorite") {
+		var x = parseInt( parsedUrl.query.x || "" );
+		var y = parseInt( parsedUrl.query.y || "" );
+		var newX = parseInt( parsedUrl.query.newX || "" );
+		var newY = parseInt( parsedUrl.query.newY || "" );
+		var room = parsedUrl.query.room;
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var name = parsedUrl.query.name;
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
+		playerDatabase.setCoordFavorite(user.id, newX, newY, x, y, name, room, function (err) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: true
+			}));
+		});
+
+		return;
+	}
+	if (parsedUrl.pathname == "/removefavorite") {
+		var x = parseInt( parsedUrl.query.x || "" );
+		var y = parseInt( parsedUrl.query.y || "" );
+		var room = parsedUrl.query.room;
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var name = parsedUrl.query.name;
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
+		playerDatabase.removeFavorite(user.id, x, y, name, room, function (err) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: true
+			}));
+		});
+
+		return;
+	}
+	if (parsedUrl.pathname == "/renamefavorite") {
+		var x = parseInt( parsedUrl.query.x || "" );
+		var y = parseInt( parsedUrl.query.y || "" );
+		var room = parsedUrl.query.room;
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var name = parsedUrl.query.name;
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
+		playerDatabase.renameFavorite(user.id, x, y, name, room, function (err) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: true
+			}));
+		});
+
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/getfavorites") {
+		var room = parsedUrl.query.room;
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
+		playerDatabase.getFavorites(user.id, room, function (err, favorites) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify(favorites));
+		});
+
+		return;
+	}
+	if (parsedUrl.pathname == "/createfavorite") {
+		var x = parseInt( parsedUrl.query.x || "" );
+		var y = parseInt( parsedUrl.query.y || "" );
+		var name = parsedUrl.query.name || "";
+		if( x !== x || y !== y){
+			res.end(JSON.stringify({
+				error: "Bad number in x or y!"
+			}));
+			return;
+		}
+		
+		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
+		
+		var user = sessions.getUser("uKey", uKey);
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
+		playerDatabase.addFavorite(user.id, x, y, name, room, function (err) {
+			if (err) {
+				console.log('Create favorite database error', err, user.id, x, y);
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			console.log("[FAVORITE ADDED]", user.id, x, y, err);
+			res.end(JSON.stringify({
+				success: 'Added favorite.',
+				owner: user.id
+			}));
+		});
+		return;
+	}
 
 	if (parsedUrl.pathname == "/createprotectedregion") {
 		var from = parsedUrl.query.from || "";
