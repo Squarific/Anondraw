@@ -423,6 +423,12 @@ var server = http.createServer(function (req, res) {
 			}));
 			return;
 		}
+		if( x !== x || y !== y || newX !== newX || newY !== newY ){
+			res.end(JSON.stringify({
+				error: "Bad number in x or y!"
+			}));
+			return;
+		}
 		playerDatabase.setCoordFavorite(user.id, newX, newY, x, y, name, room, function (err) {
 			if (err) {
 				res.end(JSON.stringify({
@@ -451,6 +457,12 @@ var server = http.createServer(function (req, res) {
 			}));
 			return;
 		}
+		if( x !== x || y !== y){
+			res.end(JSON.stringify({
+				error: "Bad number in x or y!"
+			}));
+			return;
+		}
 		playerDatabase.removeFavorite(user.id, x, y, name, room, function (err) {
 			if (err) {
 				res.end(JSON.stringify({
@@ -476,6 +488,12 @@ var server = http.createServer(function (req, res) {
 		if(!user){
 			res.end(JSON.stringify({
 				error: "not logged in"
+			}));
+			return;
+		}
+		if( x !== x || y !== y){
+			res.end(JSON.stringify({
+				error: "Bad number in x or y!"
 			}));
 			return;
 		}
@@ -521,14 +539,7 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/createfavorite") {
 		var x = parseInt( parsedUrl.query.x || "" );
 		var y = parseInt( parsedUrl.query.y || "" );
-		var name = parsedUrl.query.name || "";
-		if( x !== x || y !== y){
-			res.end(JSON.stringify({
-				error: "Bad number in x or y!"
-			}));
-			return;
-		}
-		
+		var name = parsedUrl.query.name || "";		
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
 		
@@ -536,6 +547,12 @@ var server = http.createServer(function (req, res) {
 		if(!user){
 			res.end(JSON.stringify({
 				error: "not logged in"
+			}));
+			return;
+		}
+		if( x !== x || y !== y){
+			res.end(JSON.stringify({
+				error: "Bad number in x or y!"
 			}));
 			return;
 		}

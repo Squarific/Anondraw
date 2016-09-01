@@ -502,7 +502,6 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 				drawTogether.openModeratorWelcomeWindow();
 			}			
 		}
-		drawTogether.getFavorites();
 	});
 
 	this.network.on("setink", function (ink) {
@@ -1248,13 +1247,6 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.favoritesContainer.className = "favorites-container";	
 };
 
-DrawTogether.prototype.searchAndUpdateIndividualFavoriteDom = function searchAndUpdateIndividualFavoriteDom(newX, newY, newName, newOwner, x, y, name, owner) {
-	var childArr = this.favoritesContainer.chindren; 
-	for(x = childArr.length; x >= 0; x--){
-		updateIndividualFavoriteDom(newX, newY, newName, newOwner, childArr[x]);
-	}
-};
-
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
 	if ((this.current_room.indexOf("game_") === 0 ||
 	    this.current_room.indexOf("private_game_") === 0) &&
@@ -1377,7 +1369,9 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteMinusButton.innerHTML = "-";
 	favoriteMinusButton.addEventListener("click", function (e) {
 		if(e.srcElement.classList.contains("fav-button-confirmation")){
+			e.srcElement.innerHTML = "-";
 			e.srcElement.classList.remove("fav-button-confirmation");
+			
 			var greatgrandfather = e.srcElement.parentElement;
 			
 			var x = greatgrandfather.dataset.x;
@@ -1409,6 +1403,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
 		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                  
 		if(e.srcElement.classList.contains("fav-button-confirmation")){
+			e.srcElement.innerHTML = "+";
 			e.srcElement.classList.remove("fav-button-confirmation");
 			this.setCoordFavorite(centerX, centerY, x, y, name, e.srcElement.parentElement);
 		}
@@ -1476,7 +1471,6 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 };
 
 DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
-	favorites = this.favList;
 	while (this.favoritesContainer.firstChild)
 		this.favoritesContainer.removeChild(this.favoritesContainer.firstChild)
 	
@@ -1488,27 +1482,27 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 		this.createFavorite(0, 0, "");
 	
 	}.bind(this));
-	for(x = favorites.length - 1; x >= 0 ; x--)
+	for(var x = this.favList.length - 1; x >= 0 ; x--)
 	{		
-		this.insertOneFavorite(favorites[x]['x'], favorites[x]['y'], favorites[x]['name'], favorites[x]['owner'])
+		this.insertOneFavorite(this.favList[x]['x'], this.favList[x]['y'], this.favList[x]['name'], this.favList[x]['owner'])
 	}	//end for
 };
 
 DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, element) {
-	this.network.socket.emit("setcoordfavorite", newX, newY, x, y, name, function (err, result) {
+	this.account.setCoordFavorite(newX, newY, x, y, name, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Changing coordinate of Favorite", "Error: " + err);
 			return;
 		}
 		if(result.success){
 			this.updateIndividualFavoriteDom(newX, newY, null, null, element);
-			this.getFavorites();		
+			this.getFavorites();
 			}
 		return;
 	}.bind(this));
 };
 DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
-	this.network.socket.emit("removefavorite", x, y, name, function (err, result) {
+	this.account.removeFavorite(x, y, name, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Removing Favorite", "Error: " + err);
 			return;
@@ -1521,7 +1515,7 @@ DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
 	}.bind(this));
 };
 DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
-	this.network.socket.emit("renamefavorite", x, y, name, function (err, result) {
+	this.account.renameFavorite(x, y, name, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Renaming Favorite", "Error: " + err);
 			return;
@@ -1535,7 +1529,7 @@ DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
 };
 
 DrawTogether.prototype.getFavorites = function () {
-	this.network.socket.emit("getfavorites", function (err, result) {
+	this.account.getFavorites(drawTogether.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
 			return;
@@ -1544,8 +1538,9 @@ DrawTogether.prototype.getFavorites = function () {
 		return;
 	}.bind(this));
 };
+
 DrawTogether.prototype.createFavorite = function (x, y, name) {
-	if (drawTogether.account.mail === null){
+	if (this.account.mail === null){
 		this.chat.addMessage("You must login to save or create favorites!");
 		return;
 	}
@@ -1554,8 +1549,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 		this.chat.addMessage("Creating favorites past 5 is limited to Premium Users.");
 		return;
 	}
-	
-	this.network.socket.emit("createfavorite", x, y, name, function (err, result) {
+	this.account.createFavorite(x, y, name, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Favorite", "Error: " + err);
 			return;

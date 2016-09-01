@@ -2,12 +2,83 @@ function Account (server, uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";
 	this.mail = localStorage.getItem("drawtogether-mail");
 	this.server = server;
+	this.favList = [];
 	setInterval(this.checkLogin.bind(this), 30 * 60 * 1000);
 }
 
 // Callback (err)
 Account.prototype.login = function login (email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
+};
+
+Account.prototype.genericRequest = function (serverhook, parameters, callback) {
+	if (this.uKey !== ""){
+		var req = new XMLHttpRequest();
+
+		req.addEventListener("readystatechange", function (event) {
+			if (req.status == 200 && req.readyState == 4) {
+				var data = JSON.parse(req.responseText);
+
+				if (data.error) {
+					callback(data.error)						
+					return;
+				}
+				
+				setTimeout(callback, 0, null, data); // null = err param
+			} else if (req.readyState == 4) {
+				callback("Connection error, status code: " + req.status);
+			}
+		}.bind(this));
+		req.open("GET", this.server + "/" + serverhook + "?" + parameters);
+		req.send();
+	}
+	else {
+		callback("Not logged in!")
+	}
+};
+
+Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, callback) {
+	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
+								 + "&room=" + encodeURIComponent(room)
+								 + "&newX=" + encodeURIComponent(newX)
+								 + "&newY=" + encodeURIComponent(newY)
+								 + "&x=" + encodeURIComponent(x)
+								 + "&y=" + encodeURIComponent(y)
+								 + "&name=" + encodeURIComponent(name);
+	this.genericRequest("setcoordfavorite", parameters, callback);
+};
+
+Account.prototype.removeFavorite = function (x, y, name, callback) {
+	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
+								 + "&room=" + encodeURIComponent(room)
+								 + "&x=" + encodeURIComponent(x)
+								 + "&y=" + encodeURIComponent(y)
+								 + "&name=" + encodeURIComponent(name);
+	this.genericRequest("removefavorite", parameters, callback);
+};
+
+Account.prototype.renameFavorite = function (x, y, name, callback) {
+	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
+								 + "&room=" + encodeURIComponent(room)
+								 + "&x=" + encodeURIComponent(x)
+								 + "&y=" + encodeURIComponent(y)
+								 + "&name=" + encodeURIComponent(name);
+	this.genericRequest("renamefavorite", parameters, callback);
+};
+
+Account.prototype.createFavorite = function (x, y, name, callback) {
+	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
+								 + "&room=" + encodeURIComponent(room)
+								 + "&x=" + encodeURIComponent(x)
+								 + "&y=" + encodeURIComponent(y)
+								 + "&name=" + encodeURIComponent(name);
+	this.genericRequest("createfavorite", parameters, callback);
+};
+
+Account.prototype.getFavorites = function (room, callback) {
+	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
+								+ "&room=" + encodeURIComponent(room);
+	this.genericRequest("getfavorites", parameters, callback);
 };
 
 // Callback (err)
