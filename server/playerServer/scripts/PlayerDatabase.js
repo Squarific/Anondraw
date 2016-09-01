@@ -322,7 +322,6 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 };
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
-	console.log("PlayerDatabase.prototype.addProtectedRegion" + Date.now());
 	var minX = Math.min(from[0], to[0]);
 	var minY = Math.min(from[1], to[1]);
 

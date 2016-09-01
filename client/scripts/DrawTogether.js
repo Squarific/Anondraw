@@ -1408,10 +1408,8 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		var name = e.srcElement.parentElement.dataset.name;
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
 		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                  
-		console.log(centerX, centerY);
 		if(e.srcElement.classList.contains("fav-button-confirmation")){
 			e.srcElement.classList.remove("fav-button-confirmation");
-			console.log("set");
 			this.setCoordFavorite(centerX, centerY, x, y, name, e.srcElement.parentElement);
 		}
 		else {
@@ -1431,7 +1429,6 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
 		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                   
-		console.log(centerX, centerY);
 		e.srcElement.title = "Change to " + centerX + "," + centerY + " ?";
 	}.bind(this));
 	
@@ -1465,7 +1462,6 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		
 		var x = parseInt(e.srcElement.parentElement.dataset.x);
 		var y = parseInt(e.srcElement.parentElement.dataset.y);
-		console.log( x, y);
 		this.moveScreenToPosition([x,y],0);
 	}.bind(this));
 	
@@ -1505,7 +1501,6 @@ DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, elem
 			return;
 		}
 		if(result.success){
-			console.log("changed cord");
 			this.updateIndividualFavoriteDom(newX, newY, null, null, element);
 			this.getFavorites();		
 			}
@@ -1519,7 +1514,6 @@ DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
 			return;
 		}
 		if(result.success){
-			console.log("deleted");
 			element.remove();
 			this.getFavorites();
 			}
