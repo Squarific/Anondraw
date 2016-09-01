@@ -28,6 +28,7 @@ function DrawTogether (container, settings) {
 	this._followingPlayer;  // The player the view is currently following
 	
 	this._favoriteRenameDelayTimeout;
+	this.favoritesContainer = null;
 
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
@@ -1215,6 +1216,43 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	// locationImage.src = "images/icons/locations.png";
 	// locationImage.alt = "Locations";
 	// locationImage.title = "Locations";
+	
+	
+	//Buffer between randomButton and favoritesButton in DOM
+	var buffer = this.paint.coordDiv.appendChild(document.createElement("span"));
+	buffer.innerHTML = '&nbsp;';
+	//Favorites button 
+	var favoritesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	favoritesButton.className = "control-button favorites-button";
+	
+	var favoritesButtonImage = favoritesButton.appendChild(document.createElement("img"));
+	favoritesButtonImage.src = "images/icons/locations.png";
+	favoritesButtonImage.alt = "Open Favorites Menu";
+	favoritesButtonImage.title = "Open Favorites Menu";
+	favoritesButton.addEventListener("click", function () {
+		if($(".favorites-window").is(":visible"))
+    {
+        $(".favorites-window").hide();
+    }
+    else
+    {
+				this.updateFavoriteDom();
+        $(".favorites-window").show();
+    }
+	}.bind(this));
+	
+	var favoritesWindow = this.paint.coordDiv.appendChild(document.createElement("div"));
+	favoritesWindow.className = "favorites-window";
+	
+	this.favoritesContainer = favoritesWindow.appendChild(document.createElement("div"));
+	this.favoritesContainer.className = "favorites-container";	
+};
+
+DrawTogether.prototype.searchAndUpdateIndividualFavoriteDom = function searchAndUpdateIndividualFavoriteDom(newX, newY, newName, newOwner, x, y, name, owner) {
+	var childArr = this.favoritesContainer.chindren; 
+	for(x = childArr.length; x >= 0; x--){
+		updateIndividualFavoriteDom(newX, newY, newName, newOwner, childArr[x]);
+	}
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
@@ -1299,6 +1337,167 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 	}.bind(this));
 };
 
+// Send null for unchanging value
+DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFavoriteDom(newX, newY, newName, newOwner, element) {
+	if(newX !== null)
+		element.dataset.x = newX;
+	if(newY !== null)
+		element.dataset.y = newY;
+	if(newName !== null)
+		element.dataset.name = newName;
+	if(newOwner !== null)
+		element.dataset.owner = newOwner;
+	
+	var coordinateButton = element.getElementsByClassName("fav-coor-button")[0];
+	var inputRename = element.getElementsByClassName("fav-rename-input")[0];
+	if ( (newName || element.dataset.name) === ""){
+		inputRename.value = "";
+		coordinateButton.innerHTML = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
+		coordinateButton.title = "";
+	}
+	else {
+		inputRename.value = (newName || element.dataset.name);
+		coordinateButton.innerHTML = (newName || element.dataset.name);
+		coordinateButton.title = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
+	}
+	
+	
+};
+
+DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name, owner) {
+	var favoriteContainer = this.favoritesContainer.appendChild(document.createElement("div"));
+	favoriteContainer.className = "favorite-container";
+	favoriteContainer.dataset.x = x;
+	favoriteContainer.dataset.y = y;
+	favoriteContainer.dataset.name = name;
+	favoriteContainer.dataset.owner = owner;
+	
+	var favoriteMinusButton = favoriteContainer.appendChild(document.createElement("div"));
+	favoriteMinusButton.className = "fav-button fav-minus-button";
+	favoriteMinusButton.innerHTML = "-";
+	favoriteMinusButton.addEventListener("click", function (e) {
+		if(e.srcElement.classList.contains("fav-button-confirmation")){
+			e.srcElement.classList.remove("fav-button-confirmation");
+			var greatgrandfather = e.srcElement.parentElement;
+			
+			var x = greatgrandfather.dataset.x;
+			var y = greatgrandfather.dataset.y;
+			var name = greatgrandfather.dataset.name;
+			this.removeFavorite(x, y, name, greatgrandfather);			
+		}
+		else {
+			e.srcElement.classList.add("fav-button-confirmation");
+			e.srcElement.innerHTML = "?";
+			setTimeout(function() {
+				e.srcElement.innerHTML = "-";
+				e.srcElement.classList.remove("fav-button-confirmation");
+			}.bind(e.srcElement), 4000);
+		}
+	}.bind(this));
+	
+	var favoritePlusButton = favoriteContainer.appendChild(document.createElement("div"));
+	favoritePlusButton.className = "fav-button fav-plus-button";
+	favoritePlusButton.innerHTML = "+";
+	
+	favoritePlusButton.addEventListener("click", function (e) {
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+	  
+		var x = e.srcElement.parentElement.dataset.x;
+		var y = e.srcElement.parentElement.dataset.y;
+		var name = e.srcElement.parentElement.dataset.name;
+		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                  
+		console.log(centerX, centerY);
+		if(e.srcElement.classList.contains("fav-button-confirmation")){
+			e.srcElement.classList.remove("fav-button-confirmation");
+			console.log("set");
+			this.setCoordFavorite(centerX, centerY, x, y, name, e.srcElement.parentElement);
+		}
+		else {
+			e.srcElement.classList.add("fav-button-confirmation");
+			e.srcElement.innerHTML = "?";
+			setTimeout(function() {
+				e.srcElement.innerHTML = "+";
+				e.srcElement.classList.remove("fav-button-confirmation");
+			}.bind(e.srcElement), 4000);
+		}
+
+	}.bind(this));
+	
+	favoritePlusButton.addEventListener("mouseover", function (e) {
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		
+		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                   
+		console.log(centerX, centerY);
+		e.srcElement.title = "Change to " + centerX + "," + centerY + " ?";
+	}.bind(this));
+	
+	var favoritePencilButton = favoriteContainer.appendChild(document.createElement("div"));
+	favoritePencilButton.className = "fav-button fav-pencil-button";
+	favoritePencilButton.innerHTML = "✎";
+	
+	var favoriteRenameContainer = favoritePencilButton.appendChild(document.createElement("div"));
+	favoriteRenameContainer.className = "fav-rename-container";
+	
+	var favoriteRenameInput = favoriteRenameContainer.appendChild(document.createElement("input"));
+	favoriteRenameInput.className = "fav-rename-input";
+	favoriteRenameInput.type = "text";
+	favoriteRenameInput.placeholder = "Rename"
+	
+	favoriteRenameInput.addEventListener("input", function (e) {
+		if(this._favoriteRenameDelayTimeout !== undefined)
+			clearTimeout(this._favoriteRenameDelayTimeout);
+		this._favoriteRenameDelayTimeout = setTimeout(function () {
+			var newName = e.srcElement.value;
+			var greatgrandfather = e.srcElement.parentElement.parentElement.parentElement;
+			var x = greatgrandfather.dataset.x;
+			var y = greatgrandfather.dataset.y;
+			this.renameFavorite(x, y, newName, greatgrandfather);
+		}.bind(this), 1500);
+	}.bind(this));
+	
+	var favoriteCoorButton = favoriteContainer.appendChild(document.createElement("div"));
+	favoriteCoorButton.className = "fav-button fav-coor-button";
+	favoriteCoorButton.addEventListener("click", function (e) {
+		
+		var x = parseInt(e.srcElement.parentElement.dataset.x);
+		var y = parseInt(e.srcElement.parentElement.dataset.y);
+		console.log( x, y);
+		this.moveScreenToPosition([x,y],0);
+	}.bind(this));
+	
+	if(name.length > 0){ 
+		favoriteCoorButton.innerHTML = name;
+		favoriteCoorButton.title = x + "," + y;
+		favoriteRenameInput.value = name;
+	}
+	else{
+		favoriteCoorButton.innerHTML = x + "," + y;
+	}
+};
+
+DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
+	favorites = this.favList;
+	while (this.favoritesContainer.firstChild)
+		this.favoritesContainer.removeChild(this.favoritesContainer.firstChild)
+	
+	var addNewFavoriteElementButton = this.favoritesContainer.appendChild(document.createElement("div"));
+	addNewFavoriteElementButton.className = "fav-button fav-add-new-fav";
+	addNewFavoriteElementButton.innerHTML = "^";
+	addNewFavoriteElementButton.title = "Add new Favorite."
+	addNewFavoriteElementButton.addEventListener("click", function (e) {
+		this.createFavorite(0, 0, "");
+	
+	}.bind(this));
+	for(x = favorites.length - 1; x >= 0 ; x--)
+	{		
+		this.insertOneFavorite(favorites[x]['x'], favorites[x]['y'], favorites[x]['name'], favorites[x]['owner'])
+	}	//end for
+};
+
 DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, element) {
 	this.network.socket.emit("setcoordfavorite", newX, newY, x, y, name, function (err, result) {
 		if (err) {
@@ -1307,7 +1506,7 @@ DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, elem
 		}
 		if(result.success){
 			console.log("changed cord");
-			this.paint.updateIndividualFavoriteDom(newX, newY, null, null, element);
+			this.updateIndividualFavoriteDom(newX, newY, null, null, element);
 			this.getFavorites();		
 			}
 		return;
@@ -1334,14 +1533,11 @@ DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
 			return;
 		}
 		if(result.success){
-			this.paint.updateIndividualFavoriteDom(null, null, name, null, element);
+			this.updateIndividualFavoriteDom(null, null, name, null, element);
 			this.getFavorites();
 			}
 		return;
 	}.bind(this));
-};
-DrawTogether.prototype.updateFavoriteDom = function () {
-	this.paint.updateFavoriteDom(this.favList);
 };
 
 DrawTogether.prototype.getFavorites = function () {
@@ -1373,7 +1569,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 		
 		if (result.success) {
 			this.chat.addMessage("Favorite added", result.success);
-			this.paint.insertOneFavorite(0, 0, "", result.owner);
+			this.insertOneFavorite(0, 0, "", result.owner);
 			this.getFavorites();
 		}
 	}.bind(this));
