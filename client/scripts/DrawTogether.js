@@ -1015,10 +1015,11 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 month", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
 		if (minutes == "10 year") minutes = 10 * 356 * 24 * 60;
 		if (minutes == "1 year") minutes = 356 * 24 * 60;
+		if (minutes == "1 month") minutes = 30 * 24 * 60;
 		if (minutes == "1 week") minutes = 7 * 24 * 60;
 		if (minutes == "1 day") minutes = 24 * 60;
 		if (minutes == "1 hour") minutes = 60;
