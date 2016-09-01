@@ -1216,10 +1216,6 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	// locationImage.alt = "Locations";
 	// locationImage.title = "Locations";
 	
-	
-	//Buffer between randomButton and favoritesButton in DOM
-	var buffer = this.paint.coordDiv.appendChild(document.createElement("span"));
-	buffer.innerHTML = '&nbsp;';
 	//Favorites button 
 	var favoritesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	favoritesButton.className = "control-button favorites-button";
