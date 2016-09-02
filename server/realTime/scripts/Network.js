@@ -1028,7 +1028,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("setpermission", function (socketid, level) {
 			protocol.setPermission(socket, socketId, level);
 		});
-
+		
 		socket.on("createprotectedregion", function (from, to, callback) {
 			if (typeof callback !== 'function') return;
 
