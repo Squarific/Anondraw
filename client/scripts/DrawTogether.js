@@ -596,7 +596,9 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
-
+			
+			this.getFavorites();
+			
 			// If we are new show the welcome window
 			if (this.userSettings.getBoolean("Show welcome")) {
 				this.openWelcomeWindow();
@@ -634,6 +636,8 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
+			
+			this.getFavorites();
 
 			this.removeLoading();
 		}
@@ -789,7 +793,6 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 	location.hash = room + "," +
 	                this.paint.public.leftTopX.toFixed() + "," +
 	                this.paint.public.leftTopY.toFixed();
-	this.getFavorites();
 };
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
@@ -1341,12 +1344,12 @@ DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFa
 	var inputRename = element.getElementsByClassName("fav-rename-input")[0];
 	if ( (newName || element.dataset.name) === ""){
 		inputRename.value = "";
-		coordinateButton.innerHTML = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
+		coordinateButton.textContent = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
 		coordinateButton.title = "";
 	}
 	else {
 		inputRename.value = (newName || element.dataset.name);
-		coordinateButton.innerHTML = (newName || element.dataset.name);
+		coordinateButton.textContent = (newName || element.dataset.name);
 		coordinateButton.title = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
 	}
 	
@@ -1363,72 +1366,73 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	
 	var favoriteMinusButton = favoriteContainer.appendChild(document.createElement("div"));
 	favoriteMinusButton.className = "fav-button fav-minus-button";
-	favoriteMinusButton.innerHTML = "-";
+	favoriteMinusButton.textContent = "-";
 	favoriteMinusButton.addEventListener("click", function (e) {
-		if(e.srcElement.classList.contains("fav-button-confirmation")){
-			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+		var element = e.srcElement || e.target;
+		if(element.classList.contains("fav-button-confirmation")){
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 			coord.dataset.tempConf = coord.innerHTML;
-			e.srcElement.innerHTML = "-";
-			e.srcElement.classList.remove("fav-button-confirmation");
+			element.innerHTML = "-";
+			element.classList.remove("fav-button-confirmation");
 			
-			var greatgrandfather = e.srcElement.parentElement;
+			var curFavContainer = element.parentNode;
 			
-			var x = greatgrandfather.dataset.x;
-			var y = greatgrandfather.dataset.y;
-			var name = greatgrandfather.dataset.name;
-			this.removeFavorite(x, y, name, greatgrandfather);			
+			var x = curFavContainer.dataset.x;
+			var y = curFavContainer.dataset.y;
+			var name = curFavContainer.dataset.name;
+			this.removeFavorite(x, y, name, curFavContainer);			
 		}
 		else {
-			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 			coord.dataset.tempConf = coord.innerHTML;
 			coord.innerHTML = "Delete?";
-			e.srcElement.classList.add("fav-button-confirmation");
-			e.srcElement.innerHTML = "?";
+			element.classList.add("fav-button-confirmation");
+			element.innerHTML = "?";
 			setTimeout(function() {
-				var coord = this.parentElement.getElementsByClassName("fav-coor-button")[0];
+				var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 				coord.innerHTML = coord.dataset.tempConf;
-				e.srcElement.innerHTML = "-";
-				e.srcElement.classList.remove("fav-button-confirmation");
-			}.bind(e.srcElement), 4000);
+				element.innerHTML = "-";
+				element.classList.remove("fav-button-confirmation");
+			}.bind(this), 4000);
 		}
 	}.bind(this));
 	
 	var favoritePlusButton = favoriteContainer.appendChild(document.createElement("div"));
 	favoritePlusButton.className = "fav-button fav-plus-button";
-	favoritePlusButton.innerHTML = "+";
+	favoritePlusButton.textContent = "+";
 	
 	favoritePlusButton.addEventListener("click", function (e) {
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
 		                  this.paint.public.canvas.height / this.paint.public.zoom];
-	  
-		var x = e.srcElement.parentElement.dataset.x;
-		var y = e.srcElement.parentElement.dataset.y;
-		var name = e.srcElement.parentElement.dataset.name;
+	  var element = e.srcElement || e.target;
+		var x = element.parentNode.dataset.x;
+		var y = element.parentNode.dataset.y;
+		var name = element.parentNode.dataset.name;
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
 		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                  
-		if(e.srcElement.classList.contains("fav-button-confirmation")){
-			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+		if(element.classList.contains("fav-button-confirmation")){
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 			coord.innerHTML = coord.dataset.tempConf;
 			coord.dataset.tempConf = "5215random_string_tempconf5152";
-			e.srcElement.innerHTML = "+";
-			e.srcElement.classList.remove("fav-button-confirmation");
+			element.innerHTML = "+";
+			element.classList.remove("fav-button-confirmation");
 			
 			
-			this.setCoordFavorite(centerX, centerY, x, y, name, e.srcElement.parentElement);
+			this.setCoordFavorite(centerX, centerY, x, y, name, element.parentNode);
 		}
 		else {
-			var coord = e.srcElement.parentElement.getElementsByClassName("fav-coor-button")[0];
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 			coord.dataset.tempConf = coord.innerHTML;
 			coord.innerHTML = centerX + "," + centerY + "?";
-			e.srcElement.classList.add("fav-button-confirmation");
-			e.srcElement.innerHTML = "?";
+			element.classList.add("fav-button-confirmation");
+			element.innerHTML = "?";
 			setTimeout(function() {
-				var coord = this.parentElement.getElementsByClassName("fav-coor-button")[0];
+				var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 				if(coord.dataset.tempConf !== "5215random_string_tempconf5152")
 					coord.innerHTML = coord.dataset.tempConf;
-				e.srcElement.innerHTML = "+";
-				e.srcElement.classList.remove("fav-button-confirmation");
-			}.bind(e.srcElement), 2000);
+				element.innerHTML = "+";
+				element.classList.remove("fav-button-confirmation");
+			}.bind(this), 2000);
 		}
 
 	}.bind(this));
@@ -1436,15 +1440,15 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoritePlusButton.addEventListener("mouseover", function (e) {
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
 		                  this.paint.public.canvas.height / this.paint.public.zoom];
-		
+		var element = e.srcElement || e.target;
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
 		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                   
-		e.srcElement.title = "Change to " + centerX + "," + centerY + " ?";
+		element.title = "Change to " + centerX + "," + centerY + " ?";
 	}.bind(this));
 	
 	var favoritePencilButton = favoriteContainer.appendChild(document.createElement("div"));
 	favoritePencilButton.className = "fav-button fav-pencil-button";
-	favoritePencilButton.innerHTML = "✎";
+	favoritePencilButton.textContent = "✎";
 	
 	var favoriteRenameContainer = favoritePencilButton.appendChild(document.createElement("div"));
 	favoriteRenameContainer.className = "fav-rename-container";
@@ -1455,33 +1459,34 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteRenameInput.placeholder = "Rename"
 	
 	favoriteRenameInput.addEventListener("input", function (e) {
+		var element = e.srcElement || e.target;
 		if(this._favoriteRenameDelayTimeout !== undefined)
 			clearTimeout(this._favoriteRenameDelayTimeout);
 		this._favoriteRenameDelayTimeout = setTimeout(function () {
-			var newName = e.srcElement.value;
-			var greatgrandfather = e.srcElement.parentElement.parentElement.parentElement;
-			var x = greatgrandfather.dataset.x;
-			var y = greatgrandfather.dataset.y;
-			this.renameFavorite(x, y, newName, greatgrandfather);
+			var newName = element.value;
+			var curFavContainer = element.parentNode.parentNode.parentNode;
+			var x = curFavContainer.dataset.x;
+			var y = curFavContainer.dataset.y;
+			this.renameFavorite(x, y, newName, curFavContainer);
 		}.bind(this), 1500);
 	}.bind(this));
 	
 	var favoriteCoorButton = favoriteContainer.appendChild(document.createElement("div"));
 	favoriteCoorButton.className = "fav-button fav-coor-button";
 	favoriteCoorButton.addEventListener("click", function (e) {
-		
-		var x = parseInt(e.srcElement.parentElement.dataset.x);
-		var y = parseInt(e.srcElement.parentElement.dataset.y);
+		var element = e.srcElement || e.target;
+		var x = parseInt(element.parentNode.dataset.x);
+		var y = parseInt(element.parentNode.dataset.y);
 		this.moveScreenToPosition([x,y],0);
 	}.bind(this));
 	
 	if(name.length > 0){ 
-		favoriteCoorButton.innerHTML = name;
+		favoriteCoorButton.textContent = name;
 		favoriteCoorButton.title = x + "," + y;
 		favoriteRenameInput.value = name;
 	}
 	else{
-		favoriteCoorButton.innerHTML = x + "," + y;
+		favoriteCoorButton.textContent = x + "," + y;
 	}
 };
 
@@ -1491,7 +1496,7 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 	
 	var addNewFavoriteElementButton = this.favoritesContainer.appendChild(document.createElement("div"));
 	addNewFavoriteElementButton.className = "fav-button fav-add-new-fav";
-	addNewFavoriteElementButton.innerHTML = "^";
+	addNewFavoriteElementButton.textContent = "^";
 	addNewFavoriteElementButton.title = "Add new Favorite."
 	addNewFavoriteElementButton.addEventListener("click", function (e) {
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
@@ -1501,9 +1506,9 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 		this.createFavorite(centerX, centerY, "");
 	
 	}.bind(this));
-	for(var x = this.favList.length - 1; x >= 0 ; x--)
-	{		
-		this.insertOneFavorite(this.favList[x]['x'], this.favList[x]['y'], this.favList[x]['name'], this.favList[x]['owner'])
+	for(var k = this.favList.length - 1; k >= 0 ; k--)
+	{
+		this.insertOneFavorite(this.favList[k]['x'], this.favList[k]['y'], this.favList[k]['name'], this.favList[k]['owner'])
 	}	//end for
 };
 

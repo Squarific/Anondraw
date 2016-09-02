@@ -423,7 +423,7 @@ var server = http.createServer(function (req, res) {
 			}));
 			return;
 		}
-		if( x !== x || y !== y || newX !== newX || newY !== newY ){
+		if( isNaN(x) || isNaN(y) || isNaN(newX) || isNaN(newY) ){
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));
@@ -457,7 +457,7 @@ var server = http.createServer(function (req, res) {
 			}));
 			return;
 		}
-		if( x !== x || y !== y){
+		if( isNaN(x) || isNaN(y) ){
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));
@@ -491,7 +491,7 @@ var server = http.createServer(function (req, res) {
 			}));
 			return;
 		}
-		if( x !== x || y !== y){
+		if( isNaN(x) || isNaN(y) ){
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));
@@ -550,7 +550,7 @@ var server = http.createServer(function (req, res) {
 			}));
 			return;
 		}
-		if( x !== x || y !== y){
+		if( isNaN(x) || isNaN(y) ){
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));

@@ -2,7 +2,6 @@ function Account (server, uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";
 	this.mail = localStorage.getItem("drawtogether-mail");
 	this.server = server;
-	this.favList = [];
 	setInterval(this.checkLogin.bind(this), 30 * 60 * 1000);
 }
 
@@ -38,47 +37,52 @@ Account.prototype.genericRequest = function (serverhook, parameters, callback) {
 };
 
 Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, callback) {
-	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
-								 + "&room=" + encodeURIComponent(room)
-								 + "&newX=" + encodeURIComponent(newX)
-								 + "&newY=" + encodeURIComponent(newY)
-								 + "&x=" + encodeURIComponent(x)
-								 + "&y=" + encodeURIComponent(y)
-								 + "&name=" + encodeURIComponent(name);
-	this.genericRequest("setcoordfavorite", parameters, callback);
+	this.request("/setcoordfavorite", {
+		uKey: this.uKey,
+    room: room,
+    newX: newX,
+    newY: newY,
+    x: x,
+    y: y,
+    name: name
+	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.removeFavorite = function (x, y, name, callback) {
-	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
-								 + "&room=" + encodeURIComponent(room)
-								 + "&x=" + encodeURIComponent(x)
-								 + "&y=" + encodeURIComponent(y)
-								 + "&name=" + encodeURIComponent(name);
-	this.genericRequest("removefavorite", parameters, callback);
+	this.request("/removefavorite", {
+		uKey: this.uKey,
+    room: room,
+    x: x,
+    y: y,
+    name: name
+	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.renameFavorite = function (x, y, name, callback) {
-	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
-								 + "&room=" + encodeURIComponent(room)
-								 + "&x=" + encodeURIComponent(x)
-								 + "&y=" + encodeURIComponent(y)
-								 + "&name=" + encodeURIComponent(name);
-	this.genericRequest("renamefavorite", parameters, callback);
+	this.request("/renamefavorite", {
+		uKey: this.uKey,
+    room: room,
+    x: x,
+    y: y,
+    name: name
+	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.createFavorite = function (x, y, name, callback) {
-	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
-								 + "&room=" + encodeURIComponent(room)
-								 + "&x=" + encodeURIComponent(x)
-								 + "&y=" + encodeURIComponent(y)
-								 + "&name=" + encodeURIComponent(name);
-	this.genericRequest("createfavorite", parameters, callback);
+	this.request("/createfavorite", {
+		uKey: this.uKey,
+    room: room,
+    x: x,
+    y: y,
+    name: name
+	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.getFavorites = function (room, callback) {
-	var parameters = "uKey=" + encodeURIComponent(this.uKey) 
-								+ "&room=" + encodeURIComponent(room);
-	this.genericRequest("getfavorites", parameters, callback);
+	this.request("/getfavorites", {
+		uKey: this.uKey,
+    room: room
+	}, this.parseData.bind(this, callback));
 };
 
 // Callback (err)
@@ -289,7 +293,7 @@ Account.prototype.request = function request (path, options, callback) {
 // Parses the server returned data as a JSON object
 // Callback gives err if err was already defined or if the JSON parsing failed
 // Callback (err, data)
-Account.prototype.parseData = function parseData (err, request, callback) {
+Account.prototype.parseData = function parseData (callback, err, request ) {
 	if (err) {
 		callback(err);
 		return;
@@ -299,6 +303,11 @@ Account.prototype.parseData = function parseData (err, request, callback) {
 		var data = JSON.parse(request.responseText);
 	} catch (e) {
 		err = "JSON Parse error. Server response was: " + request.responseText;
+	}
+	
+	if (data.error) {
+		callback(data.error)						
+		return;
 	}
 
 	callback(err, data);
