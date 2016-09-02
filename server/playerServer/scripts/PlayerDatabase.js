@@ -308,7 +308,10 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 				return;
 			}
 			if (rows.length > 0){
-				callback("You've already created this favorite!");
+				if(rows[0]["name"] !== "")
+					callback("You've already created this favorite at " + x + "," + y + " named " + rows[0]["name"]);
+				else
+					callback("You've already created this favorite at " + x + "," + y);
 				return;
 			}
 			this.database.query("INSERT INTO favorites (owner, x, y, room, name) VALUES (?, ?, ?, ?, ?)",

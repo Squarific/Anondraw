@@ -1494,7 +1494,11 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 	addNewFavoriteElementButton.innerHTML = "^";
 	addNewFavoriteElementButton.title = "Add new Favorite."
 	addNewFavoriteElementButton.addEventListener("click", function (e) {
-		this.createFavorite(0, 0, "");
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2); 
+		this.createFavorite(centerX, centerY, "");
 	
 	}.bind(this));
 	for(var x = this.favList.length - 1; x >= 0 ; x--)
@@ -1572,7 +1576,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 		
 		if (result.success) {
 			this.chat.addMessage("Favorite added", result.success);
-			this.insertOneFavorite(0, 0, "", result.owner);
+			this.insertOneFavorite(x, y, name, result.owner);
 			this.getFavorites();
 		}
 	}.bind(this));
