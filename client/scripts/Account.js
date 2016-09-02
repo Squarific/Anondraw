@@ -10,32 +10,6 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
 };
 
-Account.prototype.genericRequest = function (serverhook, parameters, callback) {
-	if (this.uKey !== ""){
-		var req = new XMLHttpRequest();
-
-		req.addEventListener("readystatechange", function (event) {
-			if (req.status == 200 && req.readyState == 4) {
-				var data = JSON.parse(req.responseText);
-
-				if (data.error) {
-					callback(data.error)						
-					return;
-				}
-				
-				setTimeout(callback, 0, null, data); // null = err param
-			} else if (req.readyState == 4) {
-				callback("Connection error, status code: " + req.status);
-			}
-		}.bind(this));
-		req.open("GET", this.server + "/" + serverhook + "?" + parameters);
-		req.send();
-	}
-	else {
-		callback("Not logged in!")
-	}
-};
-
 Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, callback) {
 	this.request("/setcoordfavorite", {
 		uKey: this.uKey,
