@@ -105,12 +105,13 @@ DrawTogether.prototype.addPathPoint = function addPathPoint (room, id, point) {
 };
 
 DrawTogether.prototype.finalizePath = function finalizePath (room, id, callback) {
+	callback = callback || function () {};
+
 	if (!this.paths[room] || !this.paths[room][id]) {
 		callback(false);
 		return false;
 	}
 
-	callback = callback || function () {};
 	this.addDrawing(room, this.paths[room][id], callback);
 	this.removePath(room, id);
 };
