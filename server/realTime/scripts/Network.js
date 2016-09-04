@@ -830,7 +830,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
 
-				// Always set latpathpoint even if we failed to draw
+				// Always set lastpathpoint even if we failed to draw
+				// TODO: Should this happen?
 				socket.lastPathPoint = point;
 
 				if (socket.ink < usage) {
@@ -842,8 +843,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 
-			protocol.drawTogether.addPathPoint(socket.room, socket.id, point);
-			callback(true);
+			callback(protocol.drawTogether.addPathPoint(socket.room, socket.id, point));
 			socket.broadcast.to(socket.room).emit("pp", socket.id, point);
 		});
 
@@ -869,20 +869,20 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			if (room.indexOf("user_") == 0) {
-				if (parseInt(socket.room.slice(5)) === socket.id) {
-					socket.permissions[parseInt(socket.room.slice(5))] = Number.MAX_SAFE_INTEGER;
+				if (parseInt(room.slice(5)) === socket.id) {
+					socket.permissions[parseInt(room.slice(5))] = Number.MAX_SAFE_INTEGER;
 					handleRoom();
 					return;
 				}
 
 				protocol.players.request("getpermission", {
-					roomid: parseInt(socket.room.slice(5)),
+					roomid: parseInt(room.slice(5)),
 					uKey: socket.uKey
 				}, function (err, data) {
 					if (err || data.err)
 						console.log("Get permission error", data.err);
 					
-					socket.permissions[parseInt(socket.room.slice(5))] =
+					socket.permissions[parseInt(room.slice(5))] =
 						parseInt((data && data.level) || 0);
 
 					handleRoom();

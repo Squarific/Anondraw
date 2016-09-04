@@ -13,49 +13,49 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, callback) {
 	this.request("/setcoordfavorite", {
 		uKey: this.uKey,
-    room: room,
-    newX: newX,
-    newY: newY,
-    x: x,
-    y: y,
-    name: name
+		room: room,
+		newX: newX,
+		newY: newY,
+		x: x,
+		y: y,
+		name: name
 	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.removeFavorite = function (x, y, name, callback) {
 	this.request("/removefavorite", {
 		uKey: this.uKey,
-    room: room,
-    x: x,
-    y: y,
-    name: name
+		room: room,
+		x: x,
+		y: y,
+		name: name
 	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.renameFavorite = function (x, y, name, callback) {
 	this.request("/renamefavorite", {
 		uKey: this.uKey,
-    room: room,
-    x: x,
-    y: y,
-    name: name
+		room: room,
+		x: x,
+		y: y,
+		name: name
 	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.createFavorite = function (x, y, name, callback) {
 	this.request("/createfavorite", {
 		uKey: this.uKey,
-    room: room,
-    x: x,
-    y: y,
-    name: name
+		room: room,
+		x: x,
+		y: y,
+		name: name
 	}, this.parseData.bind(this, callback));
 };
 
 Account.prototype.getFavorites = function (room, callback) {
 	this.request("/getfavorites", {
 		uKey: this.uKey,
-    room: room
+		room: room
 	}, this.parseData.bind(this, callback));
 };
 
