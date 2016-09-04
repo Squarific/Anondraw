@@ -980,6 +980,8 @@ input.paint-texttool {
   right:1em;
   bottom:5em;
 	display: none;
+  max-height: 75%;
+  overflow-y:auto;
 }
 
 .fav-button:hover {

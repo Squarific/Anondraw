@@ -1480,11 +1480,15 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		if (favoriteRenameContainer.style.visibility == "visible") {
 			favoriteRenameContainer.style.visibility = "";
 			favoriteRenameContainer.style.opacity = 0;
+
 			clearTimeout(_favoriteRenameDelayTimeout);
 			this.renameFavorite(x, y, newName, curFavContainer);
 		} else {
 			favoriteRenameContainer.style.visibility = "visible";
 			favoriteRenameContainer.style.opacity = 1;
+			favoriteRenameInput.focus();
+			favoriteRenameInput.select();
+			favoriteRenameInput.setSelectionRange(0, favoriteRenameInput.value.length);
 		}
 	});
 	
