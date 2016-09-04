@@ -10,6 +10,7 @@ function DrawTogether (container, settings) {
 	// Set default values untill we receive them from the server
 	this.playerList = [];
 	this.moveQueue = [];
+	this.favList = [];
 	this.ink = 0;
 	this.previousInk = Infinity;
 
@@ -17,7 +18,7 @@ function DrawTogether (container, settings) {
 	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
 	this.lastZoomWarning = 0;       // Last time we showed the zoom warning
 	this.lastViewDeduction = 0;     // Time since we last deducted someones viewscore
-	this.lastTimeoutError = 0;    // Last time since a socket timed out
+	this.lastTimeoutError = 0;      // Last time since a socket timed out
 
 	this.lastScreenMove = Date.now();    // Last time we moved the screen
 	this.lastScreenMoveStartPosition;    // Last start position
@@ -25,6 +26,8 @@ function DrawTogether (container, settings) {
 	this._forceFollow;      // The playerid that should be followed
 	this._autoMoveScreen;   // Boolean, should we move the screen automatically?
 	this._followingPlayer;  // The player the view is currently following
+	
+	this.favoritesContainer = null;
 
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
@@ -55,10 +58,10 @@ function DrawTogether (container, settings) {
 			ga("send", "event", "autojoin", "public");
 		}
 		this.changeRoom(this.settings.room,
-			            undefined,
-			            this.settings.leftTopX,
-			            this.settings.leftTopY,
-			            true);
+		                undefined,
+		                this.settings.leftTopX,
+		                this.settings.leftTopY,
+		                true);
 	} else  if (this.settings.mode == "private") {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
 		this.changeRoom(this.settings.room, undefined, 0, 0, true);
@@ -99,7 +102,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 3;
+DrawTogether.prototype.CLIENT_VERSION = 4;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -573,7 +576,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 	var changingRoomTimeout = setTimeout(function () {
 		this.changingRoom = false;
 	}.bind(this), 2000);
-
+	
 	number = number || "";
 	this.network.loadRoom(room + number, specific, override, function (err, drawings) {
 		this.changingRoom = false;
@@ -592,7 +595,11 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
-
+			
+			if (this.account.uKey) {
+				this.getFavorites();
+			}
+			
 			// If we are new show the welcome window
 			if (this.userSettings.getBoolean("Show welcome")) {
 				this.openWelcomeWindow();
@@ -630,6 +637,8 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
+			
+			this.getFavorites();
 
 			this.removeLoading();
 		}
@@ -1015,10 +1024,11 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
+	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 month", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
 		if (minutes == "10 year") minutes = 10 * 356 * 24 * 60;
 		if (minutes == "1 year") minutes = 356 * 24 * 60;
+		if (minutes == "1 month") minutes = 30 * 24 * 60;
 		if (minutes == "1 week") minutes = 7 * 24 * 60;
 		if (minutes == "1 day") minutes = 24 * 60;
 		if (minutes == "1 hour") minutes = 60;
@@ -1201,15 +1211,29 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	});
 
 	this.paint.changeTool("grab");
-
-	// Add the location button to the paint area
-	// var locationButton = this.paint.coordDiv.appendChild(document.createElement("div"));
-	// locationButton.className = "control-button";
-
-	// var locationImage = locationButton.appendChild(document.createElement("img"));
-	// locationImage.src = "images/icons/locations.png";
-	// locationImage.alt = "Locations";
-	// locationImage.title = "Locations";
+	
+	//Favorites button 
+	var favoritesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	favoritesButton.className = "control-button favorites-button";
+	
+	var favoritesButtonImage = favoritesButton.appendChild(document.createElement("img"));
+	favoritesButtonImage.src = "images/icons/locations.png";
+	favoritesButtonImage.alt = "Open Favorites Menu";
+	favoritesButtonImage.title = "Open Favorites Menu";
+	favoritesButton.addEventListener("click", function () {
+		if($(".favorites-window").is(":visible")) {
+			$(".favorites-window").hide();
+		} else {
+			this.updateFavoriteDom();
+			$(".favorites-window").show();
+		}
+	}.bind(this));
+	
+	var favoritesWindow = this.paint.container.appendChild(document.createElement("div"));
+	favoritesWindow.className = "favorites-window";
+	
+	this.favoritesContainer = favoritesWindow.appendChild(document.createElement("div"));
+	this.favoritesContainer.className = "favorites-container";	
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
@@ -1263,17 +1287,17 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
-			if (!success){
-				event.removePathPoint();
-				if(typeof timeOut !== 'undefined' && timeOut){
-					var curr_time = Date.now();
-					if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
-						this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
-						this.lastTimeoutError = curr_time;
-					}
+		if (!success){ 
+			event.removePathPoint();
+			if(typeof timeOut !== 'undefined' && timeOut){
+				var curr_time = Date.now();
+				if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
+					this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
+					this.lastTimeoutError = curr_time;
 				}
 			}
-		}, this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
+		}
+	}, this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
 	this.lastPathPoint = event.point;
 };
 
@@ -1291,6 +1315,293 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 		};
 
 		handlers[answer](event.from, event.to);
+	}.bind(this));
+};
+
+// Send null for unchanging value
+DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFavoriteDom(newX, newY, newName, newOwner, element) {
+	if(newX !== null)
+		element.dataset.x = newX;
+	if(newY !== null)
+		element.dataset.y = newY;
+	if(newName !== null)
+		element.dataset.name = newName;
+	if(newOwner !== null)
+		element.dataset.owner = newOwner;
+	
+	var coordinateButton = element.getElementsByClassName("fav-coor-button")[0];
+	var inputRename = element.getElementsByClassName("fav-rename-input")[0];
+	if ( (newName || element.dataset.name) === ""){
+		inputRename.value = "";
+		coordinateButton.textContent = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
+		coordinateButton.title = "";
+	} else {
+		inputRename.value = (newName || element.dataset.name);
+		coordinateButton.textContent = (newName || element.dataset.name);
+		coordinateButton.title = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
+	}
+};
+
+DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDeleteButton () {
+	var favoriteMinusButton = document.createElement("div");
+	favoriteMinusButton.className = "fav-button fav-delete-button";
+	favoriteMinusButton.textContent = "x";
+	favoriteMinusButton.addEventListener("click", function (e) {
+		var element = e.srcElement || e.target;
+		if(element.classList.contains("fav-button-confirmation")){
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			element.classList.remove("fav-button-confirmation");
+			
+			var curFavContainer = element.parentNode;
+			
+			var x = curFavContainer.dataset.x;
+			var y = curFavContainer.dataset.y;
+			var name = curFavContainer.dataset.name;
+			this.removeFavorite(x, y, name, curFavContainer);			
+		}
+		else {
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			coord.innerHTML = "Click again to delete";
+			element.classList.add("fav-button-confirmation");
+			setTimeout(function() {
+				var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
+				coord.innerHTML = coord.dataset.tempConf;
+				element.classList.remove("fav-button-confirmation");
+			}.bind(this), 4000);
+		}
+	}.bind(this));
+
+	return favoriteMinusButton;
+};
+
+DrawTogether.prototype.createSetPositionButton = function createSetPositionButton () {
+	var favoritePlusButton = document.createElement("div");
+	favoritePlusButton.className = "fav-button fav-move-button";
+	favoritePlusButton.textContent = "Set pos";
+	
+	favoritePlusButton.addEventListener("click", function (e) {
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+
+		var element = e.srcElement || e.target;
+		var x = element.parentNode.dataset.x;
+		var y = element.parentNode.dataset.y;
+		var name = element.parentNode.dataset.name;
+		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);   
+
+		if(element.classList.contains("fav-button-confirmation")){
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
+			coord.innerHTML = coord.dataset.tempConf;
+			coord.dataset.tempConf = "5215random_string_tempconf5152";
+			element.classList.remove("fav-button-confirmation");
+
+			this.setCoordFavorite(centerX, centerY, x, y, name, element.parentNode);
+		} else {
+			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			coord.innerHTML = "Change to " + centerX + "," + centerY + "?";
+			element.classList.add("fav-button-confirmation");
+			setTimeout(function() {
+				var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
+				if(coord.dataset.tempConf !== "5215random_string_tempconf5152")
+					coord.innerHTML = coord.dataset.tempConf;
+				element.classList.remove("fav-button-confirmation");
+			}.bind(this), 2000);
+		}
+	}.bind(this));
+
+	favoritePlusButton.addEventListener("mouseover", function (e) {
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		var element = e.srcElement || e.target;
+		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                   
+		element.title = "Change to " + centerX + "," + centerY + " ?";
+	}.bind(this));
+
+	return favoritePlusButton;
+};
+
+DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name, owner) {
+	var favoriteContainer = this.favoritesContainer.appendChild(document.createElement("div"));
+	favoriteContainer.className = "favorite-container";
+	favoriteContainer.dataset.x = x;
+	favoriteContainer.dataset.y = y;
+	favoriteContainer.dataset.name = name;
+	favoriteContainer.dataset.owner = owner;
+
+	var favoriteCoorButton = favoriteContainer.appendChild(document.createElement("div"));
+	favoriteCoorButton.className = "fav-button fav-coor-button";
+	favoriteCoorButton.addEventListener("click", function (e) {
+		var element = e.srcElement || e.target;
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+
+		var x = parseInt(element.parentNode.dataset.x - screenSize[0] / 2);
+		var y = parseInt(element.parentNode.dataset.y - screenSize[1] / 2);
+
+		this.moveScreenToPosition([x,y],0);
+	}.bind(this));
+	
+	var favoritePencilButton = favoriteContainer.appendChild(document.createElement("div"));
+	favoritePencilButton.className = "fav-button fav-pencil-button";
+	favoritePencilButton.textContent = "✎";
+	
+	var favoriteRenameContainer = favoriteContainer.appendChild(document.createElement("div"));
+	favoriteRenameContainer.className = "fav-rename-container";
+	
+	var favoriteRenameInput = favoriteRenameContainer.appendChild(document.createElement("input"));
+	favoriteRenameInput.className = "fav-rename-input";
+	favoriteRenameInput.type = "text";
+	favoriteRenameInput.placeholder = "Rename"
+	
+	var _favoriteRenameDelayTimeout;
+	favoriteRenameInput.addEventListener("input", function (e) {
+		var element = e.srcElement || e.target;
+		if(_favoriteRenameDelayTimeout !== undefined)
+			clearTimeout(_favoriteRenameDelayTimeout);
+		_favoriteRenameDelayTimeout = setTimeout(function () {
+			var newName = element.value;
+			var curFavContainer = favoriteContainer;
+			var x = curFavContainer.dataset.x;
+			var y = curFavContainer.dataset.y;
+
+			favoriteRenameContainer.style.visibility = "";
+			favoriteRenameContainer.style.opacity = 0;
+
+			this.renameFavorite(x, y, newName, curFavContainer);
+		}.bind(this), 2500);
+	}.bind(this));
+
+	favoritePencilButton.addEventListener("click", function () {
+		if (favoriteRenameContainer.style.visibility == "visible") {
+			favoriteRenameContainer.style.visibility = "";
+			favoriteRenameContainer.style.opacity = 0;
+
+			clearTimeout(_favoriteRenameDelayTimeout);
+			this.renameFavorite(x, y, newName, curFavContainer);
+		} else {
+			favoriteRenameContainer.style.visibility = "visible";
+			favoriteRenameContainer.style.opacity = 1;
+			favoriteRenameInput.focus();
+			favoriteRenameInput.select();
+			favoriteRenameInput.setSelectionRange(0, favoriteRenameInput.value.length);
+		}
+	});
+	
+	if(name.length > 0){ 
+		favoriteCoorButton.textContent = name;
+		favoriteCoorButton.title = x + "," + y;
+		favoriteRenameInput.value = name;
+	} else {
+		favoriteCoorButton.textContent = x + "," + y;
+	}
+
+
+	favoriteContainer.appendChild(this.createSetPositionButton());
+	favoriteContainer.appendChild(this.createFavoriteDeleteButton());
+};
+
+DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
+	while (this.favoritesContainer.firstChild)
+		this.favoritesContainer.removeChild(this.favoritesContainer.firstChild)
+	
+	var addNewFavoriteElementButton = this.favoritesContainer.appendChild(document.createElement("div"));
+	addNewFavoriteElementButton.className = "fav-button fav-add-new-fav";
+	addNewFavoriteElementButton.textContent = "Add location";
+	addNewFavoriteElementButton.title = "Add new Favorite."
+	addNewFavoriteElementButton.addEventListener("click", function (e) {
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+
+		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2); 
+
+		this.createFavorite(centerX, centerY, "");
+	
+	}.bind(this));
+	for(var k = this.favList.length - 1; k >= 0 ; k--) {
+		this.insertOneFavorite(this.favList[k]['x'], this.favList[k]['y'], this.favList[k]['name'], this.favList[k]['owner'])
+	}
+};
+
+DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, element) {
+	this.account.setCoordFavorite(newX, newY, x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Changing coordinate of Favorite", "Error: " + err);
+			return;
+		}
+
+		if (result.success) {
+			this.updateIndividualFavoriteDom(newX, newY, null, null, element);
+			this.getFavorites();
+		}
+	}.bind(this));
+};
+
+DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
+	this.account.removeFavorite(x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Removing Favorite", "Error: " + err);
+			return;
+		}
+		if(result.success){
+			element.remove();
+			this.getFavorites();
+			}
+		return;
+	}.bind(this));
+};
+DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
+	this.account.renameFavorite(x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Renaming Favorite", "Error: " + err);
+			return;
+		}
+
+		if(result.success) {
+			this.updateIndividualFavoriteDom(null, null, name, null, element);
+			this.getFavorites();
+		}
+	}.bind(this));
+};
+
+DrawTogether.prototype.getFavorites = function () {
+	this.account.getFavorites(drawTogether.current_room, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Getting Favorites", "Error: " + err);
+			return;
+		}
+
+		this.favList = result;
+	}.bind(this));
+};
+
+DrawTogether.prototype.createFavorite = function (x, y, name) {
+	if (!this.account.uKey){
+		this.chat.addMessage("You must login to save or create favorites!");
+		return;
+	}
+		
+	if (!this.memberlevel && this.favList.length >= 5) {
+		this.chat.addMessage("Buy premium to create more than 5 favorite locations.");
+		return;
+	}
+
+	this.account.createFavorite(x, y, name, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Favorite", "Error: " + err);
+			return;
+		}
+		
+		if (result.success) {
+			this.chat.addMessage("Favorite added", result.success);
+			this.insertOneFavorite(x, y, name, result.owner);
+			this.getFavorites();
+		}
 	}.bind(this));
 };
 
@@ -1957,7 +2268,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions"];
+	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions", "Save more than five favorites at once"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
@@ -2116,7 +2427,7 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Private regions for premium members", "Thanks to intOrFloat the chat will now give you a warning if your drawings are not getting saved."];
+	var features = ["It is now possible to save locations as favorites (thanks intToFloat <3)."];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
@@ -2134,13 +2445,10 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	// p.appendChild(document.createTextNode("Getting premium helps us pay for development time and the server hosting."));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("If you are premium you can create a private region. Noone besides you can then draw there."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("In the future you will be able to pick who gets to draw in it and who doesn't."));
+	p.appendChild(document.createTextNode("Planned updates are a bugfix for the saving problem that will hopefully fix it once and for all and a few quality of life changes to the regions."));
 
 	var premiumButton = container.appendChild(document.createElement("div"));
-	premiumButton.appendChild(document.createTextNode("Want to enjoy this feature? Get premium!"));
+	premiumButton.appendChild(document.createTextNode("Want to see more updates? Get premium!"));
 	premiumButton.className = "drawtogether-button";
 	premiumButton.addEventListener("click", function () {
 		if (featureWindow.parentNode)

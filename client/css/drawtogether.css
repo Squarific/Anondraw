@@ -204,9 +204,9 @@ input.paint-texttool {
     border-bottom: 0.3em solid #799abb;
     color: #333333;
     background-color: #fff;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    transition-duration: 0.3s;
+    -webkit-transition-duration: 0.1s;
+    -moz-transition-duration: 0.1s;
+    transition-duration: 0.1s;
     -webkit-transition-property: background-color;
     -moz-transition-property: background-color;
     transition-property: background-color; }
@@ -351,9 +351,9 @@ input.paint-texttool {
   margin:.3em;
   margin-left:.5em;
   margin-right:.5em;
-  -webkit-transition-duration: 0.3s;
-  -moz-transition-duration: 0.3s;
-  transition-duration: 0.3s;
+  -webkit-transition-duration: 0.1s;
+  -moz-transition-duration: 0.1s;
+  transition-duration: 0.1s;
   -webkit-transition-property: background-color;
   -moz-transition-property: background-color;
   transition-property: background-color;
@@ -638,9 +638,9 @@ input.paint-texttool {
     color: #fff;
     background:#456789;
     cursor: pointer;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    transition-duration: 0.3s;
+    -webkit-transition-duration: 0.1s;
+    -moz-transition-duration: 0.1s;
+    transition-duration: 0.1s;
     -webkit-transition-property: background-color;
     -moz-transition-property: background-color;
     transition-property: background-color; }
@@ -721,9 +721,9 @@ input.paint-texttool {
   background-color: #456789;
   color: #fff;
   cursor: pointer;
-  -webkit-transition-duration: 0.3s;
-  -moz-transition-duration: 0.3s;
-  transition-duration: 0.3s;
+  -webkit-transition-duration: 0.1s;
+  -moz-transition-duration: 0.1s;
+  transition-duration: 0.1s;
   -webkit-transition-property: background-color;
   -moz-transition-property: background-color;
   transition-property: background-color; }
@@ -795,9 +795,9 @@ input.paint-texttool {
     cursor: pointer;
     background-color: #456789;
     color: #fff;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    transition-duration: 0.3s;
+    -webkit-transition-duration: 0.1s;
+    -moz-transition-duration: 0.1s;
+    transition-duration: 0.1s;
     -webkit-transition-property: background-color;
     -moz-transition-property: background-color;
     transition-property: background-color; }
@@ -885,9 +885,9 @@ input.paint-texttool {
     z-index:125;
     width:300px;
     right:-275px;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    transition-duration: 0.3s;
+    -webkit-transition-duration: 0.1s;
+    -moz-transition-duration: 0.1s;
+    transition-duration: 0.1s;
   }
 
   .drawtogether-paint-container {
@@ -931,8 +931,8 @@ input.paint-texttool {
     overflow-y: auto;
     -webkit-transition-property: top, bottom;
     transition-property: top, bottom;
-    -webkit-transition-duration: .2s, .2s;
-    transition-duration: .2s, .2s;
+    -webkit-transition-duration: .1s, .1s;
+    transition-duration: .1s, .1s;
     -webkit-transition-timing-function: linear, linear;
     transition-timing-function: linear, linear;
     -webkit-overflow-scrolling: touch;
@@ -966,3 +966,114 @@ input.paint-texttool {
   float:right;
   margin:.3rem .5em 0;
 }
+
+.favorites-button {
+  padding: 0.3em !important;
+  margin-left: 4px;
+}
+
+.favorites-window {
+	padding: 0.5em;
+	position: absolute;
+	background: #ececec;
+	border: solid 1px #ccc;
+  right:1em;
+  bottom:5em;
+	display: none;
+  max-height: 75%;
+  overflow-y:auto;
+}
+
+.fav-button:hover {
+	background-color: #233445; 
+}
+	
+.fav-button {
+	text-align: center;
+	display: inline-block;
+	padding: 0.2em .5em;
+	border-bottom: 0.2em solid #233445;
+	background-color: #456789;
+	color: #fff;
+	cursor: pointer;
+	-webkit-transition-duration: 0.1s;
+	-moz-transition-duration: 0.1s;
+	transition-duration: 0.1s;
+	-webkit-transition-property: background-color;
+	-moz-transition-property: background-color;
+	transition-property: background-color;
+}
+
+.fav-button-confirmation { 
+	background-color: goldenrod;
+}
+.fav-button-confirmation ~ .fav-coor-button{ 
+	background-color: #b1861a;
+}
+
+.fav-button-confirmation:hover { 
+	background-color: #b1861a;
+}
+.fav-button-confirmation:hover ~ .fav-coor-button{ 
+	background-color: goldenrod;
+	-webkit-transition-duration: 0.1s;
+	-moz-transition-duration: 0.1s;
+	transition-duration: 0.1s;
+	-webkit-transition-property: background-color;
+	-moz-transition-property: background-color;
+	transition-property: background-color;
+}
+
+.fav-move-button {
+	display: inline-block;
+	min-width: 0px;
+}
+
+.fav-delete-button {
+	display: inline-block;
+	min-width: 0px;
+}
+
+.fav-pencil-button {
+	display: inline-block;
+	min-width: 0px;
+}
+
+.fav-coor-button {
+	display: inline-block;
+  min-width:18em;
+}
+
+.fav-add-new-fav {
+	width: 100%;
+	border-bottom-width: 5px;
+	margin-bottom: 1px;
+}
+.fav-add-new-fav:hover {
+	font-weight: bold;
+}
+
+.favorite-container {
+  position:relative;
+  margin-top:0.1em;
+}
+
+.fav-rename-container {
+	position: absolute;
+  left:0;
+  top:0;
+  visibility: hidden;
+  opacity: 0;
+	transition: opacity 0.2s, visibility 0.2s;
+}
+
+.fav-rename-input { 
+	display: block;
+  min-width:18em;
+	margin: 0 !important;
+	padding: 0.2em !important;
+  border: solid 0.1em goldenrod;
+	text-align: center !important;
+	float: right;
+}
+

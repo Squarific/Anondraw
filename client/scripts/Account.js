@@ -10,6 +10,55 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
 };
 
+Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, callback) {
+	this.request("/setcoordfavorite", {
+		uKey: this.uKey,
+		room: room,
+		newX: newX,
+		newY: newY,
+		x: x,
+		y: y,
+		name: name
+	}, this.parseData.bind(this, callback));
+};
+
+Account.prototype.removeFavorite = function (x, y, name, callback) {
+	this.request("/removefavorite", {
+		uKey: this.uKey,
+		room: room,
+		x: x,
+		y: y,
+		name: name
+	}, this.parseData.bind(this, callback));
+};
+
+Account.prototype.renameFavorite = function (x, y, name, callback) {
+	this.request("/renamefavorite", {
+		uKey: this.uKey,
+		room: room,
+		x: x,
+		y: y,
+		name: name
+	}, this.parseData.bind(this, callback));
+};
+
+Account.prototype.createFavorite = function (x, y, name, callback) {
+	this.request("/createfavorite", {
+		uKey: this.uKey,
+		room: room,
+		x: x,
+		y: y,
+		name: name
+	}, this.parseData.bind(this, callback));
+};
+
+Account.prototype.getFavorites = function (room, callback) {
+	this.request("/getfavorites", {
+		uKey: this.uKey,
+		room: room
+	}, this.parseData.bind(this, callback));
+};
+
 // Callback (err)
 Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 	var req = new XMLHttpRequest();
@@ -218,7 +267,7 @@ Account.prototype.request = function request (path, options, callback) {
 // Parses the server returned data as a JSON object
 // Callback gives err if err was already defined or if the JSON parsing failed
 // Callback (err, data)
-Account.prototype.parseData = function parseData (err, request, callback) {
+Account.prototype.parseData = function parseData (callback, err, request ) {
 	if (err) {
 		callback(err);
 		return;
@@ -228,6 +277,11 @@ Account.prototype.parseData = function parseData (err, request, callback) {
 		var data = JSON.parse(request.responseText);
 	} catch (e) {
 		err = "JSON Parse error. Server response was: " + request.responseText;
+	}
+	
+	if (data.error) {
+		callback(data.error)						
+		return;
 	}
 
 	callback(err, data);
