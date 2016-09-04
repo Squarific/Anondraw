@@ -48,7 +48,9 @@ CREATE TABLE IF NOT EXISTS ipbans (
 );
 
 CREATE TABLE IF NOT EXISTS regions (
+		PRIMARY KEY (id),
     owner INT UNSIGNED,
+		minRepAllowed INT UNSIGNED,
     minX BIGINT,
     minY BIGINT,
     maxX BIGINT,
@@ -57,6 +59,11 @@ CREATE TABLE IF NOT EXISTS regions (
     INDEX (room),
     INDEX (owner, maxX, minX, maxY, minY, room)
 );
+
+CREATE TABLE IF NOT EXISTS regionpermissions {
+		regionId INT UNSIGNED,
+		allowedUser INT UNSIGNED,		
+};
 
 CREATE TABLE IF NOT EXISTS favorites (
     owner INT UNSIGNED,
