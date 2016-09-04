@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS favorites (
     x BIGINT,
     y BIGINT,
     room VARCHAR(255),
-		name VARCHAR(255),
+    name VARCHAR(255),
     INDEX (room, owner, x, y)
 );
 
