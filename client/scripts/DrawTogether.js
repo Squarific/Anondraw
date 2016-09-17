@@ -1188,7 +1188,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("enduserpath", function (event) {
 		this.network.socket.emit("ep", function (id, success) {
-			event.removePath(true, id);
+			event.removePath(success, id);
 		});
 	}.bind(this));
 
