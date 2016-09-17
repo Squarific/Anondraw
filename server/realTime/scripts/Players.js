@@ -66,15 +66,16 @@ Players.prototype.request = function request (method, urlArguments, callback) {
 		method: "GET",
 		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments)
 	}, function (res) {
+		var data = "";
 		res.on("data", function (chunk) {
-			var parsed = JSON.parse(chunk);
-			callback(parsed.error, parsed);
+			data += chunk;
 		});
 
 		// Here because the docs are too hard
 		// Just wanna make sure everything can be garbagecollected
 		res.on("end", function () {
-			
+			var parsed = JSON.parse(data);
+			callback(parsed.error, parsed);
 		});
 	});
 

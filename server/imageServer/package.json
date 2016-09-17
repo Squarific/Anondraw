@@ -6,7 +6,7 @@
   "main": "imageserver.js",
   "dependencies": {
     "canvas": "*",
-    "tinycolor2": "*",
+    "tinycolor2": "1.1.2",
     "graceful-fs": "*"
   },
   "devDependencies": {},
