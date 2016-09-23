@@ -1,3 +1,5 @@
+require("../common/nice_console_log.js");
+
 var http = require("http");
 var urlParser = require("url");
 var JOIN_CODE = require("./join_code_password.js");
