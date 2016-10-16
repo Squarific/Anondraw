@@ -97,12 +97,21 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 		if (err) {
 			throw "Can't get protected regions for room " + room + " Err:" + JSON.stringify(err);
 		}
+		console.log("data:",data.permissions);
+		var permissions = data.permissions;
+
+
+		data = data.regions;
 
 		if (typeof data.length !== "number") {
 			throw "Data was not an array";
 		}
 
 		this.protectedRegions[room] = rbush();
+		var maxRegionId = 0;
+		if (permissions.length > 0)
+			maxRegionId = permissions[permissions.length - 1];
+		var minRegionId = 0;
 
 		for (var k = 0; k < data.length; k++) {
 			var base = new SAT.Vector(data[k].minX, data[k].minY);
@@ -116,7 +125,15 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 				new SAT.Vector(data[k].maxX, data[k].maxY),
 				new SAT.Vector(data[k].minX, data[k].maxY),
 			]);
-
+			for(var f = minRegionId; f < permissions.length; f++){
+				if(permissions[f].regionId == data[k].id){
+					if(typeof data[k].permissions === "undefined")
+						data[k].permissions = new Array();
+					data[k].permissions.push(permissions[f].allowedUser);
+					minRegionId = f;
+				}
+			}
+			
 			this.protectedRegions[room].insert(data[k]);
 		}
 	}.bind(this));
@@ -202,22 +219,37 @@ Protocol.prototype.getRegionSearchFromSat = function getRegionSearchFromSat (sat
 	}
 };
 
-Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (owner, satObjects, room) {
+Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (user, satObjects, room) {
 	if (!this.protectedRegions[room]) return false;
-
 	for (var k = 0; k < satObjects.length; k++) {
 		var searchRegion = this.getRegionSearchFromSat(satObjects[k]);
+
 		var relevantRegions = this.protectedRegions[room].search(searchRegion);
 
 		for (var i = 0; i < relevantRegions.length; i++) {
-			if (relevantRegions[i].owner === owner) continue;
+			if (relevantRegions[i].owner === user) continue;
+
+			if (typeof relevantRegions[i].permissions !== "undefined"){
+				var hasPermission = false;
+				for(var f = 0; f < relevantRegions[i].permissions.length; f++){
+					//console.log(relevantRegions[i].permissions[f]);
+					if (relevantRegions[i].permissions[f] === user) {
+						//console.log("permission!!!");
+						hasPermission = true;
+						break;
+					}
+				}
+				if(hasPermission) continue;
+			}
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
+					console.log("owner of region:", relevantRegions[i].owner);
 					return true;
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
+					console.log("owner of region:", relevantRegions[i].owner);
 					return true
 				}
 			}

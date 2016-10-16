@@ -365,15 +365,25 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 
 PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
 	// TODO: Select permissions
-	this.database.query("SELECT owner, minX, minY, maxX, maxY FROM regions WHERE room = ?", [room], function (err, rows, fields) {
+	this.database.query("SELECT id, owner, minX, minY, maxX, maxY FROM regions WHERE room = ? ORDER BY id", [room], function (err, rows1, fields) {
 		if (err) {
 			callback("Database error. Please contact an admin. (GETPREGION)");
 			console.log("Get protected region databse error", err);
 			return;
 		}
 
-		callback(null, rows);
-	});
+		this.database.query("SELECT regionId, allowedUser FROM regions INNER JOIN regions_permissions ON regions.id=regions_permissions.regionId WHERE room = ? ORDER BY regionId", [room], function (err, rows2, fields2){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETPREGION)");
+				console.log("Get protected region databse error", err);
+				return;
+			}
+			callback(null, {regions:rows1, permissions:rows2});
+
+		});
+
+		//callback(null, {regions:rows1});
+	}.bind(this));
 };
 
 module.exports = PlayerDatabase;
