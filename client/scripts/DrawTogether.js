@@ -1226,6 +1226,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			$(".favorites-window").hide();
 		} else {
 			this.updateFavoriteDom();
+			$(".regions-window").hide();
 			$(".favorites-window").show();
 		}
 	}.bind(this));
@@ -1239,6 +1240,17 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	//Regions button
 	var regionsButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	regionsButton.className = "control-button regions-button";
+	regionsButton.addEventListener("click", function () {
+		if($(".regions-window").is(":visible")) {
+			$(".regions-window").hide();
+		} else {
+			//this.updateFavoriteDom();
+			$(".favorites-window").hide();
+			$(".regions-window").show();
+		}
+	}.bind(this));
+
+
 	var regionsButtonImage = regionsButton.appendChild(document.createElement("img"));
 	regionsButtonImage.src = "images/icons/pregion.png";
 	regionsButtonImage.alt = "Open Regions Menu";
@@ -1248,7 +1260,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	regionsWindow.className = "regions-window";
 	
 	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
-	this.regionsContainer.className = "regions-container";	
+	this.regionsContainer.className = "regions-container";
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {

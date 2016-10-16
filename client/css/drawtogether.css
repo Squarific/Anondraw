@@ -973,6 +973,18 @@ input.paint-texttool {
   margin-right: 4px;
 }
 
+.regions-window {
+  padding: 0.5em;
+  position: absolute;
+  background: #ececec;
+  border: solid 1px #ccc;
+  right:1em;
+  bottom:5em;
+  display: none;
+  max-height: 75%;
+  overflow-y:auto;
+}
+
 .favorites-window {
 	padding: 0.5em;
 	position: absolute;
