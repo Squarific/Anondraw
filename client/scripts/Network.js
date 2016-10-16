@@ -33,7 +33,6 @@ Network.prototype.loadRoom = function loadRoom (room, specific, override, callba
 		}
 
 		// Change to the server
-		console.log("Room '" + room + "' is on server: " + server);
 		this.changeServer(server, function (err) {
 			if (err) {
 				callback(err);
