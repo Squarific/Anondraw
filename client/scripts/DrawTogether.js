@@ -1476,11 +1476,14 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 		}.bind(this), 2500);
 	}.bind(this));
 
-	favoritePencilButton.addEventListener("click", function () {
+	favoritePencilButton.addEventListener("click", function (e) {
 		if (favoriteRenameContainer.style.visibility == "visible") {
 			favoriteRenameContainer.style.visibility = "";
 			favoriteRenameContainer.style.opacity = 0;
-
+			var element = e.srcElement || e.target;
+			var associatedInputBox = element.parentNode.getElementsByClassName("fav-rename-input")[0];
+			var newName = associatedInputBox.value;
+			var curFavContainer = favoriteContainer;
 			clearTimeout(_favoriteRenameDelayTimeout);
 			this.renameFavorite(x, y, newName, curFavContainer);
 		} else {
@@ -1490,7 +1493,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 			favoriteRenameInput.select();
 			favoriteRenameInput.setSelectionRange(0, favoriteRenameInput.value.length);
 		}
-	});
+	}.bind(this));
 	
 	if(name.length > 0){ 
 		favoriteCoorButton.textContent = name;
