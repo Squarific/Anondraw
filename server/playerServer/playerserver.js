@@ -1,3 +1,5 @@
+require("../common/nice_console_log.js");
+
 var http = require("http");
 var mysql = require("mysql");
 var kickbancode = require("./kickban_password.js");

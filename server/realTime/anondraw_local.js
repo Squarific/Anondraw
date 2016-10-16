@@ -1,3 +1,5 @@
+require("../common/nice_console_log.js");
+
 var port = process.argv[2];
 if (!port) throw "No port provided!";
 

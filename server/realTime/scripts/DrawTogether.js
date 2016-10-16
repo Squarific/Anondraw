@@ -53,10 +53,15 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	callback(true);
 };
 
+DrawTogether.prototype.clearAll = function clearAll () {
+	this.drawings = {};
+	this.paths = {};
+};
+
 DrawTogether.prototype.clear = function clear (room) {
 	if (!room) {
-		this.drawings = {};
-		this.paths = {};
+		console.log("Clear called with no room");
+		return false;
 	} else {
 		delete this.drawings[room];
 		delete this.paths[room];

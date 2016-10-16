@@ -1,3 +1,5 @@
+require("../common/nice_console_log.js");
+
 var http = require("http");
 var drawcode = require("./draw_password.js");
 

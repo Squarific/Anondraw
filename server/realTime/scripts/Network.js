@@ -942,7 +942,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					else if (room.indexOf("game_") == 0 || room.indexOf("private_game_") == 0) {
 						protocol.gameRooms[room] = new GameRoom(room, protocol.io);
 						protocol.gameRooms[room].addEventListener("newgame", function (event) {
-							protocol.drawTogether.clear();
+							protocol.drawTogether.clear(room);
 							protocol.io.to(room).emit("clear");
 						});
 						protocol.gameRooms[room].join(socket);
