@@ -28,6 +28,7 @@ function DrawTogether (container, settings) {
 	this._followingPlayer;  // The player the view is currently following
 	
 	this.favoritesContainer = null;
+	this.regionsContainer = null;
 
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
@@ -1234,6 +1235,20 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	
 	this.favoritesContainer = favoritesWindow.appendChild(document.createElement("div"));
 	this.favoritesContainer.className = "favorites-container";	
+
+	//Regions button
+	var regionsButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	regionsButton.className = "control-button regions-button";
+	var regionsButtonImage = regionsButton.appendChild(document.createElement("img"));
+	regionsButtonImage.src = "images/icons/pregion.png";
+	regionsButtonImage.alt = "Open Regions Menu";
+	regionsButtonImage.title = "Open Regions Menu";
+
+	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
+	regionsWindow.className = "regions-window";
+	
+	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
+	this.regionsContainer.className = "regions-container";	
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
