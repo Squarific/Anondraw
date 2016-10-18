@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS ipbans (
 );
 
 --alter table regions add id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST; 
+--ALTER TABLE regions ADD minRepAllowed int UNSIGNED
+
 --Need above for the production server when permissions are done^^
 
 CREATE TABLE IF NOT EXISTS regions (

@@ -658,6 +658,36 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/removeprotectedregion") {
+		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
+		var regionId = parsedUrl.query.regionId;
+
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end(JSON.stringify({
+				error: "No user found with that uKey!"
+			}));
+			return;
+		}
+
+		playerDatabase.removeProtectedRegion(user.id, room, regionId, function (err) {
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: 'Remove your region.'
+			}));
+		});
+		return;
+	}
+
 	if (parsedUrl.pathname == "/getprotectedregions") {
 		var room = parsedUrl.query.room;
 
@@ -672,6 +702,101 @@ var server = http.createServer(function (req, res) {
 			res.end(JSON.stringify(regions));
 		});
 
+		return;
+	}
+
+	if (parsedUrl.pathname == "/adduserstomyprotectedregion") {
+		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
+		var userIdArr = parsedUrl.query.userIdArr;
+		 // when userIdArr is only one element it's parsed as just a string of that number. idk why. -intOrFloat
+		var regionId = parsedUrl.query.regionId;
+
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end(JSON.stringify({
+				error: "No user found with that uKey!"
+			}));
+			return;
+		}
+
+		playerDatabase.addUsersToMyProtectedRegion(user.id, room, userIdArr, regionId, function (err) {
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: 'Added '+userIdArr.length+' Permissions'
+			}));
+		});
+		return;
+	}
+
+	if (parsedUrl.pathname == "/removeuserstomyprotectedregion") {
+		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
+		var userIdArr = parsedUrl.query.userIdArr;
+		 // when userIdArr is only one element it's parsed as just a string of that number. idk why. -intOrFloat
+		var regionId = parsedUrl.query.regionId;
+
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end(JSON.stringify({
+				error: "No user found with that uKey!"
+			}));
+			return;
+		}
+
+		playerDatabase.removeUsersToMyProtectedRegion(user.id, room, userIdArr, regionId, function (err) {
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: 'removed '+userIdArr.length+' Permissions'
+			}));
+		});
+		return;
+	}
+
+	if (parsedUrl.pathname == "/setminimumrepinprotectedregion") {
+		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
+		var repAmount = parsedUrl.query.repAmount;
+		var regionId = parsedUrl.query.regionId;
+
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end(JSON.stringify({
+				error: "No user found with that uKey!"
+			}));
+			return;
+		}
+
+		playerDatabase.setMinimunRepInProtectedRegion(user.id, room, repAmount, regionId, function (err) {
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify({
+				success: 'Set minimum rep.'
+			}));
+		});
 		return;
 	}
 
