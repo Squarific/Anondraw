@@ -21,7 +21,6 @@ var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserve
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
 
 var REGION_MIN_REP = 30;
-var REGION_MAX_DIAGONAL_DISTANCE = 300;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
@@ -1110,10 +1109,19 @@ Protocol.prototype.bindIO = function bindIO () {
 				var width = Math.abs(from[0] - to[0]);
 				var height = Math.abs(from[1] - to[1]);
 
+				//Formula: 2x^2 + 500x - 6666
+				//where x = 30 output = 10 thousand
+				//where x = 50 output = 23 thousand
+				//where x = 100 output = 63 thousand
+				//where x = 150 output = 113 thousand
+
+				var x = (this.reputation < 150) ? this.reputation : 150;
+				var regionMaxSize = 2 * (x*x) + 500 * x - 6666;
+
 				var distanceBetweenPoints = width+height;
-				console.log(distanceBetweenPoints);
-				if(distanceBetweenPoints > REGION_MAX_DIAGONAL_DISTANCE){
-					callback("A region " + REGION_MAX_DIAGONAL_DISTANCE + "px or bigger requires premium");
+
+				if(distanceBetweenPoints > regionMaxSize){
+					callback("A region " + regionMaxSize + "px or bigger requires more rep or premium. You tried to make a region "+ distanceBetweenPoints "px big.");
 					return;
 				}
 			}

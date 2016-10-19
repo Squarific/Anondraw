@@ -2181,8 +2181,10 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
 	this.account.checkLogin(function (err, loggedIn) {
-		this.getFavorites();
-		this.getMyProtectedRegions();
+		if(this.account.uKey){
+			this.getFavorites();
+			this.getMyProtectedRegions();
+		}
 
 		var formContainer = accWindow.appendChild(document.createElement("div"));
 		formContainer.className = "drawtogether-account-formcontainer";
