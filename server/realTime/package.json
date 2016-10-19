@@ -5,6 +5,7 @@
   "description": "Anondraw server",
   "main": "anondraw.js",
   "dependencies": {
+    "canvas": "*",
     "external-ip": "^0.2.3",
     "imgur": ">=0.1.7",
     "rbush": "^2.0.1",
