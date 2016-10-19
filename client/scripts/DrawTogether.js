@@ -920,6 +920,55 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	return null;
 };
 
+DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
+	var PermissionDom = document.createElement("div");
+	PermissionDom.className = "drawtogether-player";
+
+	if (this.reputation >= this.KICKBAN_MIN_REP) {
+		var removeRegionButton = document.createElement("span");
+		removeRegionButton.className = "drawtogether-player-button drawtogether-kickban-button";
+
+		removeRegionButton.innerText = "Delete Region";
+		removeRegionButton.textContent = "Delete Region";
+
+		removeRegionButton.addEventListener("click", this.removeProtectedRegion.bind(this, messageFromServer.regionid, false));
+
+		PermissionDom.appendChild(removeRegionButton);
+	}
+
+	var messageText = document.createElement("span");
+	messageText.className = "drawtogether-player-name";
+
+	
+
+	var owner = this.playerFromUserId(messageFromServer.ownerid);
+				var ownerPermissionSentence = "";
+				var reputationSentence = "";
+				var loggedInSentence = "";
+
+	if(!this.loggedIn)
+		loggedInSentence = "You have to be logged in to draw in protected regions."
+	else if(this.reputation < messageFromServer.minRepAllowed)
+		reputationSentence = "This region requires at least " + messageFromServer.minRepAllowed + " Reputation.";
+
+	if(owner)
+		ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
+	else
+	ownerPermissionSentence = "The region owner is offline.";
+	console.log("regionid", messageFromServer.regionid);
+
+	var messageToUser = "This is a protected region. "
+						+ loggedInSentence + " " 
+						+ reputationSentence + " "
+						+ ownerPermissionSentence;
+
+	messageText.appendChild(document.createTextNode(messageToUser))
+
+	PermissionDom.appendChild(messageText);
+
+	return PermissionDom;
+};
+
 DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
@@ -1348,7 +1397,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 
 			if(success.isNotAllowed){
-				this.chat.addMessage(this.createPermissionChatMessage(success));
+				//this.chat.addMessage(this.createPermissionChatMessage(success));
+				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+				//self.chat.addElementAsMessage(self.createPlayerLeftDom(self.playerList[k]));
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
@@ -1361,29 +1412,6 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}.bind(this), this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
 
 	this.lastPathPoint = event.point;
-};
-
-DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
-	var owner = this.playerFromUserId(messageFromServer.ownerid);
-				var ownerPermissionSentence = "";
-				var reputationSentence = "";
-				var loggedInSentence = "";
-
-	if(!this.loggedIn)
-		loggedInSentence = "You have to be logged in to draw in protected regions."
-	else if(this.reputation < messageFromServer.minRepAllowed)
-		reputationSentence = "This region requires at least " + messageFromServer.minRepAllowed + " Reputation.";
-
-	if(owner)
-		ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
-	else
-	ownerPermissionSentence = "The region owner is offline.";
-
-	var messageToUser = "This is a protected region. "
-						+ loggedInSentence + " " 
-						+ reputationSentence + " "
-						+ ownerPermissionSentence;
-	return messageToUser;
 };
 
 DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (event) {
@@ -1804,7 +1832,11 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
 			return;
 		}
-		element.remove();
+		console.log("regionidremove ", regionId)
+		console.log("element", element)
+		if(element)
+			element.remove();
+
 		this.getMyProtectedRegions();
 		this.chat.addMessage("Regions", "Removed the region");
 	}.bind(this));

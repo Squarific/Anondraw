@@ -19,7 +19,9 @@ var BIG_BRUSH_MIN_REP = 5;
 var MEMBER_MIN_REP = 15;
 var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserver too
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
+
 var REGION_MIN_REP = 30;
+var REGION_MAX_DIAGONAL_DISTANCE = 300;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
@@ -269,11 +271,11 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, ownerid: relevantRegions[i].owner};
+					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner};
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, ownerid: relevantRegions[i].owner};
+					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner};
 				}
 			}
 		}
@@ -1107,7 +1109,19 @@ Protocol.prototype.bindIO = function bindIO () {
 					callback("You must have at least"+ REGION_MIN_REP +"! or Premium.");
 					return;
 				}
+				var width = Math.abs(from[0] - to[0]);
+				var height = Math.abs(from[1] - to[1]);
+
+				var distanceBetweenPoints = width+height;
+				console.log(distanceBetweenPoints);
+				if(distanceBetweenPoints > REGION_MAX_DIAGONAL_DISTANCE){
+					callback("A region " + REGION_MAX_DIAGONAL_DISTANCE + "px or bigger requires premium");
+					return;
+				}
 			}
+
+			
+
 			console.log("[REGIONS] Adding protected region for", socket.name, from, to);
 			protocol.players.request('createprotectedregion', {
 				uKey: socket.uKey,
@@ -1139,11 +1153,16 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback("Region id is undefined.")
 				return;
 			}
+			var overrideOwner = false;
+			if (socket.reputation > KICKBAN_MIN_REP){
+				overrideOwner = true;
+			}
 
 			protocol.players.request('removeprotectedregion', {
 				uKey: socket.uKey,
 				room: socket.room,
-				regionId: regionId
+				regionId: regionId,
+				overrideOwner: overrideOwner
 			}, function (err, data) {
 				callback(err, data);
 				protocol.updateProtectedRegions(socket.room);

@@ -662,6 +662,7 @@ var server = http.createServer(function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
 		var regionId = parsedUrl.query.regionId;
+		var overrideOwner = parsedUrl.query.overrideOwner;
 
 		var user = sessions.getUser("uKey", uKey);
 
@@ -672,7 +673,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 
-		playerDatabase.removeProtectedRegion(user.id, room, regionId, function (err) {
+		playerDatabase.removeProtectedRegion(user.id, room, regionId, overrideOwner, function (err) {
 			if (err) {
 				console.log(err);
 				res.end(JSON.stringify({
