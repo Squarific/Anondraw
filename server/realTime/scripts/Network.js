@@ -271,11 +271,11 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner};
+					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner};
+					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
 				}
 			}
 		}

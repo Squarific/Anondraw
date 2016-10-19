@@ -393,7 +393,8 @@ PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion 
 };
 
 PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
-	this.database.query("SELECT id, owner, minX, minY, maxX, maxY, minRepAllowed FROM regions WHERE room = ? ORDER BY id", [room], function (err, rows, fields) {
+	this.database.query("SELECT regions.id, owner, minX, minY, maxX, maxY, minRepAllowed, users.last_username FROM regions inner join users on users.id = regions.owner WHERE room = ? ORDER BY id;",
+	[room], function (err, rows, fields) {
 		if (err) {
 			callback("Database error. Please contact an admin. (GETPREGION)");
 			console.log("Get protected region database error", err);

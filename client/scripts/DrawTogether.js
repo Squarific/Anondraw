@@ -923,6 +923,7 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
 	var PermissionDom = document.createElement("div");
 	PermissionDom.className = "drawtogether-player";
+	console.log("messageFromServer",messageFromServer.name);
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var removeRegionButton = document.createElement("span");
@@ -941,7 +942,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 
 	
 
-	var owner = this.playerFromUserId(messageFromServer.ownerid);
+	var owner = this.playerFromUserId(messageFromServer.ownerid) || messageFromServer;//messageFromServer.name can be outdated
 				var ownerPermissionSentence = "";
 				var reputationSentence = "";
 				var loggedInSentence = "";
