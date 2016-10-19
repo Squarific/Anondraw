@@ -1102,7 +1102,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback("To array was not in the correct format");
 				return;
 			}
-			if(!socket.memberlevel){
+			if (!socket.memberlevel) {
 				if (socket.reputation < REGION_MIN_REP) {
 					callback("You must have at least"+ REGION_MIN_REP +"! or Premium.");
 					return;
@@ -1147,7 +1147,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("removeprotectedregion", function (regionId, callback) {
 			if (typeof callback !== 'function') return;
 
-			if (isNaN(regionId))	{
+			if (isNaN(regionId)) {
 				callback("Region id is undefined.")
 				return;
 			}
@@ -1168,14 +1168,13 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("getmyprotectedregions", function (callback) {
-			if(!socket.userid)
-			{
+			if (!socket.userid) {
 				callback("No User");
 				return;
 			}
 
 			var asdf = protocol.getProtectedRegionsOwnedBy(socket.userid, socket.room);
-			if(!asdf){
+			if (!asdf) {
 				callback("User has no protected regions.");
 				return;
 			}
@@ -1184,15 +1183,15 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("adduserstomyprotectedregion", function (userIdArr, regionId, callback) {
-			if(!socket.userid){
+			if (!socket.userid) {
 				callback("No User");
 				return;
 			}
-			if(!socket.room){
+			if (!socket.room) {
 				callback("No Room");
 				return;
 			}
-			if(!userIdArr || !userIdArr.length || userIdArr.length === 0) { // checking if it's an array and also worth sending
+			if (!userIdArr || !userIdArr.length || userIdArr.length === 0) { // checking if it's an array and also worth sending
 				callback("No Userids sent");
 				return;
 			}
@@ -1210,15 +1209,15 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("removeUsersFromMyProtectedRegion", function (userIdArr, regionId, callback) {
-			if(!socket.userid) {
+			if (!socket.userid) {
 				callback("No User");
 				return;
 			}
-			if(!socket.room) {
+			if (!socket.room) {
 				callback("No Room");
 				return;
 			}
-			if(!userIdArr || !userIdArr.length || userIdArr.length === 0){ // checking if it's an array and also worth sending
+			if (!userIdArr || !userIdArr.length || userIdArr.length === 0) { // checking if it's an array and also worth sending
 				callback("No Userids sent");
 				return;
 			}			
@@ -1235,19 +1234,19 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("setminimumrepinprotectedregion", function (repAmount, regionId, callback) {
-			if(!socket.userid)			{
+			if (!socket.userid) {
 				callback("No User");
 				return;
 			}
-			if(!socket.room){
+			if (!socket.room) {
 				callback("No Room");
 				return;
 			}
-			if(isNaN(repAmount) || repAmount < 0){
+			if (isNaN(repAmount) || repAmount < 0) {
 				callback("Invalid rep amount");
 				return;
 			}
-			if(isNaN(regionId) || regionId < 0){
+			if (isNaN(regionId) || regionId < 0) {
 				callback("Invalid rep amount");
 				return;
 			}			
