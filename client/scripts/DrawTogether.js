@@ -600,7 +600,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 			
-			if(!this.account.uKey)
+			if(this.account.uKey)
 			{
 				this.getFavorites();
 				this.getMyProtectedRegions();
@@ -644,7 +644,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
 			
-			if(!this.account.uKey)
+			if(this.account.uKey)
 			{
 				this.getFavorites();
 				this.getMyProtectedRegions();
