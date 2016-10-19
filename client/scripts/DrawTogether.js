@@ -1647,13 +1647,18 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
 	regionEditPermissionsButton.className = "reg-button reg-editpermissions-button";
-	regionEditPermissionsButton.textContent = "Permissions...";
+	//regionEditPermissionsButton.textContent = "Permissions...";
 	regionEditPermissionsButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
 		this.createRegionPermissionsWindow(regionListIndex);
 	
 	}.bind(this));
+
+	var permissionsButtonImage = regionEditPermissionsButton.appendChild(document.createElement("img"));
+	permissionsButtonImage.src = "images/icons/permission.png";
+	permissionsButtonImage.alt = "Open Permissions Menu";
+	permissionsButtonImage.title = "Open Permissions Menu";
 
 	var regionDeleteButton = regionContainer.appendChild(document.createElement("div"));
 	regionDeleteButton.className = "reg-button reg-delete-button";
@@ -2178,7 +2183,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	this.account.checkLogin(function (err, loggedIn) {
 		this.getFavorites();
 		this.getMyProtectedRegions();
-		
+
 		var formContainer = accWindow.appendChild(document.createElement("div"));
 		formContainer.className = "drawtogether-account-formcontainer";
 
