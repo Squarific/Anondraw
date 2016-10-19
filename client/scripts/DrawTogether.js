@@ -492,10 +492,6 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("setreputation", function (rep) {
 		self.reputation = rep;
 		console.log("Our reputation is ", rep);
-		self.loggedIn = true;
-		self.getFavorites();
-		self.getMyProtectedRegions();
-
 
 		if (self.reputation >= self.KICKBAN_MIN_REP) {
 			var lastOpen = localStorage.getItem('moderatorwelcomewindowlastopen');
@@ -604,7 +600,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 			
-			if(this.loggedIn) // self.loggedIn is set in setreputation callback
+			if(!this.account.uKey)
 			{
 				this.getFavorites();
 				this.getMyProtectedRegions();
@@ -648,7 +644,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
 			
-			if(this.loggedIn) // self.loggedIn is set in setreputation callback
+			if(!this.account.uKey)
 			{
 				this.getFavorites();
 				this.getMyProtectedRegions();
@@ -1246,12 +1242,12 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Send the drawing to the server and remove from the local
 		// layer once we got a confirmation from the server
 		this.sendDrawing(event.drawing, function (success) {
-			if(typeof success !== 'undefined' && success.isNotAllowed){
-				this.chat.addMessage(this.createPermissionChatMessage(success));
+			if(typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed){
+				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
 			}
 
 			event.removeDrawing();
-		});
+		}.bind(this));
 	}.bind(this));
 
 	this.paint.addEventListener("undo", function (event) {
@@ -1394,10 +1390,10 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
 
 
-		if (typeof success === 'boolean' ? !success : success.isNotAllowed){ 
+		if (typeof success === 'boolean' ? !success : !success.isAllowed){ 
 			event.removePathPoint();
 
-			if(success.isNotAllowed){
+			if(typeof success.isAllowed !== 'undefined'){
 				//this.chat.addMessage(this.createPermissionChatMessage(success));
 				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
 				//self.chat.addElementAsMessage(self.createPlayerLeftDom(self.playerList[k]));
@@ -1750,6 +1746,7 @@ DrawTogether.prototype.getFavorites = function () {
 	this.account.getFavorites(drawTogether.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
+
 			return;
 		}
 
@@ -1783,7 +1780,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {
-	if (typeof this.reputation === 'undefined') { 
+	if (!this.account.uKey) { 
 		this.chat.addMessage("You must be logged in to create protected regions.");
 		return;
 	}

@@ -128,8 +128,7 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 			]);
 			for(var f = minRegionId; f < permissions.length; f++){
 				if(permissions[f].regionId == data[k].id){
-					if(typeof data[k].permissions === "undefined")
-						data[k].permissions = new Array();
+					data[k].permissions = data[k].permissions || [];
 					data[k].permissions.push({ id:permissions[f].userId, oldName:permissions[f].last_username});
 					minRegionId = f;
 				}
@@ -220,7 +219,7 @@ Protocol.prototype.getRegionSearchFromSat = function getRegionSearchFromSat (sat
 	}
 };
 
-Protocol.prototype.getUsersProtectedRegions = function getUsersProtectedRegions (user, room) {
+Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwnedBy (user, room) {
 	if (!this.protectedRegions[room]) return false;
 
 	var p = [];
@@ -229,24 +228,23 @@ Protocol.prototype.getUsersProtectedRegions = function getUsersProtectedRegions 
 	if(protectedRegionsArr.length == 0) return false;
 
 	for (var i = protectedRegionsArr.length - 1; i > 0; i--) {
-		//if (typeof protectedRegionsArr[i].permissions !== "undefined")
-			if( protectedRegionsArr[i].owner === user)
-				p.push({ 
-					regionId: protectedRegionsArr[i].id,
-					owner: protectedRegionsArr[i].owner, 
-					permissions: protectedRegionsArr[i].permissions || [],
-					minX: protectedRegionsArr[i].minX,
-					minY: protectedRegionsArr[i].minY,
-					maxX: protectedRegionsArr[i].maxX,
-					maxY: protectedRegionsArr[i].maxY,
-					minRepAllowed: protectedRegionsArr[i].minRepAllowed
-				});
+		if( protectedRegionsArr[i].owner === user)
+			p.push({ 
+				regionId: protectedRegionsArr[i].id,
+				owner: protectedRegionsArr[i].owner, 
+				permissions: protectedRegionsArr[i].permissions || [],
+				minX: protectedRegionsArr[i].minX,
+				minY: protectedRegionsArr[i].minY,
+				maxX: protectedRegionsArr[i].maxX,
+				maxY: protectedRegionsArr[i].maxY,
+				minRepAllowed: protectedRegionsArr[i].minRepAllowed
+			});
 	}
 	return p;
 };
 
 Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (reputation, user, satObjects, room) {
-	if (!this.protectedRegions[room]) return {isNotAllowed: false};
+	if (!this.protectedRegions[room]) return {isAllowed: true};
 
 	for (var k = 0; k < satObjects.length; k++) {
 		var searchRegion = this.getRegionSearchFromSat(satObjects[k]);
@@ -271,17 +269,17 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
+					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
+					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
 				}
 			}
 		}
 	}
 
-	return {isNotAllowed: false};
+	return {isAllowed: true};
 };
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
@@ -794,7 +792,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
 
-			if (regionData.isNotAllowed) {
+			if (!regionData.isAllowed) {
 				protocol.informClient(socket, "This region is protected!");
 				callback(regionData);
 				return;
@@ -883,7 +881,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
 
-			if (regionData.isNotAllowed) {
+			if (!regionData.isAllowed) {
 				protocol.informClient(socket, "This region is protected!");
 				callback(regionData);
 				return;
@@ -1176,7 +1174,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			var asdf = protocol.getUsersProtectedRegions(socket.userid, socket.room);
+			var asdf = protocol.getProtectedRegionsOwnedBy(socket.userid, socket.room);
 			if(!asdf){
 				callback("User has no protected regions.");
 				return;
@@ -1186,7 +1184,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("adduserstomyprotectedregion", function (userIdArr, regionId, callback) {
-			if(!socket.userid)			{
+			if(!socket.userid){
 				callback("No User");
 				return;
 			}
@@ -1194,7 +1192,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback("No Room");
 				return;
 			}
-			if(!userIdArr || !userIdArr.length || userIdArr.length === 0){ // checking if it's an array and also worth sending
+			if(!userIdArr || !userIdArr.length || userIdArr.length === 0) { // checking if it's an array and also worth sending
 				callback("No Userids sent");
 				return;
 			}
@@ -1212,11 +1210,11 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("removeUsersFromMyProtectedRegion", function (userIdArr, regionId, callback) {
-			if(!socket.userid)			{
+			if(!socket.userid) {
 				callback("No User");
 				return;
 			}
-			if(!socket.room){
+			if(!socket.room) {
 				callback("No Room");
 				return;
 			}
