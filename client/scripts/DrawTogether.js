@@ -1195,10 +1195,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Send the drawing to the server and remove from the local
 		// layer once we got a confirmation from the server
-		this.sendDrawing(event.drawing, function (err) {
-			if(err)
-			{
-				console.log(err);
+		this.sendDrawing(event.drawing, function (success) {
+			if(typeof success !== 'undefined' && success.isNotAllowed){
+				this.chat.addMessage(this.createPermissionChatMessage(success));
 			}
 
 			event.removeDrawing();
@@ -1349,26 +1348,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 
 			if(success.isNotAllowed){
-				var owner = this.playerFromUserId(success.ownerid);
-				var ownerPermissionSentence = "";
-				var reputationSentence = "";
-				var loggedInSentence = "";
-
-				if(!this.loggedIn)
-					loggedInSentence = "You have to be logged in to draw in protected regions."
-				else if(this.reputation < success.minRepAllowed)
-					reputationSentence = "This region requires at least " + success.minRepAllowed + " Reputation.";
-
-				if(owner)
-					ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
-				else
-					ownerPermissionSentence = "The region owner is offline.";
-
-				var messageToUser = "This is a protected region. "
-									+ loggedInSentence + " " 
-									+ reputationSentence + " "
-									+ ownerPermissionSentence;
-				this.chat.addMessage( messageToUser);
+				this.chat.addMessage(this.createPermissionChatMessage(success));
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
@@ -1381,6 +1361,29 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}.bind(this), this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
 
 	this.lastPathPoint = event.point;
+};
+
+DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
+	var owner = this.playerFromUserId(messageFromServer.ownerid);
+				var ownerPermissionSentence = "";
+				var reputationSentence = "";
+				var loggedInSentence = "";
+
+	if(!this.loggedIn)
+		loggedInSentence = "You have to be logged in to draw in protected regions."
+	else if(this.reputation < messageFromServer.minRepAllowed)
+		reputationSentence = "This region requires at least " + messageFromServer.minRepAllowed + " Reputation.";
+
+	if(owner)
+		ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
+	else
+	ownerPermissionSentence = "The region owner is offline.";
+
+	var messageToUser = "This is a protected region. "
+						+ loggedInSentence + " " 
+						+ reputationSentence + " "
+						+ ownerPermissionSentence;
+	return messageToUser;
 };
 
 DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (event) {
