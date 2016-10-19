@@ -19,7 +19,7 @@ var BIG_BRUSH_MIN_REP = 5;
 var MEMBER_MIN_REP = 15;
 var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserver too
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
-var REGION_MIN_REP = 25;
+var REGION_MIN_REP = 30;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
@@ -92,7 +92,7 @@ function Protocol (io, drawtogether, imgur, players, register) {
 }
 
 Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (room) {
-	this.players.request('getprotectedregions', {
+	this.players.request('getProtectedRegionsAndPermissions', {
 		room: room
 	}, function (err, data) {
 		if (err) {
@@ -132,7 +132,7 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 				if(permissions[f].regionId == data[k].id){
 					if(typeof data[k].permissions === "undefined")
 						data[k].permissions = new Array();
-					data[k].permissions.push({ id:permissions[f].allowedUser, oldName:permissions[f].last_username});
+					data[k].permissions.push({ id:permissions[f].userId, oldName:permissions[f].last_username});
 					minRegionId = f;
 				}
 			}
@@ -1094,7 +1094,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.setPermission(socket, socketId, level);
 		});
 		
-		socket.on("createprotectedregion", function (from, to, regionCount, callback) {
+		socket.on("createprotectedregion", function (from, to, callback) {
 			if (typeof callback !== 'function') return;
 
 			if (!from || typeof from.join !== 'function') {
@@ -1111,10 +1111,6 @@ Protocol.prototype.bindIO = function bindIO () {
 					callback("You must have at least"+ REGION_MIN_REP +"!");
 					return;
 				}
-				if (regionCount > 1) {
-					callback("Having more than one region is premium only!");
-					return;
-				}//
 			}
 			console.log("[REGIONS] Adding protected region for", socket.name, from, to);
 			protocol.players.request('createprotectedregion', {
@@ -1143,8 +1139,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("removeprotectedregion", function (regionId, callback) {
 			if (typeof callback !== 'function') return;
 
-			if(isNaN(regionId))
-			{
+			if (isNaN(regionId))	{
 				callback("Region id is undefined.")
 				return;
 			}
@@ -1173,7 +1168,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			callback(null, JSON.stringify(asdf));
+			callback(null, asdf);
 		});
 
 		socket.on("adduserstomyprotectedregion", function (userIdArr, regionId, callback) {
@@ -1203,7 +1198,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
-		socket.on("removeuserstomyprotectedregion", function (userIdArr, regionId, callback) {
+		socket.on("removeUsersFromMyProtectedRegion", function (userIdArr, regionId, callback) {
 			if(!socket.userid)			{
 				callback("No User");
 				return;
@@ -1215,17 +1210,15 @@ Protocol.prototype.bindIO = function bindIO () {
 			if(!userIdArr || !userIdArr.length || userIdArr.length === 0){ // checking if it's an array and also worth sending
 				callback("No Userids sent");
 				return;
-			}
-			console.log("removeuserstomyprotectedregion",userIdArr);
-			
+			}			
 
-			protocol.players.request('removeuserstomyprotectedregion', {
+			protocol.players.request('removeUsersFromMyProtectedRegion', {
 				uKey: socket.uKey,
 				room: socket.room,
 				userIdArr: userIdArr,
 				regionId: regionId
 			}, function (err, data) {
-				console.log("Regions Updated!!!!!!!!!")
+				console.log("removeUsersFromMyProtectedRegion removed.....");
 				protocol.updateProtectedRegions(socket.room);
 				callback(err, data);
 			});

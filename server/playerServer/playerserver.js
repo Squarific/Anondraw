@@ -704,6 +704,23 @@ var server = http.createServer(function (req, res) {
 
 		return;
 	}
+	
+	if (parsedUrl.pathname == "/getProtectedRegionsAndPermissions") {
+		var room = parsedUrl.query.room;
+
+		playerDatabase.getProtectedRegionsAndPermissions(room, function (err, regions) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify(regions));
+		});
+
+		return;
+	}
 
 	if (parsedUrl.pathname == "/adduserstomyprotectedregion") {
 		var uKey = parsedUrl.query.uKey;
@@ -737,7 +754,7 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 
-	if (parsedUrl.pathname == "/removeuserstomyprotectedregion") {
+	if (parsedUrl.pathname == "/removeUsersFromMyProtectedRegion") {
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
 		var userIdArr = parsedUrl.query.userIdArr;

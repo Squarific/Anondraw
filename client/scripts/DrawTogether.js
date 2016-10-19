@@ -11,7 +11,7 @@ function DrawTogether (container, settings) {
 	this.playerList = [];
 	this.moveQueue = [];
 	this.favList = [];
-	this.regionsList = []; // Specific to the user
+	this.myRegions = []; // Specific to the user
 	this.ink = 0;
 	this.previousInk = Infinity;
 
@@ -97,7 +97,7 @@ function DrawTogether (container, settings) {
 
 // Hardcoded values who should probably be refactored to the server
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
-DrawTogether.prototype.REGION_MIN_REP = 25;
+DrawTogether.prototype.REGION_MIN_REP = 30;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -492,6 +492,11 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("setreputation", function (rep) {
 		self.reputation = rep;
 		console.log("Our reputation is ", rep);
+		self.loggedIn = true;
+		self.getFavorites();
+		self.getMyProtectedRegions();
+
+
 		if (self.reputation >= self.KICKBAN_MIN_REP) {
 			var lastOpen = localStorage.getItem('moderatorwelcomewindowlastopen');
 			if (lastOpen) {
@@ -599,13 +604,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 			
-			if (typeof this.reputation === 'undefined') {//not logged in
-				setTimeout(function(){
-					this.getFavorites();
-					this.getMyProtectedRegions();
-				}.bind(this),5000)
-			}
-			else
+			if(this.loggedIn) // self.loggedIn is set in setreputation callback
 			{
 				this.getFavorites();
 				this.getMyProtectedRegions();
@@ -649,13 +648,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
 			
-			if (typeof this.reputation === 'undefined') {//not logged in
-				setTimeout(function(){
-					this.getFavorites();
-					this.getMyProtectedRegions();
-				}.bind(this),5000)
-			}
-			else
+			if(this.loggedIn) // self.loggedIn is set in setreputation callback
 			{
 				this.getFavorites();
 				this.getMyProtectedRegions();
@@ -1602,7 +1595,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
 
-		this.removeProtectedRegion(this.regionsList[regionListIndex].regionId, element.parentNode);
+		this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
 	
 	}.bind(this));
 };
@@ -1611,8 +1604,8 @@ DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
 	while (this.regionsContainer.firstChild)
 		this.regionsContainer.removeChild(this.regionsContainer.firstChild)
 
-	for(var k = this.regionsList.length - 1; k >= 0; k--) {
-		this.insertOneRegionToDom(this.regionsList[k]['owner'], this.regionsList[k]['permissions'], this.regionsList[k]['minX'], this.regionsList[k]['minY'], this.regionsList[k]['maxX'], this.regionsList[k]['maxY'], k);
+	for(var k = this.myRegions.length - 1; k >= 0; k--) {
+		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
 	}
 
 };
@@ -1722,26 +1715,23 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 		this.chat.addMessage("You must be logged in to create protected regions.");
 		return;
 	}
-	var regionCount = this.regionsList.length || 0;
+	var regionCount = this.myRegions.length || 0;
 
 	if (!this.memberlevel) {
-		if(this.reputation < this.REGION_MIN_REP){
+		if (this.reputation < this.REGION_MIN_REP) {
 			
 			this.chat.addMessage("You must have at least "+ this.REGION_MIN_REP +" rep!");
 			return;
 		}
-		if(typeof this.regionsList !== 'undefined')
-		{
-			if(typeof this.regionsList.length === 'number')
-				if(this.regionsList.length > 1)
-				{
-					this.chat.addMessage("Having more than one region is premium only!");
-					return;
-				}
+		if (typeof this.myRegions !== 'undefined' && typeof this.myRegions.length === 'number') {
+			if (this.myRegions.length > 1) {
+				this.chat.addMessage("Having more than one region is premium only!");
+				return;
+			}
 		}
 	}
 
-	this.network.socket.emit("createprotectedregion", from, to, regionCount, function (err, result) {
+	this.network.socket.emit("createprotectedregion", from, to, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Regions", "Error: " + err);
 			return;
@@ -1783,7 +1773,8 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
 			return;
 		}
-		this.regionsList = JSON.parse(result);
+		this.myRegions = result;
+		console.log("myRegions:", this.myRegions);
 
 		if(typeof callback == "function")
 			callback();
@@ -1803,13 +1794,13 @@ DrawTogether.prototype.addUsersToMyProtectedRegion = function (userIdArr, region
 		
 		this.chat.addMessage("Regions", result.success);
 		console.log("result:",result);
-		//this.regionsList = JSON.parse(result);
+		//this.myRegions = JSON.parse(result);
 	}.bind(this));
 };
 
-DrawTogether.prototype.removeUsersToMyProtectedRegion = function (userIdArr, regionId, callback) {
+DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, regionId, callback) {
 	console.log("userIdArr", userIdArr);
-	this.network.socket.emit("removeuserstomyprotectedregion", userIdArr, regionId, function (err, result) {
+	this.network.socket.emit("removeUsersFromMyProtectedRegion", userIdArr, regionId, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Remove users to protected region", "Error: " + err);
 			return;
@@ -1820,7 +1811,7 @@ DrawTogether.prototype.removeUsersToMyProtectedRegion = function (userIdArr, reg
 
 		this.chat.addMessage("Regions", result.success);
 		console.log("result:",result);
-		//this.regionsList = JSON.parse(result);
+		//this.myRegions = JSON.parse(result);
 	}.bind(this));
 };
 
@@ -1837,7 +1828,7 @@ DrawTogether.prototype.setMinimumRepInProtectedRegion = function (repAmount, reg
 
 		this.chat.addMessage("Regions", result.success);
 		console.log("result:",result);
-		//this.regionsList = JSON.parse(result);
+		//this.myRegions = JSON.parse(result);
 	}.bind(this));
 };
 
@@ -1949,13 +1940,13 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 				var alreadyInPermissions = false;
 
-				for(var x = 0; x < this.regionsList[regionIndex].permissions.length; x++){
-					if(clonedPlayerList[i].userid == this.regionsList[regionIndex].permissions[x].id )
+				for(var x = 0; x < this.myRegions[regionIndex].permissions.length; x++){
+					if(clonedPlayerList[i].userid == this.myRegions[regionIndex].permissions[x].id )
 						alreadyInPermissions = true;
 				}
 
-				var thereAreNoPermissionsYet = this.regionsList[regionIndex].permissions.length === 0;
-				var notAddingMyself = clonedPlayerList[i].userid != this.regionsList[regionIndex].owner;
+				var thereAreNoPermissionsYet = this.myRegions[regionIndex].permissions.length === 0;
+				var notAddingMyself = clonedPlayerList[i].userid != this.myRegions[regionIndex].owner;
 
 				console.log("readyToPush",loggedIn,alreadyInPermissions,thereAreNoPermissionsYet,notAddingMyself);
 
@@ -1967,15 +1958,15 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 			}
 		}
 		if(temparr.length > 0){
-			this.addUsersToMyProtectedRegion(temparr, this.regionsList[regionIndex].regionId, function(){
+			this.addUsersToMyProtectedRegion(temparr, this.myRegions[regionIndex].regionId, function(){
 				//regionlist should be updated
 				for(var i = regionListBox2.length - 1; i >= 0 ; i--)
 					regionListBox2.options.remove(i);
 				
-				console.log("this.regionsList[regionIndex].permissions", this.regionsList[regionIndex].permissions);
-				for(var i = 0; i < this.regionsList[regionIndex].permissions.length; i++) {
+				console.log("this.myRegions[regionIndex].permissions", this.myRegions[regionIndex].permissions);
+				for(var i = 0; i < this.myRegions[regionIndex].permissions.length; i++) {
 					var option = document.createElement("option");
-					option.label = this.regionsList[regionIndex].permissions[i].oldName;
+					option.label = this.myRegions[regionIndex].permissions[i].oldName;
 					regionListBox2.add(option);
 				};
 
@@ -2001,9 +1992,9 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 	
 
-	for(var i = 0; i < this.regionsList[regionIndex].permissions.length; i++) {
+	for(var i = 0; i < this.myRegions[regionIndex].permissions.length; i++) {
 		var option = document.createElement("option");
-		option.label = this.regionsList[regionIndex].permissions[i].oldName;
+		option.label = this.myRegions[regionIndex].permissions[i].oldName;
 		regionListBox2.add(option);
 	};
 
@@ -2015,14 +2006,14 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 		var temparr = [];
 		for(var i = 0; i < regionListBox2.length; i++){
 			if(regionListBox2.options[i].selected){
-				temparr.push(this.regionsList[regionIndex].permissions[i].id);
+				temparr.push(this.myRegions[regionIndex].permissions[i].id);
 			}
 		}
 		if(temparr.length > 0){
-			this.removeUsersToMyProtectedRegion(temparr, this.regionsList[regionIndex].regionId, function(){
+			this.removeUsersFromMyProtectedRegion(temparr, this.myRegions[regionIndex].regionId, function(){
 				//regionlist should be updated
 				for(var i = 0; i < temparr.length; i++)
-					regionListBox2.remove(this.regionsList[regionIndex][temparr[i]]);
+					regionListBox2.remove(this.myRegions[regionIndex][temparr[i]]);
 				console.log(regionIndex)
 				
 				console.log("change")
@@ -2032,9 +2023,9 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 	regionPermissionsWindow.addElement("",regionPermissionsContainer);
 
-	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, 300, this.regionsList[regionIndex].minRepAllowed, 1, function (value) {
+	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, 300, this.myRegions[regionIndex].minRepAllowed, 1, function (value) {
 		//this.paint.setRotation(value);
-		this.setMinimumRepInProtectedRegion(value, this.regionsList[regionIndex].regionId);
+		this.setMinimumRepInProtectedRegion(value, this.myRegions[regionIndex].regionId);
 	}.bind(this));
 
 	regionPermissionsWindow.addButton("Close", function () {

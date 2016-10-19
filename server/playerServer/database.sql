@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS ipbans (
 --Need above for the production server when permissions are done^^
 
 CREATE TABLE IF NOT EXISTS regions (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id INT UNSIGNED NOT NULL,
     PRIMARY KEY (id),
     owner INT UNSIGNED,
     minRepAllowed INT UNSIGNED,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS regions (
 
 CREATE TABLE IF NOT EXISTS regions_permissions (
     regionId INT UNSIGNED,
-    allowedUser INT UNSIGNED,
+    userId INT UNSIGNED,
     INDEX (regionId)    
 );
 
