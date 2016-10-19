@@ -244,7 +244,7 @@ Protocol.prototype.getUsersProtectedRegions = function getUsersProtectedRegions 
 };
 
 Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (reputation, user, satObjects, room) {
-	if (!this.protectedRegions[room]) return false;
+	if (!this.protectedRegions[room]) return {isNotAllowed: false};
 
 	for (var k = 0; k < satObjects.length; k++) {
 		var searchRegion = this.getRegionSearchFromSat(satObjects[k]);
@@ -269,17 +269,17 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					return true;
+					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, ownerid: relevantRegions[i].owner};
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					return true
+					return {isNotAllowed: true, minRepAllowed:relevantRegions[i].minRepAllowed, ownerid: relevantRegions[i].owner};
 				}
 			}
 		}
 	}
 
-	return false;
+	return {isNotAllowed: false};
 };
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
@@ -365,7 +365,7 @@ Protocol.prototype.getUserList = function getUserList (room) {
 
 	for (var id in sroom) {
 		var socket = this.socketFromId(id);
-		//console.log("getUserList", socket.userid);
+
 		if (!socket) continue;
 		users.push({
 			id: socket.id,
@@ -790,9 +790,11 @@ Protocol.prototype.bindIO = function bindIO () {
 				drawing.size
 			);
 
-			if (protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room)) {
+			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
+
+			if (regionData.isNotAllowed) {
 				protocol.informClient(socket, "This region is protected!");
-				callback();
+				callback(regionData);
 				return;
 			}
 
@@ -877,9 +879,11 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint || point, socket.lastPathSize);
 
-			if (protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room)) {
+			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
+
+			if (regionData.isNotAllowed) {
 				protocol.informClient(socket, "This region is protected!");
-				callback();
+				callback(regionData);
 				return;
 			}
 
@@ -1100,7 +1104,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 			if(!socket.memberlevel){
 				if (socket.reputation < REGION_MIN_REP) {
-					callback("You must have at least"+ REGION_MIN_REP +"!");
+					callback("You must have at least"+ REGION_MIN_REP +"! or Premium.");
 					return;
 				}
 			}

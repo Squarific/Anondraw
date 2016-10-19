@@ -900,6 +900,16 @@ DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid (soc
 	return "[Not found]";
 };
 
+DrawTogether.prototype.playerFromUserId = function playerFromUserId (id) {
+	for (var k = 0; k < this.playerList.length; k++) {
+		if (this.playerList[k].userid == id) {
+			return this.playerList[k];
+		}
+	}
+
+	return null;
+};
+
 DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	for (var k = 0; k < this.playerList.length; k++) {
 		if (this.playerList[k].id == id) {
@@ -1185,7 +1195,12 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Send the drawing to the server and remove from the local
 		// layer once we got a confirmation from the server
-		this.sendDrawing(event.drawing, function () {
+		this.sendDrawing(event.drawing, function (err) {
+			if(err)
+			{
+				console.log(err);
+			}
+
 			event.removeDrawing();
 		});
 	}.bind(this));
@@ -1328,8 +1343,33 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
-		if (!success){ 
+
+
+		if (typeof success === 'boolean' ? !success : success.isNotAllowed){ 
 			event.removePathPoint();
+
+			if(success.isNotAllowed){
+				var owner = this.playerFromUserId(success.ownerid);
+				var ownerPermissionSentence = "";
+				var reputationSentence = "";
+				var loggedInSentence = "";
+
+				if(!this.loggedIn)
+					loggedInSentence = "You have to be logged in to draw in protected regions."
+				else if(this.reputation < success.minRepAllowed)
+					reputationSentence = "This region requires at least " + success.minRepAllowed + " Reputation.";
+
+				if(owner)
+					ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
+				else
+					ownerPermissionSentence = "The region owner is offline.";
+
+				var messageToUser = "This is a protected region. "
+									+ loggedInSentence + " " 
+									+ reputationSentence + " "
+									+ ownerPermissionSentence;
+				this.chat.addMessage( messageToUser);
+			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
 				if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
@@ -1338,7 +1378,8 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 				}
 			}
 		}
-	}, this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
+	}.bind(this), this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
+
 	this.lastPathPoint = event.point;
 };
 
