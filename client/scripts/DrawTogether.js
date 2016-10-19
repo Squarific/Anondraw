@@ -644,8 +644,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
 			
-			if(this.account.uKey)
-			{
+			if (this.account.uKey) {
 				this.getFavorites();
 				this.getMyProtectedRegions();
 			}
