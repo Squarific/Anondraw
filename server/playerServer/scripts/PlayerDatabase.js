@@ -380,7 +380,6 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, callback) {
-	console.log("removeProtectedRegion", userid, room, regionId);
 	this.database.query("DELETE FROM regions WHERE owner = ? AND room = ? AND id = ?", [userid, room, regionId], function (err) {
 		if(err){
 			callback(err);
@@ -439,7 +438,6 @@ PlayerDatabase.prototype.getProtectedRegionsAndPermissions = function getProtect
 };
 
 PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
-	console.log("addUsersToMyProtectedRegion", userid, room, userIdArr);
 	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
 		if (rows.length === 0) {
 			callback("You don't own this region!");
@@ -451,7 +449,6 @@ PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProt
 
 		if(isArray) // check if userIdArr is actually an array
 		{
-			console.log("is array", userIdArr)
 			for(var i = 0; i < userIdArr.length; i++)
 			{
 				if (isNaN(userIdArr[i])) {
@@ -467,10 +464,7 @@ PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProt
 				console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(2)", userIdArr, room);
 				return;
 			}
-			console.log("not array", userIdArr);
 			values = [[regionId, userIdArr]];
-
-			console.log("values", values, typeof userIdArr, typeof userIdArr.length);
 		}
 		for(var i = 0; i < values.length; i++){
 			this.database.query(sqlText, [values[i][0], values[i][1]], function(err) {
@@ -486,7 +480,6 @@ PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProt
 };
 
 PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
-	console.log("removeUsersToMyProtectedRegion", userid, room, userIdArr);
 	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
 		if (rows.length === 0) {
 			callback("You don't own this region!");
@@ -513,10 +506,7 @@ PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersTo
 				console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(2)", userIdArr, room);
 				return;
 			}
-			console.log("not array");
 			values = [[regionId, userIdArr]];
-
-			console.log("values", values, typeof userIdArr, typeof userIdArr.length);
 		}
 		for(var i = 0; i < values.length; i++){
 			this.database.query(sqlText, [values[i][0], values[i][1]], function(err) {
@@ -532,7 +522,6 @@ PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersTo
 };
 
 PlayerDatabase.prototype.setMinimunRepInProtectedRegion = function setMinimunRepInProtectedRegion (userid, room, repAmount, regionId, callback){
-	console.log("setMinimunRepInProtectedRegion", userid, room, repAmount);
 	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
 		if (rows.length === 0) {
 			callback("You don't own this region!");

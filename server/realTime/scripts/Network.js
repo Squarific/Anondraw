@@ -98,13 +98,9 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 		if (err) {
 			throw "Can't get protected regions for room " + room + " Err:" + JSON.stringify(err);
 		}
-		console.log("permissions:",data.permissions);
 		var permissions = data.permissions;
 
-
-
 		data = data.regions;
-		//console.log("regions", data);
 
 		if (typeof data.length !== "number") {
 			throw "Data was not an array";
@@ -223,7 +219,6 @@ Protocol.prototype.getRegionSearchFromSat = function getRegionSearchFromSat (sat
 };
 
 Protocol.prototype.getUsersProtectedRegions = function getUsersProtectedRegions (user, room) {
-	console.log("room", room, "user", user);
 	if (!this.protectedRegions[room]) return false;
 
 	var p = [];
@@ -264,7 +259,6 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 			if (typeof relevantRegions[i].permissions !== "undefined"){
 				var hasPermission = false;
 				for(var f = 0; f < relevantRegions[i].permissions.length; f++){
-					console.log(relevantRegions[i].permissions[f]);
 					if (relevantRegions[i].permissions[f].id === user) {
 						hasPermission = true;
 						break;
@@ -275,12 +269,10 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					console.log("owner of region:", relevantRegions[i].owner);
 					return true;
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					console.log("owner of region:", relevantRegions[i].owner);
 					return true
 				}
 			}
@@ -1158,7 +1150,6 @@ Protocol.prototype.bindIO = function bindIO () {
 			if(!socket.userid)
 			{
 				callback("No User");
-				console.log( socket.room);
 				return;
 			}
 
@@ -1192,7 +1183,6 @@ Protocol.prototype.bindIO = function bindIO () {
 				userIdArr: userIdArr,
 				regionId: regionId
 			}, function (err, data) {
-				console.log("Regions Updated!!!!!!!!!")
 				protocol.updateProtectedRegions(socket.room);
 				callback(err, data);
 			});
@@ -1218,7 +1208,6 @@ Protocol.prototype.bindIO = function bindIO () {
 				userIdArr: userIdArr,
 				regionId: regionId
 			}, function (err, data) {
-				console.log("removeUsersFromMyProtectedRegion removed.....");
 				protocol.updateProtectedRegions(socket.room);
 				callback(err, data);
 			});
@@ -1240,10 +1229,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if(isNaN(regionId) || regionId < 0){
 				callback("Invalid rep amount");
 				return;
-			}
-
-			console.log("setminimumrepinprotectedregion",repAmount);
-			
+			}			
 
 			protocol.players.request('setminimumrepinprotectedregion', {
 				uKey: socket.uKey,
@@ -1251,7 +1237,6 @@ Protocol.prototype.bindIO = function bindIO () {
 				repAmount: repAmount,
 				regionId: regionId
 			}, function (err, data) {
-				console.log("Regions Updated!!!!!!!!!")
 				protocol.updateProtectedRegions(socket.room);
 				callback(err, data);
 			});

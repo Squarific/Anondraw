@@ -1550,7 +1550,6 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 };
 
 DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owner, permissions, minX, minY, maxX, maxY, index) {
-	console.log(owner, permissions, minX, minY, maxX, maxY);
 	var regionContainer = this.regionsContainer.appendChild(document.createElement("div"));
 	regionContainer.className = "region-container";
 	regionContainer.dataset.minX = minX;
@@ -1774,7 +1773,6 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 			return;
 		}
 		this.myRegions = result;
-		console.log("myRegions:", this.myRegions);
 
 		if(typeof callback == "function")
 			callback();
@@ -1782,7 +1780,6 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 };
 
 DrawTogether.prototype.addUsersToMyProtectedRegion = function (userIdArr, regionId, callback) {
-	console.log("userIdArr", userIdArr);
 	this.network.socket.emit("adduserstomyprotectedregion", userIdArr, regionId, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Adding users to protected region", "Error: " + err);
@@ -1793,13 +1790,10 @@ DrawTogether.prototype.addUsersToMyProtectedRegion = function (userIdArr, region
 		}.bind(this), 1000);
 		
 		this.chat.addMessage("Regions", result.success);
-		console.log("result:",result);
-		//this.myRegions = JSON.parse(result);
 	}.bind(this));
 };
 
 DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, regionId, callback) {
-	console.log("userIdArr", userIdArr);
 	this.network.socket.emit("removeUsersFromMyProtectedRegion", userIdArr, regionId, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Remove users to protected region", "Error: " + err);
@@ -1810,13 +1804,10 @@ DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, r
 		}.bind(this), 1000);
 
 		this.chat.addMessage("Regions", result.success);
-		console.log("result:",result);
-		//this.myRegions = JSON.parse(result);
 	}.bind(this));
 };
 
 DrawTogether.prototype.setMinimumRepInProtectedRegion = function (repAmount, regionId) {
-	console.log("userIdArr", repAmount);
 	this.network.socket.emit("setminimumrepinprotectedregion", repAmount, regionId, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Set minimum rep", "Error: " + err);
@@ -1827,8 +1818,6 @@ DrawTogether.prototype.setMinimumRepInProtectedRegion = function (repAmount, reg
 		}.bind(this), 1000);
 
 		this.chat.addMessage("Regions", result.success);
-		console.log("result:",result);
-		//this.myRegions = JSON.parse(result);
 	}.bind(this));
 };
 
@@ -1929,7 +1918,6 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 	regionAddButton.className = "region-window-permission-button";
 	regionAddButton.textContent = "Add to permissions >";
 	regionAddButton.addEventListener("click", function (e) {
-		console.log(regionListBox1);
 		var temparr = [];
 		for(var i = 0; i < regionListBox1.length; i++){
 			if(regionListBox1.options[i].selected){
@@ -1948,11 +1936,8 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 				var thereAreNoPermissionsYet = this.myRegions[regionIndex].permissions.length === 0;
 				var notAddingMyself = clonedPlayerList[i].userid != this.myRegions[regionIndex].owner;
 
-				console.log("readyToPush",loggedIn,alreadyInPermissions,thereAreNoPermissionsYet,notAddingMyself);
-
 				var readyToPush = loggedIn && (!alreadyInPermissions || thereAreNoPermissionsYet) && notAddingMyself;
 				if(readyToPush){
-					console.log("Pushing", clonedPlayerList[i].name);
 					temparr.push(clonedPlayerList[i].userid);
 				}
 			}
@@ -1963,7 +1948,6 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 				for(var i = regionListBox2.length - 1; i >= 0 ; i--)
 					regionListBox2.options.remove(i);
 				
-				console.log("this.myRegions[regionIndex].permissions", this.myRegions[regionIndex].permissions);
 				for(var i = 0; i < this.myRegions[regionIndex].permissions.length; i++) {
 					var option = document.createElement("option");
 					option.label = this.myRegions[regionIndex].permissions[i].oldName;
@@ -2014,9 +1998,6 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 				//regionlist should be updated
 				for(var i = 0; i < temparr.length; i++)
 					regionListBox2.remove(this.myRegions[regionIndex][temparr[i]]);
-				console.log(regionIndex)
-				
-				console.log("change")
 			}.bind(this));
 		}
 	}.bind(this));
