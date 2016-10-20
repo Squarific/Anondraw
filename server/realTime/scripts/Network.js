@@ -22,6 +22,7 @@ var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserve
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
 
 var REGION_MIN_REP = 30;
+var MODERATE_REGION_MIN_REP = 100;
 
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
@@ -1168,7 +1169,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 			var overrideOwner = false;
-			if (socket.reputation > KICKBAN_MIN_REP){
+			if (socket.reputation > MODERATE_REGION_MIN_REP){
 				overrideOwner = true;
 			}
 
