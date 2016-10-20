@@ -16,7 +16,6 @@ function DrawTogether (container, settings) {
 	this.previousInk = Infinity;
 
 	this.MAX_REP_TO_DISPLAY = 300; // if a pregion's minRepAllowed is higher than this. don't mention it to user.
-	this.amtOfRegionWindowsOpen = 0; // used to just move them over so we dont spawn new ones on top of them.
 
 	this.lastInkWarning = 0;        // Last time we showed that we are out of ink
 	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
@@ -1654,8 +1653,14 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionEditPermissionsButton.addEventListener("click", function (e) {
 		var regionListIndex = regionEditPermissionsButton.parentNode.dataset.index;
 
-		if(regionListIndex)
-			this.createRegionPermissionsWindow(regionListIndex);
+		if(regionListIndex){
+			if(typeof this.regionPermissionsWindow === "undefined")
+				this.createRegionPermissionsWindow(regionListIndex);
+			else
+				this.regionPermissionsWindow.regionIndex = regionListIndex;
+			this.regionPermissionsWindow.reload();
+			this.regionPermissionsWindow.show();
+		}
 	
 	}.bind(this));
 
@@ -1972,13 +1977,12 @@ DrawTogether.prototype.createGameInformation = function createGameInformation ()
 };
 
 DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPermissionsWindow (regionIndex) {
-	this.amtOfRegionWindowsOpen += 1;
-	var Xoffset = 30 + 4 * this.amtOfRegionWindowsOpen;
-	var Yoffset = 10 + 3 * this.amtOfRegionWindowsOpen;
-
-	var regionPermissionsWindow = QuickSettings.create(Xoffset, Yoffset, "Region Permissions");
+	var regionPermissionsWindow = QuickSettings.create(30, 10, "Region Permissions");
 	regionPermissionsWindow.hide();
-	this.regionPermissionsWindow = regionPermissionsWindow;
+
+	regionPermissionsWindow.regionIndex = regionIndex;
+
+	this.regionPermissionsWindow = regionPermissionsWindow; //only one.
 
 	var regionPermissionsContainer = document.createElement("div");
 
@@ -2015,13 +2019,13 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 				var alreadyInPermissions = false;
 
-				for(var x = 0; x < this.myRegions[regionIndex].permissions.length; x++){
-					if(clonedPlayerList[i].userid == this.myRegions[regionIndex].permissions[x].id )
+				for(var x = 0; x < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; x++){
+					if(clonedPlayerList[i].userid == this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[x].id )
 						alreadyInPermissions = true;
 				}
 
-				var thereAreNoPermissionsYet = this.myRegions[regionIndex].permissions.length === 0;
-				var notAddingMyself = clonedPlayerList[i].userid != this.myRegions[regionIndex].owner;
+				var thereAreNoPermissionsYet = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length === 0;
+				var notAddingMyself = clonedPlayerList[i].userid != this.myRegions[this.regionPermissionsWindow.regionIndex].owner;
 
 				var readyToPush = loggedIn && (!alreadyInPermissions || thereAreNoPermissionsYet) && notAddingMyself;
 				if(readyToPush){
@@ -2030,14 +2034,14 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 			}
 		}
 		if(temparr.length > 0){
-			this.addUsersToMyProtectedRegion(temparr, this.myRegions[regionIndex].regionId, function(){
+			this.addUsersToMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function(){
 				//regionlist should be updated
 				for(var i = regionListBox2.length - 1; i >= 0 ; i--)
 					regionListBox2.options.remove(i);
 				
-				for(var i = 0; i < this.myRegions[regionIndex].permissions.length; i++) {
+				for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 					var option = document.createElement("option");
-					option.label = this.myRegions[regionIndex].permissions[i].oldName;
+					option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 					regionListBox2.add(option);
 				};
 
@@ -2063,9 +2067,9 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 	
 
-	for(var i = 0; i < this.myRegions[regionIndex].permissions.length; i++) {
+	for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 		var option = document.createElement("option");
-		option.label = this.myRegions[regionIndex].permissions[i].oldName;
+		option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 		regionListBox2.add(option);
 	};
 
@@ -2077,32 +2081,53 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 		var temparr = [];
 		for(var i = 0; i < regionListBox2.length; i++){
 			if(regionListBox2.options[i].selected){
-				temparr.push(this.myRegions[regionIndex].permissions[i].id);
+				temparr.push(this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].id);
 			}
 		}
 		if(temparr.length > 0){
-			this.removeUsersFromMyProtectedRegion(temparr, this.myRegions[regionIndex].regionId, function(){
+			this.removeUsersFromMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function(){
 				//regionlist should be updated
 				for(var i = 0; i < temparr.length; i++)
-					regionListBox2.remove(this.myRegions[regionIndex][temparr[i]]);
+					regionListBox2.remove(this.myRegions[this.regionPermissionsWindow.regionIndex][temparr[i]]);
 			}.bind(this));
 		}
 	}.bind(this));
 
 	regionPermissionsWindow.addElement("",regionPermissionsContainer);
 
-	var rep = (this.myRegions[regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
+	var rep = (this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
 
-	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, this.MAX_REP_TO_DISPLAY, this.myRegions[regionIndex].minRepAllowed, 1, function (value) {
-		this.setMinimumRepInProtectedRegion(value, this.myRegions[regionIndex].regionId);
+	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, this.MAX_REP_TO_DISPLAY, rep, 1, function (value) {
+		this.setMinimumRepInProtectedRegion(value, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId);
 	}.bind(this));
 
 	regionPermissionsWindow.addButton("Close", function () {
 		regionPermissionsWindow.hide();
-		this.amtOfRegionWindowsOpen = (this.amtOfRegionWindowsOpen > 0) ? this.amtOfRegionWindowsOpen - 1 : 0;
 	}.bind(this));
 
-	regionPermissionsWindow.show();
+	regionPermissionsWindow.reload = function(){
+		for(var i = regionListBox1.length - 1; i >= 0 ; i--)
+			regionListBox1.options.remove(i);
+		for(var i = regionListBox2.length - 1; i >= 0 ; i--)
+			regionListBox2.options.remove(i);
+
+		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
+
+		for(var i = 0; i < clonedPlayerList.length; i++) {
+			var option = document.createElement("option");
+			option.label = clonedPlayerList[i].name;
+			regionListBox1.add(option);
+		};
+
+		for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
+			var option = document.createElement("option");
+			option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
+			regionListBox2.add(option);
+		};
+		var rep = (this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
+		regionPermissionsWindow.setRangeValue("Minimum Rep Allowed", rep);
+	}.bind(this);
+
 };
 
 DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
