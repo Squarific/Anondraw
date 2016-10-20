@@ -1110,10 +1110,10 @@ Protocol.prototype.bindIO = function bindIO () {
 				var height = Math.abs(from[1] - to[1]);
 
 				//Formula: 2x^2 + 500x - 6666
-				//where x = 30 output = 10 thousand
-				//where x = 50 output = 23 thousand
-				//where x = 100 output = 63 thousand
-				//where x = 150 output = 113 thousand
+					//where x = 30 output = 10 thousand
+					//where x = 50 output = 23 thousand
+					//where x = 100 output = 63 thousand
+					//where x = 150 output = 113 thousand
 
 				var x = (this.reputation < 150) ? this.reputation : 150;
 				var regionMaxSize = 2 * (x*x) + 500 * x - 6666;
@@ -1121,7 +1121,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				var distanceBetweenPoints = width+height;
 
 				if(distanceBetweenPoints > regionMaxSize){
-					callback("A region " + regionMaxSize + "px or bigger requires more rep or premium. You tried to make a region "+ distanceBetweenPoints "px big.");
+					callback("A region " + regionMaxSize + "px or bigger requires more rep or premium. You tried to make a region "+ distanceBetweenPoints + "px big.");
 					return;
 				}
 			}
