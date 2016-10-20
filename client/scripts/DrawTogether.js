@@ -1318,9 +1318,12 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			$(".regions-window").hide();
 			this.getMyProtectedRegions();
 		} else {
-			this.updateRegionsDom();
-			$(".favorites-window").hide();
-			$(".regions-window").show();
+			this.getMyProtectedRegions(function(){
+				if(this.myRegions.length > 0){
+					$(".favorites-window").hide();
+					$(".regions-window").show();
+				}
+			}.bind(this));			
 		}
 	}.bind(this));
 
@@ -1853,6 +1856,7 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 
 		if(typeof callback == "function")
 			callback();
+		this.updateRegionsDom();
 	}.bind(this));
 };
 
