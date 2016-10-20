@@ -784,19 +784,18 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			if (DRAWING_TYPES.indexOf(drawing.type) == 4) { // TextTool
+			if (drawing.type === 'text') { // TextTool
 				var canvas = new Canvas();
 				var hiddenContext = canvas.getContext('2d');
 				hiddenContext.font = drawing.size + "pt Verdana, Geneva, sans-serif";
 				var textWidth = hiddenContext.measureText(drawing.text).width;
 				drawing.x1 = drawing.x + textWidth;
-
-				var objects = protocol.satObjectsFromBrush(
+			}
+			var objects = protocol.satObjectsFromBrush(
 					[drawing.x, drawing.y],
 					[drawing.x1 || drawing.x, drawing.y1 || drawing.y],
 					drawing.size
 				);
-			}
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
 
