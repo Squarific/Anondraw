@@ -2370,6 +2370,7 @@ DrawTogether.prototype.formLogin = function formLogin () {
 
 		this.network.socket.emit("uKey", this.account.uKey);
 		this.createAccountWindow();
+		this.getFavorites();
 	}.bind(this));
 };
 
@@ -2389,6 +2390,7 @@ DrawTogether.prototype.formRegister = function formRegister () {
 		ga("send", "event", "conversion", "register");
 		this.network.socket.emit("uKey", this.account.uKey);
 		this.createAccountWindow();
+		this.getFavorites();
 	}.bind(this));
 };
 
