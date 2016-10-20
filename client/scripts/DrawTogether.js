@@ -11,8 +11,11 @@ function DrawTogether (container, settings) {
 	this.playerList = [];
 	this.moveQueue = [];
 	this.favList = [];
+	this.myRegions = []; // Specific to the user
 	this.ink = 0;
 	this.previousInk = Infinity;
+
+	this.MAX_REP_TO_DISPLAY = 300; // if a pregion's minRepAllowed is higher than this. don't mention it to user.
 
 	this.lastInkWarning = 0;        // Last time we showed that we are out of ink
 	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
@@ -28,6 +31,7 @@ function DrawTogether (container, settings) {
 	this._followingPlayer;  // The player the view is currently following
 	
 	this.favoritesContainer = null;
+	this.regionsContainer = null;
 
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
@@ -95,6 +99,7 @@ function DrawTogether (container, settings) {
 
 // Hardcoded values who should probably be refactored to the server
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
+DrawTogether.prototype.REGION_MIN_REP = 30;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -489,6 +494,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("setreputation", function (rep) {
 		self.reputation = rep;
 		console.log("Our reputation is ", rep);
+
 		if (self.reputation >= self.KICKBAN_MIN_REP) {
 			var lastOpen = localStorage.getItem('moderatorwelcomewindowlastopen');
 			if (lastOpen) {
@@ -596,8 +602,10 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 			
-			if (this.account.uKey) {
+			if(this.account.uKey)
+			{
 				this.getFavorites();
+				this.getMyProtectedRegions();
 			}
 			
 			// If we are new show the welcome window
@@ -638,7 +646,10 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
 			
-			this.getFavorites();
+			if (this.account.uKey) {
+				this.getFavorites();
+				this.getMyProtectedRegions();
+			}
 
 			this.removeLoading();
 		}
@@ -886,6 +897,16 @@ DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid (soc
 	return "[Not found]";
 };
 
+DrawTogether.prototype.playerFromUserId = function playerFromUserId (id) {
+	for (var k = 0; k < this.playerList.length; k++) {
+		if (this.playerList[k].userid == id) {
+			return this.playerList[k];
+		}
+	}
+
+	return null;
+};
+
 DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	for (var k = 0; k < this.playerList.length; k++) {
 		if (this.playerList[k].id == id) {
@@ -894,6 +915,55 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	}
 
 	return null;
+};
+
+DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
+	var PermissionDom = document.createElement("div");
+	PermissionDom.className = "drawtogether-player";
+
+	if (this.reputation >= this.KICKBAN_MIN_REP) {
+		var removeRegionButton = document.createElement("span");
+		removeRegionButton.className = "drawtogether-player-button drawtogether-kickban-button";
+
+		removeRegionButton.innerText = "Delete Region";
+		removeRegionButton.textContent = "Delete Region";
+
+		removeRegionButton.addEventListener("click", this.removeProtectedRegion.bind(this, messageFromServer.regionid, false));
+
+		PermissionDom.appendChild(removeRegionButton);
+	}
+
+	var messageText = document.createElement("span");
+	messageText.className = "drawtogether-player-name";
+
+	
+
+	var owner = this.playerFromUserId(messageFromServer.ownerid) || messageFromServer;//messageFromServer.name can be outdated
+				var ownerPermissionSentence = "";
+				var reputationSentence = "";
+				var loggedInSentence = "";
+
+	if(!this.account.uKey)
+		loggedInSentence = "You have to be logged in to draw in protected regions."
+	else if(this.reputation < messageFromServer.minRepAllowed && messageFromServer.minRepAllowed <= this.MAX_REP_TO_DISPLAY)
+		reputationSentence = "This region requires at least " + messageFromServer.minRepAllowed + " Reputation.";
+
+	if(owner)
+		ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
+	else
+	ownerPermissionSentence = "The region owner is offline.";
+	console.log("regionid", messageFromServer.regionid);
+
+	var messageToUser = "This is a protected region. "
+						+ loggedInSentence + " " 
+						+ reputationSentence + " "
+						+ ownerPermissionSentence;
+
+	messageText.appendChild(document.createTextNode(messageToUser))
+
+	PermissionDom.appendChild(messageText);
+
+	return PermissionDom;
 };
 
 DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
@@ -1171,9 +1241,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Send the drawing to the server and remove from the local
 		// layer once we got a confirmation from the server
-		this.sendDrawing(event.drawing, function () {
+		this.sendDrawing(event.drawing, function (success) {
+			if(typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed){
+				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+			}
+
 			event.removeDrawing();
-		});
+		}.bind(this));
 	}.bind(this));
 
 	this.paint.addEventListener("undo", function (event) {
@@ -1225,6 +1299,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			$(".favorites-window").hide();
 		} else {
 			this.updateFavoriteDom();
+			$(".regions-window").hide();
 			$(".favorites-window").show();
 		}
 	}.bind(this));
@@ -1234,6 +1309,35 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	
 	this.favoritesContainer = favoritesWindow.appendChild(document.createElement("div"));
 	this.favoritesContainer.className = "favorites-container";	
+
+	//Regions button
+	var regionsButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	regionsButton.className = "control-button regions-button";
+	regionsButton.addEventListener("click", function () {
+		if($(".regions-window").is(":visible")) {
+			$(".regions-window").hide();
+			this.getMyProtectedRegions();
+		} else {
+			this.getMyProtectedRegions(function(){
+				if(this.myRegions.length > 0){
+					$(".favorites-window").hide();
+					$(".regions-window").show();
+				}
+			}.bind(this));			
+		}
+	}.bind(this));
+
+
+	var regionsButtonImage = regionsButton.appendChild(document.createElement("img"));
+	regionsButtonImage.src = "images/icons/pregion.png";
+	regionsButtonImage.alt = "Open Regions Menu";
+	regionsButtonImage.title = "Open Regions Menu";
+
+	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
+	regionsWindow.className = "regions-window";
+	
+	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
+	this.regionsContainer.className = "regions-container";
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
@@ -1287,8 +1391,14 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	}
 	
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
-		if (!success){ 
+
+
+		if (typeof success === 'boolean' ? !success : !success.isAllowed){ 
 			event.removePathPoint();
+
+			if(typeof success.isAllowed !== 'undefined'){
+				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
 				if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
@@ -1297,7 +1407,8 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 				}
 			}
 		}
-	}, this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
+	}.bind(this), this.SOCKET_TIMEOUT, this, [false, true]));//[,,]=[success,timeOut]
+
 	this.lastPathPoint = event.point;
 };
 
@@ -1508,6 +1619,78 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteContainer.appendChild(this.createFavoriteDeleteButton());
 };
 
+DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owner, permissions, minX, minY, maxX, maxY, index) {
+	var regionContainer = this.regionsContainer.appendChild(document.createElement("div"));
+	regionContainer.className = "region-container";
+	regionContainer.dataset.minX = minX;
+	regionContainer.dataset.minY = minY;
+	regionContainer.dataset.maxX = maxX;
+	regionContainer.dataset.maxY = maxY;
+	regionContainer.dataset.owner = owner;
+	regionContainer.dataset.index = index;
+
+	var regionPositionButton = regionContainer.appendChild(document.createElement("div"));
+	regionPositionButton.className = "reg-button reg-position-button";
+	regionPositionButton.textContent = minX + ", " + minY;
+	regionPositionButton.addEventListener("click", function (e) {
+		var element = e.srcElement || e.target;
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+		                  this.paint.public.canvas.height / this.paint.public.zoom];
+
+		var x = parseInt(minX - screenSize[0] / 2);
+		var y = parseInt(minY - screenSize[1] / 2);
+
+		this.moveScreenToPosition([x,y],0);
+	
+	}.bind(this));
+
+
+	
+
+	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
+	regionEditPermissionsButton.className = "reg-button reg-editpermissions-button";
+	//regionEditPermissionsButton.textContent = "Permissions...";
+	regionEditPermissionsButton.addEventListener("click", function (e) {
+		var regionListIndex = regionEditPermissionsButton.parentNode.dataset.index;
+
+		if(regionListIndex){
+			if(typeof this.regionPermissionsWindow === "undefined")
+				this.createRegionPermissionsWindow(regionListIndex);
+			else
+				this.regionPermissionsWindow.regionIndex = regionListIndex;
+			this.regionPermissionsWindow.reload();
+			this.regionPermissionsWindow.show();
+		}
+	
+	}.bind(this));
+
+	var permissionsButtonImage = regionEditPermissionsButton.appendChild(document.createElement("img"));
+	permissionsButtonImage.src = "images/icons/permission.png";
+	permissionsButtonImage.alt = "Open Permissions Menu";
+	permissionsButtonImage.title = "Open Permissions Menu";
+
+	var regionDeleteButton = regionContainer.appendChild(document.createElement("div"));
+	regionDeleteButton.className = "reg-button reg-delete-button";
+	regionDeleteButton.textContent = "x";
+	regionDeleteButton.addEventListener("click", function (e) {
+		var element = e.srcElement || e.target;
+		var regionListIndex = element.parentNode.dataset.index;
+
+		this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
+	
+	}.bind(this));
+};
+
+DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
+	while (this.regionsContainer.firstChild)
+		this.regionsContainer.removeChild(this.regionsContainer.firstChild)
+
+	for(var k = this.myRegions.length - 1; k >= 0; k--) {
+		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
+	}
+
+};
+
 DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 	while (this.favoritesContainer.firstChild)
 		this.favoritesContainer.removeChild(this.favoritesContainer.firstChild)
@@ -1526,7 +1709,7 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 		this.createFavorite(centerX, centerY, "");
 	
 	}.bind(this));
-	for(var k = this.favList.length - 1; k >= 0 ; k--) {
+	for(var k = this.favList.length - 1; k >= 0; k--) {
 		this.insertOneFavorite(this.favList[k]['x'], this.favList[k]['y'], this.favList[k]['name'], this.favList[k]['owner'])
 	}
 };
@@ -1576,6 +1759,7 @@ DrawTogether.prototype.getFavorites = function () {
 	this.account.getFavorites(drawTogether.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
+
 			return;
 		}
 
@@ -1609,9 +1793,24 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {
-	if (!this.memberlevel) {
-		this.chat.addMessage("Creating a protected region is a member only feature.");
+	if (!this.account.uKey) { 
+		this.chat.addMessage("You must be logged in to create protected regions.");
 		return;
+	}
+	var regionCount = this.myRegions.length || 0;
+
+	if (!this.memberlevel) {
+		if (this.reputation < this.REGION_MIN_REP) {
+			
+			this.chat.addMessage("You must have at least "+ this.REGION_MIN_REP +" rep!");
+			return;
+		}
+		if (typeof this.myRegions !== 'undefined' && typeof this.myRegions.length === 'number') {
+			if (this.myRegions.length > 1) {
+				this.chat.addMessage("Having more than one region is premium only!");
+				return;
+			}
+		}
 	}
 
 	this.network.socket.emit("createprotectedregion", from, to, function (err, result) {
@@ -1621,6 +1820,7 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 		}
 
 		if (result.success) {
+			this.getMyProtectedRegions();
 			this.chat.addMessage("Regions", result.success);
 		}
 	}.bind(this));
@@ -1632,8 +1832,80 @@ DrawTogether.prototype.resetProtectedRegions = function () {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
 			return;
 		}
-
+		this.getMyProtectedRegions();
 		this.chat.addMessage("Regions", "Reset your regions");
+	}.bind(this));
+};
+
+DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
+	this.network.socket.emit("removeprotectedregion", regionId, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Regions", "Reset Error: " + err);
+			return;
+		}
+		console.log("regionidremove ", regionId)
+		console.log("element", element)
+		if(element)
+			element.remove();
+
+		this.getMyProtectedRegions();
+		this.chat.addMessage("Regions", "Removed the region");
+	}.bind(this));
+};
+
+DrawTogether.prototype.getMyProtectedRegions = function (callback) {
+	this.network.socket.emit("getmyprotectedregions", function (err, result) {
+		if (err) {
+			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
+			return;
+		}
+		this.myRegions = result;
+
+		if(typeof callback == "function")
+			callback();
+		this.updateRegionsDom();
+	}.bind(this));
+};
+
+DrawTogether.prototype.addUsersToMyProtectedRegion = function (userIdArr, regionId, callback) {
+	this.network.socket.emit("adduserstomyprotectedregion", userIdArr, regionId, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Adding users to protected region", "Error: " + err);
+			return;
+		}
+		setTimeout(function(){
+			this.getMyProtectedRegions(callback);
+		}.bind(this), 1000);
+		
+		this.chat.addMessage("Regions", result.success);
+	}.bind(this));
+};
+
+DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, regionId, callback) {
+	this.network.socket.emit("removeUsersFromMyProtectedRegion", userIdArr, regionId, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Remove users to protected region", "Error: " + err);
+			return;
+		}
+		setTimeout(function(){
+			this.getMyProtectedRegions(callback);
+		}.bind(this), 1000);
+
+		this.chat.addMessage("Regions", result.success);
+	}.bind(this));
+};
+
+DrawTogether.prototype.setMinimumRepInProtectedRegion = function (repAmount, regionId) {
+	this.network.socket.emit("setminimumrepinprotectedregion", repAmount, regionId, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Set minimum rep", "Error: " + err);
+			return;
+		}
+		setTimeout(function(){
+			this.getMyProtectedRegions();
+		}.bind(this), 1000);
+
+		this.chat.addMessage("Regions", result.success);
 	}.bind(this));
 };
 
@@ -1702,6 +1974,160 @@ DrawTogether.prototype.createGameInformation = function createGameInformation ()
 	var gameInfoContainer = this.container.appendChild(document.createElement("div"));
 	gameInfoContainer.className = "drawtogether-gameinfo-container";
 	this.gameInfoContainer = gameInfoContainer;
+};
+
+DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPermissionsWindow (regionIndex) {
+	var regionPermissionsWindow = QuickSettings.create(30, 10, "Region Permissions");
+	regionPermissionsWindow.hide();
+
+	regionPermissionsWindow.regionIndex = regionIndex;
+
+	this.regionPermissionsWindow = regionPermissionsWindow; //only one.
+
+	var regionPermissionsContainer = document.createElement("div");
+
+	var regionListContainer = regionPermissionsContainer.appendChild(document.createElement("div"));
+	regionListContainer.className = "region-list-container";
+
+
+	var regionListBox1 = regionListContainer.appendChild(document.createElement("select"));
+	regionListBox1.className = "region-listbox";
+	regionListBox1.multiple = true;
+
+	var clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
+
+	for(var i = 0; i < clonedPlayerList.length; i++) {
+		var option = document.createElement("option");
+		option.label = clonedPlayerList[i].name;
+		regionListBox1.add(option);
+	};
+	
+	var buttonContainers = regionListContainer.appendChild(document.createElement("div"));
+	buttonContainers.className = "region-button-container";
+	
+	var regionAddButton = buttonContainers.appendChild(document.createElement("div"));
+	regionAddButton.className = "region-window-permission-button";
+	regionAddButton.textContent = "Add to permissions >";
+	regionAddButton.addEventListener("click", function (e) {
+		var temparr = [];
+		for(var i = 0; i < regionListBox1.length; i++){
+			if(regionListBox1.options[i].selected){
+				var loggedIn = typeof clonedPlayerList[i].userid !=='undefined';
+
+				if(!loggedIn)
+					this.chat.addMessage("Regions", "User " + clonedPlayerList[i].name + " isn't logged in! Can't add permission.");
+
+				var alreadyInPermissions = false;
+
+				for(var x = 0; x < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; x++){
+					if(clonedPlayerList[i].userid == this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[x].id )
+						alreadyInPermissions = true;
+				}
+
+				var thereAreNoPermissionsYet = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length === 0;
+				var notAddingMyself = clonedPlayerList[i].userid != this.myRegions[this.regionPermissionsWindow.regionIndex].owner;
+
+				var readyToPush = loggedIn && (!alreadyInPermissions || thereAreNoPermissionsYet) && notAddingMyself;
+				if(readyToPush){
+					temparr.push(clonedPlayerList[i].userid);
+				}
+			}
+		}
+		if(temparr.length > 0){
+			this.addUsersToMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function(){
+				//regionlist should be updated
+				for(var i = regionListBox2.length - 1; i >= 0 ; i--)
+					regionListBox2.options.remove(i);
+				
+				for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
+					var option = document.createElement("option");
+					option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
+					regionListBox2.add(option);
+				};
+
+			}.bind(this));
+		}
+		for(var i = regionListBox1.length - 1; i >= 0 ; i--)
+			regionListBox1.options.remove(i);
+		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
+
+		for(var i = 0; i < clonedPlayerList.length; i++) {
+			var option = document.createElement("option");
+			option.label = clonedPlayerList[i].name;
+			regionListBox1.add(option);
+		};
+
+	}.bind(this));
+	
+
+
+	var regionListBox2 = regionListContainer.appendChild(document.createElement("select"));
+	regionListBox2.className = "region-listbox";
+	regionListBox2.multiple = true;
+
+	
+
+	for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
+		var option = document.createElement("option");
+		option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
+		regionListBox2.add(option);
+	};
+
+	var regionRemoveButton = regionPermissionsContainer.appendChild(document.createElement("div"));
+	regionRemoveButton.className = "region-window-permission-button";
+	regionRemoveButton.textContent = "Remove selected from permissions";
+
+	regionRemoveButton.addEventListener("click", function (e) {
+		var temparr = [];
+		for(var i = 0; i < regionListBox2.length; i++){
+			if(regionListBox2.options[i].selected){
+				temparr.push(this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].id);
+			}
+		}
+		if(temparr.length > 0){
+			this.removeUsersFromMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function(){
+				//regionlist should be updated
+				for(var i = 0; i < temparr.length; i++)
+					regionListBox2.remove(this.myRegions[this.regionPermissionsWindow.regionIndex][temparr[i]]);
+			}.bind(this));
+		}
+	}.bind(this));
+
+	regionPermissionsWindow.addElement("",regionPermissionsContainer);
+
+	var rep = (this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
+
+	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, this.MAX_REP_TO_DISPLAY, rep, 1, function (value) {
+		this.setMinimumRepInProtectedRegion(value, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId);
+	}.bind(this));
+
+	regionPermissionsWindow.addButton("Close", function () {
+		regionPermissionsWindow.hide();
+	}.bind(this));
+
+	regionPermissionsWindow.reload = function(){
+		for(var i = regionListBox1.length - 1; i >= 0 ; i--)
+			regionListBox1.options.remove(i);
+		for(var i = regionListBox2.length - 1; i >= 0 ; i--)
+			regionListBox2.options.remove(i);
+
+		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
+
+		for(var i = 0; i < clonedPlayerList.length; i++) {
+			var option = document.createElement("option");
+			option.label = clonedPlayerList[i].name;
+			regionListBox1.add(option);
+		};
+
+		for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
+			var option = document.createElement("option");
+			option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
+			regionListBox2.add(option);
+		};
+		var rep = (this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
+		regionPermissionsWindow.setRangeValue("Minimum Rep Allowed", rep);
+	}.bind(this);
+
 };
 
 DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
@@ -1781,6 +2207,11 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
 	this.account.checkLogin(function (err, loggedIn) {
+		if(this.account.uKey){
+			this.getFavorites();
+			this.getMyProtectedRegions();
+		}
+
 		var formContainer = accWindow.appendChild(document.createElement("div"));
 		formContainer.className = "drawtogether-account-formcontainer";
 

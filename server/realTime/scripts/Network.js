@@ -21,6 +21,8 @@ var MEMBER_MIN_REP = 15;
 var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserver too
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
 
+var REGION_MIN_REP = 30;
+
 var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 
 // Ink settings
@@ -92,18 +94,25 @@ function Protocol (io, drawtogether, imgur, players, register) {
 }
 
 Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (room) {
-	this.players.request('getprotectedregions', {
+	this.players.request('getProtectedRegionsAndPermissions', {
 		room: room
 	}, function (err, data) {
 		if (err) {
 			throw "Can't get protected regions for room " + room + " Err:" + JSON.stringify(err);
 		}
+		var permissions = data.permissions;
+
+		data = data.regions;
 
 		if (typeof data.length !== "number") {
 			throw "Data was not an array";
 		}
 
 		this.protectedRegions[room] = rbush();
+		var maxRegionId = 0;
+		if (permissions.length > 0)
+			maxRegionId = permissions[permissions.length - 1];
+		var minRegionId = 0;
 
 		for (var k = 0; k < data.length; k++) {
 			var base = new SAT.Vector(data[k].minX, data[k].minY);
@@ -117,7 +126,14 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 				new SAT.Vector(data[k].maxX, data[k].maxY),
 				new SAT.Vector(data[k].minX, data[k].maxY),
 			]);
-
+			for(var f = minRegionId; f < permissions.length; f++){
+				if(permissions[f].regionId == data[k].id){
+					data[k].permissions = data[k].permissions || [];
+					data[k].permissions.push({ id:permissions[f].userId, oldName:permissions[f].last_username});
+					minRegionId = f;
+				}
+			}
+			
 			this.protectedRegions[room].insert(data[k]);
 		}
 	}.bind(this));
@@ -203,29 +219,67 @@ Protocol.prototype.getRegionSearchFromSat = function getRegionSearchFromSat (sat
 	}
 };
 
-Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (owner, satObjects, room) {
+Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwnedBy (user, room) {
 	if (!this.protectedRegions[room]) return false;
+
+	var p = [];
+	var protectedRegionsArr = this.protectedRegions[room].all();
+
+	if(protectedRegionsArr.length == 0) return false;
+
+	for (var i = protectedRegionsArr.length - 1; i > 0; i--) {
+		if( protectedRegionsArr[i].owner === user)
+			p.push({ 
+				regionId: protectedRegionsArr[i].id,
+				owner: protectedRegionsArr[i].owner, 
+				permissions: protectedRegionsArr[i].permissions || [],
+				minX: protectedRegionsArr[i].minX,
+				minY: protectedRegionsArr[i].minY,
+				maxX: protectedRegionsArr[i].maxX,
+				maxY: protectedRegionsArr[i].maxY,
+				minRepAllowed: protectedRegionsArr[i].minRepAllowed
+			});
+	}
+	return p;
+};
+
+Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (reputation, user, satObjects, room) {
+	if (!this.protectedRegions[room]) return {isAllowed: true};
 
 	for (var k = 0; k < satObjects.length; k++) {
 		var searchRegion = this.getRegionSearchFromSat(satObjects[k]);
+
 		var relevantRegions = this.protectedRegions[room].search(searchRegion);
 
 		for (var i = 0; i < relevantRegions.length; i++) {
-			if (relevantRegions[i].owner === owner) continue;
+			if (relevantRegions[i].owner === user) continue;
+
+			if(relevantRegions[i].minRepAllowed <= reputation) continue;
+
+			if (typeof relevantRegions[i].permissions !== "undefined"){
+				var hasPermission = false;
+				for(var f = 0; f < relevantRegions[i].permissions.length; f++){
+					if (relevantRegions[i].permissions[f].id === user) {
+						hasPermission = true;
+						break;
+					}
+				}
+				if(hasPermission) continue;
+			}
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					return true;
+					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					return true
+					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
 				}
 			}
 		}
 	}
 
-	return false;
+	return {isAllowed: true};
 };
 
 Protocol.prototype.clearLeftTick = function clearLeftTick () {
@@ -311,9 +365,11 @@ Protocol.prototype.getUserList = function getUserList (room) {
 
 	for (var id in sroom) {
 		var socket = this.socketFromId(id);
+
 		if (!socket) continue;
 		users.push({
 			id: socket.id,
+			userid: socket.userid,
 			name: socket.name,
 			reputation: socket.reputation,
 			memberlevel: socket.memberlevel,
@@ -739,9 +795,11 @@ Protocol.prototype.bindIO = function bindIO () {
 				drawing.size
 			);
 
-			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
+			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
+
+			if (!regionData.isAllowed) {
 				protocol.informClient(socket, "This region is protected!");
-				callback();
+				callback(regionData);
 				return;
 			}
 
@@ -826,9 +884,11 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint || point, socket.lastPathSize);
 
-			if (protocol.isInsideProtectedRegion(socket.userid, objects, socket.room)) {
+			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
+
+			if (!regionData.isAllowed) {
 				protocol.informClient(socket, "This region is protected!");
-				callback();
+				callback(regionData);
 				return;
 			}
 
@@ -1047,12 +1107,32 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback("To array was not in the correct format");
 				return;
 			}
-
-
 			if (!socket.memberlevel) {
-				callback("This feature is premium only!");
-				return;
+				if (socket.reputation < REGION_MIN_REP) {
+					callback("You must have at least"+ REGION_MIN_REP +"! or Premium.");
+					return;
+				}
+				var width = Math.abs(from[0] - to[0]);
+				var height = Math.abs(from[1] - to[1]);
+
+				//Formula: 2x^2 + 500x - 6666
+					//where x = 30 output = 10 thousand
+					//where x = 50 output = 23 thousand
+					//where x = 100 output = 63 thousand
+					//where x = 150 output = 113 thousand
+
+				var x = (this.reputation < 150) ? this.reputation : 150;
+				var regionMaxSize = 2 * (x*x) + 500 * x - 6666;
+
+				var distanceBetweenPoints = width+height;
+
+				if(distanceBetweenPoints > regionMaxSize){
+					callback("A region " + regionMaxSize + "px or bigger requires more rep or premium. You tried to make a region "+ distanceBetweenPoints + "px big.");
+					return;
+				}
 			}
+
+			
 
 			console.log("[REGIONS] Adding protected region for", socket.name, from, to);
 			protocol.players.request('createprotectedregion', {
@@ -1075,6 +1155,124 @@ Protocol.prototype.bindIO = function bindIO () {
 			}, function (err, data) {
 				callback(err, data);
 				protocol.updateProtectedRegions(socket.room);
+			});
+		});
+
+		socket.on("removeprotectedregion", function (regionId, callback) {
+			if (typeof callback !== 'function') return;
+
+			if (isNaN(regionId)) {
+				callback("Region id is undefined.")
+				return;
+			}
+			var overrideOwner = false;
+			if (socket.reputation > KICKBAN_MIN_REP){
+				overrideOwner = true;
+			}
+
+			protocol.players.request('removeprotectedregion', {
+				uKey: socket.uKey,
+				room: socket.room,
+				regionId: regionId,
+				overrideOwner: overrideOwner
+			}, function (err, data) {
+				callback(err, data);
+				protocol.updateProtectedRegions(socket.room);
+			});
+		});
+
+		socket.on("getmyprotectedregions", function (callback) {
+			if (!socket.userid) {
+				callback("No User");
+				return;
+			}
+
+			var asdf = protocol.getProtectedRegionsOwnedBy(socket.userid, socket.room);
+			if (!asdf) {
+				callback("User has no protected regions.");
+				return;
+			}
+
+			callback(null, asdf);
+		});
+
+		socket.on("adduserstomyprotectedregion", function (userIdArr, regionId, callback) {
+			if (!socket.userid) {
+				callback("No User");
+				return;
+			}
+			if (!socket.room) {
+				callback("No Room");
+				return;
+			}
+			if (!userIdArr || !userIdArr.length || userIdArr.length === 0) { // checking if it's an array and also worth sending
+				callback("No Userids sent");
+				return;
+			}
+			
+
+			protocol.players.request('adduserstomyprotectedregion', {
+				uKey: socket.uKey,
+				room: socket.room,
+				userIdArr: userIdArr,
+				regionId: regionId
+			}, function (err, data) {
+				protocol.updateProtectedRegions(socket.room);
+				callback(err, data);
+			});
+		});
+
+		socket.on("removeUsersFromMyProtectedRegion", function (userIdArr, regionId, callback) {
+			if (!socket.userid) {
+				callback("No User");
+				return;
+			}
+			if (!socket.room) {
+				callback("No Room");
+				return;
+			}
+			if (!userIdArr || !userIdArr.length || userIdArr.length === 0) { // checking if it's an array and also worth sending
+				callback("No Userids sent");
+				return;
+			}			
+
+			protocol.players.request('removeUsersFromMyProtectedRegion', {
+				uKey: socket.uKey,
+				room: socket.room,
+				userIdArr: userIdArr,
+				regionId: regionId
+			}, function (err, data) {
+				protocol.updateProtectedRegions(socket.room);
+				callback(err, data);
+			});
+		});
+
+		socket.on("setminimumrepinprotectedregion", function (repAmount, regionId, callback) {
+			if (!socket.userid) {
+				callback("No User");
+				return;
+			}
+			if (!socket.room) {
+				callback("No Room");
+				return;
+			}
+			if (isNaN(repAmount) || repAmount < 0) {
+				callback("Invalid rep amount");
+				return;
+			}
+			if (isNaN(regionId) || regionId < 0) {
+				callback("Invalid rep amount");
+				return;
+			}			
+
+			protocol.players.request('setminimumrepinprotectedregion', {
+				uKey: socket.uKey,
+				room: socket.room,
+				repAmount: repAmount,
+				regionId: regionId
+			}, function (err, data) {
+				protocol.updateProtectedRegions(socket.room);
+				callback(err, data);
 			});
 		});
 

@@ -4,6 +4,7 @@ var SHA256 = require("crypto-js/sha256");
 // Will be removed once the title system is in place
 var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028]; // Filip, Lukas, Nyrrti, Corro, Sonny
 var UPVOTE_MIN_REP = 7;
+var DEFAULT_MIN_REGION_REP = 2000000000;
 
 function PlayerDatabase (database) {
 	this.database = database;
@@ -325,36 +326,51 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 };
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
-	var minX = Math.min(from[0], to[0]);
-	var minY = Math.min(from[1], to[1]);
-
-	var maxX = Math.max(from[0], to[0]);
-	var maxY = Math.max(from[1], to[1]);
-
-	var collisionString = "? < maxX AND ";
-	   collisionString += "? > minX AND ";
-	   collisionString += "? < maxY AND ";
-	   collisionString += "? > minY";
-
-	this.database.query("SELECT * FROM regions WHERE owner != ? AND " + collisionString + " AND room = ?",
-		[userid, minX, maxX, minY, maxY, room],
+	
+	this.database.query("select * from regions join premium where premium.userid != ? AND owner = ? AND room = ?",
+		[userid, userid, room],
 		function (err, rows) {
-			if (err) {
-				callback("Database error. Please contact an admin. (GETPREGIONOVERLAP)");
-				console.log("Get protected region overlap databse error", err);
+			if (rows.length > 0) { // rows.length equals 0 when user is premium
+				callback("Having more than one region is premium only!");
 				return;
-			}
+			}//
 
-			if (rows.length > 0) {
-				callback('Someone already claimed this region!');
-				return;
-			}
 
-			this.database.query("INSERT INTO regions (owner, minX, minY, maxX, maxY, room) VALUES (?, ?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY, room], function (err) {
-				callback(err);
-			});
+			var minX = Math.min(from[0], to[0]);
+			var minY = Math.min(from[1], to[1]);
+
+			var maxX = Math.max(from[0], to[0]);
+			var maxY = Math.max(from[1], to[1]);
+
+			var collisionString = "? < maxX AND ";
+			   collisionString += "? > minX AND ";
+			   collisionString += "? < maxY AND ";
+			   collisionString += "? > minY";
+
+			this.database.query("SELECT * FROM regions WHERE owner != ? AND " + collisionString + " AND room = ?",
+				[userid, minX, maxX, minY, maxY, room],
+				function (err, rows) {
+					if (err) {
+						callback("Database error. Please contact an admin. (GETPREGIONOVERLAP)");
+						console.log("Get protected region overlap databse error", err);
+						return;
+					}
+
+					if (rows.length > 0) {
+						callback('Someone already claimed this region!');
+						return;
+					}
+
+					this.database.query("INSERT INTO regions (owner, minX, minY, maxX, maxY, room, minRepAllowed) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY, room, DEFAULT_MIN_REGION_REP], function (err) {
+						callback(err);
+					});
+				}.bind(this)
+			);
+
 		}.bind(this)
 	);
+
+
 };
 
 PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions (userid, room, callback) {
@@ -363,17 +379,167 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 	});
 };
 
-PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
-	// TODO: Select permissions
-	this.database.query("SELECT owner, minX, minY, maxX, maxY FROM regions WHERE room = ?", [room], function (err, rows, fields) {
-		if (err) {
-			callback("Database error. Please contact an admin. (GETPREGION)");
-			console.log("Get protected region databse error", err);
+PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
+	console.log("remove region:",userid, room, regionId, overrideOwner);
+	this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
+		if(err){
+			callback(err);
 			return;
 		}
+		this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
+			callback(err);
+		}.bind(this));
+	}.bind(this));
+};
 
+PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
+	this.database.query("SELECT regions.id, owner, minX, minY, maxX, maxY, minRepAllowed, users.last_username FROM regions inner join users on users.id = regions.owner WHERE room = ? ORDER BY id;",
+	[room], function (err, rows, fields) {
+		if (err) {
+			callback("Database error. Please contact an admin. (GETPREGION)");
+			console.log("Get protected region database error", err);
+			return;
+		}
 		callback(null, rows);
-	});
+
+	}.bind(this));
+};
+
+
+PlayerDatabase.prototype.getProtectedRegionPermissions = function getProtectedRegionPermissions (room, callback) {
+//permissions select
+		this.database.query("SELECT regionId, regions_permissions.userId, users.last_username FROM regions INNER JOIN regions_permissions ON regions.id=regions_permissions.regionId INNER JOIN users ON regions_permissions.userId=users.id WHERE room = ? ORDER BY regionId", [room], function (err, rows, fields){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETPREGIONPERM)");
+				console.log("Get protected region permissions database error", err);
+				return;
+			}
+			callback(null, rows);
+
+		});
+};
+
+PlayerDatabase.prototype.getProtectedRegionsAndPermissions = function getProtectedRegionsAndPermissions (room, callback) {
+	this.getProtectedRegions(room, function(err, regions){
+		if(err)
+		{
+			callback(err);
+			return;
+		}
+		this.getProtectedRegionPermissions(room, function(err, permissions){
+			if(err)
+			{
+				callback(err);
+				return;
+			}
+			callback(null, {regions:regions, permissions:permissions});
+			return;
+		}.bind(this));
+	}.bind(this));
+
+};
+
+PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
+	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
+		if (rows.length === 0) {
+			callback("You don't own this region!");
+			return;
+		}
+		var values = [];
+		var sqlText = "INSERT INTO regions_permissions (regionId, userId) VALUES (?, ?)";
+		var isArray = typeof userIdArr != "string";
+
+		if(isArray) // check if userIdArr is actually an array
+		{
+			for(var i = 0; i < userIdArr.length; i++)
+			{
+				if (isNaN(userIdArr[i])) {
+					console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(1)", userIdArr, room);
+					return;
+				}
+				values.push([ regionId, userIdArr[i] ]);
+			}
+
+		}
+		else{ // not an array
+			if (isNaN(userIdArr)) {
+				console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(2)", userIdArr, room);
+				return;
+			}
+			values = [[regionId, userIdArr]];
+		}
+		for(var i = 0; i < values.length; i++){
+			this.database.query(sqlText, [values[i][0], values[i][1]], function(err) {
+					if (err) {
+						console.log("Add Users to protected region database error", err);
+						return;
+					}									
+				});
+		}
+		callback();
+		
+	}.bind(this));
+};
+
+PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
+	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
+		if (rows.length === 0) {
+			callback("You don't own this region!");
+			return;
+		}
+		var values = [];
+		var sqlText = "DELETE FROM regions_permissions WHERE regionId=? AND userId=?";
+		var isArray = typeof userIdArr != "string";
+
+		if(isArray) // check if userIdArr is actually an array
+		{
+			for(var i = 0; i < userIdArr.length; i++)
+			{
+				if (isNaN(userIdArr[i])) {
+					console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(1)", userIdArr, room);
+					return;
+				}
+				values.push([ regionId, userIdArr[i] ]);
+			}
+
+		}
+		else{ // not an array
+			if (isNaN(userIdArr)) {
+				console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(2)", userIdArr, room);
+				return;
+			}
+			values = [[regionId, userIdArr]];
+		}
+		for(var i = 0; i < values.length; i++){
+			this.database.query(sqlText, [values[i][0], values[i][1]], function(err) {
+					if (err) {
+						console.log("Remove Users to protected region database error", err);
+						return;
+					}									
+				});
+		}
+		callback();
+		
+	}.bind(this));
+};
+
+PlayerDatabase.prototype.setMinimunRepInProtectedRegion = function setMinimunRepInProtectedRegion (userid, room, repAmount, regionId, callback){
+	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
+		if (rows.length === 0) {
+			callback("You don't own this region!");
+			return;
+		}
+		this.database.query("update regions set minRepAllowed=? where owner=? and id=? and room=?", [repAmount, userid, regionId, room], function (err, rows2, fields2){
+			if (err) {
+				callback("Database error. Please contact an admin. (GETPREGION)");
+				console.log("Get protected region databse error", err);
+				return;
+			}
+			callback();
+
+		});
+		
+	}.bind(this));
 };
 
 module.exports = PlayerDatabase;

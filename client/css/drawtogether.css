@@ -970,6 +970,7 @@ input.paint-texttool {
 .favorites-button {
   padding: 0.3em !important;
   margin-left: 4px;
+  margin-right: 4px;
 }
 
 .favorites-window {
@@ -1077,3 +1078,86 @@ input.paint-texttool {
 	float: right;
 }
 
+.regions-window {
+  padding: 0.5em;
+  position: absolute;
+  background: #ececec;
+  border: solid 1px #ccc;
+  right:1em;
+  bottom:5em;
+  display: none;
+  max-height: 75%;
+  overflow-y:auto;
+}
+
+.region-container {
+  position:relative;
+  margin-top:0.1em;
+}
+
+.reg-button:hover {
+  background-color: #233445; 
+}
+  
+.reg-button {
+  text-align: center;
+  display: inline-block;
+  padding: 0.2em .5em;
+  border-bottom: 0.2em solid #233445;
+  background-color: #456789;
+  color: #fff;
+  cursor: pointer;
+  -webkit-transition-duration: 0.1s;
+  -moz-transition-duration: 0.1s;
+  transition-duration: 0.1s;
+  -webkit-transition-property: background-color;
+  -moz-transition-property: background-color;
+  transition-property: background-color;
+}
+
+.reg-position-button {
+  display: inline-block;
+  min-width: 18em;
+}
+
+.reg-editpermissions-button {
+  display: inline-block;
+  min-width: 0px;
+}
+
+.reg-delete-button {
+  display: inline-block;
+  min-width: 0px;
+}
+
+.region-list-container {
+  display: inline-flex;
+  height: 200px;
+  background-color: grey;
+  color: white;
+}
+.region-window-permission-button:hover {
+  background-color: #233445; 
+}
+.region-window-permission-button{
+  display:block;
+  text-align: center;
+  padding: 0.2em .5em;
+  border-bottom: 0.2em solid #233445;
+  background-color: #456789;
+  color: #fff;
+  cursor: pointer;
+  -webkit-transition-duration: 0.1s;
+  -moz-transition-duration: 0.1s;
+  transition-duration: 0.1s;
+  -webkit-transition-property: background-color;
+  -moz-transition-property: background-color;
+  transition-property: background-color;
+}
+.region-button-container{
+  display:block;
+  margin: auto 5px;
+}
+.region-listbox {
+  min-width: 100px;
+}

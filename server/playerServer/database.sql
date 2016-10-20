@@ -47,8 +47,16 @@ CREATE TABLE IF NOT EXISTS ipbans (
     INDEX (ip, enddate)
 );
 
+--alter table regions add id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST; 
+--ALTER TABLE regions ADD minRepAllowed int UNSIGNED
+
+--Need above for the production server when permissions are done^^
+
 CREATE TABLE IF NOT EXISTS regions (
+    id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id),
     owner INT UNSIGNED,
+    minRepAllowed INT UNSIGNED,
     minX BIGINT,
     minY BIGINT,
     maxX BIGINT,
@@ -56,6 +64,12 @@ CREATE TABLE IF NOT EXISTS regions (
     room VARCHAR(255),
     INDEX (room),
     INDEX (owner, maxX, minX, maxY, minY, room)
+);
+
+CREATE TABLE IF NOT EXISTS regions_permissions (
+    regionId INT UNSIGNED,
+    userId INT UNSIGNED,
+    INDEX (regionId)    
 );
 
 CREATE TABLE IF NOT EXISTS favorites (
