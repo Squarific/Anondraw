@@ -2098,7 +2098,14 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 	var rep = (this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
 
 	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, this.MAX_REP_TO_DISPLAY, rep, 1, function (value) {
-		this.setMinimumRepInProtectedRegion(value, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId);
+
+		if(regionPermissionsWindow.minRepTimeout)
+			clearTimeout(regionPermissionsWindow.minRepTimeout);
+
+		regionPermissionsWindow.minRepTimeout = setTimeout(function(){
+			this.setMinimumRepInProtectedRegion(value, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId);			
+		}.bind(this), 2000)
+		
 	}.bind(this));
 
 	regionPermissionsWindow.addButton("Close", function () {
