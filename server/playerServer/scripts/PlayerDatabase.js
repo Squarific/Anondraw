@@ -5,6 +5,7 @@ var SHA256 = require("crypto-js/sha256");
 var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028]; // Filip, Lukas, Nyrrti, Corro, Sonny
 var UPVOTE_MIN_REP = 7;
 var DEFAULT_MIN_REGION_REP = 2000000000;
+var MODERATE_REGIONS_MIN_REP = 100;
 
 function PlayerDatabase (database) {
 	this.database = database;
@@ -380,15 +381,23 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	if(overrideOwner)
-		console.log("Remove region override:",userid, room, regionId, overrideOwner);
-	this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
+	this.database.query("select count(*) from reputations where to_id = ?", [userid], function(err, rows) {
 		if(err){
+			callback(err)
+			return;
+		}
+		if(overrideOwner && rows[0].reputation < MODERATE_REGIONS_MIN_REP){
 			callback(err);
 			return;
 		}
-		this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
-			callback(err);
+		this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
+			if(err){
+				callback(err);
+				return;
+			}
+			this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
+				callback(err);
+			}.bind(this));
 		}.bind(this));
 	}.bind(this));
 };
