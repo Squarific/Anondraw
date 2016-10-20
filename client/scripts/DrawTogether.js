@@ -15,6 +15,8 @@ function DrawTogether (container, settings) {
 	this.ink = 0;
 	this.previousInk = Infinity;
 
+	this.MAX_REP_TO_DISPLAY = 300; // if a pregion's minRepAllowed is higher than this. don't mention it to user.
+
 	this.lastInkWarning = 0;        // Last time we showed that we are out of ink
 	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
 	this.lastZoomWarning = 0;       // Last time we showed the zoom warning
@@ -918,7 +920,6 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
 	var PermissionDom = document.createElement("div");
 	PermissionDom.className = "drawtogether-player";
-	console.log("messageFromServer",messageFromServer.name);
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var removeRegionButton = document.createElement("span");
@@ -942,9 +943,9 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 				var reputationSentence = "";
 				var loggedInSentence = "";
 
-	if(!this.loggedIn)
+	if(!this.account.uKey)
 		loggedInSentence = "You have to be logged in to draw in protected regions."
-	else if(this.reputation < messageFromServer.minRepAllowed)
+	else if(this.reputation < messageFromServer.minRepAllowed && messageFromServer.minRepAllowed <= this.MAX_REP_TO_DISPLAY)
 		reputationSentence = "This region requires at least " + messageFromServer.minRepAllowed + " Reputation.";
 
 	if(owner)
@@ -1393,9 +1394,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 
 			if(typeof success.isAllowed !== 'undefined'){
-				//this.chat.addMessage(this.createPermissionChatMessage(success));
 				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
-				//self.chat.addElementAsMessage(self.createPlayerLeftDom(self.playerList[k]));
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
@@ -2082,8 +2081,9 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 	regionPermissionsWindow.addElement("",regionPermissionsContainer);
 
-	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, 300, this.myRegions[regionIndex].minRepAllowed, 1, function (value) {
-		//this.paint.setRotation(value);
+	var rep = (this.myRegions[regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
+
+	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, this.MAX_REP_TO_DISPLAY, this.myRegions[regionIndex].minRepAllowed, 1, function (value) {
 		this.setMinimumRepInProtectedRegion(value, this.myRegions[regionIndex].regionId);
 	}.bind(this));
 
@@ -2092,16 +2092,6 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 	});
 
 	regionPermissionsWindow.show();
-	/*
-	<select name="sometext" multiple="multiple">
-	    <option>text1</option>
-	    <option>text2</option>
-	    <option>text3</option>
-	    <option>text4</option>
-	    <option>text5</option>
-	 </select>
-
-	*/
 };
 
 DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
