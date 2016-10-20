@@ -782,9 +782,12 @@ var server = http.createServer(function (req, res) {
 				}));
 				return;
 			}
+			var responseStringValue = "1";
+			if(typeof userIdArr !== 'string')
+				responseStringValue = userIdArr.length;
 
 			res.end(JSON.stringify({
-				success: 'removed '+userIdArr.length+' Permissions'
+				success: 'removed '+responseStringValue+' Permissions'
 			}));
 		});
 		return;
