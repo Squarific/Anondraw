@@ -16,6 +16,7 @@ function DrawTogether (container, settings) {
 	this.previousInk = Infinity;
 
 	this.MAX_REP_TO_DISPLAY = 300; // if a pregion's minRepAllowed is higher than this. don't mention it to user.
+	this.amtOfRegionWindowsOpen = 0; // used to just move them over so we dont spawn new ones on top of them.
 
 	this.lastInkWarning = 0;        // Last time we showed that we are out of ink
 	this.lastBrushSizeWarning = 0;  // Last time we showed the warning that our brush is too big
@@ -1651,9 +1652,10 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionEditPermissionsButton.className = "reg-button reg-editpermissions-button";
 	//regionEditPermissionsButton.textContent = "Permissions...";
 	regionEditPermissionsButton.addEventListener("click", function (e) {
-		var element = e.srcElement || e.target;
-		var regionListIndex = element.parentNode.dataset.index;
-		this.createRegionPermissionsWindow(regionListIndex);
+		var regionListIndex = regionEditPermissionsButton.parentNode.dataset.index;
+
+		if(regionListIndex)
+			this.createRegionPermissionsWindow(regionListIndex);
 	
 	}.bind(this));
 
@@ -1970,7 +1972,11 @@ DrawTogether.prototype.createGameInformation = function createGameInformation ()
 };
 
 DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPermissionsWindow (regionIndex) {
-	var regionPermissionsWindow = QuickSettings.create(30, 10, "Region Permissions");
+	this.amtOfRegionWindowsOpen += 1;
+	var Xoffset = 30 + 4 * this.amtOfRegionWindowsOpen;
+	var Yoffset = 10 + 3 * this.amtOfRegionWindowsOpen;
+
+	var regionPermissionsWindow = QuickSettings.create(Xoffset, Yoffset, "Region Permissions");
 	regionPermissionsWindow.hide();
 	this.regionPermissionsWindow = regionPermissionsWindow;
 
@@ -2093,7 +2099,8 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 	regionPermissionsWindow.addButton("Close", function () {
 		regionPermissionsWindow.hide();
-	});
+		this.amtOfRegionWindowsOpen = (this.amtOfRegionWindowsOpen > 0) ? this.amtOfRegionWindowsOpen - 1 : 0;
+	}.bind(this));
 
 	regionPermissionsWindow.show();
 };
