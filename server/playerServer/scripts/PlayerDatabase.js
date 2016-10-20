@@ -380,8 +380,8 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	console.log("userId", userid, "removed protected region", overrideOwner)
-	this.database.query("DELETE FROM regions WHERE owner = ? OR 1 = ? AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
+	console.log("remove region:",userid, room, regionId, overrideOwner);
+	this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
 		if(err){
 			callback(err);
 			return;
