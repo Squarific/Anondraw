@@ -2870,25 +2870,23 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["It is now possible to save locations as favorites (thanks intToFloat <3)."];
+	var features = ["It is now possible to manage regions and their permissions.",
+					"Anyone with 30R+ can make a single protected region now! The region size limit is scaled with rep."];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
 	}
 
-	// var p = container.appendChild(document.createElement("p"));
-	// p.appendChild(document.createTextNode("Regards,"));
-	// p.appendChild(document.createElement("br"));
-	// p.appendChild(document.createTextNode("Anondraw Team"));
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Regards,"));
+	p.appendChild(document.createElement("br"));
+	p.appendChild(document.createTextNode("Anondraw Team"));
 
 	// var p = container.appendChild(document.createElement("p"));
 	// p.appendChild(document.createTextNode("Ps. want more features?"));
 
 	// var p = container.appendChild(document.createElement("p"));
 	// p.appendChild(document.createTextNode("Getting premium helps us pay for development time and the server hosting."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Planned updates are a bugfix for the saving problem that will hopefully fix it once and for all and a few quality of life changes to the regions."));
 
 	var premiumButton = container.appendChild(document.createElement("div"));
 	premiumButton.appendChild(document.createTextNode("Want to see more updates? Get premium!"));
