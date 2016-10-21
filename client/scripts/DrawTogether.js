@@ -1844,8 +1844,6 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
 			return;
 		}
-		console.log("regionidremove ", regionId)
-		console.log("element", element)
 		if(element){
 			element.parentNode.removeChild(element);
 		}

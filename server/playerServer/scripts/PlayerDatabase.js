@@ -385,7 +385,6 @@ PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion 
 			callback(err)
 			return;
 		}
-		console.log(typeof overrideOwner, overrideOwner);
 		if(overrideOwner && (rows[0].reputation < MODERATE_REGIONS_MIN_REP)){
 			callback("You must have at least" + MODERATE_REGIONS_MIN_REP + "R to remove someone elses region");
 			return;
@@ -393,10 +392,12 @@ PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion 
 		this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
 			if(err){
 				callback(err);
+				console.log("Delete protected region database error", err);
 				return;
 			}
 			this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
 				callback(err);
+				console.log("Delete protected region permissions database error", err);
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
