@@ -381,13 +381,14 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	this.database.query("select count(*) from reputations where to_id = ?", [userid], function(err, rows) {
+	this.database.query("select count(*) as reputation from reputations where to_id = ?", [userid], function(err, rows) {
 		if(err){
 			callback(err)
 			return;
 		}
-		if(overrideOwner && rows[0].reputation < MODERATE_REGIONS_MIN_REP){
-			callback(err);
+		console.log(typeof overrideOwner, overrideOwner);
+		if(overrideOwner && (rows[0].reputation < MODERATE_REGIONS_MIN_REP)){
+			callback("You must have at least" + MODERATE_REGIONS_MIN_REP + "R to remove someone elses region");
 			return;
 		}
 		this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
