@@ -327,11 +327,10 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 };
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
-	
-	this.database.query("select * from regions join premium on userid!=owner where owner = ? AND room = ?",
-		[userid, userid, room],
+	this.database.query("select count(*) as amountOfRegions from regions join premium on userid!=owner where owner = ? AND room = ?",
+		[userid, room],
 		function (err, rows) {
-			if (rows.length > 0) { // rows.length equals 0 when user is premium
+			if (rows[0].amountOfRegions > 0) { // rows.length equals 0 when user is premium
 				callback("Having more than one region is premium only!");
 				return;
 			}//
