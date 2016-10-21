@@ -1848,7 +1848,6 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 		console.log("element", element)
 		if(element){
 			element.parentNode.removeChild(element);
-			//element.remove();
 		}
 
 		this.getMyProtectedRegions();
