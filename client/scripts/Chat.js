@@ -300,6 +300,9 @@ Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) 
 // messages = ["a", "space", "splitted", "array", "with", "urls:", {url: "http://wwww.google.com"}]
 // Replaces emotes with image
 Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
+	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
+	
 	for (var k = 0; k < messages.length; k++) {
 		var emoteUrl = this.emotesHash[messages[k]];
 
@@ -316,6 +319,10 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 		}
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
+
+		if (max_scroll <= old_scroll) {
+			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+		}
 	}
 };
 
