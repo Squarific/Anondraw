@@ -662,7 +662,7 @@ var server = http.createServer(function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
 		var regionId = parsedUrl.query.regionId;
-		var overrideOwner = (parsedUrl.query.overrideOwner === 'true') ? true : false; //sent in as string.
+		var overrideOwner = (parsedUrl.query.overrideOwner === 'true'); //sent in as string. so we convert
 
 		var user = sessions.getUser("uKey", uKey);
 
