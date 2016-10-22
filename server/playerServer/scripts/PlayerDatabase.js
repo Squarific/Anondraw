@@ -327,11 +327,10 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 };
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
-	
-	this.database.query("select * from regions join premium on userid!=owner where owner = ? AND room = ?",
-		[userid, userid, room],
+	this.database.query("select count(*) as amountOfRegions from regions join premium on userid!=owner where owner = ? AND room = ?",
+		[userid, room],
 		function (err, rows) {
-			if (rows.length > 0) { // rows.length equals 0 when user is premium
+			if (rows[0].amountOfRegions > 0) { // amountOfRegions always equals 0 when user is premium
 				callback("Having more than one region is premium only!");
 				return;
 			}//
@@ -381,22 +380,24 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	this.database.query("select count(*) from reputations where to_id = ?", [userid], function(err, rows) {
+	this.database.query("select count(*) as reputation from reputations where to_id = ?", [userid], function(err, rows) {
 		if(err){
 			callback(err)
 			return;
 		}
-		if(overrideOwner && rows[0].reputation < MODERATE_REGIONS_MIN_REP){
-			callback(err);
+		if(overrideOwner && (rows[0].reputation < MODERATE_REGIONS_MIN_REP)){
+			callback("You must have at least" + MODERATE_REGIONS_MIN_REP + "R to remove someone elses region");
 			return;
 		}
 		this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
 			if(err){
 				callback(err);
+				console.log("Delete protected region database error", err);
 				return;
 			}
 			this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
 				callback(err);
+				console.log("Delete protected region permissions database error", err);
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));

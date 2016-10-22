@@ -100,6 +100,7 @@ function DrawTogether (container, settings) {
 // Hardcoded values who should probably be refactored to the server
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 DrawTogether.prototype.REGION_MIN_REP = 30;
+DrawTogether.prototype.MODERATE_REGION_MIN_REP = 100;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -921,12 +922,12 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 	var PermissionDom = document.createElement("div");
 	PermissionDom.className = "drawtogether-player";
 
-	if (this.reputation >= this.KICKBAN_MIN_REP) {
+	if (this.reputation >= this.MODERATE_REGION_MIN_REP) {
 		var removeRegionButton = document.createElement("span");
 		removeRegionButton.className = "drawtogether-player-button drawtogether-kickban-button";
 
-		removeRegionButton.innerText = "Delete Region";
-		removeRegionButton.textContent = "Delete Region";
+		removeRegionButton.innerText = "Delete their region?";
+		removeRegionButton.textContent = "Delete thier region?";
 
 		removeRegionButton.addEventListener("click", this.removeProtectedRegion.bind(this, messageFromServer.regionid, false));
 
@@ -1843,10 +1844,9 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
 			return;
 		}
-		console.log("regionidremove ", regionId)
-		console.log("element", element)
-		if(element)
-			element.remove();
+		if(element){
+			element.parentNode.removeChild(element);
+		}
 
 		this.getMyProtectedRegions();
 		this.chat.addMessage("Regions", "Removed the region");
