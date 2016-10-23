@@ -525,8 +525,7 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	// Display the given message and disappear after time
 	// If no time set, at least 3 seconds but longer based on message length
 	this.messageDom.style.display = "block";
-	this.messageDom.innerText = message;
-	this.messageDom.textContent = message;
+	this.messageDom.appendChild(document.createTextNode(message));
 
 	clearTimeout(this.removeMessageTimeout);
 
@@ -674,8 +673,7 @@ DrawTogether.prototype.setLoading = function setLoading (room) {
 	// Gets removed when 'drawings' are received
 	if (this.loading) return;
 	this.loading = this.paintContainer.appendChild(document.createElement("div"));
-	this.loading.innerText = "Loading room '" + room + "' ...";
-	this.loading.textContent = "Loading room '" + room + "' ...";
+	this.loading.appendChild(document.createTextNode("Loading room '" + room + "' ..."));
 	this.loading.className = "drawtogether-loading";
 };
 
@@ -714,8 +712,7 @@ DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
 		this.playerListDom.removeChild(this.playerListDom.firstChild)
 
 	var plTitle = this.playerListDom.appendChild(document.createElement("span"));
-	plTitle.innerText = "PlayerList (" + this.playerList.length + ")";
-	plTitle.textContent = "PlayerList (" + this.playerList.length + ")";
+	plTitle.appendChild(document.createTextNode("PlayerList (" + this.playerList.length + ")"));
 	plTitle.className = "drawtogether-pl-title";
 
 	for (var k = 0; k < this.playerList.length; k++) {
@@ -926,8 +923,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 		var removeRegionButton = document.createElement("span");
 		removeRegionButton.className = "drawtogether-player-button drawtogether-kickban-button";
 
-		removeRegionButton.innerText = "Delete their region?";
-		removeRegionButton.textContent = "Delete thier region?";
+		removeRegionButton.appendChild(document.createTextNode("Delete their region?"));
 
 		removeRegionButton.addEventListener("click", this.removeProtectedRegion.bind(this, messageFromServer.regionid, false));
 
@@ -975,8 +971,7 @@ DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (playe
 		var kickbanButton = document.createElement("span");
 		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
 
-		kickbanButton.innerText = "B";
-		kickbanButton.textContent = "B";
+		kickbanButton.appendChild(document.createTextNode("B"));
 
 		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
 
@@ -1052,8 +1047,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 		var kickbanButton = document.createElement("span");
 		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
 
-		kickbanButton.innerText = "B";
-		kickbanButton.textContent = "B";
+		kickbanButton.appendChild(document.createTextNode("B"));
 
 		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
 

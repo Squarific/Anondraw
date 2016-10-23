@@ -26,8 +26,7 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 	questionDom.className = "gui-prompt-question";
 	answers.className = "gui-prompt-answers";
 
-	questionDom.innerText = question;
-	questionDom.textContent = question;
+	questionDom.appendChild(document.createTextNode(question));
 
 	if (options == "freepick") {
 		answers.appendChild(this.createFreePick(question, function (answer) {
@@ -48,8 +47,7 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 			var optionButton = answers.appendChild(document.createElement("div"));
 			optionButton.className = "gui-prompt-button gui-prompt-option-button";
 
-			optionButton.innerText = options[k];
-			optionButton.textContent = options[k];
+			optionButton.appendChild(document.createTextNode(options[k]));
 			optionButton.option = options[k];
 
 			optionButton.addEventListener("click", function (event) {
@@ -78,8 +76,7 @@ Gui.prototype.createFreePick = function createFreePick (question, callback) {
 	var freepickButton = container.appendChild(document.createElement("div"));
 	freepickButton.className = "gui-prompt-button gui-prompt-freepick-button";
 
-	freepickButton.innerText = "Submit";
-	freepickButton.textContent = "Submit";
+	freepickButton.appendChild(document.createTextNode("Submit"));
 
 	freepickButton.addEventListener("click", function (event) {
 		callback(freepick.value);
