@@ -234,7 +234,7 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 
 	if(protectedRegionsArr.length == 0) return false;
 
-	for (var i = protectedRegionsArr.length - 1; i > 0; i--) {
+	for (var i = protectedRegionsArr.length - 1; i >= 0; i--) {
 		console.log("protectedRegionsArr[i].owner", protectedRegionsArr[i].owner, typeof protectedRegionsArr[i].owner);
 		console.log("user", user, typeof user);
 		console.log("equals", protectedRegionsArr[i].owner == user);
