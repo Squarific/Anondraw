@@ -1,7 +1,7 @@
 var config = require("../../common/config.js");
 var http = require("http");
 var querystring = require("querystring");
-var kickbancode = require("./kickban_password.js");
+var kickbancode = config.service.player.password.kickban;
 
 function Players (server) {
 	this.server = server;
