@@ -101,9 +101,13 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 		if (err) {
 			throw "Can't get protected regions for room " + room + " Err:" + JSON.stringify(err);
 		}
+
+		console.log("updateProtectedRegions", data.permissions, data.regions)
 		var permissions = data.permissions;
 
 		data = data.regions;
+
+
 
 		if (typeof data.length !== "number") {
 			throw "Data was not an array";

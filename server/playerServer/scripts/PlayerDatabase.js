@@ -448,6 +448,7 @@ PlayerDatabase.prototype.getProtectedRegionsAndPermissions = function getProtect
 				callback(err);
 				return;
 			}
+			console.log("regions", regions);
 			callback(null, {regions:regions, permissions:permissions});
 			return;
 		}.bind(this));
