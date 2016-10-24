@@ -1,4 +1,5 @@
 require("../common/nice_console_log.js");
+var config = require("../common/config.js");
 
 var http = require("http");
 var mysql = require("mysql");
@@ -877,4 +878,4 @@ var server = http.createServer(function (req, res) {
 	}
 
 	res.end('{"error": "Unknown command"}');
-}.bind(this)).listen(4552);
+}.bind(this)).listen(config.service.player.port);

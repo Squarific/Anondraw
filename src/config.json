@@ -1,0 +1,16 @@
+{
+    "service": {
+        "image": {
+            "port": 5552
+        },
+        "loadbalancer": {
+            "port": 3552
+        },
+        "player": {
+            "port": 4552
+        },
+        "realtime": {
+            "port": 2345
+        }
+    }
+}
