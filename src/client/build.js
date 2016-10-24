@@ -19,7 +19,7 @@ function build() {
 	new minify({
 		type: "gcc",
 		fileIn: "src/scripts/*.js",
-		fileOut: "dist/drawTogether.min.js",
+		fileOut: "dist/anondraw.min.js",
 		options: [ "--language_in=ES5" ],
 		callback: function(err, min) {
 			if (err) {
@@ -33,7 +33,7 @@ function build() {
 	new minify({
 		type: "yui-css",
 		fileIn: "src/css/*.css",
-		fileOut: "dist/drawTogether.min.css",
+		fileOut: "dist/anondraw.min.css",
 		callback: function(err, min) {
 			if (err) {
 				console.log("[ERROR] Rebuilding styles failed", err);
