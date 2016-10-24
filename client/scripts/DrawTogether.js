@@ -917,6 +917,17 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	return null;
 };
 
+DrawTogether.prototype.createPermissionChatMessageWithTimeout = function createPermissionChatMessageWithTimeout(messageFromServer){
+	if(this.insideProtectedRegionWarningTimeout != null) {
+		window.clearTimeout(this.insideProtectedRegionWarningTimeout);
+	}
+
+	this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
+		this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+		this.insideProtectedRegionWarningTimeout = null
+	}.bind(this), 2000);
+};
+
 DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
 	var PermissionDom = document.createElement("div");
 	PermissionDom.className = "drawtogether-player";
@@ -1240,13 +1251,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// layer once we got a confirmation from the server
 		this.sendDrawing(event.drawing, function (success) {
 			if(typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed){
-				if(insideProtectedRegionWarningTimeout != null) {
-					window.clearTimeout(this.insideProtectedRegionWarningTimeout);
-				}
-				this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
-					this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
-					this.insideProtectedRegionWarningTimeout = null
-				}.bind(this), 2000);
+				this.createPermissionChatMessageWithTimeout(success);
 			}
 
 			event.removeDrawing();
@@ -1400,13 +1405,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 
 			if(typeof success.isAllowed !== 'undefined'){
-				if(insideProtectedRegionWarningTimeout != null) {
-					window.clearTimeout(this.insideProtectedRegionWarningTimeout);
-				}
-				this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
-					this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
-					this.insideProtectedRegionWarningTimeout = null
-				}.bind(this), 2000);
+				this.createPermissionChatMessageWithTimeout(success);
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
