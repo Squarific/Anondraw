@@ -235,7 +235,10 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 	if(protectedRegionsArr.length == 0) return false;
 
 	for (var i = protectedRegionsArr.length - 1; i > 0; i--) {
-		if( protectedRegionsArr[i].owner == user)
+		console.log("protectedRegionsArr[i].owner", protectedRegionsArr[i].owner, typeof protectedRegionsArr[i].owner);
+		console.log("user", user, typeof user);
+		console.log("equals", protectedRegionsArr[i].owner == user);
+		if( protectedRegionsArr[i].owner == user){
 			p.push({ 
 				regionId: protectedRegionsArr[i].id,
 				owner: protectedRegionsArr[i].owner, 
@@ -246,6 +249,7 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 				maxY: protectedRegionsArr[i].maxY,
 				minRepAllowed: protectedRegionsArr[i].minRepAllowed
 			});
+		}
 	}
 	console.log("p", p);
 	return p;
