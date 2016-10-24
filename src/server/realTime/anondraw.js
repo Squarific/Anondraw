@@ -13,17 +13,17 @@ var io = require('socket.io')(server, {
 
 // Library to register to the main server
 var Register = require("./scripts/Register.js");
-var register = new Register("direct.anondraw.com", config.service.loadbalancer.password.join, io, port, server);
+var register = new Register(config.service.loadbalancer.host, config.service.loadbalancer.password.join, io, port, server);
 // var register = new Register("localhost", require("./join_code_password.js"), io, port, server);
 // var register = {isOurs: function (room, callback) {callback(null, true);}, updatePlayerCount: function () {}};
 
 // Library to check login/register and skins
 var Players = require("./scripts/Players.js");
-var players = new Players("direct.anondraw.com");
+var players = new Players(config.service.player.host);
 // var players = new Players("localhost");
 
 var Background = require("./scripts/Background.js");
-var background = new Background("direct.anondraw.com", undefined, config.service.image.password.draw);
+var background = new Background(config.service.image.host, undefined, config.service.image.password.draw);
 //var background = new Background("localhost", undefined, require("./draw_password.js"));
 
 // Drawtogether library
