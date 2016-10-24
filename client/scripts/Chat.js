@@ -260,13 +260,17 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	messageDom.title = time;
 	messageDom.alt = time;
 
+	if (max_scroll <= old_scroll) {
+		console.log("max_scroll", "old_scroll", max_scroll, old_scroll);
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+	}
+
 	// Only play audio if it was a normal message
 	if (user !== message && !this.userSettings.getBoolean("Mute chat"))
 		this.messageSound.play();
 };
 
 Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
-
 	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
 	
@@ -275,13 +279,9 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 
 	messageDom.appendChild(elem);
 
-	this.scrollChat(max_scroll, old_scroll);
-};
-
-Chat.prototype.scrollChat = function scrollChat(max_scroll, old_scroll){
 	if (max_scroll <= old_scroll) {
-		console.log("scroll!");
-		this.messagesDom.scrollTop = Math.ceil(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+		console.log("max_scroll", "old_scroll", max_scroll, old_scroll);
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 	}
 };
 
@@ -321,8 +321,11 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 		}
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
+
+		if (max_scroll <= old_scroll) {
+			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+		}
 	}
-	this.scrollChat(max_scroll, old_scroll);
 };
 
 Chat.prototype.createUrl = function createUrl (url) {
