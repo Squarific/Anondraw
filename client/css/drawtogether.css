@@ -1098,7 +1098,7 @@ input.paint-texttool {
 .region-tutorial {
   display: none;
   padding: .5em;
-  font-size: 1.2em;
+  width: 20em;
   color: rgb(37, 38, 43); 
   word-wrap:break-word;
   margin: .8em;
