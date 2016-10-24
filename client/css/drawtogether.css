@@ -1095,6 +1095,16 @@ input.paint-texttool {
   margin-top:0.1em;
 }
 
+.region-tutorial {
+  display: none;
+  padding: .5em;
+  font-size: 1.2em;
+  color: rgb(37, 38, 43); 
+  word-wrap:break-word;
+  margin: .8em;
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .reg-button:hover {
   background-color: #233445; 
 }

@@ -1343,6 +1343,10 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
 	regionsWindow.className = "regions-window";
+
+	this.regionTutorialContainer = regionsWindow.appendChild(document.createElement("div"));
+	this.regionTutorialContainer.className = "region-tutorial";
+	this.createRegionTutorialDom();
 	
 	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
 	this.regionsContainer.className = "regions-container";
@@ -1650,10 +1654,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 
 		this.moveScreenToPosition([x,y],0);
 	
-	}.bind(this));
-
-
-	
+	}.bind(this));	
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
 	regionEditPermissionsButton.className = "reg-button reg-editpermissions-button";
@@ -1683,15 +1684,38 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionDeleteButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
+		if($('.region-container').length <= 1){
+			this.tutorialVisibilityDom(true);
+		}
 
 		this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
 	
 	}.bind(this));
 };
 
+DrawTogether.prototype.tutorialVisibilityDom = function tutorialVisibilityDom(makeVisible){
+	if(makeVisible)
+		this.regionTutorialContainer.style.display = "block";
+	else
+		this.regionTutorialContainer.style.display = "none";
+};
+
+DrawTogether.prototype.createRegionTutorialDom = function createRegionTutorialDom() {
+	this.regionTutorialContainer.appendChild(document.createTextNode("You currently have no regions. If you wish to create one, select the "));
+	var permissionsButtonImage = this.regionTutorialContainer.appendChild(document.createElement("img"));
+	permissionsButtonImage.src = "images/icons/select.png";
+	permissionsButtonImage.alt = "Example select button";
+	permissionsButtonImage.title = "Example select button";
+
+	this.regionTutorialContainer.appendChild(document.createTextNode("tool on the top of your screen. You can make one region at 30+ rep or unlimited with premium."));
+};
+
 DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
 	while (this.regionsContainer.firstChild)
 		this.regionsContainer.removeChild(this.regionsContainer.firstChild)
+	
+	if(this.myRegions.length > 0)
+		this.tutorialVisibilityDom(false);
 
 	for(var k = this.myRegions.length - 1; k >= 0; k--) {
 		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
