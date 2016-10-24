@@ -260,10 +260,6 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	messageDom.title = time;
 	messageDom.alt = time;
 
-	if (max_scroll <= old_scroll) {
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height + 1;
-	}
-
 	// Only play audio if it was a normal message
 	if (user !== message && !this.userSettings.getBoolean("Mute chat"))
 		this.messageSound.play();
@@ -276,12 +272,20 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
 	messageDom.classList.add("chat-message");
 
+	elem.addEventListener("load", function(){
+		this.scrollChat(max_scroll, old_scroll);
+	}.bind(this));
+
 	messageDom.appendChild(elem);
 
-	if (max_scroll <= old_scroll) {
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height + 1;
-	}
+	
 };
+
+Chat.prototype.scrollChat = function scrollChat(max_scroll, old_scroll){
+	if (max_scroll <= old_scroll) {
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+	}
+}
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
 	var messages = message.split(" ");
@@ -317,12 +321,11 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 			messageDom.appendChild(document.createTextNode(" "));
 			continue;
 		}
+		elem.addEventListener("load", function(){
+			this.scrollChat(max_scroll, old_scroll);
+		}.bind(this));
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
-
-		if (max_scroll <= old_scroll) {
-			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height + 1;
-		}
 	}
 };
 
