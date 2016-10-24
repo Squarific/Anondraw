@@ -323,6 +323,8 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
 
+		console.log("m: max_scroll", "old_scroll",max_scroll, old_scroll);
+
 		if (max_scroll - 50 <= old_scroll ) {//scrolled all the way down minus 50px
 			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 		}
