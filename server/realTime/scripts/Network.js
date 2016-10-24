@@ -226,9 +226,11 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 	var p = [];
 	var protectedRegionsArr = this.protectedRegions[room].all();
 
+
 	if(protectedRegionsArr.length == 0) return false;
 
 	for (var i = protectedRegionsArr.length - 1; i > 0; i--) {
+		console.log(protectedRegionsArr[i], user);
 		if( protectedRegionsArr[i].owner === user)
 			p.push({ 
 				regionId: protectedRegionsArr[i].id,
