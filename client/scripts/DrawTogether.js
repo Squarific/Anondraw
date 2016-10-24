@@ -1711,6 +1711,15 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	}.bind(this));
 };
 
+DrawTogether.prototype.permissionWindowVisibilityDom = function permissionWindowVisibilityDom(makeVisible){
+	if(this.regionPermissionsWindow){
+		if(makeVisible)
+			this.regionPermissionsWindow.show();
+		else 
+			this.regionPermissionsWindow.hide();
+	}
+};
+
 DrawTogether.prototype.tutorialVisibilityDom = function tutorialVisibilityDom(makeVisible){
 	if(makeVisible)
 		this.regionTutorialContainer.style.display = "block";
@@ -1877,7 +1886,7 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 };
 
 DrawTogether.prototype.resetProtectedRegions = function () {
-	this.regionPermissionsWindow.hide();
+	this.permissionWindowVisibilityDom(false);
 
 	this.network.socket.emit("resetprotectedregions", function (err, result) {
 		if (err) {
@@ -1890,7 +1899,7 @@ DrawTogether.prototype.resetProtectedRegions = function () {
 };
 
 DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
-	this.regionPermissionsWindow.hide();
+	this.permissionWindowVisibilityDom(false);
 
 	this.network.socket.emit("removeprotectedregion", regionId, function (err, result) {
 		if (err) {
