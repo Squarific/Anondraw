@@ -7,7 +7,8 @@ read allCool
 if [ "$allCool" = "y" ]; then
 	echo enter mysql password: 
 	read mysqlp
-	echo $mysqlp > server/playerServer/mysql_password.js
+	
+	echo module.exports = $mysqlp\; | tee server/playerServer/mysql_password.js
 
 	echo enter password for everything else: 
 	read password
