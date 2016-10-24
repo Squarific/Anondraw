@@ -323,12 +323,10 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 			messageDom.appendChild(document.createTextNode(" "));
 			continue;
 		}
-		elem.addEventListener("load", function(){
-			this.scrollChat(max_scroll, old_scroll);
-		}.bind(this));
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
 	}
+	this.scrollChat(max_scroll, old_scroll);
 };
 
 Chat.prototype.createUrl = function createUrl (url) {
