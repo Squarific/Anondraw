@@ -31,7 +31,7 @@ var DrawTogether = require("./scripts/DrawTogether.js");
 var drawTogether = new DrawTogether(background);
 
 var imgur = require("imgur");
-imgur.setCredentials("anondraw", config.service.realtime.password.imgur);
+imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime.imgur.password);
 
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register);

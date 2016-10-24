@@ -26,8 +26,9 @@
         "realtime": {
             "host": "localhost",
             "port": 2345,
-            "password": {
-                "imgur": "imgur password"
+            "imgur": {
+                "user": "anondraw",
+                "password": "imgur password"
             }
         }
     },
