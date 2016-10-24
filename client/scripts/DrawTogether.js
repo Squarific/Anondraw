@@ -923,7 +923,7 @@ DrawTogether.prototype.createPermissionChatMessageWithTimeout = function createP
 	}
 
 	this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
-		this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+		this.chat.addElementAsMessage(this.createPermissionChatMessage(messageFromServer));
 		this.insideProtectedRegionWarningTimeout = null
 	}.bind(this), 2000);
 };
