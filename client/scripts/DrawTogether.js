@@ -23,6 +23,8 @@ function DrawTogether (container, settings) {
 	this.lastViewDeduction = 0;     // Time since we last deducted someones viewscore
 	this.lastTimeoutError = 0;      // Last time since a socket timed out
 
+	this.insideProtectedRegionWarningTimeout = null; // a setTimeout for the chat message warning
+
 	this.lastScreenMove = Date.now();    // Last time we moved the screen
 	this.lastScreenMoveStartPosition;    // Last start position
 
@@ -1238,7 +1240,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// layer once we got a confirmation from the server
 		this.sendDrawing(event.drawing, function (success) {
 			if(typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed){
-				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+				if(insideProtectedRegionWarningTimeout != null) {
+					window.clearTimeout(this.insideProtectedRegionWarningTimeout);
+				}
+				this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
+					this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+					this.insideProtectedRegionWarningTimeout = null
+				}.bind(this), 2000);
 			}
 
 			event.removeDrawing();
@@ -1392,7 +1400,13 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 
 			if(typeof success.isAllowed !== 'undefined'){
-				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+				if(insideProtectedRegionWarningTimeout != null) {
+					window.clearTimeout(this.insideProtectedRegionWarningTimeout);
+				}
+				this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
+					this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+					this.insideProtectedRegionWarningTimeout = null
+				}.bind(this), 2000);
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
