@@ -2,7 +2,7 @@ require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 
 var http = require("http");
-var drawcode = require("./draw_password.js");
+var drawcode = config.service.image.password.draw;
 
 var Canvas = require("canvas");
 var TiledCanvas = require("./scripts/TiledCanvas.js");

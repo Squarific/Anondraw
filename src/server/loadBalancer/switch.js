@@ -3,8 +3,8 @@ var config = require("../common/config.js");
 
 var http = require("http");
 var urlParser = require("url");
-var JOIN_CODE = require("./join_code_password.js");
-var statuscode = require("./status_password.js");
+var JOIN_CODE = config.service.loadbalancer.password.join;
+var statuscode = config.service.loadbalancer.password.status;
 var room_regex = /^[a-z0-9_]+$/i;
 
 var Servers = require("./scripts/Servers.js");

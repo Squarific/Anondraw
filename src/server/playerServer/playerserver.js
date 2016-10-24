@@ -3,14 +3,14 @@ var config = require("../common/config.js");
 
 var http = require("http");
 var mysql = require("mysql");
-var kickbancode = require("./kickban_password.js");
-var statuscode = require("./status_password.js");
+var kickbancode = config.service.player.password.kickban;
+var statuscode = config.service.player.password.status;
 
 var database = mysql.createConnection({
-	host: "localhost",
-	user: "anondraw",
-	password: require("./mysql_password.js"),
-	database: "anondraw",
+	host: config.mysql.host,
+	user: config.mysql.user,
+	password: config.mysql.password,
+	database: config.mysql.database,
 	multipleStatements: true
 });
 
