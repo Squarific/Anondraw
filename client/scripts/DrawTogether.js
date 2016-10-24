@@ -1839,10 +1839,10 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 			return;
 		}
 		if(element){
+			element.style.display = "none";
 			element.parentNode.removeChild(element);
 		}
-
-		this.getMyProtectedRegions();
+		setTimeout(this.getMyProtectedRegions, 2000);
 		this.chat.addMessage("Regions", "Removed the region");
 	}.bind(this));
 };
