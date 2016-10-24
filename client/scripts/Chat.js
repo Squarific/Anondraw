@@ -287,7 +287,7 @@ Chat.prototype.scrollChat = function scrollChat(max_scroll, old_scroll){
 		console.log("scroll!");
 		this.messagesDom.scrollTop = Math.ceil(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 	}
-}
+};
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
 	var messages = message.split(" ");
