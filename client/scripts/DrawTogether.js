@@ -1686,9 +1686,6 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionDeleteButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
-		if($('.region-container').length <= 1){
-			this.tutorialVisibilityDom(true);
-		}
 
 		this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
 	
@@ -1878,9 +1875,13 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 			return;
 		}
 		if(element){
+			if($('.region-container').length <= 1){
+				this.tutorialVisibilityDom(true);
+			}
 			element.style.display = "none";
 			element.parentNode.removeChild(element);
 		}
+
 		setTimeout(this.getMyProtectedRegions, 2000);
 		this.chat.addMessage("Regions", "Removed the region");
 	}.bind(this));

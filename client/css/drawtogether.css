@@ -1105,6 +1105,11 @@ input.paint-texttool {
   background: rgba(0, 0, 0, 0.05);
 }
 
+.region-tutorial img{
+  height: 1em;
+  background-color: #515163;
+}
+
 .reg-button:hover {
   background-color: #233445; 
 }
