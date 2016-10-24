@@ -1,4 +1,4 @@
-var config = require("../common/config.js");
+var config = require("../../common/config.js");
 var http = require("http");
 
 function Background (server, httpListenServer, drawcode) {

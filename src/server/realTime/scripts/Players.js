@@ -1,4 +1,4 @@
-var config = require("../common/config.js");
+var config = require("../../common/config.js");
 var http = require("http");
 var querystring = require("querystring");
 var kickbancode = require("./kickban_password.js");

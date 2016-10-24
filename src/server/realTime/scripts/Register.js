@@ -1,4 +1,4 @@
-var config = require("../common/config.js");
+var config = require("../../common/config.js");
 var getIp = require('external-ip')();
 var http = require('http');
 var urlParse = require("url");
