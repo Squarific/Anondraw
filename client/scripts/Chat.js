@@ -322,15 +322,10 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 		}
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
+	}
 
-		var new_max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
-		var scroll_diff = new_max_scroll - old_scroll;
-
-		console.log("m: max_scroll", "old_scroll",max_scroll, old_scroll, scroll_diff);
-
-		if (max_scroll - scroll_diff <= old_scroll ) {//scrolled all the way down minus 50px
-			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
-		}
+	if (max_scroll - messageDom.getBoundingClientRect().height * 2 <= old_scroll ) {//scrolled all the way down minus 50px
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 	}
 };
 
