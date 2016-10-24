@@ -273,13 +273,9 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
 	messageDom.classList.add("chat-message");
 
-	elem.addEventListener("load", function(){
-		this.scrollChat(max_scroll, old_scroll);
-	}.bind(this));
-
 	messageDom.appendChild(elem);
 
-	
+	this.scrollChat(max_scroll, old_scroll);
 };
 
 Chat.prototype.scrollChat = function scrollChat(max_scroll, old_scroll){
