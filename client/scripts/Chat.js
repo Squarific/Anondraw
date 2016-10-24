@@ -261,7 +261,7 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	messageDom.alt = time;
 
 	if (max_scroll <= old_scroll) {
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height + 1;
 	}
 
 	// Only play audio if it was a normal message
@@ -279,7 +279,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 	messageDom.appendChild(elem);
 
 	if (max_scroll <= old_scroll) {
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height + 1;
 	}
 };
 
@@ -321,7 +321,7 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
 
 		if (max_scroll <= old_scroll) {
-			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height + 1;
 		}
 	}
 };
