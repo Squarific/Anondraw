@@ -17,3 +17,9 @@ server/imageServer/images/main
 
 # Non default configuration files
 *.config.json
+
+# Generated content
+**/dist/**/*.html
+**/dist/**/*.json
+**/dist/**/*.js
+**/dist/**/*.css

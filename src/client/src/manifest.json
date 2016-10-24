@@ -1,17 +1,17 @@
 {
     "manifest_version": 2,
-    "name": "Anondraw",
-    "description": "Draw online with friends or strangers",
-    "version": "0.0.0.2",
+    "name": "{{ name }}",
+    "description": "{{ description }}",
+    "version": "{{ version }}",
     "icons": {
         "128": "images/logo_128.png"
     },
     "app": {
         "urls": [
-            "http://www.anondraw.com/"
+            "{{ &url }}"
         ],
         "launch": {
-            "web_url": "http://www.anondraw.com/"
+            "web_url": "{{ &url }}"
         }
     }
 }
