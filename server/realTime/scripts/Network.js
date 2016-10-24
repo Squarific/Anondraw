@@ -230,7 +230,7 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 	var p = [];
 	var protectedRegionsArr = this.protectedRegions[room].all();
 
-	console.log("getProtectedRegionsOwnedBy", user, protectedRegionsArr.owner, protectedRegionsArr);
+	console.log("getProtectedRegionsOwnedBy", user, protectedRegionsArr);
 
 	if(protectedRegionsArr.length == 0) return false;
 
@@ -247,6 +247,7 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 				minRepAllowed: protectedRegionsArr[i].minRepAllowed
 			});
 	}
+	console.log("p", p);
 	return p;
 };
 
