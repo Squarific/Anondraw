@@ -279,7 +279,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 
 	messageDom.appendChild(elem);
 
-	if (max_scroll <= old_scroll) {
+	if (max_scroll <= old_scroll - 50) { //scrolled all the way down minus 50px
 		console.log("max_scroll", "old_scroll", max_scroll, old_scroll);
 		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 	}
@@ -322,7 +322,7 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
 
-		if (max_scroll <= old_scroll) {
+		if (max_scroll <= old_scroll - 50) {//scrolled all the way down minus 50px
 			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 		}
 	}
