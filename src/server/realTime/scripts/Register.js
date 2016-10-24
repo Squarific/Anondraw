@@ -59,7 +59,7 @@ function Register (server, key, io, port, listenServer) {
 Register.prototype.isOurs = function isOurs (room, callback) {
 	var req = http.request({
 		hostname: this.server,
-		port: config.loadbalancer.port,
+		port: config.service.loadbalancer.port,
 		method: "GET",
 		path: "/isourroom?room=" + encodeURIComponent(room) + "&id=" + encodeURIComponent(this.id)
 	}, function (res) {
@@ -85,7 +85,7 @@ Register.prototype.isOurs = function isOurs (room, callback) {
 Register.prototype.register = function register () {
 	var req = http.request({
 		hostname: this.server,
-		port: config.loadbalancer.port,
+		port: config.service.loadbalancer.port,
 		method: "GET",
 		path: "/register?key=" + encodeURIComponent(this.key) + "&url=" + encodeURIComponent(this.ip + ":" + this.port)
 	}, function (res) {
@@ -140,7 +140,7 @@ Register.prototype.updatePlayerCount = function updatePlayerCount () {
 
 	var req = http.request({
 		hostname: this.server,
-		port: config.loadbalancer.port,
+		port: config.service.loadbalancer.port,
 		method: "GET",
 		path: "/update?id=" + encodeURIComponent(this.id) + "&rooms=" + JSON.stringify(rooms)
 	}, function (res) {
