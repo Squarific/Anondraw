@@ -280,7 +280,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 	messageDom.appendChild(elem);
 	console.log("max_scroll", "old_scroll", max_scroll, old_scroll, elem.getBoundingClientRect().height);
 
-	if (max_scroll <= old_scroll - 50) { //scrolled all the way down minus 50px
+	if (max_scroll - elem.getBoundingClientRect().height <= old_scroll) { // is scrolled all the way down minus elem height
 		
 		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 	}
