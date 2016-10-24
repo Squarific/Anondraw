@@ -15,5 +15,5 @@ private/
 # Image from the mainroom
 server/imageServer/images/main
 
-# Production Configuration
-production.config.js
+# Non default configuration files
+*.config.json
