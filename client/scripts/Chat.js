@@ -284,6 +284,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 
 Chat.prototype.scrollChat = function scrollChat(max_scroll, old_scroll){
 	if (max_scroll <= old_scroll) {
+		console.log("scroll!");
 		this.messagesDom.scrollTop = Math.ceil(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 	}
 }
