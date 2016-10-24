@@ -1688,6 +1688,25 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		var regionListIndex = element.parentNode.dataset.index;
 
 		this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
+
+		// start
+		if(element.classList.contains("reg-button-confirmation")){
+
+			element.classList.remove("reg-button-confirmation");
+
+			this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);		
+		}
+		else {
+			var coord = element.parentNode.getElementsByClassName("reg-position-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			coord.innerHTML = "Click again to delete";
+			element.classList.add("reg-button-confirmation");
+			setTimeout(function() {
+				var coord = element.parentNode.getElementsByClassName("reg-position-button")[0];
+				coord.innerHTML = coord.dataset.tempConf;
+				element.classList.remove("reg-button-confirmation");
+			}.bind(this), 4000);
+		}
 	
 	}.bind(this));
 };
@@ -1858,6 +1877,8 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 };
 
 DrawTogether.prototype.resetProtectedRegions = function () {
+	this.regionPermissionsWindow.hide();
+
 	this.network.socket.emit("resetprotectedregions", function (err, result) {
 		if (err) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
@@ -1869,6 +1890,8 @@ DrawTogether.prototype.resetProtectedRegions = function () {
 };
 
 DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
+	this.regionPermissionsWindow.hide();
+
 	this.network.socket.emit("removeprotectedregion", regionId, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
