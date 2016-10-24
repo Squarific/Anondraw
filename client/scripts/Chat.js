@@ -266,7 +266,8 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 };
 
 Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
-	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+
+	var max_scroll = Math.ceil(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
 	
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
@@ -283,7 +284,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 
 Chat.prototype.scrollChat = function scrollChat(max_scroll, old_scroll){
 	if (max_scroll <= old_scroll) {
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+		this.messagesDom.scrollTop = Math.ceil(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 	}
 }
 
@@ -304,7 +305,7 @@ Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) 
 // messages = ["a", "space", "splitted", "array", "with", "urls:", {url: "http://wwww.google.com"}]
 // Replaces emotes with image
 Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
-	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+	var max_scroll = Math.ceil(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
 	
 	for (var k = 0; k < messages.length; k++) {
