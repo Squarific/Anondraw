@@ -1687,8 +1687,6 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
 
-		this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
-
 		// start
 		if(element.classList.contains("reg-button-confirmation")){
 
