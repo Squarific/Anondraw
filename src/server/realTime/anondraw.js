@@ -1,10 +1,11 @@
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 
+var port = config.service.realtime.port;
 var http = require("http");
 
 var server = http.createServer();
-server.listen(config.service.realtime.port);
+server.listen(port);
 
 // Socket library
 var io = require('socket.io')(server, {
