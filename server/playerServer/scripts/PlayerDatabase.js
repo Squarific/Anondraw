@@ -362,7 +362,12 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 					}
 
 					this.database.query("INSERT INTO regions (owner, minX, minY, maxX, maxY, room, minRepAllowed) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY, room, DEFAULT_MIN_REGION_REP], function (err) {
-						callback(err);
+						if (err) {
+							callback("Database error. Please contact an admin. (ADDPREGIONINSERT)");
+							console.log("Add protected region database error", err);
+							return;
+						}
+						callback();
 					});
 				}.bind(this)
 			);
