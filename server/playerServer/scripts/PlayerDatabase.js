@@ -327,7 +327,7 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 };
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
-	this.database.query("select count(*) as amountOfRegions from regions join premium on userid!=owner where owner = ? AND room = ?",
+	this.database.query("select count(*) as amountOfRegions from regions left join premium on userid=owner where owner = ? AND userid is null AND room = ?",
 		[userid, room],
 		function (err, rows) {
 			if (rows[0].amountOfRegions > 0) { // amountOfRegions always equals 0 when user is premium
