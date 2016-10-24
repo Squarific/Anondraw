@@ -1,3 +1,4 @@
+var config = require("../common/config.js");
 var http = require("http");
 
 function Background (server, httpListenServer, drawcode) {
@@ -9,7 +10,7 @@ function Background (server, httpListenServer, drawcode) {
 Background.prototype.sendDrawings = function (room, drawings, callback) {
 	var req = http.request({
 		hostname: this.server,
-		port: 5552,
+		port: config.service.image.port,
 		method: "POST",
 		path: "/drawings?drawcode=" + encodeURIComponent(this.drawcode) + "&room=" + encodeURIComponent(room)
 	}, function (res) {
