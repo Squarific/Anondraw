@@ -1,6 +1,6 @@
-var CACHE_LENGTH = 4000; //How many drawingparts are held before being send to permanent
+var CACHE_LENGTH = 40; //How many drawingparts are held before being send to permanent
 var PARTS_PER_DRAWING = 10;
-var CACHE_IGNORE = 200; // How many drawings we ignore in the cache count
+var CACHE_IGNORE = 0; // How many drawings we ignore in the cache count
 
 function DrawTogether (background) {
 	this.drawings = {};
