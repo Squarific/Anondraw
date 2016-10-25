@@ -527,7 +527,8 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	// Display the given message and disappear after time
 	// If no time set, at least 3 seconds but longer based on message length
 	this.messageDom.style.display = "block";
-	this.messageDom.appendChild(document.createTextNode(message));
+	this.messageDom.innerText = message;
+    this.messageDom.textContent = message;
 
 	clearTimeout(this.removeMessageTimeout);
 
@@ -1687,11 +1688,8 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
 
-		// start
 		if(element.classList.contains("reg-button-confirmation")){
-
 			element.classList.remove("reg-button-confirmation");
-
 			this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);		
 		}
 		else {
