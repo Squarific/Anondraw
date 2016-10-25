@@ -39,10 +39,10 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
-		this.drawings[room].forceSend = false;
-		this.drawings[room].sendLength = this.drawings[room].length - CACHE_IGNORE;
+		
+		this.drawings[room].sendLength = this.drawings[room].length - (this.drawings[room].forceSend) ? 0 : CACHE_IGNORE; // ignore cache on forcesync
 
-		if (typeof this.onFinalize == "function") this.onFinalize(room, CACHE_IGNORE);
+		if (typeof this.onFinalize == "function") this.onFinalize(room, (this.drawings[room].forceSend) ? 0 : CACHE_IGNORE);
 		else console.log("No finalize handler");
 
 		this.background.sendDrawings(room, this.drawings[room].slice(0, this.drawings[room].sendLength), function (err) {
@@ -54,7 +54,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 			
 			console.log("Room " + room + " synced.");
 			this.drawings[room].sending = false;
-
+			this.drawings[room].forceSend = false;
 			if (err) {
 				console.log("[SENDDRAWING][ERROR] ", err);
 				return;
