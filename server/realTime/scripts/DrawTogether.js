@@ -9,9 +9,11 @@ function DrawTogether (background) {
 }
 
 DrawTogether.prototype.forceSend = function forceSend (){
+	console.log("ForceSend called", this.drawings.length);
 	for( var i = this.drawings.length - 1; i >= 0; i-- ) {
 		if(!this.drawings[i].sending)
 			this.drawings[i].forceSend = true;
+		console.log("forceSend Loop", this.drawings[i].sending, this.drawings[i].forceSend)
 	}
 };
 
@@ -23,6 +25,8 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
+
+	console.log("am I force sent?", this.drawings[room].forceSend);
 
 	// If we have enough drawings and they are long enough
 	// and if we are not yet sending anything and this is not a gameroom
