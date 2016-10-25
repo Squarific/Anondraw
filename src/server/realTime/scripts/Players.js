@@ -1,6 +1,7 @@
+var config = require("../../common/config.js");
 var http = require("http");
 var querystring = require("querystring");
-var kickbancode = require("./kickban_password.js");
+var kickbancode = config.service.player.password.kickban;
 
 function Players (server) {
 	this.server = server;
@@ -62,7 +63,7 @@ Players.prototype.request = function request (method, urlArguments, callback) {
 
 	var req = http.request({
 		hostname: this.server,
-		port: 4552,
+		port: config.service.player.port,
 		method: "GET",
 		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments)
 	}, function (res) {
