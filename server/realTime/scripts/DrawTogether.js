@@ -9,11 +9,11 @@ function DrawTogether (background) {
 }
 
 DrawTogether.prototype.forceSend = function forceSend (){
-	console.log("ForceSend called", this.drawings.length);
-	for( var i = this.drawings.length - 1; i >= 0; i-- ) {
-		if(!this.drawings[i].sending)
-			this.drawings[i].forceSend = true;
-		console.log("forceSend Loop", this.drawings[i].sending, this.drawings[i].forceSend)
+	console.log("ForceSend called", this.drawings);
+	for( var room in this.drawings ) {
+		if(!this.drawings[room].sending)
+			this.drawings[room].forceSend = true;
+		console.log("forceSend Loop", this.drawings[room].sending, this.drawings[room].forceSend)
 	}
 };
 
