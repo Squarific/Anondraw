@@ -39,10 +39,12 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
-		
-		this.drawings[room].sendLength = this.drawings[room].length - (this.drawings[room].forceSend) ? 0 : CACHE_IGNORE; // ignore cache on forcesync
 
-		if (typeof this.onFinalize == "function") this.onFinalize(room, (this.drawings[room].forceSend) ? 0 : CACHE_IGNORE);
+		var cacheIgnore = (this.drawings[room].forceSend) ? 0 : CACHE_IGNORE; // ignore cache on forcesync
+		
+		this.drawings[room].sendLength = this.drawings[room].length - cacheIgnore; 
+
+		if (typeof this.onFinalize == "function") this.onFinalize(room, cacheIgnore);
 		else console.log("No finalize handler");
 
 		this.background.sendDrawings(room, this.drawings[room].slice(0, this.drawings[room].sendLength), function (err) {
@@ -50,9 +52,12 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 			// Reset the amount of parts, we recount instead of
 			// subtracting what we send to ensure it never goes out of sync
-			this.drawings[room].currentParts = this.countParts(this.drawings[room]);
+			this.drawings[room].currentParts = this.countParts(this.drawings[room], cacheIgnore);
 			
-			console.log("Room " + room + " synced.");
+			if(this.drawings[room].forceSend)
+				console.log("Room " + room + " force synced.");
+			else
+				console.log("Room " + room + " synced.");
 			this.drawings[room].sending = false;
 			this.drawings[room].forceSend = false;
 			if (err) {
@@ -99,10 +104,10 @@ DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all
 	}
 };
 
-DrawTogether.prototype.countParts = function countParts (drawingList) {
+DrawTogether.prototype.countParts = function countParts (drawingList, cacheIgnore) {
 	var size = 0;
 
-	for (var k = 0; k < drawingList.length - CACHE_IGNORE; k++)
+	for (var k = 0; k < drawingList.length - cacheIgnore; k++)
 		size += drawingList[k].points ? drawingList[k].points.length : 1;
 
 	return size;
