@@ -517,6 +517,8 @@ Protocol.prototype.bindIO = function bindIO () {
 							message: helpText[k]
 						});
 					}
+				} else if (message.indexOf("/forcesync") == 0) {
+					protocol.drawTogether.forceSend();
 				} else {
 					socket.emit("chatmessage", {
 						user: "SERVER",

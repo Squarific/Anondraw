@@ -8,6 +8,13 @@ function DrawTogether (background) {
 	this.background = background;
 }
 
+DrawTogether.prototype.forceSend = function forceSend (){
+	for( var i = this.drawings.length - 1; i >= 0; i-- ) {
+		if(!this.drawings[i].sending)
+			this.drawings[i].forceSend = true;
+	}
+};
+
 DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback) {
 	// Put the given drawing in the database for the given room
 	this.drawings[room] = this.drawings[room] || [];
@@ -20,14 +27,15 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	// If we have enough drawings and they are long enough
 	// and if we are not yet sending anything and this is not a gameroom
 	// then we will sync the drawings with the background server
-	if (this.drawings[room].currentParts > CACHE_LENGTH &&
-	    this.drawings[room].length > CACHE_IGNORE &&
+	if ( ( this.drawings[room].currentParts > CACHE_LENGTH || this.drawings[room].forceSend ) &&
+	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].forceSend ) &&
 	    !this.drawings[room].sending &&
 	    !room.indexOf("game_") == 0 &&
 	    !room.indexOf("private_game_") == 0) {
 
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
+		this.drawings[room].forceSend = false;
 		this.drawings[room].sendLength = this.drawings[room].length - CACHE_IGNORE;
 
 		if (typeof this.onFinalize == "function") this.onFinalize(room, CACHE_IGNORE);
