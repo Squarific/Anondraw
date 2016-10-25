@@ -518,13 +518,20 @@ Protocol.prototype.bindIO = function bindIO () {
 						});
 					}
 				} else if (message.indexOf("/forcesync") == 0) {
-					if(socket.userid == 1 || socket.userid == 2659) // only uber/float can force send for server restart
-						protocol.drawTogether.forceSend();
+					if(socket.userid == 1 || socket.userid == 2659){ // only uber/float can force send for server restart
+						protocol.drawTogether.forceSend(function(syncMessage){
+							socket.emit("chatmessage", {
+								user: "SERVER",
+								message: syncMessage
+							});
+						}.bind(this));
+						
+					}
 				} else {
 					socket.emit("chatmessage", {
 						user: "SERVER",
 						message: "Command not found!"
-					})
+					});
 				}
 
 				// If the message started with a '/' don't send it to the other clients 
