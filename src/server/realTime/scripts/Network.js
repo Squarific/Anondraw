@@ -1201,9 +1201,9 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			var asdf = protocol.getProtectedRegionsOwnedBy(socket.userid, socket.room);
-			if (!asdf) {
-				callback("User has no protected regions.");
+			var usersProtectedRegions = protocol.getProtectedRegionsOwnedBy(socket.userid, socket.room);
+			if (!usersProtectedRegions) {
+				callback();
 				return;
 			}
 

@@ -1337,7 +1337,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 				$(".regions-window").show();
 
 				if(this.myRegions.length == 0){
-					this.tutorialVisibilityDom(true);
+					this.displayRegionTutorial(true);
 				}
 			}.bind(this));			
 		}
@@ -1721,7 +1721,7 @@ DrawTogether.prototype.permissionWindowVisibilityDom = function permissionWindow
 	}
 };
 
-DrawTogether.prototype.tutorialVisibilityDom = function tutorialVisibilityDom(makeVisible){
+DrawTogether.prototype.displayRegionTutorial = function displayRegionTutorial(makeVisible){
 	if(makeVisible)
 		this.regionTutorialContainer.style.display = "block";
 	else
@@ -1742,8 +1742,7 @@ DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
 	while (this.regionsContainer.firstChild)
 		this.regionsContainer.removeChild(this.regionsContainer.firstChild)
 
-	if(this.myRegions.length > 0)
-		this.tutorialVisibilityDom(false);
+	this.displayRegionTutorial(this.myRegions.length === 0);
 
 	for(var k = this.myRegions.length - 1; k >= 0; k--) {
 		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
@@ -1909,7 +1908,7 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 		}
 		if(element){
 			if($('.region-container').length <= 1){
-				this.tutorialVisibilityDom(true);
+				this.displayRegionTutorial(true);
 			}
 			element.style.display = "none";
 			element.parentNode.removeChild(element);
@@ -1926,7 +1925,10 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
 			return;
 		}
-		this.myRegions = result;
+		if(result)
+			this.myRegions = result;
+		else
+			this.myRegions = [];
 
 		if(typeof callback == "function")
 			callback();
