@@ -1,5 +1,6 @@
 var drawingTypes = ["line", "brush", "block"];
 var tinycolor = require("tinycolor2");
+var FIX_CANVAS_PIXEL_SIZE = 0.5;
 
 function decodeDrawing (drawing) {
     drawing.color = tinycolor(drawing.color);
@@ -99,8 +100,8 @@ TiledCanvas.prototype.drawFunctions = {
 
         context.beginPath();
 
-        context.moveTo(drawing.x, drawing.y);
-        context.lineTo(drawing.x1, drawing.y1);
+        context.moveTo(drawing.x, drawing.y + FIX_CANVAS_PIXEL_SIZE);
+        context.lineTo(drawing.x1, drawing.y1 + FIX_CANVAS_PIXEL_SIZE);
         
         context.strokeStyle = drawing.color.toRgbString();
         context.lineWidth = drawing.size;
@@ -137,7 +138,7 @@ TiledCanvas.prototype.drawFunctions = {
             return;
         }
 
-        ctx.moveTo(path.points[0][0], path.points[0][1]);
+        ctx.moveTo(path.points[0][0], path.points[0][1] + FIX_CANVAS_PIXEL_SIZE);
 
         // Connect a line between all points
         for (var pointId = 1; pointId < path.points.length; pointId++) {
@@ -145,7 +146,7 @@ TiledCanvas.prototype.drawFunctions = {
                 typeof path.points[pointId][1] !== "number")
                 continue;
 
-            ctx.lineTo(path.points[pointId][0], path.points[pointId][1]);
+            ctx.lineTo(path.points[pointId][0], path.points[pointId][1] + FIX_CANVAS_PIXEL_SIZE);
 
             minX = Math.min(path.points[pointId][0], minX);
             minY = Math.min(path.points[pointId][1], minY);
@@ -154,7 +155,7 @@ TiledCanvas.prototype.drawFunctions = {
         }
 
         ctx.strokeStyle = path.color.toRgbString();
-        ctx.lineWidth = path.size * 2;
+        ctx.lineWidth = path.size;
 
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
