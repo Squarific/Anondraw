@@ -1215,9 +1215,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
 			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
-			    ((event.drawing.size > 10 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
+			    ((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
-					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
+					this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 					this.lastBrushSizeWarning = Date.now();
 				}
 
@@ -1372,9 +1372,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	// Lower our ink with how much it takes to draw this
 	// Only do that if we are connected and in a room that does not start with private_ or game_
 	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
-		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 10) {
+		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 20) {
 			if (Date.now() - this.lastBrushSizeWarning > 5000) {
-				this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
+				this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 				this.lastBrushSizeWarning = Date.now();
 			}
 
