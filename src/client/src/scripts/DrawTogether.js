@@ -1923,7 +1923,6 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 	this.network.socket.emit("getmyprotectedregions", function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
-			return;
 		}
 		if(result)
 			this.myRegions = result;
