@@ -1197,7 +1197,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("getmyprotectedregions", function (callback) {
 			if (!socket.userid) {
-				callback("No User");
+				callback();
 				return;
 			}
 
