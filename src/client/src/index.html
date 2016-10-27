@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html style="padding:0; margin:0; height:100%;">
+	<head>
+
+		<!-- 
+			This is the anondraw draw online source code
+			It allows you to draw with friends in group
+			Readable version: https://github.com/Squarific/anondraw/
+		-->
+		<link rel="stylesheet" href="anondraw.min.css?v={{ version }}">
+		<title>AnonDraw - Draw online on an infinte paint canvas</title>
+
+		<meta name="viewport" content="width=device-width">
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+		
+		<meta property="fb:admins" content="{{ facebookAdmin }}" />
+		<meta name="description" content="{{ description }}">
+		<link rel="shortcut icon" href="favicon.ico?v={{ version }}">
+
+		<meta property="og:image" content="http://www.anondraw.com/images/promotional/logo-modern.png?v={{ version }}" />
+
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-30802449-5', 'auto');
+		  ga('send', 'pageview');
+
+		</script>
+	</head>
+	<body style="position:relative; padding:0; margin:0; min-height: 100%;">
+		<!-- Project Wonderful Ad Box Loader -->
+		<script type="text/javascript">
+		   function pw_load(){
+		      if(arguments.callee.z)return;else arguments.callee.z=true;
+		      var d=document;var s=d.createElement('script');
+		      var x=d.getElementsByTagName('script')[0];
+		      s.type='text/javascript';s.async=true;
+		      s.src='//www.projectwonderful.com/pwa.js';
+		      x.parentNode.insertBefore(s,x);
+		  }
+		</script>
+		<!-- End Project Wonderful Ad Box Loader -->
+		<img src="http://www.anondraw.com/images/promotional/logo-modern.png?v={{ version }}" alt="Anon Draw" style="display:none;">
+		<div id="fullscreen" style="position:absolute; left:0; right:0; top:0; bottom:0; background:white;"></div>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+		<script src="anondraw.min.js?v={{ version }}"></script>
+		<script type="text/javascript">
+			// Draw and paint online
+			var urlInfo = location.hash.substr(1, location.hash.length).split(",")
+
+			var room = urlInfo[0];
+			var x = parseInt(urlInfo[1]);
+			var y = parseInt(urlInfo[2]);
+
+			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
+				room: room || "main",
+				mode: (room) ? "join" : "ask",
+				loadbalancer: "http://{{ service.loadbalancer.host }}:{{ service.loadbalancer.port }}",
+				imageServer: "http://{{ service.image.host }}:{{ service.image.port }}",
+				accountServer: "http://{{ service.player.host }}:{{ service.player.port }}",
+				leftTopX: x || 0,
+				leftTopY: y || 0
+			});
+		</script>
+		<!-- Go to www.addthis.com/dashboard to customize your tools -->
+		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-53c4fbf2311fe8f1" async="async"></script>
+		<script type="text/javascript">
+			reformal_wdg_domain    = "anondraw";
+			reformal_wdg_mode    = 0;
+			reformal_wdg_title   = "Anondraw";
+			reformal_wdg_ltitle  = "Feedback";
+			reformal_wdg_lfont   = "";
+			reformal_wdg_lsize   = "";
+			reformal_wdg_color   = "#45678a";
+			reformal_wdg_bcolor  = "#516683";
+			reformal_wdg_tcolor  = "#FFFFFF";
+			reformal_wdg_align   = "left";
+			reformal_wdg_waction = 0;
+			reformal_wdg_vcolor  = "#9FCE54";
+			reformal_wdg_cmline  = "#E0E0E0";
+			reformal_wdg_glcolor  = "#105895";
+			reformal_wdg_tbcolor  = "#FFFFFF";
+			 
+			reformal_wdg_bimage = "bea4c2c8eb82d05891ddd71584881b56.png";
+		</script>
+		<style type="text/css">.furjbqy {z-index:1000 !important;} .furjbqy a {padding: .5em;} .furjbqy table {background:#273849;}</style>
+		<script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=anondraw">
+		</script>
+
+		<noscript>
+			<a href="http://anondraw.idea.informer.com">Anondraw feedback</a>
+			<a href="http://idea.informer.com">
+				<img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" />
+			</a>
+		</noscript>
+		<!-- Google Code for Register Conversion Page
+		In your html page, add the snippet and call
+		goog_report_conversion when someone clicks on the
+		chosen link or button. -->
+		<script type="text/javascript">
+		  /* <![CDATA[ */
+		  goog_snippet_register_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "bCA4CICTj2cQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  goog_snippet_join_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "lIFsCNzQomcQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  goog_snippet_buy_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "99KuCPC3nmcQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  // DO NOT CHANGE THE CODE BELOW.
+		  goog_report_register = function(url) {
+		    goog_snippet_register_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+			    window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		  goog_report_join = function(url) {
+		    goog_snippet_join_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+		    	 window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		  goog_report_buy = function(url) {
+		    goog_snippet_buy_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+			    window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		/* ]]> */
+		</script>
+		<script type="text/javascript"
+		  src="//www.googleadservices.com/pagead/conversion_async.js">
+		</script>
+
+		<noscript>
+		<!-- Project Wonderful Ad Box Loader -->
+		<script type="text/javascript">
+		   (function(){function pw_load(){
+		      if(arguments.callee.z)return;else arguments.callee.z=true;
+		      var d=document;var s=d.createElement('script');
+		      var x=d.getElementsByTagName('script')[0];
+		      s.type='text/javascript';s.async=true;
+		      s.src='//www.projectwonderful.com/pwa.js';
+		      x.parentNode.insertBefore(s,x);}
+		   if (window.attachEvent){
+		    window.attachEvent('DOMContentLoaded',pw_load);
+		    window.attachEvent('onload',pw_load);}
+		   else{
+		    window.addEventListener('DOMContentLoaded',pw_load,false);
+		    window.addEventListener('load',pw_load,false);}})();
+		</script>
+		<!-- End Project Wonderful Ad Box Loader -->
+		</noscript>
+
+		<div style="display:none;">
+			<!-- Project Wonderful Ad Box Code -->
+			<div id="pw_adbox_78949_1_0"></div>
+			<script type="text/javascript"></script>
+			<noscript><map name="admap78949" id="admap78949"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=78949&type=1" shape="rect" coords="0,0,468,60" title="" alt="" target="_blank" /></map>
+			<table cellpadding="0" cellspacing="0" style="width:468px;border-style:none;background-color:#3A5774;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=78949&type=1" style="width:468px;height:60px;border-style:none;" usemap="#admap78949" alt="" /></td></tr><tr><td style="background-color:#3A5774;" colspan="1"><center><a style="font-size:10px;color:#ffffff;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=78949&type=1" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table>
+			</noscript>
+			<!-- End Project Wonderful Ad Box Code -->
+		</div>
+	</body>
+</html>
