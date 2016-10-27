@@ -29,6 +29,7 @@ var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 // Ink settings
 var MAX_INK = 200000;
 var MAX_GUEST_INK = 5000;
+var MAX_SIZE = 100;
 
 var BASE_GEN = 300;
 var PER_REP_GEN = 1500;
@@ -839,7 +840,7 @@ Protocol.prototype.bindIO = function bindIO () {
 	
 		// Startpath, endpath and pathpoint handlers
 		socket.on("sp", function (color, size) {
-			if (size > 50 || size < 0) return;
+			if (size > MAX_SIZE || size < 0) return;
 			protocol.drawTogether.addPath(socket.room, socket.id, {socketid: socket.id, type: "path", color: color, size: size});
 			socket.lastPathSize = size;
 			delete socket.lastPathPoint;
