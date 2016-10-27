@@ -1208,7 +1208,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			callback(null, asdf);
+			callback(null, usersProtectedRegions);
 		});
 
 		socket.on("adduserstomyprotectedregion", function (userIdArr, regionId, callback) {
