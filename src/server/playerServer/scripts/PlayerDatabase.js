@@ -327,7 +327,7 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 };
 
 PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
-	this.database.query("select count(*) as amountOfRegions from regions join premium on userid!=owner where owner = ? AND room = ?",
+	this.database.query("select count(*) as amountOfRegions from regions left join premium on userid=owner where owner = ? AND userid is null AND room = ?",
 		[userid, room],
 		function (err, rows) {
 			if (rows[0].amountOfRegions > 0) { // amountOfRegions always equals 0 when user is premium
@@ -362,7 +362,12 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 					}
 
 					this.database.query("INSERT INTO regions (owner, minX, minY, maxX, maxY, room, minRepAllowed) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, minX, minY, maxX, maxY, room, DEFAULT_MIN_REGION_REP], function (err) {
-						callback(err);
+						if (err) {
+							callback("Database error. Please contact an admin. (ADDPREGIONINSERT)");
+							console.log("Add protected region database error", err);
+							return;
+						}
+						callback();
 					});
 				}.bind(this)
 			);

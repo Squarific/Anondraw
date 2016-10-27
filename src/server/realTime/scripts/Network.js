@@ -228,8 +228,8 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 
 	if(protectedRegionsArr.length == 0) return false;
 
-	for (var i = protectedRegionsArr.length - 1; i > 0; i--) {
-		if( protectedRegionsArr[i].owner === user)
+	for (var i = protectedRegionsArr.length - 1; i >= 0; i--) {
+		if( protectedRegionsArr[i].owner == user){
 			p.push({ 
 				regionId: protectedRegionsArr[i].id,
 				owner: protectedRegionsArr[i].owner, 
@@ -240,6 +240,7 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 				maxY: protectedRegionsArr[i].maxY,
 				minRepAllowed: protectedRegionsArr[i].minRepAllowed
 			});
+		}
 	}
 	return p;
 };
@@ -516,11 +517,21 @@ Protocol.prototype.bindIO = function bindIO () {
 							message: helpText[k]
 						});
 					}
+				} else if (message.indexOf("/forcesync") == 0) {
+					if ([1,27,2659].indexOf(socket.userid) > -1) { // only uber/lukas/float can force send for server restart
+						protocol.drawTogether.forceSend(function(syncMessage){
+							socket.emit("chatmessage", {
+								user: "SERVER",
+								message: syncMessage
+							});
+						}.bind(this));
+						
+					}
 				} else {
 					socket.emit("chatmessage", {
 						user: "SERVER",
 						message: "Command not found!"
-					})
+					});
 				}
 
 				// If the message started with a '/' don't send it to the other clients 
@@ -1190,13 +1201,13 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			var asdf = protocol.getProtectedRegionsOwnedBy(socket.userid, socket.room);
-			if (!asdf) {
-				callback("User has no protected regions.");
+			var usersProtectedRegions = protocol.getProtectedRegionsOwnedBy(socket.userid, socket.room);
+			if (!usersProtectedRegions) {
+				callback();
 				return;
 			}
 
-			callback(null, asdf);
+			callback(null, usersProtectedRegions);
 		});
 
 		socket.on("adduserstomyprotectedregion", function (userIdArr, regionId, callback) {

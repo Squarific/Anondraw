@@ -236,9 +236,6 @@ Chat.prototype.emotesHash = {
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
 
 Chat.prototype.addMessage = function addMessage (user, message) {
-	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
-	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
-	
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
 	messageDom.classList.add("chat-message");
 
@@ -260,10 +257,6 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	messageDom.title = time;
 	messageDom.alt = time;
 
-	if (max_scroll <= old_scroll) {
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
-	}
-
 	// Only play audio if it was a normal message
 	if (user !== message && !this.userSettings.getBoolean("Mute chat"))
 		this.messageSound.play();
@@ -278,7 +271,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 
 	messageDom.appendChild(elem);
 
-	if (max_scroll <= old_scroll) {
+	if (max_scroll - elem.getBoundingClientRect().height <= old_scroll) { // is scrolled all the way down minus elem height
 		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 	}
 };
@@ -319,10 +312,10 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 		}
 
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
+	}
 
-		if (max_scroll <= old_scroll) {
-			this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
-		}
+	if (max_scroll - messageDom.getBoundingClientRect().height * 2 <= old_scroll ) {//scrolled all the way down minus new message * 2 to account for margins
+		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
 	}
 };
 
