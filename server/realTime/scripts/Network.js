@@ -518,7 +518,6 @@ Protocol.prototype.bindIO = function bindIO () {
 						});
 					}
 				} else if (message.indexOf("/forcesync") == 0) {
-					if(socket.userid == 1 || socket.userid == 2659){ // only uber/float can force send for server restart
 						protocol.drawTogether.forceSend(function(syncMessage){
 							socket.emit("chatmessage", {
 								user: "SERVER",
