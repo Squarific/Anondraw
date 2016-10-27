@@ -525,7 +525,13 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	// Display the given message and disappear after time
 	// If no time set, at least 3 seconds but longer based on message length
 	this.messageDom.style.display = "block";
-	this.messageDom.appendChild(document.createTextNode(message));
+
+	var textNode = document.createTextNode(message);
+	if (this.messageDom.childNodes.length > 0) {
+		this.messageDom.replaceChild(textNode, this.messageDom.childNodes[0]);
+	} else {
+		this.messageDom.appendChild(textNode);
+	}
 
 	clearTimeout(this.removeMessageTimeout);
 

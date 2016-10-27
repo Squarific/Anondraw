@@ -1,33 +1,20 @@
-DrawTogether2
-=============
+# Anondraw
 
-Source code of http://www.anondraw.com
+Source code of <http://www.anondraw.com>
 
-How to embed on your website
-============================
+##  Configuration
 
-##The client
+Properties live in the `config.json` file *closest* to 
+`src/server/common/config.js`. Therefore it does not matter where the config
+file is placed, as long as it is in a directory that is a parent of any server.
 
-###Simple
-Copy paste the following code where you want the app:
-```js
-<script src="http://www.anondraw.com/DrawTogether.embed.min.js"></script>
-<div id="drawtogether2" style="min-height:250px;"></div>
-<script>
-	var container = document.getElementById("drawtogether2");
-    var drawtogether2 = new DrawTogether(container, {
-    	server: "http://drawtogether.squarific.com",
-    	room: "main"
-    });
-</script>
-```
-###Advanced
-Documentation to be added.
+A default `config.json` is provided in `src/config.json` as an example, but 
+**should not be used in production**. 
+Instead a `$NODE_ENV$.config.json` will be chosen if the environmental variable 
+`NODE_ENV` is set.
 
-##The server (if you don't want to use the public server)
-You need the following npm librarys: socket.io, mysql, imgur
+### Example:
 
-Protocol
-========
-
-Documentation about the protocol to be added.
+- `export NODE_ENV=` can use `src/config.json`
+- `export NODE_ENV=beta` can use `/beta.config.json`
+- `export NODE_ENV=production` can use `/production.config.json`
