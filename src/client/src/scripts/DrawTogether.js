@@ -1879,7 +1879,7 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 		}
 
 		if (result.success) {
-			this.getMyProtectedRegions();
+			setTimeout(this.getMyProtectedRegions, 2000);
 			this.chat.addMessage("Regions", result.success);
 		}
 	}.bind(this));
