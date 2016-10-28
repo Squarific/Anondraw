@@ -1336,7 +1336,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 				$(".favorites-window").hide();
 				$(".regions-window").show();
 
-				if(this.myRegions.length == 0){
+				if(this.myRegions.length === 0){
 					this.displayRegionTutorial(true);
 				}
 			}.bind(this));			
