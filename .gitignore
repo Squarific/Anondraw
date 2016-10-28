@@ -11,6 +11,9 @@ node_modules
 
 # Private files
 private/
+**/dist/*.xml
+**/dist/error
+**/dist/stats
 
 # Image from the mainroom
 server/imageServer/images/main
