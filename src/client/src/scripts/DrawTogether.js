@@ -1336,7 +1336,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 				$(".favorites-window").hide();
 				$(".regions-window").show();
 
-				if(this.myRegions.length == 0){
+				if(!this.myRegions || this.myRegions.length === 0){
 					this.displayRegionTutorial(true);
 				}
 			}.bind(this));			
@@ -1879,7 +1879,7 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 		}
 
 		if (result.success) {
-			this.getMyProtectedRegions();
+			setTimeout(this.getMyProtectedRegions, 2000);
 			this.chat.addMessage("Regions", result.success);
 		}
 	}.bind(this));
@@ -2001,11 +2001,11 @@ DrawTogether.prototype.inkUsageFromPath = function inkUsageFromPath (point1, poi
 
 DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
 	// If its a brush the ink usage is (size * size)
-	// If it is a line the ink usage is (size * length * 2)
+	// If it is a line the ink usage is (size * length)
 	var length = drawing.size;
 
 	if (typeof drawing.x1 == "number")
-		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1) * 2;
+		length = this.utils.distance(drawing.x, drawing.y, drawing.x1, drawing.y1);
 
 	if (typeof drawing.text == "string")
 		length *= drawing.text.length;
