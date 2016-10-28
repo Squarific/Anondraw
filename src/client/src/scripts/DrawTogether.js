@@ -23,6 +23,8 @@ function DrawTogether (container, settings) {
 	this.lastViewDeduction = 0;     // Time since we last deducted someones viewscore
 	this.lastTimeoutError = 0;      // Last time since a socket timed out
 
+	this.insideProtectedRegionWarningTimeout = null; // a setTimeout for the chat message warning
+
 	this.lastScreenMove = Date.now();    // Last time we moved the screen
 	this.lastScreenMoveStartPosition;    // Last start position
 
@@ -921,6 +923,17 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	return null;
 };
 
+DrawTogether.prototype.createPermissionChatMessageWithTimeout = function createPermissionChatMessageWithTimeout(messageFromServer){
+	if(this.insideProtectedRegionWarningTimeout != null) {
+		window.clearTimeout(this.insideProtectedRegionWarningTimeout);
+	}
+
+	this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
+		this.chat.addElementAsMessage(this.createPermissionChatMessage(messageFromServer));
+		this.insideProtectedRegionWarningTimeout = null
+	}.bind(this), 2000);
+};
+
 DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
 	var PermissionDom = document.createElement("div");
 	PermissionDom.className = "drawtogether-player";
@@ -1202,9 +1215,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Only do that if we are connected and in a room that does not start with private_ or game_
 		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
 			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
-			    ((event.drawing.size > 10 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
+			    ((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
-					this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
+					this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 					this.lastBrushSizeWarning = Date.now();
 				}
 
@@ -1244,7 +1257,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// layer once we got a confirmation from the server
 		this.sendDrawing(event.drawing, function (success) {
 			if(typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed){
-				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+				this.createPermissionChatMessageWithTimeout(success);
 			}
 
 			event.removeDrawing();
@@ -1320,9 +1333,11 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			this.getMyProtectedRegions();
 		} else {
 			this.getMyProtectedRegions(function(){
-				if(this.myRegions.length > 0){
-					$(".favorites-window").hide();
-					$(".regions-window").show();
+				$(".favorites-window").hide();
+				$(".regions-window").show();
+
+				if(this.myRegions.length == 0){
+					this.displayRegionTutorial(true);
 				}
 			}.bind(this));			
 		}
@@ -1336,6 +1351,10 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
 	regionsWindow.className = "regions-window";
+
+	this.regionTutorialContainer = regionsWindow.appendChild(document.createElement("div"));
+	this.regionTutorialContainer.className = "region-tutorial";
+	this.createRegionTutorialDom();
 	
 	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
 	this.regionsContainer.className = "regions-container";
@@ -1353,9 +1372,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	// Lower our ink with how much it takes to draw this
 	// Only do that if we are connected and in a room that does not start with private_ or game_
 	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
-		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 10) {
+		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 20) {
 			if (Date.now() - this.lastBrushSizeWarning > 5000) {
-				this.chat.addMessage("Brush sizes above 10 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
+				this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 				this.lastBrushSizeWarning = Date.now();
 			}
 
@@ -1398,7 +1417,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 
 			if(typeof success.isAllowed !== 'undefined'){
-				this.chat.addElementAsMessage(this.createPermissionChatMessage(success));
+				this.createPermissionChatMessageWithTimeout(success);
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
@@ -1643,10 +1662,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 
 		this.moveScreenToPosition([x,y],0);
 	
-	}.bind(this));
-
-
-	
+	}.bind(this));	
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
 	regionEditPermissionsButton.className = "reg-button reg-editpermissions-button";
@@ -1677,14 +1693,56 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
 
-		this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
+		if(element.classList.contains("reg-button-confirmation")){
+			element.classList.remove("reg-button-confirmation");
+			this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);		
+		}
+		else {
+			var coord = element.parentNode.getElementsByClassName("reg-position-button")[0];
+			coord.dataset.tempConf = coord.innerHTML;
+			coord.innerHTML = "Click again to delete";
+			element.classList.add("reg-button-confirmation");
+			setTimeout(function() {
+				var coord = element.parentNode.getElementsByClassName("reg-position-button")[0];
+				coord.innerHTML = coord.dataset.tempConf;
+				element.classList.remove("reg-button-confirmation");
+			}.bind(this), 4000);
+		}
 	
 	}.bind(this));
+};
+
+DrawTogether.prototype.permissionWindowVisibilityDom = function permissionWindowVisibilityDom(makeVisible){
+	if(this.regionPermissionsWindow){
+		if(makeVisible)
+			this.regionPermissionsWindow.show();
+		else 
+			this.regionPermissionsWindow.hide();
+	}
+};
+
+DrawTogether.prototype.displayRegionTutorial = function displayRegionTutorial(makeVisible){
+	if(makeVisible)
+		this.regionTutorialContainer.style.display = "block";
+	else
+		this.regionTutorialContainer.style.display = "none";
+};
+
+DrawTogether.prototype.createRegionTutorialDom = function createRegionTutorialDom() {
+	this.regionTutorialContainer.appendChild(document.createTextNode("You currently have no regions. If you wish to create one, select the "));
+	var permissionsButtonImage = this.regionTutorialContainer.appendChild(document.createElement("img"));
+	permissionsButtonImage.src = "images/icons/select.png";
+	permissionsButtonImage.alt = "Example select button";
+	permissionsButtonImage.title = "Example select button";
+
+	this.regionTutorialContainer.appendChild(document.createTextNode(" tool on the top of your screen. You can make one region at 30+ rep or unlimited with premium."));
 };
 
 DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
 	while (this.regionsContainer.firstChild)
 		this.regionsContainer.removeChild(this.regionsContainer.firstChild)
+
+	this.displayRegionTutorial(this.myRegions.length === 0);
 
 	for(var k = this.myRegions.length - 1; k >= 0; k--) {
 		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
@@ -1828,6 +1886,8 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 };
 
 DrawTogether.prototype.resetProtectedRegions = function () {
+	this.permissionWindowVisibilityDom(false);
+
 	this.network.socket.emit("resetprotectedregions", function (err, result) {
 		if (err) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
@@ -1839,16 +1899,22 @@ DrawTogether.prototype.resetProtectedRegions = function () {
 };
 
 DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
+	this.permissionWindowVisibilityDom(false);
+
 	this.network.socket.emit("removeprotectedregion", regionId, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
 			return;
 		}
 		if(element){
+			if($('.region-container').length <= 1){
+				this.displayRegionTutorial(true);
+			}
+			element.style.display = "none";
 			element.parentNode.removeChild(element);
 		}
 
-		this.getMyProtectedRegions();
+		setTimeout(this.getMyProtectedRegions, 2000);
 		this.chat.addMessage("Regions", "Removed the region");
 	}.bind(this));
 };
@@ -1857,9 +1923,11 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 	this.network.socket.emit("getmyprotectedregions", function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
-			return;
 		}
-		this.myRegions = result;
+		if(result)
+			this.myRegions = result;
+		else
+			this.myRegions = [];
 
 		if(typeof callback == "function")
 			callback();

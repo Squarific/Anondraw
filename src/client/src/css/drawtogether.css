@@ -1095,6 +1095,21 @@ input.paint-texttool {
   margin-top:0.1em;
 }
 
+.region-tutorial {
+  display: none;
+  padding: .5em;
+  width: 20em;
+  color: rgb(37, 38, 43); 
+  word-wrap:break-word;
+  margin: .8em;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.region-tutorial img{
+  height: 1em;
+  background-color: #515163;
+}
+
 .reg-button:hover {
   background-color: #233445; 
 }
@@ -1128,6 +1143,26 @@ input.paint-texttool {
 .reg-delete-button {
   display: inline-block;
   min-width: 0px;
+}
+
+.reg-button-confirmation { 
+  background-color: goldenrod;
+}
+.reg-button-confirmation ~ .reg-position-button{ 
+  background-color: #b1861a;
+}
+
+.reg-button-confirmation:hover { 
+  background-color: #b1861a;
+}
+.fav-button-confirmation:hover ~ .fav-coor-button{ 
+  background-color: goldenrod;
+  -webkit-transition-duration: 0.1s;
+  -moz-transition-duration: 0.1s;
+  transition-duration: 0.1s;
+  -webkit-transition-property: background-color;
+  -moz-transition-property: background-color;
+  transition-property: background-color;
 }
 
 .region-list-container {
