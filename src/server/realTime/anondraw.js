@@ -2,7 +2,8 @@ require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 var http = require("http");
 
-var port = process.argv[2] || config.service.realtime.port;
+var port = process.argv[2];
+if (!port) throw "No port provided!";
 
 var server = http.createServer();
 server.listen(port);
