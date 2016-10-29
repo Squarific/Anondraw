@@ -1090,7 +1090,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	}
 
 	if (player.memberlevel == 1) {
-		icons += "♥";
+		icons += "🎃";
 		nameText.className += " premium";
 	}
 
