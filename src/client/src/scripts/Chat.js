@@ -233,7 +233,8 @@ Chat.prototype.emotesHash = {
 	"WillDraw4Rep": "images/emotes/WillDraw4Rep.png"
 };
 
-Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
+Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/.
+Chat.prototype.coordinateRegex = /\d*[,| |x]?[ ]?\d*/
 
 Chat.prototype.addMessage = function addMessage (user, message) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
@@ -277,14 +278,29 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
+	//find all matches of url with spaces and shit
+	var matches = '15524, 42142'.match(coordinateRegex); // find all matches
+	for (var k = 0; k < matches.length; k++) {
+		var first = matches[k].match(/\d*/); //first number
+		var last = matches[k].match(/\d*$/); // last number	
+	}
+	
 	var messages = message.split(" ");
 	var temp;
 	var result;
 
 	for (var k = 0; k < messages.length; k++) {
 		// Replace if url
-		if (this.urlRegex.test(messages[k]))
+		if (this.urlRegex.test(messages[k])){
 			messages[k] = { url: messages[k] };
+			continue;
+		}
+		if (this.coordinateRegex.test(messages[k])){
+			messages[k] = { coordinate: messages[k] };
+			console.log(messages[k], "is a coordinate.");
+			continue;
+		}
+
 	}
 
 	this.addMessageList(messageDom, messages);
@@ -307,6 +323,12 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 
 		if (messages[k].url) {
 			messageDom.appendChild(this.createUrl(messages[k].url));
+			messageDom.appendChild(document.createTextNode(" "));
+			continue;
+		}
+
+		if (messages[k].coordinate) {
+			messageDom.appendChild(this.createCoordinate(messages[k].coordinate));
 			messageDom.appendChild(document.createTextNode(" "));
 			continue;
 		}
@@ -338,6 +360,10 @@ Chat.prototype.createEmote = function createEmote (name, url) {
 
 	return img;
 };
+
+Chat.prototype.createCoordinate = function createCoordinate (coordinate) {
+
+}
 
 Chat.prototype.sendChat = function sendChat () {
 	this.onMessage(this.input.value);

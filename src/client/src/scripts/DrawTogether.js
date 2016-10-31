@@ -2220,6 +2220,10 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
 
+	var chatFilter = this.userSettings.addButton("Chat filters", function(){
+		
+	});
+
 	var advancedOptions = QuickSettings.create(30, 10, "Advanced options");
 	advancedOptions.hide();
 	this.advancedOptions = advancedOptions;
