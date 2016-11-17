@@ -1140,6 +1140,10 @@ input.paint-texttool {
   min-width: 0px;
 }
 
+.reg-editpermissions-button img {
+  vertical-align:middle;
+}
+
 .reg-delete-button {
   display: inline-block;
   min-width: 0px;
