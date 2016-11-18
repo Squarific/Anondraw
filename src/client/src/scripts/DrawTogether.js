@@ -2377,15 +2377,54 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 
 	chatFilterOptions.addElement("",ChatFilterListContainer);
 
-	chatFilterOptions.reload = function chatFilterOptionsReload() {//naming just for stack trace
-		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
-		for(var i = 0; i < clonedPlayerList.length; i++) {
-
+	chatFilterOptions.reload = function chatFilterOptionsReload() { //naming just for stack trace
+		while (chatFilterByPlayerTable.children.length > 1) {
+			chatFilterByPlayerTable.removeChild(chatFilterByPlayerTable.children[1]);
 		}
-	}
+
+		var chatFilterByPlayerArrStringified = localStorage.getItem("chatFilterByPlayerArr");
+		var chatFilterByPlayerArr = [];
+
+		chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
+		if(!chatFilterByPlayerArr)
+			chatFilterByPlayerArr = [];
+
+		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
+
+		for(var i = 0; i < clonedPlayerList.length; i++) {
+			console.log(clonedPlayerList[i]);
+			var userid = clonedPlayerList[i].userid;
+			var nameInput = clonedPlayerList[i].name;
+			var visibility = 100;
+			var mute = false;
+			var globalNotification = false;
+			var overrideMute = false;
+			for(var k = 0; k < chatFilterByPlayerArr.length; k++){
+				if(chatFilterByPlayerArr[k].userid === clonedPlayerList[i].userid){ // found 
+					nameInput += "(" + chatFilterByPlayerArr[k] + ")";
+					visibility = chatFilterByPlayerArr[k].visibility;
+					mute = chatFilterByPlayerArr[k].mute;
+					globalNotification = chatFilterByPlayerArr[k].globalNotification;
+					overrideMute = chatFilterByPlayerArr[k].overrideMute;
+					chatFilterByPlayerArr.splice(k, 1); //remove from array
+				}
+			}
+			var row = chatFilterByPlayerTable.appendChild(document.createElement("tr"));
+			this.createFilterByPlayerRow(
+				row,
+				userid,
+				nameInput,
+				visibility,
+				mute,
+				globalNotification,
+				overrideMute
+				);
+		}
+	}.bind(this);
 
 	chatFilterOptions.addButton("Close", function () {
 		chatFilterOptions.hide();
+		chatFilterOptions.reload();
 	}.bind(this));
 
 	//Button itself----------------------------------------
@@ -2395,6 +2434,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 
 	openChatFilterButton.addEventListener("click", function () {
 		this.closeSettingsWindow();
+		chatFilterOptions.reload();
 		chatFilterOptions.show();
 	}.bind(this));
 	
@@ -2430,6 +2470,25 @@ DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr (addEm
 	return chatFilterByWordsArr;
 };
 
+DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRow (newPlayerRow, userid, name, visibility, mute, globalNotification, overrideMute ) {
+	newPlayerRow.dataset.userid = userid;
+
+	var nameRowData1 = newPlayerRow.appendChild(document.createElement("td"));
+	var nameLabel = nameRowData1.appendChild(document.createElement("label"));
+	var nameText = nameLabel.appendChild(document.createTextNode(name));
+
+	var visibilityRowData2 = newPlayerRow.appendChild(document.createElement("td"));
+	var visibilitySlider = visibilityRowData2.appendChild(document.createElement("input"));
+	visibilitySlider.type = "range";
+	visibilitySlider.className = "chat-filter-visibility";
+	visibilitySlider.value = visibility || 100;
+	visibilitySlider.addEventListener("change", function (e) {
+		//var chatFilterByWordsArr = this.getFilterByWordsArr();
+		//chatFilterByWordsArr[index].visibility = newWordVisibilitySlider.value;
+		//localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+	}.bind(this));
+};
+
 DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (newWordRow, index, inputText, looseMatch, visibility, mute, globalNotification, overrideMute) {
 	newWordRow.dataset.index = index;
 
@@ -2448,7 +2507,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	var newWordRowData2 = newWordRow.appendChild(document.createElement("td"));
 	var looseMatchCheckbox = newWordRowData2.appendChild(document.createElement("input"));
 	looseMatchCheckbox.type = "checkbox";
-	looseMatchCheckbox.className = "chat-filter-word-looseMatch";
+	looseMatchCheckbox.className = "chat-filter-looseMatch";
 	looseMatchCheckbox.checked = looseMatch;
 	looseMatchCheckbox.addEventListener("change", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
@@ -2459,7 +2518,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	var newWordRowData3 = newWordRow.appendChild(document.createElement("td"));
 	var newWordVisibilitySlider = newWordRowData3.appendChild(document.createElement("input"));
 	newWordVisibilitySlider.type = "range";
-	newWordVisibilitySlider.className = "chat-filter-word-visibility";
+	newWordVisibilitySlider.className = "chat-filter-visibility";
 	newWordVisibilitySlider.value = visibility || 100;
 	newWordVisibilitySlider.addEventListener("change", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
@@ -2470,7 +2529,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	var newWordRowData4 = newWordRow.appendChild(document.createElement("td"));
 	var muteCheckbox = newWordRowData4.appendChild(document.createElement("input"));
 	muteCheckbox.type = "checkbox";
-	muteCheckbox.className = "chat-filter-word-mute";
+	muteCheckbox.className = "chat-filter-mute";
 	muteCheckbox.checked = !mute;
 	muteCheckbox.addEventListener("change", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
@@ -2481,7 +2540,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	var newWordRowData5 = newWordRow.appendChild(document.createElement("td"));
 	var globalNotificationCheckbox = newWordRowData5.appendChild(document.createElement("input"));
 	globalNotificationCheckbox.type = "checkbox";
-	globalNotificationCheckbox.className = "chat-filter-word-globalNotification";
+	globalNotificationCheckbox.className = "chat-filter-globalNotification";
 	globalNotificationCheckbox.checked = globalNotification;
 	globalNotificationCheckbox.addEventListener("change", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
@@ -2495,7 +2554,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	var newWordRowData6 = newWordRow.appendChild(document.createElement("td"));
 	var overrideMuteChatCheckbox = newWordRowData6.appendChild(document.createElement("input"));
 	overrideMuteChatCheckbox.type = "checkbox";
-	overrideMuteChatCheckbox.className = "chat-filter-word-overrideMute";
+	overrideMuteChatCheckbox.className = "chat-filter-overrideMute";
 	overrideMuteChatCheckbox.checked = overrideMute;
 	overrideMuteChatCheckbox.addEventListener("change", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
@@ -2506,7 +2565,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	var newWordRowData7 = newWordRow.appendChild(document.createElement("td"));
 	var removeRowButton = newWordRowData7.appendChild(document.createElement("button"));
 	removeRowButton.appendChild(document.createTextNode("X"));
-	removeRowButton.className = "chat-filter-word-removeRow";
+	removeRowButton.className = "chat-filter-removeRow";
 	removeRowButton.addEventListener("click", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
 		chatFilterByWordsArr.splice(index, 1);
