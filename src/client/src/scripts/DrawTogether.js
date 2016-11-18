@@ -818,6 +818,11 @@ DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
 	ga("send", "event", "openwindow", "settings");
 };
 
+DrawTogether.prototype.openChatFilterWindow = function openChatFilterWindow () {
+	this.chatFilterOptions.style.display = "block";
+	ga("send", "event", "openwindow", "chatFilter");
+};
+
 DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	this.shareWindow.style.display = "block";
 	ga("send", "event", "openwindow", "share");
@@ -859,6 +864,10 @@ DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
 
 DrawTogether.prototype.openModeSelector = function openModeSelector () {
 	this.selectWindow.style.display = "block";
+};
+
+DrawTogether.prototype.closeChatFilterWindow = function closeChatFilterWindow () {
+	this.chatFilterOptions.style.display = "";
 };
 
 DrawTogether.prototype.closeSettingsWindow = function closeSettingsWindow () {
@@ -2264,11 +2273,251 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.closeSettingsWindow();
 		advancedOptions.show();
 	}.bind(this));
+
+	var chatFilterOptions = QuickSettings.create(30, 10, "Chat filter options");
+	chatFilterOptions.hide();
+	this.chatFilterOptions = chatFilterOptions;
+
+	var ChatFilterListContainer = document.createElement("div");
+	ChatFilterListContainer.className = "chat-filter-list-container";
+
+	var chatDefaultsHeader = document.createElement("H3");
+	chatDefaultsHeader.appendChild(document.createTextNode("Chat Defaults:"));
+	ChatFilterListContainer.appendChild(chatDefaultsHeader);
+
+	var muteNewPeopleLabel = ChatFilterListContainer.appendChild(document.createElement("label"));
+	muteNewPeopleLabel.appendChild(document.createTextNode("Mute new people"));
+
+	var muteNewPeopleCheckbox = muteNewPeopleLabel.appendChild(document.createElement("input"));
+	muteNewPeopleCheckbox.type = "checkbox";
+
+	var chatFilterByWordsHeader = document.createElement("H3");
+	chatFilterByWordsHeader.appendChild(document.createTextNode("Filter by Words/Phrases options:"));
+	ChatFilterListContainer.appendChild(chatFilterByWordsHeader);
+
+	var chatFilterByWordsTableWrapper = ChatFilterListContainer.appendChild(document.createElement("div"));
+	chatFilterByWordsTableWrapper.className = "chat-filter-wrapper";
+
+	var chatFilterByWordsTable = chatFilterByWordsTableWrapper.appendChild(document.createElement("table"));
+	chatFilterByWordsTable.className = "chat-filter-table";
+	
+	var chatFilterByWordsHeaderRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
+
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Word/Phrase")).parentNode);
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Loose match")).parentNode);
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Visibility")).parentNode);
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("🔊")).parentNode);
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Global notification")).parentNode);
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Override Mute Chat")).parentNode);
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Delete")).parentNode);
+
+	var chatFilterByWordsAddRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
+	var chatFilterByWordsAddRowData = chatFilterByWordsAddRow.appendChild(document.createElement("td"));
+	chatFilterByWordsAddRowData.colSpan = "6";
+
+	var chatFilterByWordsAddRowButton = chatFilterByWordsAddRowData.appendChild(document.createElement("button"));
+	chatFilterByWordsAddRowButton.appendChild(document.createTextNode("V Add Word/Phrase Row V"));
+	chatFilterByWordsAddRowButton.className = "chat-filter-add-word";
+
+	var addEmptyObjectToEnd = true;
+	var chatFilterByWordsArr = this.getFilterByWordsArr();
+
+	for (var k = 0; k < chatFilterByWordsArr.length; k++) {
+		var newWordRow = chatFilterByWordsTable.insertBefore(document.createElement("tr"), chatFilterByWordsAddRow);
+		this.createFilterByWordRow(
+			newWordRow,
+			k,
+			chatFilterByWordsArr[k].inputText,
+			chatFilterByWordsArr[k].looseMatch,
+			chatFilterByWordsArr[k].visibility,
+			chatFilterByWordsArr[k].mute,
+			chatFilterByWordsArr[k].globalNotification,
+			chatFilterByWordsArr[k].overrideMute
+			);
+	}
+
+	chatFilterByWordsAddRowButton.addEventListener("click", function (e) {
+		var newWordRow = chatFilterByWordsTable.insertBefore(document.createElement("tr"), chatFilterByWordsAddRow);
+
+		var addEmptyObjectToEnd = true;
+		var chatFilterByWordsArr = this.getFilterByWordsArr(addEmptyObjectToEnd);
+
+		var index = chatFilterByWordsArr.length - 1;
+
+		this.createFilterByWordRow(
+				newWordRow,
+				index,
+				chatFilterByWordsArr[index].inputText,
+				chatFilterByWordsArr[index].looseMatch,
+				chatFilterByWordsArr[index].visibility,
+				chatFilterByWordsArr[index].mute,
+				chatFilterByWordsArr[index].globalNotification,
+				chatFilterByWordsArr[index].overrideMute
+				);
+		console.log(JSON.stringify(chatFilterByWordsArr));
+
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+	}.bind(this));
+
+	var chatFilterByPlayerHeader = document.createElement("H3");
+	chatFilterByPlayerHeader.appendChild(document.createTextNode("Player filter options:"));
+	ChatFilterListContainer.appendChild(chatFilterByPlayerHeader);
+
+	var chatFilterByPlayerTable = ChatFilterListContainer.appendChild(document.createElement("table"));
+	chatFilterByPlayerTable.className = "chat-filter-table chat-filter-player-table";
+	
+	var chatFilterByPlayerHeaderRow = chatFilterByPlayerTable.appendChild(document.createElement("tr"));
+
+	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Name")).parentNode);
+	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Visibility")).parentNode);
+	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("🔊")).parentNode);
+	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Global notification")).parentNode);
+	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Override Mute Chat")).parentNode);
+	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Delete")).parentNode);
+
+	chatFilterOptions.addElement("",ChatFilterListContainer);
+
+	chatFilterOptions.reload = function chatFilterOptionsReload() {//naming just for stack trace
+		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
+		for(var i = 0; i < clonedPlayerList.length; i++) {
+
+		}
+	}
+
+	chatFilterOptions.addButton("Close", function () {
+		chatFilterOptions.hide();
+	}.bind(this));
+
+	//Button itself----------------------------------------
+	var openChatFilterButton = settingsContainer.appendChild(document.createElement("div"));
+	openChatFilterButton.appendChild(document.createTextNode("Open chat filter options"));
+	openChatFilterButton.className = "drawtogether-button";
+
+	openChatFilterButton.addEventListener("click", function () {
+		this.closeSettingsWindow();
+		chatFilterOptions.show();
+	}.bind(this));
 	
 	var close = settingsContainer.appendChild(document.createElement("div"));
 	close.appendChild(document.createTextNode("Close settings window"))
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeSettingsWindow.bind(this));
+};
+
+DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr (addEmptyObjectToEnd){
+	var chatFilterByWordsArrStringified = localStorage.getItem("chatFilterByWordsArr");
+	var chatFilterByWordsArr = [];
+
+	if(chatFilterByWordsArrStringified){
+		chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
+		if(!chatFilterByWordsArr || !chatFilterByWordsArr.length || chatFilterByWordsArr.length < 1 || typeof chatFilterByWordsArr[0] !== "object"){
+			chatFilterByWordsArr = []; // reset array
+			addEmptyObjectToEnd = true
+		}
+		
+		if(addEmptyObjectToEnd){
+			chatFilterByWordsArr.push({
+				inputText: "",
+				looseMatch: true,
+				visibility: 100,
+				mute: false,
+				globalNotification: false,
+				overrideMute: false
+			});
+
+			localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr)); // resanitize array
+		}
+	}
+
+	return chatFilterByWordsArr;
+};
+
+DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (newWordRow, index, inputText, looseMatch, visibility, mute, globalNotification, overrideMute) {
+	newWordRow.dataset.index = index;
+
+	var newWordRowData1 = newWordRow.appendChild(document.createElement("td"));
+	var newWordInputText = newWordRowData1.appendChild(document.createElement("input"));
+	newWordInputText.type = "text";
+	newWordInputText.className = "chat-filter-word-input";
+	newWordInputText.value = inputText || "";
+	newWordInputText.addEventListener("change", function (e) {
+		var chatFilterByWordsArr = this.getFilterByWordsArr();
+		chatFilterByWordsArr[index].inputText = newWordInputText.value;
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+	}.bind(this));
+
+	var newWordRowData2 = newWordRow.appendChild(document.createElement("td"));
+	var looseMatchCheckbox = newWordRowData2.appendChild(document.createElement("input"));
+	looseMatchCheckbox.type = "checkbox";
+	looseMatchCheckbox.className = "chat-filter-word-looseMatch";
+	looseMatchCheckbox.checked = looseMatch;
+	looseMatchCheckbox.addEventListener("change", function (e) {
+		var chatFilterByWordsArr = this.getFilterByWordsArr();
+		chatFilterByWordsArr[index].looseMatch = looseMatchCheckbox.checked;
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+	}.bind(this));
+
+	var newWordRowData3 = newWordRow.appendChild(document.createElement("td"));
+	var newWordVisibilitySlider = newWordRowData3.appendChild(document.createElement("input"));
+	newWordVisibilitySlider.type = "range";
+	newWordVisibilitySlider.className = "chat-filter-word-visibility";
+	newWordVisibilitySlider.value = visibility || 100;
+	newWordVisibilitySlider.addEventListener("change", function (e) {
+		var chatFilterByWordsArr = this.getFilterByWordsArr();
+		chatFilterByWordsArr[index].visibility = newWordVisibilitySlider.value;
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+	}.bind(this));
+
+	var newWordRowData4 = newWordRow.appendChild(document.createElement("td"));
+	var muteCheckbox = newWordRowData4.appendChild(document.createElement("input"));
+	muteCheckbox.type = "checkbox";
+	muteCheckbox.className = "chat-filter-word-mute";
+	muteCheckbox.checked = !mute;
+	muteCheckbox.addEventListener("change", function (e) {
+		var chatFilterByWordsArr = this.getFilterByWordsArr();
+		chatFilterByWordsArr[index].mute = !muteCheckbox.checked;
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+	}.bind(this));
+
+	var newWordRowData5 = newWordRow.appendChild(document.createElement("td"));
+	var globalNotificationCheckbox = newWordRowData5.appendChild(document.createElement("input"));
+	globalNotificationCheckbox.type = "checkbox";
+	globalNotificationCheckbox.className = "chat-filter-word-globalNotification";
+	globalNotificationCheckbox.checked = globalNotification;
+	globalNotificationCheckbox.addEventListener("change", function (e) {
+		var chatFilterByWordsArr = this.getFilterByWordsArr();
+		chatFilterByWordsArr[index].globalNotification = globalNotificationCheckbox.checked;
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+
+		if (Notification.permission !== "granted")
+			Notification.requestPermission();
+	}.bind(this));
+
+	var newWordRowData6 = newWordRow.appendChild(document.createElement("td"));
+	var overrideMuteChatCheckbox = newWordRowData6.appendChild(document.createElement("input"));
+	overrideMuteChatCheckbox.type = "checkbox";
+	overrideMuteChatCheckbox.className = "chat-filter-word-overrideMute";
+	overrideMuteChatCheckbox.checked = overrideMute;
+	overrideMuteChatCheckbox.addEventListener("change", function (e) {
+		var chatFilterByWordsArr = this.getFilterByWordsArr();
+		chatFilterByWordsArr[index].overrideMute = overrideMuteChatCheckbox.checked;
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+	}.bind(this));
+
+	var newWordRowData7 = newWordRow.appendChild(document.createElement("td"));
+	var removeRowButton = newWordRowData7.appendChild(document.createElement("button"));
+	removeRowButton.appendChild(document.createTextNode("X"));
+	removeRowButton.className = "chat-filter-word-removeRow";
+	removeRowButton.addEventListener("click", function (e) {
+		var chatFilterByWordsArr = this.getFilterByWordsArr();
+		chatFilterByWordsArr.splice(index, 1);
+		if(chatFilterByWordsArr.length < 1){
+			var addEmptyObjectToEnd = true;
+			chatFilterByWordsArr = this.getFilterByWordsArr(addEmptyObjectToEnd);
+		}
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
+		newWordRow.parentNode.removeChild(newWordRow);//stupid as shit
+	}.bind(this));
 };
 
 DrawTogether.prototype.createAccountWindow = function createAccountWindow () {

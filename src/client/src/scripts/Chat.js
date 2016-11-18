@@ -252,14 +252,44 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 		userSpan.appendChild(document.createTextNode(user + ": "));
 		userSpan.style.color = this.string2Color(user);
 	}
+	var chatFilterByWordsArrStringified = localStorage.getItem("chatFilterByWordsArr");
+	chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
+
+	var overrideMuteAll = false;
+	var mute = false;
+	var globalNotification = false;
+
+	for (var k = 0; k < chatFilterByWordsArr.length; k++){
+		if (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1) {
+			console.log("has text" + chatFilterByWordsArr[k].inputText);
+			messageDom.style.opacity = chatFilterByWordsArr[k].visibility * 0.01; // 100 to 1.0
+			if (chatFilterByWordsArr[k].overrideMute)
+				overrideMuteAll = true;
+			if (chatFilterByWordsArr[k].mute)
+				mute = true;
+			if (chatFilterByWordsArr[k].globalNotification)
+				globalNotification = true;
+
+		}
+	}
 
 	this.addMessageToDom(messageDom, message);
 	messageDom.title = time;
 	messageDom.alt = time;
 
 	// Only play audio if it was a normal message
-	if (user !== message && !this.userSettings.getBoolean("Mute chat"))
+	if (user !== message && ( !this.userSettings.getBoolean("Mute chat") || overrideMuteAll ) && !mute)
 		this.messageSound.play();
+	if(globalNotification){
+		if (Notification.permission !== "granted")
+			Notification.requestPermission();
+		else {
+			var notification = new Notification('Notification title', {
+				icon: 'http://www.anondraw.com/favicon.ico',
+				body: user + ": " + message,
+			});
+		}
+	}
 };
 
 Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
@@ -285,6 +315,7 @@ Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) 
 		// Replace if url
 		if (this.urlRegex.test(messages[k]))
 			messages[k] = { url: messages[k] };
+
 	}
 
 	this.addMessageList(messageDom, messages);
