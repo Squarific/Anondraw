@@ -2438,6 +2438,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	newWordInputText.type = "text";
 	newWordInputText.className = "chat-filter-word-input";
 	newWordInputText.value = inputText || "";
+	newWordInputText.placeholder = "Enter at least one character";
 	newWordInputText.addEventListener("change", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
 		chatFilterByWordsArr[index].inputText = newWordInputText.value;
