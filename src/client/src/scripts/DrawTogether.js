@@ -2408,25 +2408,23 @@ DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr (addEm
 	var chatFilterByWordsArrStringified = localStorage.getItem("chatFilterByWordsArr");
 	var chatFilterByWordsArr = [];
 
-	if(chatFilterByWordsArrStringified){
-		chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
-		if(!chatFilterByWordsArr || !chatFilterByWordsArr.length || chatFilterByWordsArr.length < 1 || typeof chatFilterByWordsArr[0] !== "object"){
-			chatFilterByWordsArr = []; // reset array
-			addEmptyObjectToEnd = true
-		}
-		
-		if(addEmptyObjectToEnd){
-			chatFilterByWordsArr.push({
-				inputText: "",
-				looseMatch: true,
-				visibility: 100,
-				mute: false,
-				globalNotification: false,
-				overrideMute: false
-			});
+	chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
+	if(!chatFilterByWordsArr || !chatFilterByWordsArr.length || chatFilterByWordsArr.length < 1 || typeof chatFilterByWordsArr[0] !== "object"){
+		chatFilterByWordsArr = []; // reset array
+		addEmptyObjectToEnd = true
+	}
 
-			localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr)); // resanitize array
-		}
+	if(addEmptyObjectToEnd){
+		chatFilterByWordsArr.push({
+			inputText: "",
+			looseMatch: true,
+			visibility: 100,
+			mute: false,
+			globalNotification: false,
+			overrideMute: false
+		});
+
+	localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr)); // resanitize array
 	}
 
 	return chatFilterByWordsArr;

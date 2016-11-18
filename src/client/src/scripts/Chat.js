@@ -253,12 +253,13 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 		userSpan.style.color = this.string2Color(user);
 	}
 	var chatFilterByWordsArrStringified = localStorage.getItem("chatFilterByWordsArr");
-	chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
+	if(chatFilterByWordsArrStringified)
+		var chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
 
 	var overrideMuteAll = false;
 	var mute = false;
 	var globalNotification = false;
-
+	if(chatFilterByWordsArr)
 	for (var k = 0; k < chatFilterByWordsArr.length; k++){
 		if (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1) {
 			console.log("has text" + chatFilterByWordsArr[k].inputText);
