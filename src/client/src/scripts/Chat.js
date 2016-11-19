@@ -235,7 +235,7 @@ Chat.prototype.emotesHash = {
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
 
-Chat.prototype.addMessage = function addMessage (user, message, userid, ukey) {
+Chat.prototype.addMessage = function addMessage (user, message, userid, socketid) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
 	messageDom.classList.add("chat-message");
 
@@ -278,10 +278,17 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, ukey) {
 		var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
 	if(chatFilterByPlayerArr)
 	for (var k = 0; k < chatFilterByPlayerArr.length; k++){
-		var ukeyMatches = chatFilterByPlayerArr[k].ukey && chatFilterByPlayerArr[k].ukey == ukey;
+		console.log("PlayerArr", chatFilterByPlayerArr[k].userid,userid, chatFilterByPlayerArr[k].ukey, socketid)
+		var ukeyMatches = chatFilterByPlayerArr[k].ukey && chatFilterByPlayerArr[k].ukey == socketid;
 		var useridMatches = chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userid;
 		if (useridMatches || ukeyMatches) {
 			messageDom.style.opacity = chatFilterByPlayerArr[k].visibility * 0.01; // 100 to 1.0
+			if (chatFilterByPlayerArr[k].overrideMute)
+				overrideMuteAll = true;
+			if (chatFilterByPlayerArr[k].mute)
+				mute = true;
+			if (chatFilterByPlayerArr[k].globalNotification)
+				globalNotification = true;
 			console.log("found");
 		}
 

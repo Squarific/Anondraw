@@ -550,12 +550,13 @@ Protocol.prototype.bindIO = function bindIO () {
 					return;
 			 	}
 			}
+			console.log("message sent", socket.name,message,socket.userid, socket.id);
 
 			protocol.sendChatMessage(socket.room ,{
 				user: socket.name,
 				message: message,
 				userid: socket.userid,
-				ukey: socket.uKey
+				id: socket.id
 			});
 		});
 

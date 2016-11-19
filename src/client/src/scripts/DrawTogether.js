@@ -475,7 +475,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	// chat events
 	this.network.on("chatmessage", function (data) {
 		var data = data || {};
-		self.chat.addMessage(data.user, data.message, data.userid, data.ukey);
+		self.chat.addMessage(data.user, data.message, data.userid, data.id);
 	});
 
 	this.network.on("emote", function (data) {
@@ -2476,7 +2476,7 @@ DrawTogether.prototype.getFilterByPlayerArr = function getFilterByPlayerArr (pla
 		if (!chatFilterByPlayerArr[i].userid) {
 			var found = false;
 			for (var k = 0; k < playerlist.length; k++) {
-				if(chatFilterByPlayerArr[i].ukey == playerlist[k].ukey)
+				if(chatFilterByPlayerArr[i].ukey == playerlist[k].id)
 					found = true;
 			}
 			if(!found){
