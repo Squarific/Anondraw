@@ -2362,7 +2362,10 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	chatFilterByPlayerHeader.appendChild(document.createTextNode("Player filter options:"));
 	ChatFilterListContainer.appendChild(chatFilterByPlayerHeader);
 
-	var chatFilterByPlayerTable = ChatFilterListContainer.appendChild(document.createElement("table"));
+	var chatFilterByPlayerTableWrapper = ChatFilterListContainer.appendChild(document.createElement("div"));
+	chatFilterByPlayerTableWrapper.className = "chat-filter-wrapper";
+
+	var chatFilterByPlayerTable = chatFilterByPlayerTableWrapper.appendChild(document.createElement("table"));
 	chatFilterByPlayerTable.className = "chat-filter-table chat-filter-player-table";
 	
 	var chatFilterByPlayerHeaderRow = chatFilterByPlayerTable.appendChild(document.createElement("tr"));
