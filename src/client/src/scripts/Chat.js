@@ -324,7 +324,7 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		if (Notification.permission !== "granted")
 			Notification.requestPermission();
 		else {
-			if (document[hidden]) {
+			if (document[this.hidden]) {
 				var notification = new Notification(user + ":", {
 					icon: 'http://www.anondraw.com/favicon.ico',
 					body: message,
