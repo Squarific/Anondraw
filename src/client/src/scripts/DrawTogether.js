@@ -3415,9 +3415,8 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Fixed bug that prevented lines from being saved",
-					"It is now possible to manage regions and their permissions.",
-					"Anyone with 30R+ can make a single protected region now! The region size limit is scaled with rep."];
+	var features = ["Added Chat Filter! Settings -> Chat filter options",
+					"This allows you to locally filter chat phrases/words and people."];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
