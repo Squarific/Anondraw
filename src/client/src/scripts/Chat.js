@@ -235,7 +235,7 @@ Chat.prototype.emotesHash = {
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
 
-Chat.prototype.addMessage = function addMessage (user, message) {
+Chat.prototype.addMessage = function addMessage (user, message, userid, ukey) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
 	messageDom.classList.add("chat-message");
 
@@ -261,7 +261,6 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 	var globalNotification = false;
 	if(chatFilterByWordsArr)
 	for (var k = 0; k < chatFilterByWordsArr.length; k++){
-		if (chatFilterByWordsArr[k].inputText.length > 1)
 		if (chatFilterByWordsArr[k].inputText.length > 1 && message.indexOf(chatFilterByWordsArr[k].inputText) !== -1) {
 			console.log("has text" + chatFilterByWordsArr[k].inputText);
 			messageDom.style.opacity = chatFilterByWordsArr[k].visibility * 0.01; // 100 to 1.0
@@ -271,9 +270,23 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 				mute = true;
 			if (chatFilterByWordsArr[k].globalNotification)
 				globalNotification = true;
-
 		}
 	}
+
+	var chatFilterByPlayerArrStringified = localStorage.getItem("chatFilterByPlayerArr");
+	if(chatFilterByPlayerArrStringified)
+		var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
+	if(chatFilterByPlayerArr)
+	for (var k = 0; k < chatFilterByPlayerArr.length; k++){
+		var ukeyMatches = chatFilterByPlayerArr[k].ukey && chatFilterByPlayerArr[k].ukey == ukey;
+		var useridMatches = chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userid;
+		if (useridMatches || ukeyMatches) {
+			messageDom.style.opacity = chatFilterByPlayerArr[k].visibility * 0.01; // 100 to 1.0
+			console.log("found");
+		}
+
+	}
+	console.log("userid", userid);
 
 	this.addMessageToDom(messageDom, message);
 	messageDom.title = time;
