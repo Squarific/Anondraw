@@ -2281,15 +2281,15 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var ChatFilterListContainer = document.createElement("div");
 	ChatFilterListContainer.className = "chat-filter-list-container";
 
-	var chatDefaultsHeader = document.createElement("H3");
-	chatDefaultsHeader.appendChild(document.createTextNode("Chat Defaults:"));
-	ChatFilterListContainer.appendChild(chatDefaultsHeader);
+	//var chatDefaultsHeader = document.createElement("H3");
+	//chatDefaultsHeader.appendChild(document.createTextNode("Chat Defaults:"));
+	//ChatFilterListContainer.appendChild(chatDefaultsHeader);
 
-	var muteNewPeopleLabel = ChatFilterListContainer.appendChild(document.createElement("label"));
-	muteNewPeopleLabel.appendChild(document.createTextNode("Mute new people"));
+	//var muteNewPeopleLabel = ChatFilterListContainer.appendChild(document.createElement("label"));
+	//muteNewPeopleLabel.appendChild(document.createTextNode("Mute new people"));
 
-	var muteNewPeopleCheckbox = muteNewPeopleLabel.appendChild(document.createElement("input"));
-	muteNewPeopleCheckbox.type = "checkbox";
+	//var muteNewPeopleCheckbox = muteNewPeopleLabel.appendChild(document.createElement("input"));
+	//muteNewPeopleCheckbox.type = "checkbox";
 
 	var chatFilterByWordsHeader = document.createElement("H3");
 	chatFilterByWordsHeader.appendChild(document.createTextNode("Filter by Words/Phrases options:"));
@@ -2304,7 +2304,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var chatFilterByWordsHeaderRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
 
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Word/Phrase")).parentNode);
-	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Loose match")).parentNode);
+	//chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Loose match")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Visibility")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("🔊")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Global notification")).parentNode);
@@ -2313,7 +2313,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 
 	var chatFilterByWordsAddRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
 	var chatFilterByWordsAddRowData = chatFilterByWordsAddRow.appendChild(document.createElement("td"));
-	chatFilterByWordsAddRowData.colSpan = "6";
+	chatFilterByWordsAddRowData.colSpan = "5";
 
 	var chatFilterByWordsAddRowButton = chatFilterByWordsAddRowData.appendChild(document.createElement("button"));
 	chatFilterByWordsAddRowButton.appendChild(document.createTextNode("V Add Word/Phrase Row V"));
@@ -2328,7 +2328,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			newWordRow,
 			k,
 			chatFilterByWordsArr[k].inputText,
-			chatFilterByWordsArr[k].looseMatch,
+			//chatFilterByWordsArr[k].looseMatch,
 			chatFilterByWordsArr[k].visibility,
 			chatFilterByWordsArr[k].mute,
 			chatFilterByWordsArr[k].globalNotification,
@@ -2348,7 +2348,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 				newWordRow,
 				index,
 				chatFilterByWordsArr[index].inputText,
-				chatFilterByWordsArr[index].looseMatch,
+				//chatFilterByWordsArr[index].looseMatch,
 				chatFilterByWordsArr[index].visibility,
 				chatFilterByWordsArr[index].mute,
 				chatFilterByWordsArr[index].globalNotification,
@@ -2513,7 +2513,7 @@ DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr (addEm
 	if(addEmptyObjectToEnd){
 		chatFilterByWordsArr.push({
 			inputText: "",
-			looseMatch: true,
+			//looseMatch: true,
 			visibility: 100,
 			mute: false,
 			globalNotification: false,
@@ -2658,7 +2658,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	}.bind(this));
 };
 
-DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (newWordRow, index, inputText, looseMatch, visibility, mute, globalNotification, overrideMute) {
+DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (newWordRow, index, inputText/*, looseMatch*/, visibility, mute, globalNotification, overrideMute) {
 	newWordRow.dataset.index = index;
 
 	var newWordRowData1 = newWordRow.appendChild(document.createElement("td"));
@@ -2673,7 +2673,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
 	}.bind(this));
 
-	var newWordRowData2 = newWordRow.appendChild(document.createElement("td"));
+	/*var newWordRowData2 = newWordRow.appendChild(document.createElement("td"));
 	var looseMatchCheckbox = newWordRowData2.appendChild(document.createElement("input"));
 	looseMatchCheckbox.type = "checkbox";
 	looseMatchCheckbox.className = "chat-filter-looseMatch";
@@ -2683,6 +2683,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 		chatFilterByWordsArr[index].looseMatch = looseMatchCheckbox.checked;
 		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
 	}.bind(this));
+	*/
 
 	var newWordRowData3 = newWordRow.appendChild(document.createElement("td"));
 	var newWordVisibilitySlider = newWordRowData3.appendChild(document.createElement("input"));
