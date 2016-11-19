@@ -2354,7 +2354,6 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 				chatFilterByWordsArr[index].globalNotification,
 				chatFilterByWordsArr[index].overrideMute
 				);
-		console.log(JSON.stringify(chatFilterByWordsArr));
 
 		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
 	}.bind(this));
@@ -2386,7 +2385,6 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr(clonedPlayerList);
 
 		for (var i = 0; i < clonedPlayerList.length; i++) {
-			console.log(clonedPlayerList[i]);
 			var userid = clonedPlayerList[i].userid;
 			var nameInput = clonedPlayerList[i].name;
 			var visibility = 100;

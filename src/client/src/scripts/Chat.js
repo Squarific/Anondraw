@@ -306,11 +306,8 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 				mute = true;
 			if (chatFilterByPlayerArr[k].globalNotification)
 				globalNotification = true;
-			console.log("found");
 		}
-
 	}
-	console.log("userid", userid);
 
 	this.addMessageToDom(messageDom, message);
 	messageDom.title = time;
