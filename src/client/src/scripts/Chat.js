@@ -261,7 +261,10 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	var globalNotification = false;
 	if(chatFilterByWordsArr)
 	for (var k = 0; k < chatFilterByWordsArr.length; k++){
-		if (chatFilterByWordsArr[k].inputText.length > 1 && message.indexOf(chatFilterByWordsArr[k].inputText) !== -1) {
+		
+		var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
+
+		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
 			console.log("has text" + chatFilterByWordsArr[k].inputText);
 			messageDom.style.opacity = chatFilterByWordsArr[k].visibility * 0.01; // 100 to 1.0
 			if (chatFilterByWordsArr[k].overrideMute)
