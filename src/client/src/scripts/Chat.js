@@ -27,6 +27,20 @@ function Chat (container, onmessage, userSettings) {
 
 	this.onMessage = onmessage || function () {};
 	this.messageSound = new Audio("sounds/message.wav");
+
+	//Visibility compatibility 
+	// Set the name of the hidden property and the change event for visibility
+	//var this.hidden, this.visibilityChange; 
+	if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+		this.hidden = "hidden";
+		this.visibilityChange = "visibilitychange";
+	} else if (typeof document.msHidden !== "undefined") {
+		this.hidden = "msHidden";
+		this.visibilityChange = "msvisibilitychange";
+	} else if (typeof document.webkitHidden !== "undefined") {
+		this.hidden = "webkitHidden";
+		this.visibilityChange = "webkitvisibilitychange";
+	}
 }
 
 Chat.prototype.string2Color = function string2Color (str) {
@@ -235,7 +249,7 @@ Chat.prototype.emotesHash = {
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
 
-Chat.prototype.addMessage = function addMessage (user, message) {
+Chat.prototype.addMessage = function addMessage (user, message, userid, socketid) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
 	messageDom.classList.add("chat-message");
 
@@ -252,14 +266,71 @@ Chat.prototype.addMessage = function addMessage (user, message) {
 		userSpan.appendChild(document.createTextNode(user + ": "));
 		userSpan.style.color = this.string2Color(user);
 	}
+	var chatFilterByWordsArrStringified = localStorage.getItem("chatFilterByWordsArr");
+	if(chatFilterByWordsArrStringified)
+		var chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
+
+	var overrideMuteAll = false;
+	var mute = false;
+	var globalNotification = false;
+	if(chatFilterByWordsArr)
+	for (var k = 0; k < chatFilterByWordsArr.length; k++){
+
+		var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
+
+		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
+			console.log("has text" + chatFilterByWordsArr[k].inputText);
+			messageDom.style.opacity = chatFilterByWordsArr[k].visibility * 0.01; // 100 to 1.0
+			if (chatFilterByWordsArr[k].overrideMute)
+				overrideMuteAll = true;
+			if (chatFilterByWordsArr[k].mute)
+				mute = true;
+			if (chatFilterByWordsArr[k].globalNotification)
+				globalNotification = true;
+		}
+	}
+
+	var chatFilterByPlayerArrStringified = localStorage.getItem("chatFilterByPlayerArr");
+	if(chatFilterByPlayerArrStringified)
+		var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
+	if(chatFilterByPlayerArr)
+	for (var k = 0; k < chatFilterByPlayerArr.length; k++){
+		console.log("PlayerArr", chatFilterByPlayerArr[k].userid,userid, chatFilterByPlayerArr[k].socketid, socketid)
+		var socketidMatches = chatFilterByPlayerArr[k].socketid && chatFilterByPlayerArr[k].socketid == socketid;
+		var useridMatches = chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userid;
+		if (useridMatches || socketidMatches) {
+			messageDom.style.opacity = chatFilterByPlayerArr[k].visibility * 0.01; // 100 to 1.0
+			if(chatFilterByPlayerArr[k].visibility == 0)
+				messageDom.style.display = "none";
+			if (chatFilterByPlayerArr[k].overrideMute)
+				overrideMuteAll = true;
+			if (chatFilterByPlayerArr[k].mute)
+				mute = true;
+			if (chatFilterByPlayerArr[k].globalNotification)
+				globalNotification = true;
+		}
+	}
 
 	this.addMessageToDom(messageDom, message);
 	messageDom.title = time;
 	messageDom.alt = time;
 
 	// Only play audio if it was a normal message
-	if (user !== message && !this.userSettings.getBoolean("Mute chat"))
+	if (user !== message && ( !this.userSettings.getBoolean("Mute chat") || overrideMuteAll ) && !mute)
 		this.messageSound.play();
+	if(globalNotification){
+
+		if (Notification.permission !== "granted")
+			Notification.requestPermission();
+		else {
+			if (document[this.hidden]) {
+				var notification = new Notification(user + ":", {
+					icon: 'http://www.anondraw.com/favicon.ico',
+					body: message,
+				});
+			}
+		}
+	}
 };
 
 Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
@@ -285,6 +356,7 @@ Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) 
 		// Replace if url
 		if (this.urlRegex.test(messages[k]))
 			messages[k] = { url: messages[k] };
+
 	}
 
 	this.addMessageList(messageDom, messages);

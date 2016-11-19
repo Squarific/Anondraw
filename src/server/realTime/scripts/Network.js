@@ -553,7 +553,9 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			protocol.sendChatMessage(socket.room ,{
 				user: socket.name,
-				message: message
+				message: message,
+				userid: socket.userid,
+				id: socket.id
 			});
 		});
 

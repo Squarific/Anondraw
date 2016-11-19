@@ -1196,3 +1196,26 @@ input.paint-texttool {
 .region-listbox {
   min-width: 100px;
 }
+
+.chat-filter-table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  overflow-y: scroll;
+
+}
+.chat-filter-wrapper {
+  max-height: 150px;
+  overflow-y: scroll;
+}
+.chat-filter-table td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+.chat-filter-player-table tr td:nth-last-child(-n+3) {
+  text-align: center;
+}
+.chat-filter-add-word {
+  width:100%;
+}
