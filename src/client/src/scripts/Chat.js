@@ -295,10 +295,10 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
 	if(chatFilterByPlayerArr)
 	for (var k = 0; k < chatFilterByPlayerArr.length; k++){
-		console.log("PlayerArr", chatFilterByPlayerArr[k].userid,userid, chatFilterByPlayerArr[k].ukey, socketid)
-		var ukeyMatches = chatFilterByPlayerArr[k].ukey && chatFilterByPlayerArr[k].ukey == socketid;
+		console.log("PlayerArr", chatFilterByPlayerArr[k].userid,userid, chatFilterByPlayerArr[k].socketid, socketid)
+		var socketidMatches = chatFilterByPlayerArr[k].socketid && chatFilterByPlayerArr[k].socketid == socketid;
 		var useridMatches = chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userid;
-		if (useridMatches || ukeyMatches) {
+		if (useridMatches || socketidMatches) {
 			messageDom.style.opacity = chatFilterByPlayerArr[k].visibility * 0.01; // 100 to 1.0
 			if (chatFilterByPlayerArr[k].overrideMute)
 				overrideMuteAll = true;

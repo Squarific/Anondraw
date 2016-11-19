@@ -2391,7 +2391,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			var mute = false;
 			var globalNotification = false;
 			var overrideMute = false;
-			var ukey = clonedPlayerList[i].id;
+			var socketid = clonedPlayerList[i].id;
 
 			for(var k = 0; k < chatFilterByPlayerArr.length; k++){
 				if(chatFilterByPlayerArr[k].userid === clonedPlayerList[i].userid){ // found 
@@ -2413,7 +2413,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 				mute,
 				globalNotification,
 				overrideMute,
-				ukey
+				socketid
 				);
 		}
 
@@ -2474,7 +2474,7 @@ DrawTogether.prototype.getFilterByPlayerArr = function getFilterByPlayerArr (pla
 		if (!chatFilterByPlayerArr[i].userid) {
 			var found = false;
 			for (var k = 0; k < playerlist.length; k++) {
-				if(chatFilterByPlayerArr[i].ukey == playerlist[k].id)
+				if(chatFilterByPlayerArr[i].socketid == playerlist[k].id)
 					found = true;
 			}
 			if(!found){
@@ -2488,9 +2488,9 @@ DrawTogether.prototype.getFilterByPlayerArr = function getFilterByPlayerArr (pla
 	return chatFilterByPlayerArr;
 };
 
-DrawTogether.prototype.searchForPlayerInFilterArr = function searchForPlayerInFilterArr (arr, userid, ukey) {
+DrawTogether.prototype.searchForPlayerInFilterArr = function searchForPlayerInFilterArr (arr, userid, socketid) {
 	for(var i = 0; i < arr.length; i++) {
-		if(ukey && arr[i].ukey == ukey)
+		if(socketid && arr[i].socketid == socketid)
 			return i;
 		if( arr[i].userid == userid )
 			return i
@@ -2524,10 +2524,10 @@ DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr (addEm
 	return chatFilterByWordsArr;
 };
 
-DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRow (newPlayerRow, userid, name, visibility, mute, globalNotification, overrideMute, ukey ) {
+DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRow (newPlayerRow, userid, name, visibility, mute, globalNotification, overrideMute, socketid ) {
 	newPlayerRow.dataset.userid = userid;
-	if(ukey)
-		newPlayerRow.dataset.ukey = ukey;
+	if(socketid)
+		newPlayerRow.dataset.socketid = socketid;
 
 	var nameRowData1 = newPlayerRow.appendChild(document.createElement("td"));
 	var nameLabel = nameRowData1.appendChild(document.createElement("label"));
@@ -2540,7 +2540,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	visibilitySlider.value = visibility || 100;
 	visibilitySlider.addEventListener("change", function (e) {		
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
-		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, ukey)
+		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
 		if(indexOfPlayer == -1)
 		{
 			//create and push player object
@@ -2551,7 +2551,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 				mute: mute,
 				globalNotification: globalNotification,
 				overrideMute: overrideMute,
-				ukey: ukey
+				socketid: socketid
 			}
 			playerObject.visibility = visibilitySlider.value;
 
@@ -2570,7 +2570,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	muteCheckbox.checked = !mute;
 	muteCheckbox.addEventListener("change", function (e) {		
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
-		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, ukey)
+		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
 		if(indexOfPlayer == -1)
 		{
 			//create and push player object
@@ -2581,7 +2581,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 				mute: mute,
 				globalNotification: globalNotification,
 				overrideMute: overrideMute,
-				ukey: ukey
+				socketid: socketid
 			}
 			playerObject.mute = !muteCheckbox.checked;
 
@@ -2600,7 +2600,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	globalNotificationCheckbox.checked = globalNotification;
 	globalNotificationCheckbox.addEventListener("change", function (e) {		
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
-		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, ukey)
+		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
 		if(indexOfPlayer == -1)
 		{
 			//create and push player object
@@ -2611,7 +2611,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 				mute: mute,
 				globalNotification: globalNotification,
 				overrideMute: overrideMute,
-				ukey: ukey
+				socketid: socketid
 			}
 			playerObject.globalNotification = globalNotificationCheckbox.checked;
 
@@ -2632,7 +2632,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	overrideMuteChatCheckbox.checked = overrideMute;
 	overrideMuteChatCheckbox.addEventListener("change", function (e) {		
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
-		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, ukey)
+		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
 		if(indexOfPlayer == -1)
 		{
 			//create and push player object
@@ -2643,7 +2643,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 				mute: mute,
 				globalNotification: globalNotification,
 				overrideMute: overrideMute,
-				ukey: ukey
+				socketid: socketid
 			}
 			playerObject.overrideMute = overrideMuteChatCheckbox.checked;
 
