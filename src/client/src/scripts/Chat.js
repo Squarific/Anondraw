@@ -300,6 +300,8 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		var useridMatches = chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userid;
 		if (useridMatches || socketidMatches) {
 			messageDom.style.opacity = chatFilterByPlayerArr[k].visibility * 0.01; // 100 to 1.0
+			if(chatFilterByPlayerArr[k].visibility == 0)
+				messageDom.style.display = "none";
 			if (chatFilterByPlayerArr[k].overrideMute)
 				overrideMuteAll = true;
 			if (chatFilterByPlayerArr[k].mute)
