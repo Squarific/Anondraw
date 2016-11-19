@@ -27,6 +27,20 @@ function Chat (container, onmessage, userSettings) {
 
 	this.onMessage = onmessage || function () {};
 	this.messageSound = new Audio("sounds/message.wav");
+
+	//Visibility compatibility 
+	// Set the name of the hidden property and the change event for visibility
+	var this.hidden, this.visibilityChange; 
+	if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+		hidden = "hidden";
+		visibilityChange = "visibilitychange";
+	} else if (typeof document.msHidden !== "undefined") {
+		hidden = "msHidden";
+		visibilityChange = "msvisibilitychange";
+	} else if (typeof document.webkitHidden !== "undefined") {
+		hidden = "webkitHidden";
+		visibilityChange = "webkitvisibilitychange";
+	}
 }
 
 Chat.prototype.string2Color = function string2Color (str) {
@@ -261,7 +275,7 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	var globalNotification = false;
 	if(chatFilterByWordsArr)
 	for (var k = 0; k < chatFilterByWordsArr.length; k++){
-		
+
 		var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
 
 		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
@@ -306,13 +320,16 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	if (user !== message && ( !this.userSettings.getBoolean("Mute chat") || overrideMuteAll ) && !mute)
 		this.messageSound.play();
 	if(globalNotification){
+
 		if (Notification.permission !== "granted")
 			Notification.requestPermission();
 		else {
-			var notification = new Notification('Notification title', {
-				icon: 'http://www.anondraw.com/favicon.ico',
-				body: user + ": " + message,
-			});
+			if (document[hidden]) {
+				var notification = new Notification(user + ":", {
+					icon: 'http://www.anondraw.com/favicon.ico',
+					body: message,
+				});
+			}
 		}
 	}
 };
