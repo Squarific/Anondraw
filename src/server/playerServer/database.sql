@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
 	id INT UNSIGNED AUTO_INCREMENT,
 	email VARCHAR(255) UNIQUE,
 	pass VARCHAR(64),
+	referral INT UNSIGNED,
 	PRIMARY KEY(id),
 	INDEX (email, pass)
 );
