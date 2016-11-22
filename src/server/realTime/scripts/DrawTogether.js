@@ -28,6 +28,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
+	this.whoDrewInThisArea(room, {point1:[-500,-500], point2:[500,500]});
 
 	// If we have enough drawings and they are long enough
 	// and if we are not yet sending anything and this is not a gameroom
@@ -84,6 +85,47 @@ DrawTogether.prototype.clear = function clear (room) {
 		delete this.drawings[room];
 		delete this.paths[room];
 	}
+};
+// region example: {point1:[-500,-500], point2:[500,500]}
+DrawTogether.prototype.whoDrewInThisArea = function whoDrewInThisArea(room, region) {
+	//this.removePath(room, socketid);
+	var peopleWhoDrewInTheAreaHash = new Object();
+	if (region.point1[0] > region.point2[0]) {
+		var temp = region.point1[0];
+		region.point1[0] = region.point2[0];
+		region.point2[0] = temp;
+	}
+
+	if (!this.drawings || !this.drawings[room]) return;
+
+	var stop = 0;
+	if (this.drawings[room].sending) {
+		stop = this.drawings[room].sendLength;
+	}
+
+	for (k = this.drawings[room].length - 1; k >= stop; k--) {
+		if(!this.drawings[room][k].points) continue;
+
+		var pointsamt = this.drawings[room][k].points.length;
+		var checkEveryX = Math.round(pointsamt / 5);
+
+		for (var i = this.drawings[room][k].points.length - 1; i >= 0; i -= checkEveryX){
+			if (this.drawings[room][k].points[i][0] >= region.point1[0] 
+				&& this.drawings[room][k].points[i][0] <= region.point2[0] 
+				&& this.drawings[room][k].points[i][1] <= region.point2[1]
+				&& this.drawings[room][k].points[i][1] <= region.point2[1]) {
+					if(!peopleWhoDrewInTheAreaHash[this.drawings[room][k].id || this.drawings[room][k].socketid]){
+						console.log(this.drawings[room][k].id || this.drawings[room][k].socketid);
+						peopleWhoDrewInTheAreaHash[this.drawings[room][k].id || this.drawings[room][k].socketid] = true;
+					}
+					
+					
+			}
+		}
+		//if (this.drawings[room][k].id == socketid || this.drawings[room][k].socketid == socketid) {
+
+	}
+	return peopleWhoDrewInTheAreaHash;
 };
 
 DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all) {
