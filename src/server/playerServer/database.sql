@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS reputations (
     INDEX(to_id, from_id)
 );
 
+ALTER TABLE reputations ADD COLUMN source VARCHAR(64);
+
 CREATE TABLE IF NOT EXISTS ipbans (
     ip VARCHAR(48),
     banned_by INT UNSIGNED,
