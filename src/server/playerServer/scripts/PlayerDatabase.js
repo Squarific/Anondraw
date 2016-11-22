@@ -90,8 +90,8 @@ PlayerDatabase.prototype.login = function login (email, pass, callback) {
 	});
 };
 
-PlayerDatabase.prototype.register = function register (email, pass, callback) {
-	this.database.query("INSERT INTO users (email, pass, register_datetime) VALUES (?, ?, ?)", [email, SHA256(pass).toString(), new Date()], function (err, result) {
+PlayerDatabase.prototype.register = function register (email, pass, referral, callback) {
+	this.database.query("INSERT INTO users (email, pass, referral, register_datetime) VALUES (?, ?, ?, ?)", [email, SHA256(pass).toString(), referral, new Date()], function (err, result) {
 		if (err) {
 			if (err.code == "ER_DUP_ENTRY") {
 				callback("Already registered!");
