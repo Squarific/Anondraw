@@ -69,6 +69,7 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/register") {
 		var email = parsedUrl.query.email;
 		var pass = parsedUrl.query.pass;
+		var referral = parsedUrl.query.referral;
 
 		if (!email || !pass) {
 			res.end('{"error": "No user or password provided"}');
@@ -87,7 +88,7 @@ var server = http.createServer(function (req, res) {
 				return;
 			}
 
-			playerDatabase.register(email, pass, function (err, id) {
+			playerDatabase.register(email, pass, referral, function (err, id) {
 				if (err) {
 					res.end('{"error": "' + err + '"}');
 					return;
