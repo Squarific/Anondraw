@@ -1870,33 +1870,47 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 	}.bind(this));
 };
 
-DrawTogether.prototype.whoDrewInThisArea = function(from, to){
-	if (!this.account.uKey) { 
-		this.chat.addMessage("You must be logged in to use the who drew in this area tool.");
-		return;
-	}
+DrawTogether.prototype.whoDrewInThisArea = function (from, to){
+	var minX = Math.min(from[0], to[0]);
+	var minY = Math.min(from[1], to[1]);
+	var maxX = Math.max(from[0], to[0]);
+	var maxY = Math.max(from[1], to[1]);
 
-	if (this.reputation < this.KICKBAN_MIN_REP){
-		this.chat.addMessage("Who Drew in this area Tool", "Error: You need atleast " + this.KICKBAN_MIN_REP + "R to use this tool");
-		return;
-	}
-	this.network.socket.emit("whodrewthis", from, to, function (result) {
-		if (result === null){
-			this.chat.addMessage("Who Drew in this area Tool", "No record of lines recently drawn in this area.");
-			return;
-		}
+	var peopleWhoDrewInTheAreaHash = new Object();
+	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--){
+		if(!this.paint.publicdrawings[i].points) continue;
 
-		if (result.error) {
-			this.chat.addMessage("Who Drew in this area Tool", "Error: " + result.error);
-			return;
-		}
+		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
 
-		for( var socketid in result){
-			this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result[socketid]));
-		}
+		if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
+
+		var pointsamt = this.paint.publicdrawings[i].points.length;
 		
-	}.bind(this));
+		//var checkEveryX = Math.round(pointsamt / 5);
 
+		for (var k = pointsamt - 1; k >= 0; k--){//i -= checkEveryX){
+			if (this.paint.publicdrawings[i].points[k][0] >= minX
+				&& this.paint.publicdrawings[i].points[k][0] <= maxX
+				&& this.paint.publicdrawings[i].points[k][1] >= minY
+				&& this.paint.publicdrawings[i].points[k][1] <= maxY) {
+					var player = this.playerFromId(socketid);
+					peopleWhoDrewInTheAreaHash[socketid] = true;
+					if(player){
+						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+					}
+					else{
+						this.network.socket.emit("playerfromsocketid", from, to, function (result) {
+							if (result.error) {
+								this.chat.addMessage("Who Drew in this area Tool", "Error: " + result.error);
+								return;
+							}
+							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+						}.bind(this));
+					}
+					break;
+			}
+		}
+	}
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {

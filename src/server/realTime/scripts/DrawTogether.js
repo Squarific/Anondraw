@@ -85,46 +85,6 @@ DrawTogether.prototype.clear = function clear (room) {
 		delete this.paths[room];
 	}
 };
-// region example: {point1:[-500,-500], point2:[500,500]}
-DrawTogether.prototype.whoDrewInThisArea = function whoDrewInThisArea(room, region) {
-	var peopleWhoDrewInTheAreaHash = new Object();
-	if (region.point1[0] > region.point2[0]) {
-		var temp = region.point1[0];
-		region.point1[0] = region.point2[0];
-		region.point2[0] = temp;
-	}
-	console.log("hey");
-
-	if (!this.drawings || !this.drawings[room]) return;
-
-	var stop = 0;
-	if (this.drawings[room].sending) {
-		stop = this.drawings[room].sendLength;
-	}
-
-	for (k = this.drawings[room].length - 1; k >= stop; k--) {
-		if(!this.drawings[room][k].points) continue;
-
-		var pointsamt = this.drawings[room][k].points.length;
-		var checkEveryX = Math.round(pointsamt / 5);
-
-		for (var i = this.drawings[room][k].points.length - 1; i >= 0; i -= checkEveryX){
-			if (this.drawings[room][k].points[i][0] >= region.point1[0] 
-				&& this.drawings[room][k].points[i][0] <= region.point2[0] 
-				&& this.drawings[room][k].points[i][1] <= region.point2[1]
-				&& this.drawings[room][k].points[i][1] <= region.point2[1]) {
-					if(!peopleWhoDrewInTheAreaHash[this.drawings[room][k].id || this.drawings[room][k].socketid]){
-						peopleWhoDrewInTheAreaHash[this.drawings[room][k].id || this.drawings[room][k].socketid] = true;
-						console.log("within area", this.drawings[room][k].id );
-						break;
-					}
-			}
-		}
-
-
-	}
-	return peopleWhoDrewInTheAreaHash;
-};
 
 DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all) {
 	this.removePath(room, socketid);

@@ -1041,30 +1041,17 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 		});
 
-		socket.on("whodrewthis", function (from, to, callback) {
-			if (!socket.uKey || typeof socket.reputation !== "number") {
-				callback({error: "You can only use this tool if you're logged in!"});
+		socket.on("playerfromsocketid", function (socketid, callback) {
+			if(!socketid){
+				callback({error: "socketid undefined"});
 				return;
 			}
-			if (socket.reputation < KICKBAN_MIN_REP) {
-				callback({error: "You need at least " + KICKBAN_MIN_REP + " reputation to use this tool."});
+			var targetSocket = protocol.socketFromId(socketid);
+			if(!targetSocket) {
+				callback({error: "No socket found with that id"});
 				return;
 			}
-			if(!socket.room){
-				callback({error: "Invalid room"});
-				return;
-			}
-			if(isNaN(from.length) || isNaN(to.length)){
-				callback({error: "Invalid drawn region coordinates"});
-				return;
-			}
-			var sockethash = protocol.drawTogether.whoDrewInThisArea(socket.room, {point1:from, point2:to});
-			for(var socketid in sockethash){
-				var targetSocket = protocol.socketFromId(socketid);
-				if(!targetSocket) continue;
-				sockethash[socketid] = {id: socketid, name: targetSocket.name, reputation: targetSocket.reputation, gamescore: targetSocket.gamescore};
-			}
-			callback(sockethash);
+			callback({id: socketid, name: targetSocket.name, reputation: targetSocket.reputation, gamescore: targetSocket.gamescore});
 		});
 
 		socket.on("undo", function () {
