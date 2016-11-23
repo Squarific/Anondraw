@@ -279,7 +279,6 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
 
 		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
-			console.log("has text" + chatFilterByWordsArr[k].inputText);
 			messageDom.style.opacity = chatFilterByWordsArr[k].visibility * 0.01; // 100 to 1.0
 			if (chatFilterByWordsArr[k].overrideMute)
 				overrideMuteAll = true;
@@ -295,7 +294,6 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
 	if(chatFilterByPlayerArr)
 	for (var k = 0; k < chatFilterByPlayerArr.length; k++){
-		console.log("PlayerArr", chatFilterByPlayerArr[k].userid,userid, chatFilterByPlayerArr[k].socketid, socketid)
 		var socketidMatches = chatFilterByPlayerArr[k].socketid && chatFilterByPlayerArr[k].socketid == socketid;
 		var useridMatches = chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userid;
 		if (useridMatches || socketidMatches) {

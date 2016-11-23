@@ -991,7 +991,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 	return PermissionDom;
 };
 
-DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (player, appendedText) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
 
@@ -1026,12 +1026,20 @@ DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (playe
 		score = " [" + player.gamescore + " Points]";
 	}
 
-	nameText.appendChild(document.createTextNode(player.name + rep + score + " has left."))
+	nameText.appendChild(document.createTextNode(player.name + rep + score + appendedText))
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
 
 	return playerDom;
+};
+
+DrawTogether.prototype.createPlayerDrewInAreaDom = function createPlayerDrewInAreaDom (player) {
+	return this.createPlayerChatDom(player, " drew in this area.");
+};
+
+DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+	return this.createPlayerChatDom(player, " has left.");
 };
 
 DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
@@ -1445,13 +1453,15 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 	this.gui.prompt("What do you want to do with your selection?", [
 		"Export in high quality",
 		"Create protected region",
+		"Inspect tool",
 		"Cancel"
 	], function (answer) {
 		if (answer === "Cancel") return;
 
 		var handlers = {
 			"Export in high quality": this.exportImage.bind(this),
-			"Create protected region": this.createProtectedRegion.bind(this)
+			"Create protected region": this.createProtectedRegion.bind(this),
+			"Inspect tool": this.whoDrewInThisArea.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
@@ -1858,6 +1868,55 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 			this.getFavorites();
 		}
 	}.bind(this));
+};
+
+DrawTogether.prototype.whoDrewInThisArea = function (from, to){
+	var minX = Math.min(from[0], to[0]);
+	var minY = Math.min(from[1], to[1]);
+	var maxX = Math.max(from[0], to[0]);
+	var maxY = Math.max(from[1], to[1]);
+
+	var peopleWhoDrewInTheAreaHash = new Object();
+	peopleWhoDrewInTheAreaHash.length = 0;
+	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--){
+		if(!this.paint.publicdrawings[i].points) continue;
+
+		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
+
+		if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
+
+		var pointsamt = this.paint.publicdrawings[i].points.length;
+		
+		//var checkEveryX = Math.round(pointsamt / 5);
+
+		for (var k = pointsamt - 1; k >= 0; k--){//i -= checkEveryX){
+			if (this.paint.publicdrawings[i].points[k][0] >= minX
+				&& this.paint.publicdrawings[i].points[k][0] <= maxX
+				&& this.paint.publicdrawings[i].points[k][1] >= minY
+				&& this.paint.publicdrawings[i].points[k][1] <= maxY) {
+					var player = this.playerFromId(socketid);
+					peopleWhoDrewInTheAreaHash[socketid] = true;
+					peopleWhoDrewInTheAreaHash.length++;
+					if(player){
+						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+					}
+					else{
+						this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+							if (result.error) {
+								this.chat.addMessage("Inspect tool", "Error: " + result.error);
+								return;
+							}
+							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+						}.bind(this));
+					}
+					break;
+			}
+		}
+	}
+	
+	if(peopleWhoDrewInTheAreaHash.length === 0) {
+		this.chat.addMessage("Inspect tool", "No recently drawn lines found in this area.");
+	}
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {

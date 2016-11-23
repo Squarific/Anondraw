@@ -1041,6 +1041,19 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 		});
 
+		socket.on("playerfromsocketid", function (socketid, callback) {
+			if(!socketid){
+				callback({error: "socketid undefined"});
+				return;
+			}
+			var targetSocket = protocol.socketFromId(socketid);
+			if(!targetSocket) {
+				callback({error: "No socket found with that id"});
+				return;
+			}
+			callback({id: socketid, name: targetSocket.name, reputation: targetSocket.reputation, gamescore: targetSocket.gamescore});
+		});
+
 		socket.on("undo", function () {
 			protocol.drawTogether.undoDrawings(socket.room, socket.id);
 			protocol.io.to(socket.room).emit("undodrawings", socket.id);
