@@ -1042,7 +1042,14 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("whodrewthis", function (from, to, callback) {
-			console.log(from,to,socket.room);
+			if (!socket.uKey || typeof socket.reputation !== "number") {
+				callback({error: "You can only use this tool if you're logged in!"});
+				return;
+			}
+			if (socket.reputation < KICKBAN_MIN_REP) {
+				callback({error: "You need at least " + KICKBAN_MIN_REP + " reputation to use this tool."});
+				return;
+			}
 			if(!socket.room){
 				callback({error: "Invalid room"});
 				return;
@@ -1054,6 +1061,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			var sockethash = protocol.drawTogether.whoDrewInThisArea(socket.room, {point1:from, point2:to});
 			for(var socketid in sockethash){
 				var targetSocket = protocol.socketFromId(socketid);
+				if(!targetSocket) continue;
 				sockethash[socketid] = {id: socketid, name: targetSocket.name, reputation: targetSocket.reputation, gamescore: targetSocket.gamescore};
 			}
 			callback(sockethash);

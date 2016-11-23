@@ -1877,7 +1877,8 @@ DrawTogether.prototype.whoDrewInThisArea = function(from, to){
 	}
 
 	if (this.reputation < this.KICKBAN_MIN_REP){
-		this.chat.addMessage("Regions", "Error: You need atleast" + this.KICKBAN_MIN_REP + "R to use this tool");
+		this.chat.addMessage("Regions", "Error: You need atleast " + this.KICKBAN_MIN_REP + "R to use this tool");
+		return;
 	}
 	this.network.socket.emit("whodrewthis", from, to, function (result) {
 		if (result.error) {
