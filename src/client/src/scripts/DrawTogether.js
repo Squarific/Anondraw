@@ -1035,7 +1035,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 };
 
 DrawTogether.prototype.createPlayerDrewInAreaDom = function createPlayerDrewInAreaDom (player) {
-	return this.createPlayerChatDom(player, " drew in the area.");
+	return this.createPlayerChatDom(player, " drew in this area.");
 };
 
 DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
@@ -1877,18 +1877,22 @@ DrawTogether.prototype.whoDrewInThisArea = function(from, to){
 	}
 
 	if (this.reputation < this.KICKBAN_MIN_REP){
-		this.chat.addMessage("Regions", "Error: You need atleast " + this.KICKBAN_MIN_REP + "R to use this tool");
+		this.chat.addMessage("Who Drew in this area Tool", "Error: You need atleast " + this.KICKBAN_MIN_REP + "R to use this tool");
 		return;
 	}
 	this.network.socket.emit("whodrewthis", from, to, function (result) {
+		if (result === null){
+			this.chat.addMessage("Who Drew in this area Tool", "No record of lines recently drawn in this area.");
+			return;
+		}
+
 		if (result.error) {
-			this.chat.addMessage("Regions", "Error: " + result.error);
+			this.chat.addMessage("Who Drew in this area Tool", "Error: " + result.error);
 			return;
 		}
 
 		for( var socketid in result){
 			this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result[socketid]));
-			console.log("socket", socketid, "result", result[socketid]);
 		}
 		
 	}.bind(this));
