@@ -1453,7 +1453,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 	this.gui.prompt("What do you want to do with your selection?", [
 		"Export in high quality",
 		"Create protected region",
-		"Who drew in this area tool(mod only)",
+		"Who just drew in this area tool",
 		"Cancel"
 	], function (answer) {
 		if (answer === "Cancel") return;
@@ -1461,7 +1461,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 		var handlers = {
 			"Export in high quality": this.exportImage.bind(this),
 			"Create protected region": this.createProtectedRegion.bind(this),
-			"Who drew in this area tool(mod only)": this.whoDrewInThisArea.bind(this)
+			"Who just drew in this area tool": this.whoDrewInThisArea.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
@@ -1877,6 +1877,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 	var maxY = Math.max(from[1], to[1]);
 
 	var peopleWhoDrewInTheAreaHash = new Object();
+	peopleWhoDrewInTheAreaHash.length = 0;
 	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--){
 		if(!this.paint.publicdrawings[i].points) continue;
 
@@ -1895,6 +1896,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 				&& this.paint.publicdrawings[i].points[k][1] <= maxY) {
 					var player = this.playerFromId(socketid);
 					peopleWhoDrewInTheAreaHash[socketid] = true;
+					peopleWhoDrewInTheAreaHash.length++;
 					if(player){
 						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
 					}
@@ -1910,6 +1912,10 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 					break;
 			}
 		}
+	}
+	console.log("peopleWhoDrewInTheAreaHash", peopleWhoDrewInTheAreaHash.length, peopleWhoDrewInTheAreaHash);
+	if(peopleWhoDrewInTheAreaHash.length === 0) {
+		this.chat.addMessage("Who Drew in this area Tool", "No recently drawn lines found in this area.");
 	}
 };
 
