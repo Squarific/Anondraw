@@ -1871,8 +1871,14 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 };
 
 DrawTogether.prototype.whoDrewInThisArea = function(from, to){
-	console.log("fromto", from, to);
-	if (this.reputation >= this.MODERATE_REGION_MIN_REP)
+	if (!this.account.uKey) { 
+		this.chat.addMessage("You must be logged in to use the who drew in this area tool.");
+		return;
+	}
+
+	if (this.reputation < this.KICKBAN_MIN_REP){
+		this.chat.addMessage("Regions", "Error: You need atleast" + this KICKBAN_MIN_REP + "R to use this tool");
+	}
 	this.network.socket.emit("whodrewthis", from, to, function (result) {
 		if (result.error) {
 			this.chat.addMessage("Regions", "Error: " + result.error);
@@ -1881,7 +1887,7 @@ DrawTogether.prototype.whoDrewInThisArea = function(from, to){
 
 		for( var socketid in result){
 			this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result[socketid]));
-			//console.log("socket", socketid, "name", result[socketid]);
+			console.log("socket", socketid, "result", result[socketid]);
 		}
 		
 	}.bind(this));
