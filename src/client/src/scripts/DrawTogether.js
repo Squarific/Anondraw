@@ -110,7 +110,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 5;
+DrawTogether.prototype.CLIENT_VERSION = 6;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -1913,7 +1913,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 			}
 		}
 	}
-	
+
 	if(peopleWhoDrewInTheAreaHash.length === 0) {
 		this.chat.addMessage("Inspect tool", "No recently drawn lines found in this area.");
 	}
@@ -3476,7 +3476,7 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	var ol = container.appendChild(document.createElement("ol"));
 
 	var features = ["Added Chat Filter! Settings -> Chat filter options",
-					"This allows you to locally filter chat phrases/words and people."];
+					"Inspect tool! See who just drew those lines!"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
