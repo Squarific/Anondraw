@@ -1041,6 +1041,24 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 		});
 
+		socket.on("whodrewthis", function (from, to, callback) {
+			console.log(from,to,socket.room);
+			if(!socket.room){
+				callback({error: "Invalid room"});
+				return;
+			}
+			if(isNaN(from.length) || isNaN(to.length)){
+				callback({error: "Invalid drawn region coordinates"});
+				return;
+			}
+			var sockethash = protocol.drawTogether.whoDrewInThisArea(socket.room, {point1:from, point2:to});
+			for(var socketid in sockethash){
+				var targetSocket = protocol.socketFromId(socketid);
+				sockethash[socketid] = {id: socketid, name: targetSocket.name, reputation: targetSocket.reputation, gamescore: targetSocket.gamescore};
+			}
+			callback(sockethash);
+		});
+
 		socket.on("undo", function () {
 			protocol.drawTogether.undoDrawings(socket.room, socket.id);
 			protocol.io.to(socket.room).emit("undodrawings", socket.id);

@@ -991,7 +991,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 	return PermissionDom;
 };
 
-DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (player, appendedText) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
 
@@ -1026,12 +1026,20 @@ DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (playe
 		score = " [" + player.gamescore + " Points]";
 	}
 
-	nameText.appendChild(document.createTextNode(player.name + rep + score + " has left."))
+	nameText.appendChild(document.createTextNode(player.name + rep + score + appendedText))
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
 
 	return playerDom;
+};
+
+DrawTogether.prototype.createPlayerDrewInAreaDom = function createPlayerDrewInAreaDom (player) {
+	return this.createPlayerChatDom(player, " drew in the area.");
+};
+
+DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+	return this.createPlayerChatDom(player, " has left.");
 };
 
 DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
@@ -1445,13 +1453,15 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 	this.gui.prompt("What do you want to do with your selection?", [
 		"Export in high quality",
 		"Create protected region",
+		"Who drew in this area tool(mod only)",
 		"Cancel"
 	], function (answer) {
 		if (answer === "Cancel") return;
 
 		var handlers = {
 			"Export in high quality": this.exportImage.bind(this),
-			"Create protected region": this.createProtectedRegion.bind(this)
+			"Create protected region": this.createProtectedRegion.bind(this),
+			"Who drew in this area tool(mod only)": this.whoDrewInThisArea.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
@@ -1858,6 +1868,24 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 			this.getFavorites();
 		}
 	}.bind(this));
+};
+
+DrawTogether.prototype.whoDrewInThisArea = function(from, to){
+	console.log("fromto", from, to);
+	if (this.reputation >= this.MODERATE_REGION_MIN_REP)
+	this.network.socket.emit("whodrewthis", from, to, function (result) {
+		if (result.error) {
+			this.chat.addMessage("Regions", "Error: " + result.error);
+			return;
+		}
+
+		for( var socketid in result){
+			this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result[socketid]));
+			//console.log("socket", socketid, "name", result[socketid]);
+		}
+		
+	}.bind(this));
+
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {
