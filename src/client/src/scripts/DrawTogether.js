@@ -1913,7 +1913,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 			}
 		}
 	}
-	console.log("peopleWhoDrewInTheAreaHash", peopleWhoDrewInTheAreaHash.length, peopleWhoDrewInTheAreaHash);
+	
 	if(peopleWhoDrewInTheAreaHash.length === 0) {
 		this.chat.addMessage("Inspect tool", "No recently drawn lines found in this area.");
 	}
