@@ -1901,7 +1901,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
 					}
 					else{
-						this.network.socket.emit("playerfromsocketid", from, to, function (result) {
+						this.network.socket.emit("playerfromsocketid", socketid, function (result) {
 							if (result.error) {
 								this.chat.addMessage("Who Drew in this area Tool", "Error: " + result.error);
 								return;
