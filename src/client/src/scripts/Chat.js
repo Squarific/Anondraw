@@ -391,20 +391,20 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 
 		if (emoteUrl) {
 			messageDom.appendChild(this.createEmote(messages[k], emoteUrl));
-			messageDom.appendChild(document.createTextNode(" "));
+			messageDom.appendChild(document.createTextNode('\u00A0')); //&nbsp
 			continue;
 		}
 
 		if (messages[k].url) {
 			messageDom.appendChild(this.createUrl(messages[k].url));
-			messageDom.appendChild(document.createTextNode(" "));
+			messageDom.appendChild(document.createTextNode('\u00A0')); //&nbsp
 			continue;
 		}
 
 		if (messages[k].coordinate) {
 			console.log(messages[k]);
 			messageDom.appendChild(this.createCoordinate(messages[k].coordinate, messages[k].x, messages[k].y));
-			messageDom.appendChild(document.createTextNode(" "));
+			messageDom.appendChild(document.createTextNode('\u00A0')); //&nbsp
 			continue;
 		}
 
