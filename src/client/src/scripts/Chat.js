@@ -254,11 +254,19 @@ Chat.prototype.coordinateRegex = /(?:x:?\s*)?([-]?\d\d*)[,/.\sxy][\s*{0,4}]?[,/.
 // [\s*{0,4}]? match 0 to 4 consequtive spaces if they exist
 // matches:
 // 4444x 5555y
-// 4444X5555
+// 4444X5555Y
 // 4444, 5555
 // 4444 5555
-// 4444   5555
+// 4444  5555
 // (4444,5555)
+// 4444 ,5555
+// 4444.5555
+// 4444/5555
+// x223412 y21321
+// 5555 , 55554
+// x 123 y 123
+// x: 555 y: 2222
+// 1255y5242
 
 Chat.prototype.addMessage = function addMessage (user, message, userid, socketid) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
@@ -416,44 +424,6 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 	}
 };
 
-
-/**
- * Fire an event handler to the specified node. Event handlers can detect that the event was fired programatically
- * by testing for a 'synthetic=true' property on the event object
- * @param {HTMLNode} node The node to fire the event handler on.
- * @param {String} eventName The name of the event without the "on" (e.g., "focus")
- */
- /*
-Chat.prototype.fireEvent = fireEvent(node, eventName) {
-    // Make sure we use the ownerDocument from the provided node to avoid cross-window problems
-    var doc;
-    if (node.ownerDocument) {
-        doc = node.ownerDocument;
-    } else if (node.nodeType == 9){
-        // the node may be the document itself, nodeType 9 = DOCUMENT_NODE
-        doc = node;
-    } else {
-        throw new Error("Invalid node passed to fireEvent: " + node.id);
-    }
-
-     if (node.dispatchEvent) {
-        // Gecko-style approach (now the standard) takes more work
-        var eventClass = "";
-
-        var event = doc.createEvent(eventClass);
-        event.initEvent(eventName, true, true); // All events created as bubbling and cancelable.
-
-        event.synthetic = true; // allow detection of synthetic events
-        // The second parameter says go ahead with the default action
-        node.dispatchEvent(event, true);
-    } else  if (node.fireEvent) {
-        // IE-old school style
-        var event = doc.createEventObject();
-        event.synthetic = true; // allow detection of synthetic events
-        node.fireEvent("on" + eventName, event);
-    }
-};*/
-
 Chat.prototype.createUrl = function createUrl (url) {
 	var a = document.createElement("a");
 	a.href = url.indexOf("://") == -1 ? "http://" + url : url;
@@ -465,7 +435,7 @@ Chat.prototype.createUrl = function createUrl (url) {
 Chat.prototype.createCoordinate = function createCoordinate (coordinateText, x, y) {
 	var a = document.createElement("a");
 	a.href = "javascript:void(0);"
-	a.addEventListener("click", function (e) {
+	a.addEventListener("click", function (e) { // dispatch event code from: http://stackoverflow.com/a/33420324
 
 		e.preventDefault();
 		console.log(x,y);
