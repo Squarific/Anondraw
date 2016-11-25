@@ -248,6 +248,17 @@ Chat.prototype.emotesHash = {
 };
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
+Chat.prototype.coordinateRegex = /([-]?\d\d*)[,\sxX][\s*{0,4}]?([-]?\d\d*)/g
+// \d\d* match atleast 1 number then every number right after that if they exists
+// [,\sxX] match atleast one of the following: , or space or x or X
+// [\s*{0,4}]? match 0 to 4 consequtive spaces if they exist
+// matches:
+// 4444x 5555y
+// 4444X5555
+// 4444, 5555
+// 4444 5555
+// 4444   5555
+// (4444,5555)
 
 Chat.prototype.addMessage = function addMessage (user, message, userid, socketid) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
@@ -346,15 +357,24 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
+	message = message.replace(this.coordinateRegex, " $1,$2 "); // removes spaces from between coordinates so it can be split below
 	var messages = message.split(" ");
 	var temp;
 	var result;
 
 	for (var k = 0; k < messages.length; k++) {
 		// Replace if url
-		if (this.urlRegex.test(messages[k]))
+		if (this.urlRegex.test(messages[k])){
 			messages[k] = { url: messages[k] };
-
+			continue;
+		}
+		// Replace if coordinate
+		if(this.coordinateRegex.test(messages[k])){
+			var first = messages[k].match(/[-]?\d*/)[0]; //first number
+			var last = messages[k].match(/[-]?\d*$/)[0]; // last number	
+			messages[k] = { coordinate: messages[k], x: first, y: last };
+			continue;
+		}
 	}
 
 	this.addMessageList(messageDom, messages);
@@ -381,6 +401,13 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 			continue;
 		}
 
+		if (messages[k].coordinate) {
+			console.log(messages[k]);
+			messageDom.appendChild(this.createCoordinate(messages[k].coordinate, messages[k].x, messages[k].y));
+			messageDom.appendChild(document.createTextNode(" "));
+			continue;
+		}
+
 		messageDom.appendChild(document.createTextNode(messages[k] + " "));
 	}
 
@@ -389,11 +416,81 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 	}
 };
 
+
+/**
+ * Fire an event handler to the specified node. Event handlers can detect that the event was fired programatically
+ * by testing for a 'synthetic=true' property on the event object
+ * @param {HTMLNode} node The node to fire the event handler on.
+ * @param {String} eventName The name of the event without the "on" (e.g., "focus")
+ */
+ /*
+Chat.prototype.fireEvent = fireEvent(node, eventName) {
+    // Make sure we use the ownerDocument from the provided node to avoid cross-window problems
+    var doc;
+    if (node.ownerDocument) {
+        doc = node.ownerDocument;
+    } else if (node.nodeType == 9){
+        // the node may be the document itself, nodeType 9 = DOCUMENT_NODE
+        doc = node;
+    } else {
+        throw new Error("Invalid node passed to fireEvent: " + node.id);
+    }
+
+     if (node.dispatchEvent) {
+        // Gecko-style approach (now the standard) takes more work
+        var eventClass = "";
+
+        var event = doc.createEvent(eventClass);
+        event.initEvent(eventName, true, true); // All events created as bubbling and cancelable.
+
+        event.synthetic = true; // allow detection of synthetic events
+        // The second parameter says go ahead with the default action
+        node.dispatchEvent(event, true);
+    } else  if (node.fireEvent) {
+        // IE-old school style
+        var event = doc.createEventObject();
+        event.synthetic = true; // allow detection of synthetic events
+        node.fireEvent("on" + eventName, event);
+    }
+};*/
+
 Chat.prototype.createUrl = function createUrl (url) {
 	var a = document.createElement("a");
 	a.href = url.indexOf("://") == -1 ? "http://" + url : url;
 	a.target = "_blank";
 	a.appendChild(document.createTextNode(url));
+	return a;
+};
+
+Chat.prototype.createCoordinate = function createCoordinate (coordinateText, x, y) {
+	var a = document.createElement("a");
+	a.href = "javascript:void(0);"
+	a.addEventListener("click", function (e) {
+
+		e.preventDefault();
+		console.log(x,y);
+		var doc;
+		var node = $(".mouse-coords input:first").val(x)[0];
+		if (node.ownerDocument) {
+			doc = node.ownerDocument;
+		} else if (node.nodeType == 9){
+			// the node may be the document itself, nodeType 9 = DOCUMENT_NODE
+			doc = node;
+		}
+		
+		var eventName = "input";
+		var eventClass = "";
+		var event = doc.createEvent('Event');
+		event.initEvent(eventName, true, true);
+
+		event.synthetic = true;
+
+		node.dispatchEvent(event, true);
+		node = $(".mouse-coords input:last").val(y)[0];
+		node.dispatchEvent(event, true);
+	}.bind(this));
+
+	a.appendChild(document.createTextNode(coordinateText));
 	return a;
 };
 
