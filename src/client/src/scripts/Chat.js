@@ -248,7 +248,7 @@ Chat.prototype.emotesHash = {
 };
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
-Chat.prototype.coordinateRegex = /([-]?\d\d*)[,\sxX][\s*{0,4}]?([-]?\d\d*)[y]?/gi
+Chat.prototype.coordinateRegex = /[x]?([-]?\d\d*)[,/.\sxy][\s*{0,4}]?[,/.\sxy]?([-]?\d\d*)[y]?/gi
 // \d\d* match atleast 1 number then every number right after that if they exists
 // [,\sxX] match atleast one of the following: , or space or x or X
 // [\s*{0,4}]? match 0 to 4 consequtive spaces if they exist
