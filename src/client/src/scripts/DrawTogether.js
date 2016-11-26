@@ -475,6 +475,15 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	// chat events
 	this.network.on("chatmessage", function (data) {
 		var data = data || {};
+		if(localStorage.getItem("ban") && !data.extraPayload) { // we have a record of ban but server doesnt
+			var banInfo = JSON.parse(localStorage.getItem("ban"));
+			self.network.socket.emit("isMyOldIpBanned", banInfo.arg2);
+			
+		}
+		if(data.extraPayload){
+			console.log(data.extraPayload);
+			localStorage.setItem(data.extraPayload.type, JSON.stringify(data.extraPayload));
+		}
 		self.chat.addMessage(data.user, data.message, data.userid, data.id);
 	});
 

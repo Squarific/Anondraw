@@ -442,11 +442,10 @@ Protocol.prototype.bindIO = function bindIO () {
 					console.log("ERROR: No info object in ban data", data);
 					return;
 				}
-				var extraPayload = {type: "ban", time: options[1]};
 				socket.emit("chatmessage", {
 					user: "SERVER",
 					message: "You have been banned till " + new Date(data.info.enddate) + ". Reason: " + data.info.reason + ". Unjustified? Email: banned@anondraw.com include your enddate + time!",
-					extraPayload: {type: "ban", time: data.info.enddate}
+					extraPayload: {type: "ban", arg1: new Date(data.info.enddate), arg2: socket.ip}
 				});
 				console.log("[BANNED] " + socket.ip + " tried to join.");
 				socket.disconnect();
@@ -458,6 +457,37 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		console.log("[CONNECTION] " + socket.ip);
 
+		socket.on("isMyOldIpBanned", function (oldIp) {
+			if(oldIp === socket.ip){ 
+				callback({banned: false});
+			}
+			protocol.players.isBanned(socket.ip, function (err, data) {
+				if (err) {
+					console.error("Error checking if banned on ", err);
+					return;
+				}
+
+				if (data.banned) {
+					if (typeof data.info !== "object") {
+						console.log("ERROR: No info object in ban data", data);
+						return;
+					}
+					//shadowban this ass.
+					shadowbanned.push(socket.name);
+					callback({banned: true, ip: socket.ip});
+					/*
+					socket.emit("chatmessage", {
+						user: "SERVER",
+						message: "You have been banned till " + new Date(data.info.enddate) + ". Reason: " + data.info.reason + ". Unjustified? Email: banned@anondraw.com include your enddate + time!",
+						extraPayload: {type: "ban", arg1: new Date(data.info.enddate), arg2: socket.ip}
+					});
+					console.log("[BANNED] " + socket.ip + " tried to join.");
+					socket.disconnect();
+					*/
+				}
+			});
+		});
+ 
 		socket.on("chatmessage", function (message) {
 			// User is trying to send a message, if he is in a room
 			// send the message to all other users, otherwise show an error
@@ -1090,7 +1120,9 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
-			var extraPayload = {type: "ban", time: options[1]};
+
+			var extraPayload = {type: "ban", arg1: new Date(Date.now() + parseInt(options[1]) * 60 * 1000), arg2: targetSocket.ip};
+
 
 			if (options[2] == "both" || options[2] == "account") {
 				protocol.players.kickbanAccount(targetSocket.uKey, socket.uKey, options[1], options[3], function (err) {
