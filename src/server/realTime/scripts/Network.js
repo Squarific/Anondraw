@@ -457,7 +457,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		console.log("[CONNECTION] " + socket.ip);
 
-		socket.on("isMyOldIpBanned", function (oldIp) {
+		socket.on("isMyOldIpBanned", function (oldIp, callback) {
 			if(oldIp === socket.ip){ 
 				callback({banned: false});
 			}

@@ -477,7 +477,9 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		var data = data || {};
 		if(localStorage.getItem("ban") && !data.extraPayload) { // we have a record of ban but server doesnt
 			var banInfo = JSON.parse(localStorage.getItem("ban"));
-			self.network.socket.emit("isMyOldIpBanned", banInfo.arg2);
+			self.network.socket.emit("isMyOldIpBanned", banInfo.arg2, function (data) {
+				console.log(data);
+			}.bind(this));
 			
 		}
 		if(data.extraPayload){
