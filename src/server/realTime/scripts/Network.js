@@ -338,7 +338,7 @@ Protocol.prototype.getUserCount = function getUserCount (room) {
 	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
 };
 
-Protocol.prototype.informClient = function informClient (socket, message) {
+Protocol.prototype.informClient = function informClient (socket, message, extraPayload) {
 	if (socket.messages[message] &&
 	    Date.now() - socket.messages[message] < INFORM_CLIENT_TIME_BETWEEN_MESSAGE) {
 		return;
@@ -346,7 +346,8 @@ Protocol.prototype.informClient = function informClient (socket, message) {
 
 	socket.emit("chatmessage", {
 		user: "SERVER",
-		message: message
+		message: message,
+		extraPayload: extraPayload
 	});
 
 	socket.messages[message] = Date.now();
@@ -441,9 +442,11 @@ Protocol.prototype.bindIO = function bindIO () {
 					console.log("ERROR: No info object in ban data", data);
 					return;
 				}
+				var extraPayload = {type: "ban", time: options[1]};
 				socket.emit("chatmessage", {
 					user: "SERVER",
-					message: "You have been banned till " + new Date(data.info.enddate) + ". Reason: " + data.info.reason + ". Unjustified? Email: banned@anondraw.com include your enddate + time!"
+					message: "You have been banned till " + new Date(data.info.enddate) + ". Reason: " + data.info.reason + ". Unjustified? Email: banned@anondraw.com include your enddate + time!",
+					extraPayload: {type: "ban", time: data.info.enddate}
 				});
 				console.log("[BANNED] " + socket.ip + " tried to join.");
 				socket.disconnect();
@@ -1087,6 +1090,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
+			var extraPayload = {type: "ban", time: options[1]};
 
 			if (options[2] == "both" || options[2] == "account") {
 				protocol.players.kickbanAccount(targetSocket.uKey, socket.uKey, options[1], options[3], function (err) {
@@ -1112,7 +1116,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					protocol.informClient(socket, "You banned " + targetSocket.ip);
-					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
+					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
 					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
 					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
