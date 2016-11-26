@@ -436,7 +436,6 @@ Chat.prototype.createCoordinate = function createCoordinate (coordinateText, x, 
 	var a = document.createElement("a");
 	a.href = "javascript:void(0);"
 	a.addEventListener("click", function (e) { // dispatch event code from: http://stackoverflow.com/a/33420324
-
 		e.preventDefault();
 		console.log(x,y);
 		var doc;
