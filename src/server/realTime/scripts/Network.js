@@ -459,11 +459,11 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("isMyOldIpBanned", function (oldIp, callback) {
 			if(oldIp === socket.ip){ 
-				callback({banned: false});
+				return;
 			}
 			protocol.players.isBanned(oldIp, function (err, data) {
 				if (err) {
-					console.error("Error checking if banned on ", err);
+					console.error("Error checking if banned on isMyOldIpBanned", err);
 					return;
 				}
 
@@ -473,17 +473,9 @@ Protocol.prototype.bindIO = function bindIO () {
 						return;
 					}
 					//shadowban this ass.
-					shadowbanned.push(socket.name);
-					callback({banned: true, ip: socket.ip});
-					/*
-					socket.emit("chatmessage", {
-						user: "SERVER",
-						message: "You have been banned till " + new Date(data.info.enddate) + ". Reason: " + data.info.reason + ". Unjustified? Email: banned@anondraw.com include your enddate + time!",
-						extraPayload: {type: "ban", arg1: new Date(data.info.enddate), arg2: socket.ip}
-					});
-					console.log("[BANNED] " + socket.ip + " tried to join.");
-					socket.disconnect();
-					*/
+					console.log("Shadow Banned:", socket.name, socket.ip);
+					shadowbanned.push(socket.ip);
+					return;
 				}
 			});
 		});
@@ -898,7 +890,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			// Shadow bans
-			if (shadowbanned.indexOf(socket.name) != -1) {
+			if (shadowbanned.indexOf(socket.ip) != -1) {
 				callback(true);
 				return;
 			}
