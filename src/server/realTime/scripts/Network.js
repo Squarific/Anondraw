@@ -461,7 +461,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if(oldIp === socket.ip){ 
 				callback({banned: false});
 			}
-			protocol.players.isBanned(socket.ip, function (err, data) {
+			protocol.players.isBanned(oldIp, function (err, data) {
 				if (err) {
 					console.error("Error checking if banned on ", err);
 					return;
