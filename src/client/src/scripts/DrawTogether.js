@@ -166,13 +166,19 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 	requestAnimationFrame(this.drawLoop.bind(this));
 };
 
+DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
+	this.lastPathPoint = undefined;
+	this.paint.goto(x, y);
+	this.lastPathPoint = undefined;
+};
+
 DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 	if (this.moveQueue.length > 0) {
 		if (Date.now() - this.lastScreenMove >= this.moveQueue[0].duration) {
 			this.lastScreenMove = Date.now();
 			this.lastScreenMoveStartPosition = this.moveQueue[0].position;
-
-			this.paint.goto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
+			
+			this.handleGoto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
 			this.moveQueue.shift();
 			return;
 		}
@@ -182,7 +188,7 @@ DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 		var distances = [relativeDistance * (this.moveQueue[0].position[0] - this.lastScreenMoveStartPosition[0]),
 		                 relativeDistance * (this.moveQueue[0].position[1] - this.lastScreenMoveStartPosition[1])];
 
-		this.paint.goto(distances[0] + this.lastScreenMoveStartPosition[0],
+		this.handleGoto(distances[0] + this.lastScreenMoveStartPosition[0],
 		                distances[1] + this.lastScreenMoveStartPosition[1]);
 	}
 };
@@ -612,7 +618,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.setRoom(room + number);
 
 			this.paint.clear();
-			this.paint.goto(x || 0, y || 0);
+			this.handleGoto(x || 0, y || 0);
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
