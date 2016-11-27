@@ -169,6 +169,7 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
 	this.lastPathPoint = undefined;
 	this.paint.goto(x, y);
+	this.lastPathPoint = undefined;
 };
 
 DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
