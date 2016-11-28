@@ -103,6 +103,7 @@ function DrawTogether (container, settings) {
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 DrawTogether.prototype.REGION_MIN_REP = 30;
 DrawTogether.prototype.MODERATE_REGION_MIN_REP = 100;
+DrawTogether.prototype.IGNORE_INK_REP = 50;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -1254,6 +1255,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 				event.removeDrawing();
 				return;
 			}
+			if(this.reputation >= this.IGNORE_INK_REP) return;
+			if(this.memberlevel) return;
 
 			// When a drawing is made check if we have ink left
 			var usage = this.inkUsageFromDrawing(event.drawing);
@@ -1411,6 +1414,8 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 			return;
 		}
+		if(this.reputation >= this.IGNORE_INK_REP) return;
+		if(this.memberlevel) return;
 
 		// When a drawing is made check if we have ink left
 		var usage = this.inkUsageFromPath(event.point, this.lastPathPoint, this.lastPathSize);
