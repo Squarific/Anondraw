@@ -103,6 +103,7 @@ function DrawTogether (container, settings) {
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 DrawTogether.prototype.REGION_MIN_REP = 30;
 DrawTogether.prototype.MODERATE_REGION_MIN_REP = 100;
+DrawTogether.prototype.IGNORE_INK_REP = 50;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -1243,7 +1244,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+			&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
 			    ((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
@@ -1401,7 +1404,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 
 	// Lower our ink with how much it takes to draw this
 	// Only do that if we are connected and in a room that does not start with private_ or game_
-	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+		&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 20) {
 			if (Date.now() - this.lastBrushSizeWarning > 5000) {
 				this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");

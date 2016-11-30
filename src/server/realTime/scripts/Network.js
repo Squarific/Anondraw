@@ -16,6 +16,7 @@ var MAX_USERS_IN_GAMEROOM = 12;
 var KICKBAN_MIN_REP = 50;                 // Reputation required to kickban
 var REQUIRED_REP_DIFFERENCE = 20;         // Required reputation difference to be allowed to kickban someone
 
+var IGNORE_INK_REP = 50;
 var BIG_BRUSH_MIN_REP = 5;
 var MEMBER_MIN_REP = 15;
 var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserver too
@@ -846,7 +847,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			// If we aren't in a private room, check our ink
-			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
+			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0 
+				&& socket.reputation < IGNORE_INK_REP && !socket.memberlevel) {
 				var usage = protocol.drawTogether.inkUsageFromDrawing(drawing);
 
 				if (socket.ink < usage) {
@@ -935,7 +937,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			// If we aren't in a private room, check our ink
-			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0) {
+			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0 
+				&& socket.reputation < IGNORE_INK_REP && !socket.memberlevel) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
 
 				// Always set lastpathpoint even if we failed to draw
