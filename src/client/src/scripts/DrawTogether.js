@@ -1244,7 +1244,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+			&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
 			    ((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
@@ -1255,8 +1257,6 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 				event.removeDrawing();
 				return;
 			}
-			if(this.reputation >= this.IGNORE_INK_REP) return;
-			if(this.memberlevel) return;
 
 			// When a drawing is made check if we have ink left
 			var usage = this.inkUsageFromDrawing(event.drawing);
@@ -1404,7 +1404,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 
 	// Lower our ink with how much it takes to draw this
 	// Only do that if we are connected and in a room that does not start with private_ or game_
-	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+		&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 20) {
 			if (Date.now() - this.lastBrushSizeWarning > 5000) {
 				this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
@@ -1414,8 +1416,6 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			event.removePathPoint();
 			return;
 		}
-		if(this.reputation >= this.IGNORE_INK_REP) return;
-		if(this.memberlevel) return;
 
 		// When a drawing is made check if we have ink left
 		var usage = this.inkUsageFromPath(event.point, this.lastPathPoint, this.lastPathSize);
