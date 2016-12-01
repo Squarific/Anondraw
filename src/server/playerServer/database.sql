@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS reputations (
     to_id INT UNSIGNED,
     PRIMARY KEY (id),
     INDEX(to_id, from_id)
+    INDEX(from_id, to_id)
 );
 
 --For the possible source values, see PlayerDatabase.js
