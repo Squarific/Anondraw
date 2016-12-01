@@ -61,7 +61,7 @@ BEGIN
 	AND EXISTS (SELECT * FROM users WHERE id = triggereduser.referral)
         AND NOT EXISTS (
             SELECT * FROM reputations
-            WHERE from_id = 1
+            WHERE from_id = triggereduser.id
                 AND to_id = triggereduser.referral
                 AND source = 2
 	);
