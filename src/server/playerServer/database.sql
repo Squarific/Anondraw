@@ -31,10 +31,12 @@ CREATE TABLE IF NOT EXISTS permissions (
     INDEX(roomid, userid)
 );
 
+--For the possible source values, see PlayerDatabase.js
 CREATE TABLE IF NOT EXISTS reputations (
     id INT UNSIGNED AUTO_INCREMENT,
     from_id INT UNSIGNED,
     to_id INT UNSIGNED,
+    source INT UNSIGNED DEFAULT 0,
     PRIMARY KEY (id),
     INDEX(to_id, from_id)
 );
