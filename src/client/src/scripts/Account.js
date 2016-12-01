@@ -91,6 +91,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 Account.prototype.register = function register (email, pass, callback) {
 	var req = new XMLHttpRequest();
 	var pass = CryptoJS.SHA256(pass).toString(CryptoJS.enc.Base64);
+	var ref = localStorage.getItem("drawtogether-referrer");
 
 	req.addEventListener("readystatechange", function (event) {
 		if (req.status == 200 && req.readyState == 4) {
@@ -112,7 +113,7 @@ Account.prototype.register = function register (email, pass, callback) {
 		}
 	}.bind(this));
 
-	req.open("GET", this.server + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass));
+	req.open("GET", this.server + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass) + "&ref=" + encodeURIComponent(ref));
 	req.send();
 };
 
