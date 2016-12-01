@@ -103,6 +103,7 @@ function DrawTogether (container, settings) {
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 DrawTogether.prototype.REGION_MIN_REP = 30;
 DrawTogether.prototype.MODERATE_REGION_MIN_REP = 100;
+DrawTogether.prototype.IGNORE_INK_REP = 50;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -110,7 +111,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 5;
+DrawTogether.prototype.CLIENT_VERSION = 6;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -166,13 +167,19 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 	requestAnimationFrame(this.drawLoop.bind(this));
 };
 
+DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
+	this.lastPathPoint = undefined;
+	this.paint.goto(x, y);
+	this.lastPathPoint = undefined;
+};
+
 DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 	if (this.moveQueue.length > 0) {
 		if (Date.now() - this.lastScreenMove >= this.moveQueue[0].duration) {
 			this.lastScreenMove = Date.now();
 			this.lastScreenMoveStartPosition = this.moveQueue[0].position;
-
-			this.paint.goto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
+			
+			this.handleGoto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
 			this.moveQueue.shift();
 			return;
 		}
@@ -182,7 +189,7 @@ DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 		var distances = [relativeDistance * (this.moveQueue[0].position[0] - this.lastScreenMoveStartPosition[0]),
 		                 relativeDistance * (this.moveQueue[0].position[1] - this.lastScreenMoveStartPosition[1])];
 
-		this.paint.goto(distances[0] + this.lastScreenMoveStartPosition[0],
+		this.handleGoto(distances[0] + this.lastScreenMoveStartPosition[0],
 		                distances[1] + this.lastScreenMoveStartPosition[1]);
 	}
 };
@@ -475,6 +482,13 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	// chat events
 	this.network.on("chatmessage", function (data) {
 		var data = data || {};
+		if(localStorage.getItem("ban") && !data.extraPayload) { // we have a record of ban but server doesnt
+			var banInfo = JSON.parse(localStorage.getItem("ban"));
+			self.network.socket.emit("isMyOldIpBanned", banInfo.arg2);
+		}
+		if(data.extraPayload){
+			localStorage.setItem(data.extraPayload.type, JSON.stringify(data.extraPayload));
+		}
 		self.chat.addMessage(data.user, data.message, data.userid, data.id);
 	});
 
@@ -605,7 +619,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.setRoom(room + number);
 
 			this.paint.clear();
-			this.paint.goto(x || 0, y || 0);
+			this.handleGoto(x || 0, y || 0);
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
@@ -991,7 +1005,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 	return PermissionDom;
 };
 
-DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (player, appendedText) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
 
@@ -1026,12 +1040,20 @@ DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (playe
 		score = " [" + player.gamescore + " Points]";
 	}
 
-	nameText.appendChild(document.createTextNode(player.name + rep + score + " has left."))
+	nameText.appendChild(document.createTextNode(player.name + rep + score + appendedText))
 
 	playerDom.appendChild(upvoteButton);
 	playerDom.appendChild(nameText);
 
 	return playerDom;
+};
+
+DrawTogether.prototype.createPlayerDrewInAreaDom = function createPlayerDrewInAreaDom (player) {
+	return this.createPlayerChatDom(player, " drew in this area.");
+};
+
+DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+	return this.createPlayerChatDom(player, " has left.");
 };
 
 DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
@@ -1222,7 +1244,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+			&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
 			    ((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
@@ -1380,7 +1404,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 
 	// Lower our ink with how much it takes to draw this
 	// Only do that if we are connected and in a room that does not start with private_ or game_
-	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+		&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 20) {
 			if (Date.now() - this.lastBrushSizeWarning > 5000) {
 				this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
@@ -1445,13 +1471,15 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 	this.gui.prompt("What do you want to do with your selection?", [
 		"Export in high quality",
 		"Create protected region",
+		"Inspect tool",
 		"Cancel"
 	], function (answer) {
 		if (answer === "Cancel") return;
 
 		var handlers = {
 			"Export in high quality": this.exportImage.bind(this),
-			"Create protected region": this.createProtectedRegion.bind(this)
+			"Create protected region": this.createProtectedRegion.bind(this),
+			"Inspect tool": this.whoDrewInThisArea.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
@@ -1858,6 +1886,55 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 			this.getFavorites();
 		}
 	}.bind(this));
+};
+
+DrawTogether.prototype.whoDrewInThisArea = function (from, to){
+	var minX = Math.min(from[0], to[0]);
+	var minY = Math.min(from[1], to[1]);
+	var maxX = Math.max(from[0], to[0]);
+	var maxY = Math.max(from[1], to[1]);
+
+	var peopleWhoDrewInTheAreaHash = new Object();
+	peopleWhoDrewInTheAreaHash.length = 0;
+	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--){
+		if(!this.paint.publicdrawings[i].points) continue;
+
+		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
+
+		if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
+
+		var pointsamt = this.paint.publicdrawings[i].points.length;
+		
+		//var checkEveryX = Math.round(pointsamt / 5);
+
+		for (var k = pointsamt - 1; k >= 0; k--){//i -= checkEveryX){
+			if (this.paint.publicdrawings[i].points[k][0] >= minX
+				&& this.paint.publicdrawings[i].points[k][0] <= maxX
+				&& this.paint.publicdrawings[i].points[k][1] >= minY
+				&& this.paint.publicdrawings[i].points[k][1] <= maxY) {
+					var player = this.playerFromId(socketid);
+					peopleWhoDrewInTheAreaHash[socketid] = true;
+					peopleWhoDrewInTheAreaHash.length++;
+					if(player){
+						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+					}
+					else{
+						this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+							if (result.error) {
+								this.chat.addMessage("Inspect tool", "Error: " + result.error);
+								return;
+							}
+							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+						}.bind(this));
+					}
+					break;
+			}
+		}
+	}
+
+	if(peopleWhoDrewInTheAreaHash.length === 0) {
+		this.chat.addMessage("Inspect tool", "No recently drawn lines found in this area.");
+	}
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {
@@ -3417,7 +3494,7 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	var ol = container.appendChild(document.createElement("ol"));
 
 	var features = ["Added Chat Filter! Settings -> Chat filter options",
-					"This allows you to locally filter chat phrases/words and people."];
+					"Inspect tool! See who just drew those lines!"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
