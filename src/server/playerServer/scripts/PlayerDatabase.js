@@ -7,6 +7,12 @@ var UPVOTE_MIN_REP = 7;
 var DEFAULT_MIN_REGION_REP = 2000000000;
 var MODERATE_REGIONS_MIN_REP = 100;
 
+var REPSOURCES = {
+	GIVEN: 0,
+	PREMIUM: 1,
+	REFERRAL: 2
+};
+
 function PlayerDatabase (database) {
 	this.database = database;
 }
@@ -159,10 +165,33 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 				this.database.query("INSERT INTO reputations (from_id, to_id) VALUES (?, ?)", [fromId, toId], function (err, rows) {
 					if (err) console.log("[GIVEREPUTATION] Database error inserting reputation");
 					callback(err ? "Database error (#2) trying to give reputation." : null);
-				});
+					this.checkReferralRep(toId);
+				}.bind(this));
 			}.bind(this));
 		}.bind(this));		
 	}.bind(this));
+};
+
+/*
+	This should be called every time someone gets reputation
+	It will check if they have the right amount of rep, and if so, give the referral reward to the referrer
+*/
+PlayerDatabase.prototype.checkReferralRep = function checkReferralRep (playerid) {
+	var query = "";
+	query += "INSERT INTO";
+	query += "	reputations (from_id, to_id, source)";
+	// Selects one row if our referrer does not have a referral rep from us
+	query += "SELECT";
+	query += "	? as from_id,";
+	query += "	referral as to_id,";
+	query += "	REPSOURCES.REFERRAL as source";
+	query += "FROM users";
+	query += "	JOIN reputations ON users.id = reputations.from_id";
+	query += "WHERE reputations.from_id = ?";
+	query += "AND to_id = (SELECT referral FROM users WHERE id = ?)
+	query += "LIMIT 1"; //Because technically it is possible that there are multiple
+	
+	this.database.query(query, [playerid, playerid, playerid]);
 };
 
 PlayerDatabase.prototype.setName = function setName (id, name) {
