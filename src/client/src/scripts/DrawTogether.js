@@ -3342,11 +3342,14 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon", "100: you get free premium (or one of your friends if you already have)"];
+	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: TBA", "100: TBA"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
 	}
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If one of your referrals gets premium, you get it too! (Already have premium? Then you get 10 rep)"));
 	
 	var title = container.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Link"));
