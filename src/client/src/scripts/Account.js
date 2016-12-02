@@ -115,7 +115,7 @@ Account.prototype.register = function register (email, pass, callback) {
 		}
 	}.bind(this));
 
-	req.open("GET", this.server + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass) + "&ref=" + encodeURIComponent(ref));
+	req.open("GET", this.server + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass) + "&referral=" + encodeURIComponent(ref));
 	req.send();
 };
 
