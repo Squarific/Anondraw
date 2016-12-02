@@ -64,7 +64,7 @@ BEGIN
             WHERE from_id = triggereduser.id
                 AND to_id = triggereduser.referral
                 AND source = 2
-	);
+	)
 END;
 
 CREATE TABLE IF NOT EXISTS ipbans (
