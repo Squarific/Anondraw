@@ -3351,11 +3351,11 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	var title = container.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Link"));
 	
-	
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Your link is: "));
 
 	var link = p.appendChild(document.createElement("a"));
+	link.appendChild(document.createTextNode("http://www.anondraw.com/?ref=" + this.account.id));
 	link.href = "http://www.anondraw.com/?ref=" + this.account.id;
 	link.alt = "Your referral link";
 	link.title = "Your referral link";
