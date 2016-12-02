@@ -527,7 +527,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 			var moderatorGuidelines = document.createElement("div");
 			moderatorGuidelines.appendChild(document.createTextNode("You are a moderator! Click here for guidelines"));
 			moderatorGuidelines.addEventListener("click", self.openModeratorWelcomeWindow.bind(self));
-			moderatorGuideliens.style.cursor = "pointer";
+			moderatorGuidelines.style.cursor = "pointer";
 			self.chat.addElementAsMessage(moderatorGuidelines);
 		}
 	});
