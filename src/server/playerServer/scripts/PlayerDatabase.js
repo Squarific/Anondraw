@@ -181,24 +181,24 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 PlayerDatabase.prototype.checkReferralRep = function checkReferralRep () {
 	console.log("Checking referral rep");
 	var query = "";
-	query += "INSERT INTO";
-	query += "reputations (from_id, to_id, source)";
-	query += "SELECT";
-	query += "    triggereduser.id as from_id,";
-	query += "    triggereduser.referral as to_id,";
-	query += "    2 as source";
-	query += "FROM users AS triggereduser";
-	query += "INNER JOIN reputations";
-	query += "    ON triggereduser.id = reputations.to_id";
-	query += "GROUP BY reputations.to_id";
+	query += "INSERT INTO ";
+	query += "reputations (from_id, to_id, source) ";
+	query += "SELECT ";
+	query += "    triggereduser.id as from_id, ";
+	query += "    triggereduser.referral as to_id, ";
+	query += "    2 as source ";
+	query += "FROM users AS triggereduser ";
+	query += "INNER JOIN reputations ";
+	query += "    ON triggereduser.id = reputations.to_id ";
+	query += "GROUP BY reputations.to_id ";
 	query += "HAVING COUNT(reputations.to_id) > " + REFERRAL_CONFIRMED_REP;
-	query += "    AND EXISTS (SELECT * FROM users WHERE id = triggereduser.referral)";
-	query += "    AND NOT EXISTS (";
-	query += "        SELECT * FROM reputations";
-	query += "        WHERE from_id = triggereduser.id";
-	query += "            AND to_id = triggereduser.referral";
-	query += "            AND source = 2";
-	query += "    );";
+	query += "    AND EXISTS (SELECT * FROM users WHERE id = triggereduser.referral) ";
+	query += "    AND NOT EXISTS ( ";
+	query += "        SELECT * FROM reputations ";
+	query += "        WHERE from_id = triggereduser.id ";
+	query += "            AND to_id = triggereduser.referral ";
+	query += "            AND source = 2 ";
+	query += "    )";
 	
 	this.database.query(query, function (err, result) {
 		if (err) console.log("[CHECKREFERRALREP] DBError", err);
