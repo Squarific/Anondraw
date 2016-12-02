@@ -7,6 +7,12 @@ var UPVOTE_MIN_REP = 7;
 var DEFAULT_MIN_REGION_REP = 2000000000;
 var MODERATE_REGIONS_MIN_REP = 100;
 
+var REPSOURCES = {
+	GIVEN: 0,
+	PREMIUM: 1,
+	REFERRAL: 2
+};
+
 function PlayerDatabase (database) {
 	this.database = database;
 }
@@ -90,8 +96,8 @@ PlayerDatabase.prototype.login = function login (email, pass, callback) {
 	});
 };
 
-PlayerDatabase.prototype.register = function register (email, pass, callback) {
-	this.database.query("INSERT INTO users (email, pass, register_datetime) VALUES (?, ?, ?)", [email, SHA256(pass).toString(), new Date()], function (err, result) {
+PlayerDatabase.prototype.register = function register (email, pass, referral, callback) {
+	this.database.query("INSERT INTO users (email, pass, referral, register_datetime) VALUES (?, ?, ?, ?)", [email, SHA256(pass).toString(), referral, new Date()], function (err, result) {
 		if (err) {
 			if (err.code == "ER_DUP_ENTRY") {
 				callback("Already registered!");
@@ -159,7 +165,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 				this.database.query("INSERT INTO reputations (from_id, to_id) VALUES (?, ?)", [fromId, toId], function (err, rows) {
 					if (err) console.log("[GIVEREPUTATION] Database error inserting reputation");
 					callback(err ? "Database error (#2) trying to give reputation." : null);
-				});
+				}.bind(this));
 			}.bind(this));
 		}.bind(this));		
 	}.bind(this));

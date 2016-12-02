@@ -111,7 +111,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 6;
+DrawTogether.prototype.CLIENT_VERSION = 7;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -2890,6 +2890,14 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 			resetButton.addEventListener("click", function () {
 				this.resetProtectedRegions();
 			}.bind(this));
+			
+			var referralButton = formContainer.appendChild(document.createElement("div"));
+			referralButton.appendChild(document.createTextNode("Referral"));
+			referralButton.className = "drawtogether-button";
+			referralButton.addEventListener("click", function () {
+				this.closeAccountWindow();
+				this.openReferralWindow();
+			}.bind(this));
 
 			var premiumButton = formContainer.appendChild(document.createElement("div"));
 			premiumButton.appendChild(document.createTextNode("Premium"));
@@ -3320,6 +3328,48 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
 };
 
+DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
+	var referralWindow = this.gui.createWindow({ title: "Referrals" });
+
+	var container = referralWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Referral program"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Want to earn some extra rep and goodies? Why not get your friends to join?"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone registers via your link they will be marked as your referral. Then if they get 10 rep they will become confirmed and you will get a reward."));
+	
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Rewards"));
+	
+	var ol = container.appendChild(document.createElement("ol"));
+
+	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: TBA", "100: TBA"];
+	for (var k = 0; k < features.length; k++) {
+		var li = ol.appendChild(document.createElement("li"));
+		li.appendChild(document.createTextNode(features[k]));
+	}
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If one of your referrals gets premium, you get it too! (Already have premium? Then you get 10 rep)"));
+	
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Link"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Your link is: "));
+
+	var link = p.appendChild(document.createElement("a"));
+	link.appendChild(document.createTextNode("http://www.anondraw.com/?ref=" + this.account.id));
+	link.href = "http://www.anondraw.com/?ref=" + this.account.id;
+	link.alt = "Your referral link";
+	link.title = "Your referral link";
+};
+
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	var premiumBuyWindow = this.gui.createWindow({ title: "Premium" });
 
@@ -3492,15 +3542,17 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("We just had an update!"));
+	title.appendChild(document.createTextNode("We now have a referral program"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Current new features:"));
+	p.appendChild(document.createTextNode("Recent new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
 	var features = ["Added Chat Filter! Settings -> Chat filter options",
-					"Inspect tool! See who just drew those lines!"];
+	                "Inspect tool! See who just drew those lines!",
+	                "Referral program (earn more rep)",
+	                "50R+ accounts no longer use ink"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
