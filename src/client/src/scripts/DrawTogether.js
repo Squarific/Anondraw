@@ -522,7 +522,12 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 				}
 			} else {
 				drawTogether.openModeratorWelcomeWindow();
-			}			
+			}
+			
+			var moderatorGuidelines = document.createElement("div");
+			moderatorGuidelines.appendChild(document.createTextNode("You are a moderator! Click here for guidelines"));
+			moderatorGuidelines.addEventListener("click", this.openModeratorWelcomeWindow.bind(this));
+			this.chat.addElementAsMessage(moderatorGuidelines);
 		}
 	});
 
@@ -667,11 +672,6 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
-			
-			var moderatorGuidelines = document.createElement("div");
-			moderatorGuidelines.appendChild(document.createTextNode("You are a moderator! Click here for guidelines"));
-			moderatorGuidelines.addEventListener("click", this.openModeratorWelcomeWindow.bind(this));
-			this.chat.addElementAsMessage(moderatorGuidelines);
 			
 			if (this.account.uKey) {
 				this.getFavorites();
