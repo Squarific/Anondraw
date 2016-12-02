@@ -3314,6 +3314,45 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
 };
 
+DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
+	var referralWindow = this.gui.createWindow({ title: "Referrals" });
+
+	var container = referralWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Referral program"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Want to earn some extra rep and goodies? Why not get your friends to join?"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone registers via your link they will be marked as your referral. Then if they get 10 rep they will become confirmed and you will get a reward."));
+	
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Rewards"));
+	
+	var ol = container.appendChild(document.createElement("ol"));
+
+	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon", "100: you get free premium (or one of your friends if you already have)"];
+	for (var k = 0; k < features.length; k++) {
+		var li = ol.appendChild(document.createElement("li"));
+		li.appendChild(document.createTextNode(features[k]));
+	}
+	
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Link"));
+	
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Your link is: "));
+
+	var link = p.appendChild(document.createElement("a"));
+	link.href = "http://www.anondraw.com/?ref=" + this.account.id;
+	link.alt = "Your referral link";
+	link.title = "Your referral link";
+};
+
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	var premiumBuyWindow = this.gui.createWindow({ title: "Premium" });
 
