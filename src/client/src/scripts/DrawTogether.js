@@ -111,7 +111,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 6;
+DrawTogether.prototype.CLIENT_VERSION = 7;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -3533,15 +3533,17 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("We just had an update!"));
+	title.appendChild(document.createTextNode("We now have a referral program"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Current new features:"));
+	p.appendChild(document.createTextNode("Recent new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
 	var features = ["Added Chat Filter! Settings -> Chat filter options",
-					"Inspect tool! See who just drew those lines!"];
+	                "Inspect tool! See who just drew those lines!",
+	                "Referral program (earn more rep)",
+	                "50R+ accounts no longer use ink"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
