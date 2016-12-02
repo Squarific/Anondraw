@@ -45,27 +45,25 @@ ALTER TABLE reputations ADD COLUMN source INT UNSIGNED DEFAULT 0;
 
 CREATE TRIGGER referralcheck
 AFTER INSERT
-    ON reputations FOR EACH ROW
-BEGIN
-    INSERT INTO
-        reputations (from_id, to_id, source)
-    SELECT
-        triggereduser.id as from_id,
-        triggereduser.referral as to_id,
-        2 as source
-    FROM users AS triggereduser
-    INNER JOIN reputations
-        ON triggereduser.id = reputations.to_id
-    GROUP BY reputations.to_id
-    HAVING COUNT(reputations.to_id) > 10
-	AND EXISTS (SELECT * FROM users WHERE id = triggereduser.referral)
-        AND NOT EXISTS (
-            SELECT * FROM reputations
-            WHERE from_id = triggereduser.id
-                AND to_id = triggereduser.referral
-                AND source = 2
-	)
-END;
+ON reputations FOR EACH ROW
+INSERT INTO
+    reputations (from_id, to_id, source)
+SELECT
+    triggereduser.id as from_id,
+    triggereduser.referral as to_id,
+    2 as source
+FROM users AS triggereduser
+INNER JOIN reputations
+    ON triggereduser.id = reputations.to_id
+GROUP BY reputations.to_id
+HAVING COUNT(reputations.to_id) > 10
+    AND EXISTS (SELECT * FROM users WHERE id = triggereduser.referral)
+    AND NOT EXISTS (
+        SELECT * FROM reputations
+        WHERE from_id = triggereduser.id
+            AND to_id = triggereduser.referral
+            AND source = 2
+    );
 
 CREATE TABLE IF NOT EXISTS ipbans (
     ip VARCHAR(48),
