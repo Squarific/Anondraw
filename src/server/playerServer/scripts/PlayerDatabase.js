@@ -163,7 +163,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 				}
 
 				this.database.query("INSERT INTO reputations (from_id, to_id) VALUES (?, ?)", [fromId, toId], function (err, rows) {
-					if (err) console.log("[GIVEREPUTATION] Database error inserting reputation");
+					if (err) console.log("[GIVEREPUTATION] Database error inserting reputation", err);
 					callback(err ? "Database error (#2) trying to give reputation." : null);
 				}.bind(this));
 			}.bind(this));
