@@ -3549,10 +3549,12 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Added Chat Filter! Settings -> Chat filter options",
-	                "Inspect tool! See who just drew those lines!",
-	                "Referral program (earn more rep)",
-	                "50R+ accounts no longer use ink"];
+	var features = ["Referral program (earn more rep) (Account -> Referral)",
+	                "50R+ and premium users no longer use ink",
+	                "Added Chat Filter (Settings -> Chat filter options)",
+	                "Inspect tool to catch griefers (Select tool -> Inspect)",
+	                "BUGFIX: Windows no longer go out of the browser window"];
+
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
