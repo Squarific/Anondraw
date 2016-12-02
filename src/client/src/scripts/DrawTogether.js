@@ -668,7 +668,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
 			
-			var moderatorGuidelines = document.createElement("div"):
+			var moderatorGuidelines = document.createElement("div");
 			moderatorGuidelines.appendChild(document.createTextNode("You are a moderator! Click here for guidelines"));
 			moderatorGuidelines.addEventListener("click", this.openModeratorWelcomeWindow.bind(this));
 			this.chat.addElementAsMessage(moderatorGuidelines);
