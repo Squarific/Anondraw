@@ -165,10 +165,44 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 				this.database.query("INSERT INTO reputations (from_id, to_id) VALUES (?, ?)", [fromId, toId], function (err, rows) {
 					if (err) console.log("[GIVEREPUTATION] Database error inserting reputation", err);
 					callback(err ? "Database error (#2) trying to give reputation." : null);
+					this.checkReferralRep();
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));		
 	}.bind(this));
+};
+
+/*
+	This query gives rep to everyone that has a referral with more than
+	REFERRAL_CONFIRMED_REP and has not yet gotten a rep for that user.
+	Should be run every time someone has gotten rep.
+*/
+PlayerDatabase.prototype.checkReferralRep = function checkReferralRep () {
+	console.log("Checking referral rep");
+	var query = "";
+	query += "INSERT INTO";
+	query += "reputations (from_id, to_id, source)";
+	query += "SELECT";
+	query += "    triggereduser.id as from_id,";
+	query += "    triggereduser.referral as to_id,";
+	query += "    2 as source";
+	query += "FROM users AS triggereduser";
+	query += "INNER JOIN reputations";
+	query += "    ON triggereduser.id = reputations.to_id";
+	query += "GROUP BY reputations.to_id";
+	query += "HAVING COUNT(reputations.to_id) > " + REFERRAL_CONFIRMED_REP;
+	query += "    AND EXISTS (SELECT * FROM users WHERE id = triggereduser.referral)";
+	query += "    AND NOT EXISTS (";
+	query += "        SELECT * FROM reputations";
+	query += "        WHERE from_id = triggereduser.id";
+	query += "            AND to_id = triggereduser.referral";
+	query += "            AND source = 2";
+	query += "    );";
+	
+	this.database.query(query, function (err, result) {
+		if (err) console.log("[CHECKREFERRALREP] DBError", err);
+		console.log(result);
+	});
 };
 
 PlayerDatabase.prototype.setName = function setName (id, name) {
