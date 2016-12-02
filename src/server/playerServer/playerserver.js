@@ -60,7 +60,7 @@ var server = http.createServer(function (req, res) {
 
 			var uKey = sessions.addSession(id, email);
 			playerDatabase.setOnline(id);
-			res.end('{"success": "Logged in", "uKey": "' + uKey + ', "id":' + id + "}');
+			res.end('{"success": "Logged in", "uKey": "' + uKey + ', "id":' + id + '}');
 		});
 
 		return;
@@ -259,7 +259,7 @@ var server = http.createServer(function (req, res) {
 		}
 
 		playerDatabase.setOnline(user.id);
-		res.end('{"success": "Logged in"}');
+		res.end('{"success": "Logged in", "id": ' + user.id + '}');
 		return;
 	}
 
