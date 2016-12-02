@@ -2884,6 +2884,14 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 			resetButton.addEventListener("click", function () {
 				this.resetProtectedRegions();
 			}.bind(this));
+			
+			var referralButton = formContainer.appendChild(document.createElement("div"));
+			referralButton.appendChild(document.createTextNode("Referral"));
+			referralButton.className = "drawtogether-button";
+			referralButton.addEventListener("click", function () {
+				this.closeAccountWindow();
+				this.openReferralWindow();
+			}.bind(this));
 
 			var premiumButton = formContainer.appendChild(document.createElement("div"));
 			premiumButton.appendChild(document.createTextNode("Premium"));
