@@ -58,6 +58,10 @@
   background: #eee;
   padding: 1em;
   font-size: 1.1em;
+  overflow-y: auto;
+  max-height: 20em;
+  max-height: 50vh;
+  max-height: calc(100vh - 7em - 100px);
 }
 
 .gui-window ol {
