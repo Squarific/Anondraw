@@ -518,16 +518,16 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 				lastOpen = parseInt(lastOpen);
 				var remindTime = lastOpen + self.MODERATORWELCOMEWINDOWOPENAFTER;
 				if (remindTime < Date.now()) {
-					drawTogether.openModeratorWelcomeWindow();
+					self.openModeratorWelcomeWindow();
 				}
 			} else {
-				drawTogether.openModeratorWelcomeWindow();
+				self.openModeratorWelcomeWindow();
 			}
 			
 			var moderatorGuidelines = document.createElement("div");
 			moderatorGuidelines.appendChild(document.createTextNode("You are a moderator! Click here for guidelines"));
-			moderatorGuidelines.addEventListener("click", this.openModeratorWelcomeWindow.bind(this));
-			this.chat.addElementAsMessage(moderatorGuidelines);
+			moderatorGuidelines.addEventListener("click", self.openModeratorWelcomeWindow.bind(self));
+			self.chat.addElementAsMessage(moderatorGuidelines);
 		}
 	});
 
