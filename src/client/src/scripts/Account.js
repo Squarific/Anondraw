@@ -73,6 +73,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 			}
 
 			this.uKey = data.uKey;
+			this.id = data.id;
 			this.mail = email;
 			localStorage.setItem("drawtogether-uKey", data.uKey);
 			localStorage.setItem("drawtogether-mail", email);
@@ -103,6 +104,7 @@ Account.prototype.register = function register (email, pass, callback) {
 			}
 
 			this.uKey = data.uKey;
+			this.id = data.id;
 			this.mail = email;
 			localStorage.setItem("drawtogether-uKey", data.uKey);
 			localStorage.setItem("drawtogether-mail", email);
@@ -134,6 +136,7 @@ Account.prototype.logout = function logout (callback) {
 			localStorage.removeItem("drawtogether-pass");
 			delete this.uKey;
 			delete this.mail;
+			delete this.id;
 
 			setTimeout(function () {
 				callback(null, true)
@@ -179,6 +182,7 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 			if (data.error) {
 				if (data.error == "Not logged in.") {
 					delete this.uKey;
+					delete this.id;
 					localStorage.removeItem("drawtogether-uKey");
 
 					// Our uKey expired, try logging in again
@@ -197,6 +201,8 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 				return;
 			}
 
+			this.id = data.id;
+			
 			// Our uKey is still valid
 			setTimeout(function () {
 				callback(null, true)
