@@ -2374,7 +2374,10 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var chatBeepVolumeSlider = ChatFilterListContainer.appendChild(document.createElement("input"));
 	chatBeepVolumeSlider.type = "range";
 	chatBeepVolumeSlider.className = "chat-filter-visibility";
-	chatBeepVolumeSlider.value = localStorage.getItem("chatBeepVolume") * 100 || 100;
+	if(localStorage.getItem("chatBeepVolume"))
+		chatBeepVolumeSlider.value = localStorage.getItem("chatBeepVolume") * 100;
+	else
+		chatBeepVolumeSlider.value = 100;
 	chatBeepVolumeSlider.addEventListener("change", function (e) {		
 		localStorage.setItem("chatBeepVolume", chatBeepVolumeSlider.value * 0.01);
 	}.bind(this));
@@ -2397,7 +2400,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var chatFilterByWordsHeaderRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
 
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Word/Phrase")).parentNode);
-	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Case insensitive")).parentNode);//loosematch
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Loose Match")).parentNode);//loosematch
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Visibility")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("🔊")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Global notification")).parentNode);
