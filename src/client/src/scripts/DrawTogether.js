@@ -2400,7 +2400,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var chatFilterByWordsHeaderRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
 
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Word/Phrase")).parentNode);
-	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Case insensitive")).parentNode);//loosematch
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Loose Match")).parentNode);//loosematch
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Visibility")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("🔊")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Global notification")).parentNode);
