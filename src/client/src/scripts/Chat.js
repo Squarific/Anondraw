@@ -333,8 +333,10 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	messageDom.alt = time;
 
 	// Only play audio if it was a normal message
-	if (user !== message && ( !this.userSettings.getBoolean("Mute chat") || overrideMuteAll ) && !mute)
+	if (user !== message && ( !this.userSettings.getBoolean("Mute chat") || overrideMuteAll ) && !mute){
+		this.messageSound.volume = localStorage.getItem("chatBeepVolume") || 1;
 		this.messageSound.play();
+	}
 	if(globalNotification){
 
 		if (Notification.permission !== "granted")

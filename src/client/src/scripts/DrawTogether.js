@@ -2364,12 +2364,22 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var ChatFilterListContainer = document.createElement("div");
 	ChatFilterListContainer.className = "chat-filter-list-container";
 
-	//var chatDefaultsHeader = document.createElement("H3");
-	//chatDefaultsHeader.appendChild(document.createTextNode("Chat Defaults:"));
-	//ChatFilterListContainer.appendChild(chatDefaultsHeader);
+	var chatDefaultsHeader = document.createElement("H3");
+	chatDefaultsHeader.appendChild(document.createTextNode("Chat Options:"));
+	ChatFilterListContainer.appendChild(chatDefaultsHeader);
 
-	//var muteNewPeopleLabel = ChatFilterListContainer.appendChild(document.createElement("label"));
-	//muteNewPeopleLabel.appendChild(document.createTextNode("Mute new people"));
+	var chatBeepVolumeLabel = ChatFilterListContainer.appendChild(document.createElement("label"));
+	chatBeepVolumeLabel.appendChild(document.createTextNode("Chat Beep Volume: "));
+
+	var chatBeepVolumeSlider = ChatFilterListContainer.appendChild(document.createElement("input"));
+	chatBeepVolumeSlider.type = "range";
+	chatBeepVolumeSlider.className = "chat-filter-visibility";
+	chatBeepVolumeSlider.value = localStorage.getItem("chatBeepVolume") || 100;
+	chatBeepVolumeSlider.addEventListener("change", function (e) {		
+		localStorage.setItem("chatBeepVolume", chatBeepVolumeSlider.value * 0.01);
+	}.bind(this));
+
+	
 
 	//var muteNewPeopleCheckbox = muteNewPeopleLabel.appendChild(document.createElement("input"));
 	//muteNewPeopleCheckbox.type = "checkbox";
