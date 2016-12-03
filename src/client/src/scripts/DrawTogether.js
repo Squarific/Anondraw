@@ -2374,7 +2374,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var chatBeepVolumeSlider = ChatFilterListContainer.appendChild(document.createElement("input"));
 	chatBeepVolumeSlider.type = "range";
 	chatBeepVolumeSlider.className = "chat-filter-visibility";
-	chatBeepVolumeSlider.value = localStorage.getItem("chatBeepVolume") || 100;
+	chatBeepVolumeSlider.value = localStorage.getItem("chatBeepVolume") * 100 || 100;
 	chatBeepVolumeSlider.addEventListener("change", function (e) {		
 		localStorage.setItem("chatBeepVolume", chatBeepVolumeSlider.value * 0.01);
 	}.bind(this));
