@@ -248,7 +248,13 @@ Chat.prototype.emotesHash = {
 };
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
-Chat.prototype.coordinateRegex = /(?:x:?\s*)?([-]?\d\d*)[,/.\sxy][\s*{0,4}]?[,/.\sxy]?(?:y:?\s*)?([-]?\d\d*)[y]?/gi
+Chat.prototype.strictMatch1 = '(?:^|\\W)(';
+Chat.prototype.strictMatch2 = ')(?:$|\\W)';
+//(?:^|\W)(int)(?:$|\W) 
+// matches:
+// int, hey
+Chat.prototype.matchSearchMode = 'gi';
+Chat.prototype.coordinateRegex = /(?:x:?\s*)?([-]?\d\d*)[,/.\sxy][\s*{0,4}]?[,/.\sxy]?(?:y:?\s*)?([-]?\d\d*)[y]?/gi;
 // \d\d* match atleast 1 number then every number right after that if they exists
 // [,\sxX] match atleast one of the following: , or space or x or X
 // [\s*{0,4}]? match 0 to 4 consequtive spaces if they exist
@@ -294,11 +300,26 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	var globalNotification = false;
 	if(chatFilterByWordsArr)
 	for (var k = 0; k < chatFilterByWordsArr.length; k++){
+		var messageContainsWord = -1;
+		var matchContainsWordRegex = '';
 
-		var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
+		if(chatFilterByWordsArr[k].looseMatch){
+			console.log("looseMatch");
+			matchContainsWordRegex = chatFilterByWordsArr[k].inputText;
+		} else
+		{
+			matchContainsWordRegex = this.strictMatch1 + chatFilterByWordsArr[k].inputText + this.strictMatch2;
+		}
+		var strRegExPattern = '\\b'+searchStr+'\\b'; 
+		var messageContainsWord = new RegExp(matchContainsWordRegex, this.matchSearchMode).test(message);
+
+		//var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
 
 		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
-			messageDom.style.opacity = chatFilterByWordsArr[k].visibility * 0.01; // 100 to 1.0
+			console.log(chatFilterByWordsArr[k].visibility);
+			var opacityfordom = chatFilterByWordsArr[k].visibility * 0.01;
+			console.log(opacityfordom);
+			messageDom.style.opacity =  opacityfordom;// 100 to 1.0
 			if (chatFilterByWordsArr[k].overrideMute)
 				overrideMuteAll = true;
 			if (chatFilterByWordsArr[k].mute)
