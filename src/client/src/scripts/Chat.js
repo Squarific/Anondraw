@@ -254,10 +254,7 @@ Chat.prototype.strictMatch2 = ')(?:$|\\W)';
 // matches:
 // int, hey
 Chat.prototype.matchSearchMode = 'gi';
-Chat.prototype.coordinateRegex = /(?:x:?\s*)?([-]?\d\d*)[,/.\sxy][\s*{0,4}]?[,/.\sxy]?(?:y:?\s*)?([-]?\d\d*)[y]?/gi;
-// \d\d* match atleast 1 number then every number right after that if they exists
-// [,\sxX] match atleast one of the following: , or space or x or X
-// [\s*{0,4}]? match 0 to 4 consequtive spaces if they exist
+Chat.prototype.coordinateRegex = /([-]?\d\d*)(?:[\s*{0,4}]?,[\s*{0,4}]?)([-]?\d\d*)/gi;
 // matches:
 // 4444x 5555y
 // 4444X5555Y
