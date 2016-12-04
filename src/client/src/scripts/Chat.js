@@ -254,22 +254,13 @@ Chat.prototype.strictMatch2 = ')(?:$|\\W)';
 // matches:
 // int, hey
 Chat.prototype.matchSearchMode = 'gi';
-Chat.prototype.coordinateRegex = /([-]?\d\d*)(?:[\s*{0,4}]?,[\s*{0,4}]?)([-]?\d\d*)/gi;
+Chat.prototype.coordinateRegex = /(http[\S]*)?([-]?\d\d*)(?:[\s*{0,4}]?,[\s*{0,4}]?)([-]?\d\d*)/gi;
 // matches:
-// 4444x 5555y
-// 4444X5555Y
 // 4444, 5555
-// 4444 5555
-// 4444  5555
 // (4444,5555)
 // 4444 ,5555
 // 4444.5555
-// 4444/5555
-// x223412 y21321
 // 5555 , 55554
-// x 123 y 123
-// x: 555 y: 2222
-// 1255y5242
 
 Chat.prototype.addMessage = function addMessage (user, message, userid, socketid) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
@@ -385,7 +376,16 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
-	message = message.replace(this.coordinateRegex, " $1,$2 "); // removes spaces from between coordinates so it can be split below
+	var foundCoordinates = message.match(this.coordinateRegex);
+	if(foundCoordinates)
+	for (var i = 0; i < foundCoordinates.length; i++) {
+		if(foundCoordinates[i].indexOf('http') != -1)
+			continue;
+		var original = foundCoordinates[i];
+		foundCoordinates[i].trim();
+		message.replace(original, foundCoordinates[i]);
+	}
+	//message = message.replace(this.coordinateRegex, " $2,$3 "); // removes spaces from between coordinates so it can be split below
 	var messages = message.split(" ");
 	var temp;
 	var result;
