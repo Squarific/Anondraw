@@ -73,6 +73,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 			}
 
 			this.uKey = data.uKey;
+			this.id = data.id;
 			this.mail = email;
 			localStorage.setItem("drawtogether-uKey", data.uKey);
 			localStorage.setItem("drawtogether-mail", email);
@@ -91,6 +92,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 Account.prototype.register = function register (email, pass, callback) {
 	var req = new XMLHttpRequest();
 	var pass = CryptoJS.SHA256(pass).toString(CryptoJS.enc.Base64);
+	var ref = localStorage.getItem("drawtogether-referrer");
 
 	req.addEventListener("readystatechange", function (event) {
 		if (req.status == 200 && req.readyState == 4) {
@@ -102,6 +104,7 @@ Account.prototype.register = function register (email, pass, callback) {
 			}
 
 			this.uKey = data.uKey;
+			this.id = data.id;
 			this.mail = email;
 			localStorage.setItem("drawtogether-uKey", data.uKey);
 			localStorage.setItem("drawtogether-mail", email);
@@ -112,7 +115,7 @@ Account.prototype.register = function register (email, pass, callback) {
 		}
 	}.bind(this));
 
-	req.open("GET", this.server + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass));
+	req.open("GET", this.server + "/register?email=" + encodeURIComponent(email) + "&pass=" + encodeURIComponent(pass) + "&referral=" + encodeURIComponent(ref));
 	req.send();
 };
 
@@ -133,6 +136,7 @@ Account.prototype.logout = function logout (callback) {
 			localStorage.removeItem("drawtogether-pass");
 			delete this.uKey;
 			delete this.mail;
+			delete this.id;
 
 			setTimeout(function () {
 				callback(null, true)
@@ -178,6 +182,7 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 			if (data.error) {
 				if (data.error == "Not logged in.") {
 					delete this.uKey;
+					delete this.id;
 					localStorage.removeItem("drawtogether-uKey");
 
 					// Our uKey expired, try logging in again
@@ -196,6 +201,8 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 				return;
 			}
 
+			this.id = data.id;
+			
 			// Our uKey is still valid
 			setTimeout(function () {
 				callback(null, true)

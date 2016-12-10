@@ -248,6 +248,19 @@ Chat.prototype.emotesHash = {
 };
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
+Chat.prototype.strictMatch1 = '(?:^|\\W)(';
+Chat.prototype.strictMatch2 = ')(?:$|\\W)';
+//(?:^|\W)(int)(?:$|\W) 
+// matches:
+// int, hey
+Chat.prototype.matchSearchMode = 'gi';
+Chat.prototype.coordinateRegex = /(http[\S]*)?([-]?\d\d*)(?:[\s*{0,4}]?,[\s*{0,4}]?)([-]?\d\d*)/gi;
+// matches:
+// 4444, 5555
+// (4444,5555)
+// 4444 ,5555
+// 4444.5555
+// 5555 , 55554
 
 Chat.prototype.addMessage = function addMessage (user, message, userid, socketid) {
 	var messageDom = this.messagesDom.appendChild(document.createElement("div"));
@@ -275,12 +288,26 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	var globalNotification = false;
 	if(chatFilterByWordsArr)
 	for (var k = 0; k < chatFilterByWordsArr.length; k++){
+		var messageContainsWord = -1;
+		var matchContainsWordRegex = '';
 
-		var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
+		if(chatFilterByWordsArr[k].looseMatch){
+			console.log("looseMatch");
+			matchContainsWordRegex = chatFilterByWordsArr[k].inputText;
+		} else
+		{
+			matchContainsWordRegex = this.strictMatch1 + chatFilterByWordsArr[k].inputText + this.strictMatch2;
+		}
+		var strRegExPattern = '\\b'+searchStr+'\\b'; 
+		var messageContainsWord = new RegExp(matchContainsWordRegex, this.matchSearchMode).test(message);
+
+		//var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
 
 		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
-			console.log("has text" + chatFilterByWordsArr[k].inputText);
-			messageDom.style.opacity = chatFilterByWordsArr[k].visibility * 0.01; // 100 to 1.0
+			console.log(chatFilterByWordsArr[k].visibility);
+			var opacityfordom = chatFilterByWordsArr[k].visibility * 0.01;
+			console.log(opacityfordom);
+			messageDom.style.opacity =  opacityfordom;// 100 to 1.0
 			if (chatFilterByWordsArr[k].overrideMute)
 				overrideMuteAll = true;
 			if (chatFilterByWordsArr[k].mute)
@@ -295,7 +322,6 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
 	if(chatFilterByPlayerArr)
 	for (var k = 0; k < chatFilterByPlayerArr.length; k++){
-		console.log("PlayerArr", chatFilterByPlayerArr[k].userid,userid, chatFilterByPlayerArr[k].socketid, socketid)
 		var socketidMatches = chatFilterByPlayerArr[k].socketid && chatFilterByPlayerArr[k].socketid == socketid;
 		var useridMatches = chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userid;
 		if (useridMatches || socketidMatches) {
@@ -316,8 +342,10 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	messageDom.alt = time;
 
 	// Only play audio if it was a normal message
-	if (user !== message && ( !this.userSettings.getBoolean("Mute chat") || overrideMuteAll ) && !mute)
+	if (user !== message && ( !this.userSettings.getBoolean("Mute chat") || overrideMuteAll ) && !mute){
+		this.messageSound.volume = localStorage.getItem("chatBeepVolume") || 1;
 		this.messageSound.play();
+	}
 	if(globalNotification){
 
 		if (Notification.permission !== "granted")
@@ -348,15 +376,33 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
+	var foundCoordinates = message.match(this.coordinateRegex);
+	if(foundCoordinates)
+	for (var i = 0; i < foundCoordinates.length; i++) {
+		if(foundCoordinates[i].indexOf('http') != -1)
+			continue;
+		var original = foundCoordinates[i];
+		foundCoordinates[i].trim();
+		message.replace(original, foundCoordinates[i]);
+	}
+	//message = message.replace(this.coordinateRegex, " $2,$3 "); // removes spaces from between coordinates so it can be split below
 	var messages = message.split(" ");
 	var temp;
 	var result;
 
 	for (var k = 0; k < messages.length; k++) {
 		// Replace if url
-		if (this.urlRegex.test(messages[k]))
+		if (this.urlRegex.test(messages[k])){
 			messages[k] = { url: messages[k] };
-
+			continue;
+		}
+		// Replace if coordinate
+		if(this.coordinateRegex.test(messages[k])){
+			var first = messages[k].match(/[-]?\d*/)[0]; //first number
+			var last = messages[k].match(/[-]?\d*$/)[0]; // last number	
+			messages[k] = { coordinate: messages[k], x: first, y: last };
+			continue;
+		}
 	}
 
 	this.addMessageList(messageDom, messages);
@@ -373,13 +419,20 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 
 		if (emoteUrl) {
 			messageDom.appendChild(this.createEmote(messages[k], emoteUrl));
-			messageDom.appendChild(document.createTextNode(" "));
+			messageDom.appendChild(document.createTextNode('\u00A0')); //&nbsp
 			continue;
 		}
 
 		if (messages[k].url) {
 			messageDom.appendChild(this.createUrl(messages[k].url));
-			messageDom.appendChild(document.createTextNode(" "));
+			messageDom.appendChild(document.createTextNode('\u00A0')); //&nbsp
+			continue;
+		}
+
+		if (messages[k].coordinate) {
+			console.log(messages[k]);
+			messageDom.appendChild(this.createCoordinate(messages[k].coordinate, messages[k].x, messages[k].y));
+			messageDom.appendChild(document.createTextNode('\u00A0')); //&nbsp
 			continue;
 		}
 
@@ -396,6 +449,37 @@ Chat.prototype.createUrl = function createUrl (url) {
 	a.href = url.indexOf("://") == -1 ? "http://" + url : url;
 	a.target = "_blank";
 	a.appendChild(document.createTextNode(url));
+	return a;
+};
+
+Chat.prototype.createCoordinate = function createCoordinate (coordinateText, x, y) {
+	var a = document.createElement("a");
+	a.href = "javascript:void(0);"
+	a.addEventListener("click", function (e) { // dispatch event code from: http://stackoverflow.com/a/33420324
+		e.preventDefault();
+		console.log(x,y);
+		var doc;
+		var node = $(".mouse-coords input:first").val(x)[0];
+		if (node.ownerDocument) {
+			doc = node.ownerDocument;
+		} else if (node.nodeType == 9){
+			// the node may be the document itself, nodeType 9 = DOCUMENT_NODE
+			doc = node;
+		}
+		
+		var eventName = "input";
+		var eventClass = "";
+		var event = doc.createEvent('Event');
+		event.initEvent(eventName, true, true);
+
+		event.synthetic = true;
+
+		node.dispatchEvent(event, true);
+		node = $(".mouse-coords input:last").val(y)[0];
+		node.dispatchEvent(event, true);
+	}.bind(this));
+
+	a.appendChild(document.createTextNode(coordinateText));
 	return a;
 };
 

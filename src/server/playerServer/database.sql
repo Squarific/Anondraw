@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
 	id INT UNSIGNED AUTO_INCREMENT,
 	email VARCHAR(255) UNIQUE,
 	pass VARCHAR(64),
+	referral INT UNSIGNED,
 	PRIMARY KEY(id),
 	INDEX (email, pass)
 );
@@ -36,7 +37,11 @@ CREATE TABLE IF NOT EXISTS reputations (
     to_id INT UNSIGNED,
     PRIMARY KEY (id),
     INDEX(to_id, from_id)
+    INDEX(from_id, to_id)
 );
+
+--For the possible source values, see PlayerDatabase.js
+ALTER TABLE reputations ADD COLUMN source INT UNSIGNED DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS ipbans (
     ip VARCHAR(48),
