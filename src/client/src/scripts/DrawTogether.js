@@ -3813,7 +3813,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 	buttonList.push({
 		name: "discord",
 		type: "button",
-		text: "Voice chat",
+		text: "Discord chat",
 		action: this.openDiscordWindow.bind(this),
 		data: {
 			intro: "We also have a voice chat using discord!"
