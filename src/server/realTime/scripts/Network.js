@@ -926,7 +926,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint || point, socket.lastPathSize);
+			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, socket.lastPathSize);
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
 
@@ -938,12 +938,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			// If we aren't in a private room, check our ink
 			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0 
-				&& socket.reputation < IGNORE_INK_REP && !socket.memberlevel) {
+				&& !(socket.reputation > IGNORE_INK_REP) && !socket.memberlevel) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
-
-				// Always set lastpathpoint even if we failed to draw
-				// TODO: Should this happen?
-				socket.lastPathPoint = point;
 
 				if (socket.ink < usage) {
 					protocol.informClient(socket, "Not enough ink!");
@@ -954,6 +950,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 
+			socket.lastPathPoint = point;
 			callback(protocol.drawTogether.addPathPoint(socket.room, socket.id, point));
 			socket.broadcast.to(socket.room).emit("pp", socket.id, point);
 		});
