@@ -926,7 +926,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				return;
 			}
 
-			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint, socket.lastPathSize);
+			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint || point, socket.lastPathSize);
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
 
