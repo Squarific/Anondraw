@@ -155,7 +155,7 @@ DrawTogether.prototype.defaultVideoExportSettings = [{
 	}, {
 		title: "format",
 		type: "dropdown",
-		items: ["webm", "gif"],
+		items: ["gif", "webm"],
 		value: 0
 	}, {
 		title: "quality",
@@ -3717,7 +3717,8 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Referral program (earn more rep) (Account -> Referral)",
+	var features = ["Export videos/gifs (Select tool -> Export video)",
+	                "Referral program (earn more rep) (Account -> Referral)",
 	                "50R+ and premium users no longer use ink",
 	                "Added Chat Filter (Settings -> Chat filter options)",
 	                "Inspect tool to catch griefers (Select tool -> Inspect)",
