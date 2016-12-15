@@ -3710,7 +3710,7 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("We now have a referral program"));
+	title.appendChild(document.createTextNode("You can now export videos!"));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Recent new features:"));
