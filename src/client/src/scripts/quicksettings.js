@@ -323,7 +323,7 @@
 		},
 
 		getRangeValue: function(title) {
-			return this._controls[title].control.value;
+			return parseInt(this._controls[title].control.value);
 		},
 
 		setRangeValue: function(title, value, notify) {

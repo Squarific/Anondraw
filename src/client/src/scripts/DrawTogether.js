@@ -6,6 +6,9 @@ function DrawTogether (container, settings) {
 	this.userSettings = QuickSettings.create(0, 0, "settings");
 	this.userSettings.setDraggable(false);
 	this.userSettings.setCollapsible(false);
+	
+	this.videoExportSettings = QuickSettings.create(50, 50, "Video export settings");
+	this.videoExportSettings.hide();
 
 	// Set default values untill we receive them from the server
 	this.playerList = [];
@@ -140,8 +143,62 @@ DrawTogether.prototype.defaultUserSettings = [{
 		title: "Show welcome",
 		type: "boolean",
 		value: true
-	}
-];
+}];
+
+DrawTogether.prototype.defaultVideoExportSettings = [{
+		title: "framerate",
+		type: "range",
+		min: 1,
+		max: 144,
+		step: 1,
+		value: 10
+	}, {
+		title: "format",
+		type: "dropdown",
+		items: ["webm", "gif", "png", "jpg", "ffmpegserver"],
+		value: 0
+	}, {
+		title: "quality",
+		type: "range",
+		min: 0,
+		max: 100,
+		step: 1,
+		value: 100
+	}, {
+		title: "motionBlurFrames",
+		type: "range",
+		min: 1,
+		max: 10,
+		step: 1,
+		value: 1
+	}, {
+		title: "verbose",
+		type: "boolean"
+	}, {
+		title: "display",
+		type: "boolean"
+	}, {
+		title: "timeLimit",
+		type: "range",
+		min: 10,
+		max: 3600,
+		step: 10,
+		value: 600
+	}, {
+		title: "autoSaveTime",
+		type: "range",
+		min: 30,
+		max: 1800,
+		step: 10,
+		value: 600
+	}, {
+		title: "startTime",
+		type: "range",
+		min: 0,
+		max: 3600,
+		step: 1,
+		value: 0
+}];
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
 DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
@@ -1476,6 +1533,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (event) {
 	this.gui.prompt("What do you want to do with your selection?", [
 		"Export in high quality",
+		"Export video/gif",
 		"Create protected region",
 		"Inspect tool",
 		"Cancel"
@@ -1484,6 +1542,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 
 		var handlers = {
 			"Export in high quality": this.exportImage.bind(this),
+			"Export video/gif": this.exportVideo.bind(this),
 			"Create protected region": this.createProtectedRegion.bind(this),
 			"Inspect tool": this.whoDrewInThisArea.bind(this)
 		};
@@ -2079,6 +2138,86 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	exportwindow.appendChild(img);
 };
 
+DrawTogether.prototype.exportVideo = function (from, to) {
+	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
+	
+	var settings = QuickSettings.create(0, 0, "Specific settings");
+	settings.addText("Name", "Your title");
+	settings.addRange("Frames", 1, 200, 10, 1);
+	exportVideoWindow.appendChild(settings._panel);
+	
+	var container = exportVideoWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+	
+	var renderButton = container.appendChild(document.createElement("div"));
+	renderButton.appendChild(document.createTextNode("Render"));
+	renderButton.className = "drawtogether-button";
+	renderButton.addEventListener("click", function () {
+		var exportFuncs = {
+			boolean: "getBoolean",
+			range: "getRangeValue",
+			dropdown: "getDropDownValue"
+		};
+		
+		var captureSettings = {
+			name: settings.getText("Name"),
+			workersPath: ''
+		};
+		
+		for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
+			var funcName = exportFuncs[this.defaultVideoExportSettings[k].type];
+			var value = this.videoExportSettings[funcName](this.defaultVideoExportSettings[k].title)
+			if (typeof value == "object") value = value.value;
+			captureSettings[this.defaultVideoExportSettings[k].title] = value;
+		}
+		
+		console.log("CaptureSettings:", captureSettings);
+		
+		var capturer = new CCapture(captureSettings);
+		capturer.start();
+		
+		var frames = settings.getRangeValue("Frames");
+		
+		var frameWidth = Math.abs(to[0] - from[0]) / frames;
+		
+		var start = [
+			Math.min(from[0], to[0]),
+			Math.min(from[1], to[1])
+		];
+		
+		var endY = Math.max(from[1], to[1]);
+		
+		for (var k = 0; k < frames; k++) {
+			var tempFrom = [
+				start[0] + frameWidth * k,
+				start[1]
+			];
+			
+			var tempTo = [
+				tempFrom[0] + frameWidth,
+				endY
+			];
+			
+			if (captureSettings.verbose) {
+				console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
+			}
+			
+			capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
+		}
+
+		capturer.stop();
+		capturer.save();
+		
+	}.bind(this));
+	
+	var settingsButton = container.appendChild(document.createElement("div"));
+	settingsButton.appendChild(document.createTextNode("General export settings"));
+	settingsButton.className = "drawtogether-button";
+	settingsButton.addEventListener("click", function () {
+		this.videoExportSettings.show();
+	}.bind(this));
+};
+
 DrawTogether.prototype.createMessage = function createMessage () {
 	this.messageDom = this.container.appendChild(document.createElement("div"));
 	this.messageDom.className = "drawtogether-general-message";
@@ -2311,6 +2450,14 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	for (var k = 0; k < this.defaultUserSettings.length; k++) {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
+	
+	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
+		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
+	}
+	
+	this.videoExportSettings.addButton("Close", function () {
+		this.videoExportSettings.hide();
+	}.bind(this));
 
 	var advancedOptions = QuickSettings.create(30, 10, "Advanced options");
 	advancedOptions.hide();
@@ -2355,6 +2502,14 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	openAdvancedButton.addEventListener("click", function () {
 		this.closeSettingsWindow();
 		advancedOptions.show();
+	}.bind(this));
+	
+	var videoExportSettingsButton = settingsContainer.appendChild(document.createElement("div"));
+	videoExportSettingsButton.appendChild(document.createTextNode("Open video export settings"));
+	videoExportSettingsButton.className = "drawtogether-button";
+	videoExportSettingsButton.addEventListener("click", function () {
+		this.closeSettingsWindow();
+		this.videoExportSettings.show();
 	}.bind(this));
 
 	var chatFilterOptions = QuickSettings.create(30, 10, "Chat filter options");

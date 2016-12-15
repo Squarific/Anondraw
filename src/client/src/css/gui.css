@@ -32,6 +32,10 @@
   line-height:3em;
 }
 
+.titlecontainer .title {
+	margin: 1em;
+}
+
 .titlecontainer .close {
   display: block;
   float: right;
@@ -47,6 +51,7 @@
 
 .gui-window {
   max-width:40em;
+  box-shadow: 0 0 5px 2px rgba(0,0,0,0.15);
 }
 
 .gui-window h2 {
