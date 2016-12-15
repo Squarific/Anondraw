@@ -32,7 +32,7 @@ var imgur = require("imgur");
 imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime.imgur.password);
 
 var Protocol = require("./scripts/Network.js");
-var protocol = new Protocol(io, drawTogether, imgur, players, register);
+var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
 function saveAndShutdown () {
 	console.log("SAVING AND SHUTTING DOWN");
