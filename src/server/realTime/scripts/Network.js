@@ -76,7 +76,7 @@ function deepCopyWithoutFunctions (target, alreadyDone) {
 	return newObject;
 }
 
-function Protocol (io, drawtogether, imgur, players, register) {
+function Protocol (io, drawtogether, imgur, players, register, saveAndShutdown) {
 	this.io = io;
 	this.drawTogether = drawtogether;
 	this.imgur = imgur;
@@ -84,6 +84,7 @@ function Protocol (io, drawtogether, imgur, players, register) {
 	this.register = register;
 	this.protectedRegions = {};
 	this.bindIO();
+	this.saveAndShutdown = saveAndShutdown;
 
 	this.drawTogether.onFinalize = function (room, amountToKeep) {
 		this.io.to(room).emit("finalize", amountToKeep);
@@ -545,7 +546,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						});
 					}
 				} else if (message.indexOf("/forcesync") == 0) {
-					if ([1,27,2659].indexOf(socket.userid) > -1) { // only uber/lukas/float can force send for server restart
+					if ([1,27,2659].indexOf(socket.userid) > -1) { // only uber/lukas/float can force send for syncing
 						protocol.drawTogether.forceSend(function(syncMessage){
 							socket.emit("chatmessage", {
 								user: "SERVER",
@@ -553,6 +554,10 @@ Protocol.prototype.bindIO = function bindIO () {
 							});
 						}.bind(this));
 						
+					}
+				} else if (message.indexOf("/shutdown") == 0) {
+					if ([1,27,2659].indexOf(socket.userid) > -1) { // only uber/lukas/float can force send for server restart
+						protocol.saveAndShutdown();
 					}
 				} else {
 					socket.emit("chatmessage", {
