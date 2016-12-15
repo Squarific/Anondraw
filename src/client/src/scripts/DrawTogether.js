@@ -155,7 +155,7 @@ DrawTogether.prototype.defaultVideoExportSettings = [{
 	}, {
 		title: "format",
 		type: "dropdown",
-		items: ["webm", "gif", "png", "jpg", "ffmpegserver"],
+		items: ["webm", "gif"],
 		value: 0
 	}, {
 		title: "quality",
