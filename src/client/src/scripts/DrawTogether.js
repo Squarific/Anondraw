@@ -3546,6 +3546,9 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
 	var generationSettings = QuickSettings.create(50, 50, "Generate grid");
 
+	generationSettings.addInfo("How to use", "The size of the lines is determined by your brush size. The color by the brush color.");
+	generationSettings.addInfo("Sizes", "The width and height are per square.");
+	
 	generationSettings.addText("Left top x", this.paint.public.leftTopX);
 	generationSettings.addText("Left top y", this.paint.public.leftTopY);
 	
