@@ -1536,6 +1536,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 		"Export video/gif",
 		"Create protected region",
 		"Inspect tool",
+		"Create grid",
 		"Cancel"
 	], function (answer) {
 		if (answer === "Cancel") return;
@@ -1544,7 +1545,8 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			"Export in high quality": this.exportImage.bind(this),
 			"Export video/gif": this.exportVideo.bind(this),
 			"Create protected region": this.createProtectedRegion.bind(this),
-			"Inspect tool": this.whoDrewInThisArea.bind(this)
+			"Inspect tool": this.whoDrewInThisArea.bind(this),
+			"Create grid": this.createGridInSelection.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
@@ -3543,6 +3545,39 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
+DrawTogether.prototype.createGridInSelection = function createGridInSelection (from, to) {
+	var generationSettings = QuickSettings.create(50, 50, "Grid settings");
+	generationSettings.addRange("Squares", 1, 30, 5, 1);
+	
+	generationSettings.addButton("Generate", function () {
+		var squares = generationSettings.getRangeValue("Squares");
+		
+		var totalWidth = Math.abs(to[0] - from[0]);
+		var totalHeight = Math.abs(to[1] - from[1]);
+		
+		var sqwidth = totalWidth / squares;
+		var sqheight = totalHeight / squares;
+		
+		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+		
+		if (this.reputation >= 5 || (totalWidth > 1000 || totalHeight > 1000)) {
+			console.log("Generating grid", squares, sqwidth, sqheight);
+			this.paint.generateGrid(
+				leftTop,
+				squares,
+				sqwidth,
+				sqheight
+			);
+		} else {
+			this.chat.addMessage("Grids bigger than 1000 pixels are limited to users with 5+ reputation.");
+		}
+	}.bind(this));
+	
+	generationSettings.addButton("Cancel", function () {
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+	});
+};
+
 DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
 	var generationSettings = QuickSettings.create(50, 50, "Generate grid");
 
@@ -3758,7 +3793,7 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Grid creating tool (Advanced options -> generate grid)",
+	var features = ["Grid creating tool (Select tool or advanced options)",
 					"Export videos/gifs (Select tool -> Export video)",
 	                "Referral program (earn more rep) (Account -> Referral)",
 	                "50R+ and premium users no longer use ink",
