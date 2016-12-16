@@ -3548,6 +3548,7 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 DrawTogether.prototype.createGridInSelection = function createGridInSelection (from, to) {
 	var generationSettings = QuickSettings.create(50, 50, "Grid settings");
 	generationSettings.addControl({
+		type: "range",
 		title: "Squares",
 		min: 1,
 		max: 50,
@@ -3556,6 +3557,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 	});
 	
 	generationSettings.addControl({
+		type: "range",
 		title: "Gutter",
 		min: 0,
 		max: 200,
@@ -3605,6 +3607,7 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 	generationSettings.addRange("Height", 1, 500, 100, 1);
 	
 	generationSettings.addControl({
+		type: "range",
 		title: "Gutter",
 		min: 0,
 		max: 200,
