@@ -3559,14 +3559,15 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 		var sqheight = generationSettings.getRangeValue("Height");
 		
 		if (this.reputation >= 5 || (squares <= 5 && sqwidth <= 200 && sqheight <= 200)) {
-			this.chat.addMessage("Grids with more than 6 squares or squares bigger than 200 pixels are limited to users with 5+ reputation.");
-			
+			console.log(Generating grid, squares, sqwidth, sqheight);
 			this.paint.generateGrid(
 				[parseInt(generationSettings.getText("Left top x")), parseInt(generationSettings.getText("Left top y"))],
 				squares,
 				sqwidth,
 				sqheight
 			);
+		} else {
+			this.chat.addMessage("Grids with more than 6 squares or squares bigger than 200 pixels are limited to users with 5+ reputation.");
 		}
 	}.bind(this));
 	
