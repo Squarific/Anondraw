@@ -114,7 +114,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 8;
+DrawTogether.prototype.CLIENT_VERSION = 9;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -3755,7 +3755,8 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Export videos/gifs (Select tool -> Export video)",
+	var features = ["Grid creating tool (Advanced options -> generate grid)",
+					"Export videos/gifs (Select tool -> Export video)",
 	                "Referral program (earn more rep) (Account -> Referral)",
 	                "50R+ and premium users no longer use ink",
 	                "Added Chat Filter (Settings -> Chat filter options)",
