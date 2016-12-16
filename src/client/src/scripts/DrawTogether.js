@@ -3553,14 +3553,11 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		var squares = generationSettings.getRangeValue("Squares");
 		
 		var totalWidth = Math.abs(to[0] - from[0]);
-		var totalHeight = Math.abs(to[1] - from[1]);
-		
-		var sqwidth = totalWidth / squares;
-		var sqheight = totalHeight / squares;
+		var sqheight = Math.abs(to[1] - from[1]);
 		
 		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
 		
-		if (this.reputation >= 5 || (totalWidth > 1000 || totalHeight > 1000)) {
+		if (this.reputation >= 5 || (totalWidth > 1000 || sqheight > 200)) {
 			console.log("Generating grid", squares, sqwidth, sqheight);
 			this.paint.generateGrid(
 				leftTop,
@@ -3569,7 +3566,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 				sqheight
 			);
 		} else {
-			this.chat.addMessage("Grids bigger than 1000 pixels are limited to users with 5+ reputation.");
+			this.chat.addMessage("Grids wider than 1000 pixels or higher than 200 are limited to users with 5+ reputation.");
 		}
 	}.bind(this));
 	
