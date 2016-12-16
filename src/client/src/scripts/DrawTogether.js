@@ -3553,11 +3553,11 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		var squares = generationSettings.getRangeValue("Squares");
 		
 		var totalWidth = Math.abs(to[0] - from[0]);
-		var sqheight = Math.abs(to[1] - from[1]);
+		var sqwidth = Math.abs(to[1] - from[1]);
 		
 		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
 		
-		if (this.reputation >= 5 || (totalWidth > 1000 || sqheight > 200)) {
+		if (this.reputation >= 5 || (totalWidth > 1000 || sqwidth > 200)) {
 			console.log("Generating grid", squares, sqwidth, sqheight);
 			this.paint.generateGrid(
 				leftTop,
