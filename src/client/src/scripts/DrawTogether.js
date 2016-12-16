@@ -3547,7 +3547,21 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 
 DrawTogether.prototype.createGridInSelection = function createGridInSelection (from, to) {
 	var generationSettings = QuickSettings.create(50, 50, "Grid settings");
-	generationSettings.addRange("Squares", 1, 30, 5, 1);
+	generationSettings.addControl({
+		title: "Squares",
+		min: 1,
+		max: 50,
+		value: 5,
+		step: 1
+	});
+	
+	generationSettings.addControl({
+		title: "Gutter",
+		min: 0,
+		max: 200,
+		value: 0,
+		step: 1
+	});
 	
 	generationSettings.addButton("Generate", function () {
 		var squares = generationSettings.getRangeValue("Squares");
@@ -3564,7 +3578,8 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 				leftTop,
 				squares,
 				sqwidth,
-				sqheight
+				sqheight,
+				generationSettings.getRangeValue("Gutter")
 			);
 		} else {
 			this.chat.addMessage("Grids wider than 1000 pixels or higher than 200 are limited to users with 5+ reputation.");
@@ -3589,6 +3604,14 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 	generationSettings.addRange("Width", 1, 500, 100, 1);
 	generationSettings.addRange("Height", 1, 500, 100, 1);
 	
+	generationSettings.addControl({
+		title: "Gutter",
+		min: 0,
+		max: 200,
+		value: 0,
+		step: 1
+	});
+	
 	generationSettings.addButton("Generate", function () {
 		var squares = generationSettings.getRangeValue("Squares");
 		var sqwidth = generationSettings.getRangeValue("Width");
@@ -3600,7 +3623,8 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 				[parseInt(generationSettings.getText("Left top x")), parseInt(generationSettings.getText("Left top y"))],
 				squares,
 				sqwidth,
-				sqheight
+				sqheight,
+				generationSettings.getRangeValue("Gutter")
 			);
 		} else {
 			this.chat.addMessage("Grids with more than 6 squares or squares bigger than 200 pixels are limited to users with 5+ reputation.");
