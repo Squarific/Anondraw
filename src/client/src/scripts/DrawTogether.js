@@ -3567,9 +3567,10 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 	
 	generationSettings.addButton("Generate", function () {
 		var squares = generationSettings.getRangeValue("Squares");
+		var gutter = generationSettings.getRangeValue("Gutter");
 		
 		var totalWidth = Math.abs(to[0] - from[0]);
-		var sqwidth = totalWidth / squares;
+		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 		var sqheight = Math.abs(to[1] - from[1]);
 		
 		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
@@ -3581,7 +3582,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 				squares,
 				sqwidth,
 				sqheight,
-				generationSettings.getRangeValue("Gutter")
+				gutter
 			);
 		} else {
 			this.chat.addMessage("Grids wider than 1000 pixels or higher than 200 are limited to users with 5+ reputation.");
