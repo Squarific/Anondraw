@@ -2485,7 +2485,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	advancedOptions.addButton("Generate grid", function () {
 		this.openGenerateGridWindow();
 		advancedOptions.hide();
-	});
+	}.bind(this));
 	
 	advancedOptions.addButton("Close (a)", function () {
 		advancedOptions.hide();
