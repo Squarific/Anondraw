@@ -2482,6 +2482,11 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.setVerticalMirror(value);
 	}.bind(this));
 
+	advancedOptions.addButton("Generate grid", function () {
+		this.openGenerateGridWindow();
+		advancedOptions.hide();
+	});
+	
 	advancedOptions.addButton("Close (a)", function () {
 		advancedOptions.hide();
 	});
@@ -3536,6 +3541,38 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.href = "http://www.anondraw.com/?ref=" + this.account.id;
 	link.alt = "Your referral link";
 	link.title = "Your referral link";
+};
+
+DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
+	var generationSettings = QuickSettings.create(50, 50, "Generate grid");
+
+	generationSettings.addText("Left top x", this.paint.public.leftTopX);
+	generationSettings.addText("Left top y", this.paint.public.leftTopY);
+	
+	generationSettings.addRange("Squares", 1, 30, 5, 1);
+	generationSettings.addRange("Width", 1, 500, 100, 1);
+	generationSettings.addRange("Height", 1, 500, 100, 1);
+	
+	generationSettings.addButton("Generate", function () {
+		var squares = generationSettings.getRangeValue("Squares");
+		var sqwidth = generationSettings.getRangeValue("Width");
+		var sqheight = generationSettings.getRangeValue("Height");
+		
+		if (this.reputation >= 5 || (squares <= 5 && sqwidth <= 200 && sqheight <= 200)) {
+			this.chat.addMessage("Grids with more than 6 squares or squares bigger than 200 pixels are limited to users with 5+ reputation.");
+			
+			this.paint.generateGrid(
+				[parseInt(generationSettings.getText("Left top x")), parseInt(generationSettings.getText("Left top y"))],
+				squares,
+				sqwidth,
+				sqheight
+			);
+		}
+	}.bind(this));
+	
+	generationSettings.addButton("close", function () {
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+	});
 };
 
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
