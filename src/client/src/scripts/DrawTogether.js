@@ -3559,7 +3559,7 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 		var sqheight = generationSettings.getRangeValue("Height");
 		
 		if (this.reputation >= 5 || (squares <= 5 && sqwidth <= 200 && sqheight <= 200)) {
-			console.log(Generating grid, squares, sqwidth, sqheight);
+			console.log("Generating grid", squares, sqwidth, sqheight);
 			this.paint.generateGrid(
 				[parseInt(generationSettings.getText("Left top x")), parseInt(generationSettings.getText("Left top y"))],
 				squares,
