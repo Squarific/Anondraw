@@ -3554,6 +3554,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		
 		var totalWidth = Math.abs(to[0] - from[0]);
 		var sqwidth = Math.abs(to[1] - from[1]);
+		var sqheight = totalWidth / squares;
 		
 		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
 		
