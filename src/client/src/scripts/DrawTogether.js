@@ -3582,8 +3582,8 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 	generationSettings.addInfo("How to use", "The size of the lines is determined by your brush size. The color by the brush color.");
 	generationSettings.addInfo("Sizes", "The width and height are per square.");
 	
-	generationSettings.addText("Left top x", this.paint.public.leftTopX);
-	generationSettings.addText("Left top y", this.paint.public.leftTopY);
+	generationSettings.addText("Left top x", Math.round(this.paint.public.leftTopX));
+	generationSettings.addText("Left top y", Math.round(this.paint.public.leftTopY));
 	
 	generationSettings.addRange("Squares", 1, 30, 5, 1);
 	generationSettings.addRange("Width", 1, 500, 100, 1);
