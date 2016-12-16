@@ -2032,7 +2032,7 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 		}
 
 		if (result.success) {
-			setTimeout(this.getMyProtectedRegions, 2000);
+			setTimeout(this.getMyProtectedRegions.bind(this), 2000);
 			this.chat.addMessage("Regions", result.success);
 		}
 	}.bind(this));
@@ -2067,12 +2067,16 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 			element.parentNode.removeChild(element);
 		}
 
-		setTimeout(this.getMyProtectedRegions, 2000);
+		setTimeout(this.getMyProtectedRegions.bind(this), 2000);
 		this.chat.addMessage("Regions", "Removed the region");
 	}.bind(this));
 };
 
 DrawTogether.prototype.getMyProtectedRegions = function (callback) {
+	if (!this.network.socket) {
+		console.log("Network socket was not defined.");
+		return;
+	}
 	this.network.socket.emit("getmyprotectedregions", function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
@@ -3018,11 +3022,6 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
 	this.account.checkLogin(function (err, loggedIn) {
-		if(this.account.uKey){
-			this.getFavorites();
-			this.getMyProtectedRegions();
-		}
-
 		var formContainer = accWindow.appendChild(document.createElement("div"));
 		formContainer.className = "drawtogether-account-formcontainer";
 
@@ -3096,6 +3095,9 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 					this.network.socket.emit("uKey", this.account.uKey);
 				}.bind(this));
 			}.bind(this));
+			
+			this.getFavorites();
+			this.getMyProtectedRegions();
 		}
 		
 		var close = formContainer.appendChild(document.createElement("div"));
