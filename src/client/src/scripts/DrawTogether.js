@@ -1547,7 +1547,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			"Export video/gif": this.exportVideo.bind(this),
 			"Create protected region": this.createProtectedRegion.bind(this),
 			"Inspect tool": this.whoDrewInThisArea.bind(this),
-			"Show video frames": this.showVideoFrames(this),
+			"Show video frames": this.showVideoFrames.bind(this),
 			"Create grid": this.createGridInSelection.bind(this)
 		};
 
