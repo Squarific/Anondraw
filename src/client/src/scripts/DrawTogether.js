@@ -1579,6 +1579,7 @@ DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
 		var frames = generationSettings.getRangeValue("Frames");
 		var opacity = generationSettings.getRangeValue("Opacity");
 		this.paint.addFrame(from, to, frames, opacity);
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
 	}.bind(this));
 	
 	generationSettings.addButton("Cancel", function () {
