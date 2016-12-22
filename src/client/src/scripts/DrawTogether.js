@@ -1537,6 +1537,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 		"Create protected region",
 		"Inspect tool",
 		"Create grid",
+		"Show video frames",
 		"Cancel"
 	], function (answer) {
 		if (answer === "Cancel") return;
@@ -1546,11 +1547,43 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			"Export video/gif": this.exportVideo.bind(this),
 			"Create protected region": this.createProtectedRegion.bind(this),
 			"Inspect tool": this.whoDrewInThisArea.bind(this),
+			"Show video frames": this.showVideoFrames(this),
 			"Create grid": this.createGridInSelection.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
 	}.bind(this));
+};
+
+DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
+	var generationSettings = QuickSettings.create(50, 50, "Frame settings");
+	generationSettings.addControl({
+		type: "range",
+		title: "Frames",
+		min: 1,
+		max: 50,
+		value: 5,
+		step: 1
+	});
+	
+	generationSettings.addControl({
+		type: "range",
+		title: "Opacity",
+		min: 0,
+		max: 1,
+		value: 0.5,
+		step: 0.05
+	});
+	
+	generationSettings.addButton("Show", function () {
+		var frames = generationSettings.getRangeValue("Frames");
+		var opacity = generationSettings.getRangeValue("Opacity");
+		this.paint.addFrame(from, to, frames, opacity);
+	}.bind(this));
+	
+	generationSettings.addButton("Cancel", function () {
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+	});
 };
 
 // Send null for unchanging value
