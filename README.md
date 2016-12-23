@@ -2,6 +2,12 @@
 
 Source code of <http://www.anondraw.com>
 
+## Questions
+
+Have questions you need answered? Feel free to email filipsmetsbelgium@gmail.com I promise I won't bite.
+Or alternativly join this discord: https://discord.gg/MDXx8qE
+Or use the issues
+
 ##  Configuration
 
 Properties live in the `config.json` file *closest* to 
