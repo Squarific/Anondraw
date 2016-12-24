@@ -1214,7 +1214,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 		if (minutes == "1 minute") minutes = 1;
 		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both", "Cancel"], function (type) {
 			if (type == "Cancel") return;
-			this.gui.prompt("What is the reason you want to ban him?", ["freepick", "Drawings swastikas", "Destroying drawings", "Being a dick in chat", "Spam", "Cancel"], function (reason) {
+			this.gui.prompt("What is the reason you want to ban him?", ["freepick", "Destroying drawings", "Cancel"], function (reason) {
 				if (reason == "Cancel") return;
 				this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes. Reason: " + reason, ["Yes", "No"], function (confirmation) {
 					if (confirmation == "Yes") {
