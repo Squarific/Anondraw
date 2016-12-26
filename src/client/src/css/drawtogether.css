@@ -1095,6 +1095,12 @@ input.paint-texttool {
   -moz-transition-property: background-color;
   transition-property: background-color;
 }
+
+.coords-button img {
+	height:1em;
+	vertical-align:middle;
+}
+
 .reg-position-button {
   display: inline-block;
   min-width: 18em;
