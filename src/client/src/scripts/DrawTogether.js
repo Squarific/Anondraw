@@ -1539,7 +1539,7 @@ DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, 
 	if (button.classList.contains("confirm")) {
 		for (var k = 0; k < this.paint.frames.length; k++) {
 			if (this.paint.frames[k] == frame) {
-				this.paint.splice(k, 1);
+				this.paint.frames.splice(k, 1);
 				this.paint.redrawFrames();
 				return;
 			}
