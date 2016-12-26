@@ -1535,8 +1535,8 @@ DrawTogether.prototype.buildFrameOnOffButton = function buildFrameOnOffButton(fr
 	return button;
 };
 
-DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, event) {
-	if (event.target.classList.contains("confirm")) {
+DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, button, event) {
+	if (button.classList.contains("confirm")) {
 		for (var k = 0; k < this.paint.frames; k++) {
 			if (this.paint.frames[k] == frame) {
 				this.paint.splice(k, 1);
@@ -1544,11 +1544,11 @@ DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, 
 			}
 		}
 	} else {
-		event.target.classList.add("confirm");
+		button.classList.add("confirm");
 		
 		setTimeout(function () {
-			event.target.classList.remove("confirm");
-		}, 1500);
+			button.classList.remove("confirm");
+		}, 3000);
 	}
 };
 
@@ -1560,7 +1560,7 @@ DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton(
 	image.src = "images/icons/remove.png";
 	button.appendChild(image);
 	
-	button.addEventListener("click", this.frameRemoveHandler.bind(this, frame));
+	button.addEventListener("click", this.frameRemoveHandler.bind(this, frame, button));
 	return button;
 };
 
