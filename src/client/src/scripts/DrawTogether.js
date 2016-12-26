@@ -1532,6 +1532,7 @@ DrawTogether.prototype.buildFrameOnOffButton = function buildFrameOnOffButton(fr
 	button.appendChild(image);
 	
 	button.addEventListener("click", this.frameOnOffHandler.bind(this, frame));
+	return button;
 };
 
 DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, event) {
@@ -1560,6 +1561,7 @@ DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton(
 	button.appendChild(image);
 	
 	button.addEventListener("click", this.frameRemoveHandler.bind(this, frame));
+	return button;
 };
 
 DrawTogether.prototype.toggleFramesManager = function toggleFramesManager () {
