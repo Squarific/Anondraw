@@ -1101,6 +1101,10 @@ input.paint-texttool {
 	vertical-align:middle;
 }
 
+.position-button {
+	width:18em;
+}
+
 .reg-position-button {
   display: inline-block;
   min-width: 18em;
