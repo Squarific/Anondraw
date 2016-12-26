@@ -1484,6 +1484,10 @@ DrawTogether.prototype.updateFramesManager = function updateFramesManager () {
 	var container = this.framesWindow.appendChild(document.createElement("div"));
 	container.className = "container";
 	
+	if (this.paint.frames.length === 0) {
+		container.appendChild(document.createTextNode("You haven't made any frames."));
+	}
+	
 	for (var k = 0; k < this.paint.frames.length; k++) {
 		container.appendChild(this.buildFrameButtons(this.paint.frames[k]));
 	}
