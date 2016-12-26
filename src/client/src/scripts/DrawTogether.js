@@ -1537,7 +1537,7 @@ DrawTogether.prototype.buildFrameOnOffButton = function buildFrameOnOffButton(fr
 
 DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, button, event) {
 	if (button.classList.contains("confirm")) {
-		for (var k = 0; k < this.paint.frames; k++) {
+		for (var k = 0; k < this.paint.frames.length; k++) {
 			if (this.paint.frames[k] == frame) {
 				this.paint.splice(k, 1);
 				this.paint.redrawFrames();
@@ -1556,11 +1556,11 @@ DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, 
 DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton(frame) {
 	var button = document.createElement("div");
 	button.classList.add("coords-button");
-	
+
 	var image = document.createElement("img");
 	image.src = "images/icons/remove.png";
 	button.appendChild(image);
-	
+
 	button.addEventListener("click", this.frameRemoveHandler.bind(this, frame, button));
 	return button;
 };
