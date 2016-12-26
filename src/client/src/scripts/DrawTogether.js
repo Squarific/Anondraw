@@ -1498,7 +1498,7 @@ DrawTogether.prototype.buildFrameButtons = function buildFrameButtons (frame) {
 	
 	var gotoButton = container.appendChild(document.createElement("div"));
 	gotoButton.classList.add("coords-button");
-	gotoButton.appendChild(document.createTextNode(frame.from[0] + ", " + frame.from[1]));
+	gotoButton.appendChild(document.createTextNode(frame.leftTop[0] + ", " + frame.leftTop[1]));
 	gotoButton.addEventListener("click", this.frameGotoHandler.bind(this, frame));
 	
 	container.appendChild(this.buildFrameOnOffButton(frame));
@@ -1508,7 +1508,7 @@ DrawTogether.prototype.buildFrameButtons = function buildFrameButtons (frame) {
 };
 
 DrawTogether.prototype.frameGotoHandler = function frameGotoHandler (frame, event) {
-	this.handleGoto(frame.from[0], frame.from[1]);
+	this.handleGoto(frame.leftTop[0], frame.leftTop[1]);
 };
 
 DrawTogether.prototype.frameOnOffHandler = function frameOnOffHandler (frame, event) {
