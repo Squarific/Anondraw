@@ -1448,6 +1448,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
 	regionsWindow.className = "coords-window regions-window";
 	
+	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
+	this.regionsContainer.className = "regions-container";
+	
 	// Frames button
 	var framesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	framesButton.className = "control-button frames-button";
