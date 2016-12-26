@@ -1541,6 +1541,7 @@ DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, 
 			if (this.paint.frames[k] == frame) {
 				this.paint.frames.splice(k, 1);
 				this.paint.redrawFrames();
+				this.updateFramesManager();
 				return;
 			}
 		}
