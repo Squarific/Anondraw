@@ -1568,7 +1568,7 @@ DrawTogether.prototype.toggleFramesManager = function toggleFramesManager () {
 	} else {
 		this.framesWindow.classList.add("show");
 		$(".regions-window").hide();
-		$(".favorites-window").show();
+		$(".favorites-window").hide();
 		this.updateFramesManager();
 	}
 };
