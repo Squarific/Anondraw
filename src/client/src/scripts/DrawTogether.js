@@ -1540,6 +1540,7 @@ DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, 
 		for (var k = 0; k < this.paint.frames; k++) {
 			if (this.paint.frames[k] == frame) {
 				this.paint.splice(k, 1);
+				this.paint.redrawFrames();
 				return;
 			}
 		}
