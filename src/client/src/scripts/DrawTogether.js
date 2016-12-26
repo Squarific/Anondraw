@@ -1415,7 +1415,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	}.bind(this));
 	
 	var favoritesWindow = this.paint.container.appendChild(document.createElement("div"));
-	favoritesWindow.className = "favorites-window";
+	favoritesWindow.className = "coords-window favorites-window";
 	
 	this.favoritesContainer = favoritesWindow.appendChild(document.createElement("div"));
 	this.favoritesContainer.className = "favorites-container";	
@@ -1446,14 +1446,111 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	regionsButtonImage.title = "Open Regions Menu";
 
 	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
-	regionsWindow.className = "regions-window";
-
-	this.regionTutorialContainer = regionsWindow.appendChild(document.createElement("div"));
-	this.regionTutorialContainer.className = "region-tutorial";
-	this.createRegionTutorialDom();
+	regionsWindow.className = "coords-window regions-window";
 	
-	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
-	this.regionsContainer.className = "regions-container";
+	// Frames button
+	var framesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	framesButton.className = "control-button frames-button";
+	framesButton.addEventListener("click", this.toggleFramesManager.bind(this));
+
+	var framesButtonImage = framesButton.appendChild(document.createElement("img"));
+	framesButtonImage.src = "images/icons/frames.png";
+	framesButtonImage.alt = "Open Frames Manager";
+	framesButtonImage.title = "Open Frames Manager";
+	
+	this.createFramesManager();
+};
+
+DrawTogether.prototype.createFramesManager = function createFramesManager () {
+	this.framesWindow = this.paint.container.appendChild(document.createElement("div"));
+	this.framesWindow.className = "coords-window frames-window";
+	this.updateFramesManager();
+};
+
+/*
+	Adds the current frames to the manager and
+	show location and options (disable/enable, delete, ...)
+*/
+DrawTogether.prototype.updateFramesManager = function updateFramesManager () {
+	while (this.framesWindow.firstChild) this.framesWindow.removeChild(this.framesWindow.firstChild);
+	
+	var container = this.framesWindow.appendChild(document.createElement("div"));
+	container.className = "container";
+	
+	for (var k = 0; k < this.paint.frames.length; k++) {
+		container.appendChild(this.buildFrameButtons(this.paint.frames[k]));
+	}
+};
+
+/*
+	Returns a div containing buttons bounded with eventlisteners
+	that control the given frame
+*/
+DrawTogether.prototype.buildFrameButtons = function buildFrameButtons (frame) {
+	var container = document.createElement("div");
+	
+	var gotoButton = container.appendChild(document.createElement("div"));
+	gotoButton.classList.add("coords-button");
+	gotoButton.appendChild(document.createTextNode(frame.from[0] + ", " + frame.from[1]));
+	gotoButton.addEventListener("click", this.frameGotoHandler.bind(this, frame));
+	
+	container.appendChild(this.buildFrameOnOffButton(frame));
+	container.appendChild(this.buildFrameRemoveButton(frame));
+	
+	return container;
+};
+
+DrawTogether.prototype.frameGotoHandler = function frameGotoHandler = function (frame, event) {
+	this.handleGoto(frame.from[0], frame.from[1]);
+};
+
+DrawTogether.prototype.frameOnOffHandler = function frameOnOffHandler (frame, event) {
+	frame.disabled = !frame.disabled;
+	this.redrawFrames();
+	this.updateFramesManager();
+};
+
+DrawTogether.prototype.buildFrameOnOffButton = function buildFrameOnOffButton(frame) {
+	var button = document.createElement("div");
+	button.classList.add("coords-button");
+	
+	var image = document.createElement("img");
+	image.src = frame.disabled ? "images/icons/hidden.png" : "images/icons/visible.png";
+	button.appendChild(image);
+	
+	button.addEventListener("click", this.frameOnOffHandler.bind(this, frame));
+};
+
+DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, event) {
+	if (event.target.classList.contains("confirm")) {
+		for (var k = 0; k < this.paint.frames; k++) {
+			if (this.paint.frames[k] == frame) {
+				this.paint.splice(k, 1);
+				return;
+			}
+		}
+	} else {
+		event.target.classList.add("confirm");
+		
+		setTimeout(function () {
+			event.target.classList.remove("confirm");
+		}, 1500);
+	}
+};
+
+DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton() {
+	var button = document.createElement("div");
+	button.classList.add("coords-button");
+	
+	var image = document.createElement("img");
+	image.src = "images/icons/remove.png";
+	button.appendChild(image);
+	
+	button.addEventListener("click", this.frameRemoveHandler.bind(this, frame));
+};
+
+DrawTogether.prototype.toggleFramesManager = function toggleFramesManager () {
+	this.updateFramesManager();
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
@@ -1579,6 +1676,7 @@ DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
 		var frames = generationSettings.getRangeValue("Frames");
 		var opacity = generationSettings.getRangeValue("Opacity");
 		this.paint.addFrame(from, to, frames, opacity);
+		this.updateFramesManager();
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
 	}.bind(this));
 	
@@ -1613,8 +1711,8 @@ DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFa
 
 DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDeleteButton () {
 	var favoriteMinusButton = document.createElement("div");
-	favoriteMinusButton.className = "fav-button fav-delete-button";
-	favoriteMinusButton.textContent = "x";
+	favoriteMinusButton.className = "coords-button fav-delete-button";
+	favoriteMinusButton.textContent = "X";
 	favoriteMinusButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		if(element.classList.contains("fav-button-confirmation")){
@@ -1703,7 +1801,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteContainer.dataset.owner = owner;
 
 	var favoriteCoorButton = favoriteContainer.appendChild(document.createElement("div"));
-	favoriteCoorButton.className = "fav-button fav-coor-button";
+	favoriteCoorButton.className = "coords-button fav-coor-button";
 	favoriteCoorButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
@@ -1788,7 +1886,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionContainer.dataset.index = index;
 
 	var regionPositionButton = regionContainer.appendChild(document.createElement("div"));
-	regionPositionButton.className = "reg-button reg-position-button";
+	regionPositionButton.className = "coords-button reg-position-button";
 	regionPositionButton.textContent = minX + ", " + minY;
 	regionPositionButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
@@ -1803,7 +1901,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	}.bind(this));	
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
-	regionEditPermissionsButton.className = "reg-button reg-editpermissions-button";
+	regionEditPermissionsButton.className = "coords-button reg-editpermissions-button";
 	//regionEditPermissionsButton.textContent = "Permissions...";
 	regionEditPermissionsButton.addEventListener("click", function (e) {
 		var regionListIndex = regionEditPermissionsButton.parentNode.dataset.index;
@@ -1825,8 +1923,8 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	permissionsButtonImage.title = "Open Permissions Menu";
 
 	var regionDeleteButton = regionContainer.appendChild(document.createElement("div"));
-	regionDeleteButton.className = "reg-button reg-delete-button";
-	regionDeleteButton.textContent = "x";
+	regionDeleteButton.className = "coords-button reg-delete-button";
+	regionDeleteButton.textContent = "X";
 	regionDeleteButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;

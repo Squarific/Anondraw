@@ -973,7 +973,7 @@ input.paint-texttool {
   margin-right: 4px;
 }
 
-.favorites-window {
+.coords-window {
 	padding: 0.5em;
 	position: absolute;
 	background: #ececec;
@@ -983,26 +983,6 @@ input.paint-texttool {
 	display: none;
   max-height: 75%;
   overflow-y:auto;
-}
-
-.fav-button:hover {
-	background-color: #233445; 
-}
-	
-.fav-button {
-	text-align: center;
-	display: inline-block;
-	padding: 0.2em .5em;
-	border-bottom: 0.2em solid #233445;
-	background-color: #456789;
-	color: #fff;
-	cursor: pointer;
-	-webkit-transition-duration: 0.1s;
-	-moz-transition-duration: 0.1s;
-	transition-duration: 0.1s;
-	-webkit-transition-property: background-color;
-	-moz-transition-property: background-color;
-	transition-property: background-color;
 }
 
 .fav-button-confirmation { 
@@ -1078,18 +1058,6 @@ input.paint-texttool {
 	float: right;
 }
 
-.regions-window {
-  padding: 0.5em;
-  position: absolute;
-  background: #ececec;
-  border: solid 1px #ccc;
-  right:1em;
-  bottom:5em;
-  display: none;
-  max-height: 75%;
-  overflow-y:auto;
-}
-
 .region-container {
   position:relative;
   margin-top:0.1em;
@@ -1110,11 +1078,11 @@ input.paint-texttool {
   background-color: #515163;
 }
 
-.reg-button:hover {
+.coords-button:hover {
   background-color: #233445; 
 }
   
-.reg-button {
+.coords-button {
   text-align: center;
   display: inline-block;
   padding: 0.2em .5em;
@@ -1129,7 +1097,6 @@ input.paint-texttool {
   -moz-transition-property: background-color;
   transition-property: background-color;
 }
-
 .reg-position-button {
   display: inline-block;
   min-width: 18em;
@@ -1222,4 +1189,12 @@ input.paint-texttool {
 }
 .chat-filter-add-word {
   width:100%;
+}
+
+.confirm {
+	background-color:goldenrod;
+}
+
+.confirm:hover { 
+	background-color: #b1861a;
 }
