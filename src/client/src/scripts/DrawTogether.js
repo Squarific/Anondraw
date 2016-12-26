@@ -1500,7 +1500,7 @@ DrawTogether.prototype.buildFrameButtons = function buildFrameButtons (frame) {
 	return container;
 };
 
-DrawTogether.prototype.frameGotoHandler = function frameGotoHandler = function (frame, event) {
+DrawTogether.prototype.frameGotoHandler = function frameGotoHandler (frame, event) {
 	this.handleGoto(frame.from[0], frame.from[1]);
 };
 
