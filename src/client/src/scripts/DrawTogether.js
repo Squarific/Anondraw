@@ -1410,6 +1410,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		} else {
 			this.updateFavoriteDom();
 			$(".regions-window").hide();
+			this.framesWindow.classList.remove("show");
 			$(".favorites-window").show();
 		}
 	}.bind(this));
@@ -1430,6 +1431,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		} else {
 			this.getMyProtectedRegions(function(){
 				$(".favorites-window").hide();
+				this.framesWindow.classList.remove("show");
 				$(".regions-window").show();
 
 				if(!this.myRegions || this.myRegions.length === 0){
@@ -1561,7 +1563,14 @@ DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton(
 };
 
 DrawTogether.prototype.toggleFramesManager = function toggleFramesManager () {
-	this.updateFramesManager();
+	if (this.framesWindow.classList.contains("show")) {
+		this.framesWindow.classList.remove("show");
+	} else {
+		this.framesWindow.classList.add("show");
+		$(".regions-window").hide();
+		$(".favorites-window").show();
+		this.updateFramesManager();
+	}
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {

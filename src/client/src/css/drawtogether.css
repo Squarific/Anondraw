@@ -1159,7 +1159,7 @@ input.paint-texttool {
   transition-property: background-color;
 }
 .region-button-container{
-  display:block;
+  display: block;
   margin: auto 5px;
 }
 .region-listbox {
@@ -1195,4 +1195,8 @@ input.paint-texttool {
 
 .confirm:hover { 
 	background-color: #b1861a;
+}
+
+.show {
+	display: block;
 }
