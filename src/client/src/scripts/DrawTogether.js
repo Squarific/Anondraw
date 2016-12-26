@@ -1552,7 +1552,7 @@ DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, 
 	}
 };
 
-DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton() {
+DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton(frame) {
 	var button = document.createElement("div");
 	button.classList.add("coords-button");
 	
