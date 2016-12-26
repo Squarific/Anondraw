@@ -1745,7 +1745,7 @@ DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDelet
 
 DrawTogether.prototype.createSetPositionButton = function createSetPositionButton () {
 	var favoritePlusButton = document.createElement("div");
-	favoritePlusButton.className = "fav-button fav-move-button";
+	favoritePlusButton.className = "coords-button fav-move-button";
 	favoritePlusButton.textContent = "Set pos";
 	
 	favoritePlusButton.addEventListener("click", function (e) {
@@ -1814,7 +1814,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	}.bind(this));
 	
 	var favoritePencilButton = favoriteContainer.appendChild(document.createElement("div"));
-	favoritePencilButton.className = "fav-button fav-pencil-button";
+	favoritePencilButton.className = "coords-button fav-pencil-button";
 	favoritePencilButton.textContent = "✎";
 	
 	var favoriteRenameContainer = favoriteContainer.appendChild(document.createElement("div"));
@@ -1991,7 +1991,7 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 		this.favoritesContainer.removeChild(this.favoritesContainer.firstChild)
 	
 	var addNewFavoriteElementButton = this.favoritesContainer.appendChild(document.createElement("div"));
-	addNewFavoriteElementButton.className = "fav-button fav-add-new-fav";
+	addNewFavoriteElementButton.className = "coords-button fav-add-new-fav";
 	addNewFavoriteElementButton.textContent = "Add location";
 	addNewFavoriteElementButton.title = "Add new Favorite."
 	addNewFavoriteElementButton.addEventListener("click", function (e) {
