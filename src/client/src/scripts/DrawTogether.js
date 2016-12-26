@@ -1503,7 +1503,7 @@ DrawTogether.prototype.buildFrameButtons = function buildFrameButtons (frame) {
 	var container = document.createElement("div");
 	
 	var gotoButton = container.appendChild(document.createElement("div"));
-	gotoButton.classList.add("coords-button position-button");
+	gotoButton.className = "coords-button position-button";
 	gotoButton.appendChild(document.createTextNode(frame.leftTop[0] + ", " + frame.leftTop[1]));
 	gotoButton.addEventListener("click", this.frameGotoHandler.bind(this, frame));
 	
