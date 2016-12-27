@@ -1118,7 +1118,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
 			
-			var duplicateUsers = [];
+			var usersWithSameIp = [];
 			
 			if (protocol.io.nsps['/'].adapter.rooms[targetSocket.room]) {
 				var sroom = protocol.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
@@ -1128,7 +1128,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					if (!tempSocket) continue;
 					if(tempSocket.ip === targetSocket.ip)
-						duplicateUsers.push(tempSocket);
+						usersWithSameIp.push(tempSocket);
 				}
 			}
 
@@ -1141,16 +1141,16 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.informClient(socket, "Error while trying to kickban account: " + err);
 						return;
 					}
+					
+					for (var k = 0; k < usersWithSameIp.length; k++) {
+						protocol.informClient(socket, "Banning " + usersWithSameIp[k].name);
+						protocol.informClient(usersWithSameIp[k], "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
-					protocol.informClient(socket, "You banned " + targetSocket.name);
-					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
-
-					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
-					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-
-					for (var k = 0; k < duplicateUsers.length; k++) {
-						console.log(duplicateUsers[k].name);
-						duplicateUsers[k].disconnect();
+						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
+						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
+						
+						console.log(usersWithSameIp[k].name);
+						usersWithSameIp[k].disconnect();
 					}
 					//targetSocket.disconnect();
 				});
@@ -1162,16 +1162,16 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.informClient(socket, "Error while trying to kickban ip: " + err);
 						return;
 					}
+					protocol.informClient(socket, "You banned ip " + targetSocket.ip);
+					for (var k = 0; k < usersWithSameIp.length; k++) {
+						protocol.informClient(socket, "Banning " + usersWithSameIp[k].name);
+						protocol.informClient(usersWithSameIp[k], "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
-					protocol.informClient(socket, "You banned " + targetSocket.ip);
-					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
-
-					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
-					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					
-					for (var k = 0; k < duplicateUsers.length; k++) {
-						console.log(duplicateUsers[k].name);
-						duplicateUsers[k].disconnect();
+						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
+						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
+						
+						console.log(usersWithSameIp[k].name);
+						usersWithSameIp[k].disconnect();
 					}
 					//targetSocket.disconnect();
 				});
