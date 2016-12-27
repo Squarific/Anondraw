@@ -1902,17 +1902,24 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 
 	var peopleWhoDrewInTheAreaHash = new Object();
 	peopleWhoDrewInTheAreaHash.length = 0;
+	
+	var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
+
+	if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
+	
 	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--) {
 		if(!this.paint.publicdrawings[i].points) {
 			if(this.paint.publicdrawings[i].type === 'line') {
-				if (this.paint.publicdrawings[i].x >= minX
+				if (
+					( this.paint.publicdrawings[i].x >= minX
 					&& this.paint.publicdrawings[i].x <= maxX
 					&& this.paint.publicdrawings[i].y >= minY
-					&& this.paint.publicdrawings[i].y <= maxY
-					&& this.paint.publicdrawings[i].x1 >= minX
+					&& this.paint.publicdrawings[i].y <= maxY )
+					|| 
+					( this.paint.publicdrawings[i].x1 >= minX
 					&& this.paint.publicdrawings[i].x1 <= maxX
 					&& this.paint.publicdrawings[i].y1 >= minY
-					&& this.paint.publicdrawings[i].y1 <= maxY) {
+					&& this.paint.publicdrawings[i].y1 <= maxY )) {
 						var player = this.playerFromId(socketid);
 						peopleWhoDrewInTheAreaHash[socketid] = true;
 						peopleWhoDrewInTheAreaHash.length++;
@@ -1933,11 +1940,6 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 			}
 			
 		}
-		
-		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
-
-		if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
-
 		var pointsamt = this.paint.publicdrawings[i].points.length;
 		
 		//var checkEveryX = Math.round(pointsamt / 5);
