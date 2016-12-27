@@ -1122,11 +1122,11 @@ Protocol.prototype.bindIO = function bindIO () {
 			var duplicateUsers = [];
 
 			for (var id in sroom) {
-				var socket = this.socketFromId(id);
+				var tempSocket = this.socketFromId(id);
 
-				if (!socket) continue;
-				if(socket.ip === targetSocket.ip)
-					duplicateUsers.push(socket);
+				if (!tempSocket) continue;
+				if(tempSocket.ip === targetSocket.ip)
+					duplicateUsers.push(tempSocket);
 			}
 
 			var extraPayload = {type: "ban", arg1: new Date(Date.now() + parseInt(options[1]) * 60 * 1000), arg2: targetSocket.ip};
@@ -1144,8 +1144,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
 					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					for (var socket in duplicateUsers) {
-						socket.disconnect();
+					for (var tempSocket in duplicateUsers) {
+						tempSocket.disconnect();
 					}
 					//targetSocket.disconnect();
 				});
@@ -1163,8 +1163,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
 					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					for (var socket in duplicateUsers) {
-						socket.disconnect();
+					for (var tempSocket in duplicateUsers) {
+						tempSocket.disconnect();
 					}
 					//targetSocket.disconnect();
 				});
