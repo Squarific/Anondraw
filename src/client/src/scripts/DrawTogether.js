@@ -1931,7 +1931,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 						break;
 					}
 			}
-			else continue;
+			continue;
 		}
 		
 		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
