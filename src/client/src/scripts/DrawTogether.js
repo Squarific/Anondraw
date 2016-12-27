@@ -1894,7 +1894,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 	}.bind(this));
 };
 
-DrawTogether.prototype.whoDrewInThisArea = function (from, to){
+DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 	var minX = Math.min(from[0], to[0]);
 	var minY = Math.min(from[1], to[1]);
 	var maxX = Math.max(from[0], to[0]);
@@ -1902,9 +1902,38 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 
 	var peopleWhoDrewInTheAreaHash = new Object();
 	peopleWhoDrewInTheAreaHash.length = 0;
-	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--){
-		if(!this.paint.publicdrawings[i].points) continue;
-
+	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--) {
+		if(!this.paint.publicdrawings[i].points) {
+			if(this.paint.publicdrawings[i].type === 'line') {
+				if (this.paint.publicdrawings[i].x >= minX
+					&& this.paint.publicdrawings[i].x <= maxX
+					&& this.paint.publicdrawings[i].y >= minY
+					&& this.paint.publicdrawings[i].y <= maxY
+					&& this.paint.publicdrawings[i].x1 >= minX
+					&& this.paint.publicdrawings[i].x1 <= maxX
+					&& this.paint.publicdrawings[i].y1 >= minY
+					&& this.paint.publicdrawings[i].y1 <= maxY) {
+						var player = this.playerFromId(socketid);
+						peopleWhoDrewInTheAreaHash[socketid] = true;
+						peopleWhoDrewInTheAreaHash.length++;
+						if(player){
+							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+						}
+						else{
+							this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+								if (result.error) {
+									this.chat.addMessage("Inspect tool", "Error: " + result.error);
+									return;
+								}
+								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+							}.bind(this));
+						}
+						break;
+					}
+			}
+			else continue;
+		}
+		
 		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
 
 		if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
