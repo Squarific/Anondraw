@@ -6,6 +6,9 @@ function DrawTogether (container, settings) {
 	this.userSettings = QuickSettings.create(0, 0, "settings");
 	this.userSettings.setDraggable(false);
 	this.userSettings.setCollapsible(false);
+	
+	this.videoExportSettings = QuickSettings.create(50, 50, "Video export settings");
+	this.videoExportSettings.hide();
 
 	// Set default values untill we receive them from the server
 	this.playerList = [];
@@ -111,7 +114,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 7;
+DrawTogether.prototype.CLIENT_VERSION = 10;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -140,8 +143,62 @@ DrawTogether.prototype.defaultUserSettings = [{
 		title: "Show welcome",
 		type: "boolean",
 		value: true
-	}
-];
+}];
+
+DrawTogether.prototype.defaultVideoExportSettings = [{
+		title: "framerate",
+		type: "range",
+		min: 1,
+		max: 144,
+		step: 1,
+		value: 10
+	}, {
+		title: "format",
+		type: "dropdown",
+		items: ["gif", "webm"],
+		value: 0
+	}, {
+		title: "quality",
+		type: "range",
+		min: 0,
+		max: 100,
+		step: 1,
+		value: 100
+	}, {
+		title: "motionBlurFrames",
+		type: "range",
+		min: 1,
+		max: 10,
+		step: 1,
+		value: 1
+	}, {
+		title: "verbose",
+		type: "boolean"
+	}, {
+		title: "display",
+		type: "boolean"
+	}, {
+		title: "timeLimit",
+		type: "range",
+		min: 10,
+		max: 3600,
+		step: 10,
+		value: 600
+	}, {
+		title: "autoSaveTime",
+		type: "range",
+		min: 30,
+		max: 1800,
+		step: 10,
+		value: 600
+	}, {
+		title: "startTime",
+		type: "range",
+		min: 0,
+		max: 3600,
+		step: 1,
+		value: 0
+}];
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
 DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
@@ -1157,7 +1214,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 		if (minutes == "1 minute") minutes = 1;
 		this.gui.prompt("Should we ban the account, the ip or both?", ["account", "ip", "both", "Cancel"], function (type) {
 			if (type == "Cancel") return;
-			this.gui.prompt("What is the reason you want to ban him?", ["freepick", "Drawings swastikas", "Destroying drawings", "Being a dick in chat", "Spam", "Cancel"], function (reason) {
+			this.gui.prompt("What is the reason you want to ban him?", ["freepick", "Destroying drawings", "Cancel"], function (reason) {
 				if (reason == "Cancel") return;
 				this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes. Reason: " + reason, ["Yes", "No"], function (confirmation) {
 					if (confirmation == "Yes") {
@@ -1353,12 +1410,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		} else {
 			this.updateFavoriteDom();
 			$(".regions-window").hide();
+			this.framesWindow.classList.remove("show");
 			$(".favorites-window").show();
 		}
 	}.bind(this));
 	
 	var favoritesWindow = this.paint.container.appendChild(document.createElement("div"));
-	favoritesWindow.className = "favorites-window";
+	favoritesWindow.className = "coords-window favorites-window";
 	
 	this.favoritesContainer = favoritesWindow.appendChild(document.createElement("div"));
 	this.favoritesContainer.className = "favorites-container";	
@@ -1373,6 +1431,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		} else {
 			this.getMyProtectedRegions(function(){
 				$(".favorites-window").hide();
+				this.framesWindow.classList.remove("show");
 				$(".regions-window").show();
 
 				if(!this.myRegions || this.myRegions.length === 0){
@@ -1389,14 +1448,133 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	regionsButtonImage.title = "Open Regions Menu";
 
 	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
-	regionsWindow.className = "regions-window";
-
+	regionsWindow.className = "coords-window regions-window";
+	
 	this.regionTutorialContainer = regionsWindow.appendChild(document.createElement("div"));
 	this.regionTutorialContainer.className = "region-tutorial";
 	this.createRegionTutorialDom();
 	
 	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
 	this.regionsContainer.className = "regions-container";
+	
+	// Frames button
+	var framesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	framesButton.className = "control-button frames-button";
+	framesButton.addEventListener("click", this.toggleFramesManager.bind(this));
+
+	var framesButtonImage = framesButton.appendChild(document.createElement("img"));
+	framesButtonImage.src = "images/icons/frames.png";
+	framesButtonImage.alt = "Open Frames Manager";
+	framesButtonImage.title = "Open Frames Manager";
+	
+	this.createFramesManager();
+};
+
+DrawTogether.prototype.createFramesManager = function createFramesManager () {
+	this.framesWindow = this.paint.container.appendChild(document.createElement("div"));
+	this.framesWindow.className = "coords-window frames-window";
+	this.updateFramesManager();
+};
+
+/*
+	Adds the current frames to the manager and
+	show location and options (disable/enable, delete, ...)
+*/
+DrawTogether.prototype.updateFramesManager = function updateFramesManager () {
+	while (this.framesWindow.firstChild) this.framesWindow.removeChild(this.framesWindow.firstChild);
+	
+	var container = this.framesWindow.appendChild(document.createElement("div"));
+	container.className = "container";
+	
+	if (this.paint.frames.length === 0) {
+		container.appendChild(document.createTextNode("You haven't made any frames."));
+	}
+	
+	for (var k = 0; k < this.paint.frames.length; k++) {
+		container.appendChild(this.buildFrameButtons(this.paint.frames[k]));
+	}
+};
+
+/*
+	Returns a div containing buttons bounded with eventlisteners
+	that control the given frame
+*/
+DrawTogether.prototype.buildFrameButtons = function buildFrameButtons (frame) {
+	var container = document.createElement("div");
+	
+	var gotoButton = container.appendChild(document.createElement("div"));
+	gotoButton.className = "coords-button position-button";
+	gotoButton.appendChild(document.createTextNode(frame.leftTop[0] + ", " + frame.leftTop[1]));
+	gotoButton.addEventListener("click", this.frameGotoHandler.bind(this, frame));
+	
+	container.appendChild(this.buildFrameOnOffButton(frame));
+	container.appendChild(this.buildFrameRemoveButton(frame));
+	
+	return container;
+};
+
+DrawTogether.prototype.frameGotoHandler = function frameGotoHandler (frame, event) {
+	this.handleGoto(frame.leftTop[0], frame.leftTop[1]);
+};
+
+DrawTogether.prototype.frameOnOffHandler = function frameOnOffHandler (frame, event) {
+	frame.disabled = !frame.disabled;
+	this.paint.redrawFrames();
+	this.updateFramesManager();
+};
+
+DrawTogether.prototype.buildFrameOnOffButton = function buildFrameOnOffButton(frame) {
+	var button = document.createElement("div");
+	button.classList.add("coords-button");
+	
+	var image = document.createElement("img");
+	image.src = frame.disabled ? "images/icons/hidden.png" : "images/icons/visible.png";
+	button.appendChild(image);
+	
+	button.addEventListener("click", this.frameOnOffHandler.bind(this, frame));
+	return button;
+};
+
+DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, button, event) {
+	if (button.classList.contains("confirm")) {
+		for (var k = 0; k < this.paint.frames.length; k++) {
+			if (this.paint.frames[k] == frame) {
+				this.paint.frames.splice(k, 1);
+				this.paint.redrawFrames();
+				this.updateFramesManager();
+				return;
+			}
+		}
+	} else {
+		button.classList.add("confirm");
+		
+		setTimeout(function () {
+			button.classList.remove("confirm");
+		}, 3000);
+	}
+};
+
+DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton(frame) {
+	var button = document.createElement("div");
+	button.classList.add("coords-button");
+
+	var image = document.createElement("img");
+	image.src = "images/icons/remove.png";
+	button.appendChild(image);
+
+	button.addEventListener("click", this.frameRemoveHandler.bind(this, frame, button));
+	return button;
+};
+
+DrawTogether.prototype.toggleFramesManager = function toggleFramesManager () {
+	if (this.framesWindow.classList.contains("show")) {
+		this.framesWindow.classList.remove("show");
+	} else {
+		this.framesWindow.classList.add("show");
+		$(".regions-window").hide();
+		$(".favorites-window").hide();
+		this.updateFramesManager();
+	}
 };
 
 DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
@@ -1476,20 +1654,59 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (event) {
 	this.gui.prompt("What do you want to do with your selection?", [
 		"Export in high quality",
+		"Export video/gif",
 		"Create protected region",
 		"Inspect tool",
+		"Create grid",
+		"Show video frames",
 		"Cancel"
 	], function (answer) {
 		if (answer === "Cancel") return;
 
 		var handlers = {
 			"Export in high quality": this.exportImage.bind(this),
+			"Export video/gif": this.exportVideo.bind(this),
 			"Create protected region": this.createProtectedRegion.bind(this),
-			"Inspect tool": this.whoDrewInThisArea.bind(this)
+			"Inspect tool": this.whoDrewInThisArea.bind(this),
+			"Show video frames": this.showVideoFrames.bind(this),
+			"Create grid": this.createGridInSelection.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
 	}.bind(this));
+};
+
+DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
+	var generationSettings = QuickSettings.create(50, 50, "Frame settings");
+	generationSettings.addControl({
+		type: "range",
+		title: "Frames",
+		min: 1,
+		max: 50,
+		value: 5,
+		step: 1
+	});
+	
+	generationSettings.addControl({
+		type: "range",
+		title: "Opacity",
+		min: 0,
+		max: 1,
+		value: 0.5,
+		step: 0.05
+	});
+	
+	generationSettings.addButton("Show", function () {
+		var frames = generationSettings.getRangeValue("Frames");
+		var opacity = generationSettings.getRangeValue("Opacity");
+		this.paint.addFrame(from, to, frames, opacity);
+		this.updateFramesManager();
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+	}.bind(this));
+	
+	generationSettings.addButton("Cancel", function () {
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+	});
 };
 
 // Send null for unchanging value
@@ -1518,8 +1735,8 @@ DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFa
 
 DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDeleteButton () {
 	var favoriteMinusButton = document.createElement("div");
-	favoriteMinusButton.className = "fav-button fav-delete-button";
-	favoriteMinusButton.textContent = "x";
+	favoriteMinusButton.className = "coords-button fav-delete-button";
+	favoriteMinusButton.textContent = "X";
 	favoriteMinusButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		if(element.classList.contains("fav-button-confirmation")){
@@ -1552,7 +1769,7 @@ DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDelet
 
 DrawTogether.prototype.createSetPositionButton = function createSetPositionButton () {
 	var favoritePlusButton = document.createElement("div");
-	favoritePlusButton.className = "fav-button fav-move-button";
+	favoritePlusButton.className = "coords-button fav-move-button";
 	favoritePlusButton.textContent = "Set pos";
 	
 	favoritePlusButton.addEventListener("click", function (e) {
@@ -1608,7 +1825,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteContainer.dataset.owner = owner;
 
 	var favoriteCoorButton = favoriteContainer.appendChild(document.createElement("div"));
-	favoriteCoorButton.className = "fav-button fav-coor-button";
+	favoriteCoorButton.className = "coords-button fav-coor-button";
 	favoriteCoorButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
@@ -1621,7 +1838,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	}.bind(this));
 	
 	var favoritePencilButton = favoriteContainer.appendChild(document.createElement("div"));
-	favoritePencilButton.className = "fav-button fav-pencil-button";
+	favoritePencilButton.className = "coords-button fav-pencil-button";
 	favoritePencilButton.textContent = "✎";
 	
 	var favoriteRenameContainer = favoriteContainer.appendChild(document.createElement("div"));
@@ -1693,7 +1910,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionContainer.dataset.index = index;
 
 	var regionPositionButton = regionContainer.appendChild(document.createElement("div"));
-	regionPositionButton.className = "reg-button reg-position-button";
+	regionPositionButton.className = "coords-button reg-position-button";
 	regionPositionButton.textContent = minX + ", " + minY;
 	regionPositionButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
@@ -1708,7 +1925,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	}.bind(this));	
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
-	regionEditPermissionsButton.className = "reg-button reg-editpermissions-button";
+	regionEditPermissionsButton.className = "coords-button reg-editpermissions-button";
 	//regionEditPermissionsButton.textContent = "Permissions...";
 	regionEditPermissionsButton.addEventListener("click", function (e) {
 		var regionListIndex = regionEditPermissionsButton.parentNode.dataset.index;
@@ -1730,8 +1947,8 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	permissionsButtonImage.title = "Open Permissions Menu";
 
 	var regionDeleteButton = regionContainer.appendChild(document.createElement("div"));
-	regionDeleteButton.className = "reg-button reg-delete-button";
-	regionDeleteButton.textContent = "x";
+	regionDeleteButton.className = "coords-button reg-delete-button";
+	regionDeleteButton.textContent = "X";
 	regionDeleteButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
@@ -1798,7 +2015,7 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 		this.favoritesContainer.removeChild(this.favoritesContainer.firstChild)
 	
 	var addNewFavoriteElementButton = this.favoritesContainer.appendChild(document.createElement("div"));
-	addNewFavoriteElementButton.className = "fav-button fav-add-new-fav";
+	addNewFavoriteElementButton.className = "coords-button fav-add-new-fav";
 	addNewFavoriteElementButton.textContent = "Add location";
 	addNewFavoriteElementButton.title = "Add new Favorite."
 	addNewFavoriteElementButton.addEventListener("click", function (e) {
@@ -1894,7 +2111,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 	}.bind(this));
 };
 
-DrawTogether.prototype.whoDrewInThisArea = function (from, to){
+DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 	var minX = Math.min(from[0], to[0]);
 	var minY = Math.min(from[1], to[1]);
 	var maxX = Math.max(from[0], to[0]);
@@ -1902,12 +2119,45 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to){
 
 	var peopleWhoDrewInTheAreaHash = new Object();
 	peopleWhoDrewInTheAreaHash.length = 0;
-	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--){
-		if(!this.paint.publicdrawings[i].points) continue;
-
+	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--) {
 		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
 
 		if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
+		
+		if(!this.paint.publicdrawings[i].points) {
+			if(this.paint.publicdrawings[i].type === 'line') {
+				if (
+					( this.paint.publicdrawings[i].x >= minX
+					&& this.paint.publicdrawings[i].x <= maxX
+					&& this.paint.publicdrawings[i].y >= minY
+					&& this.paint.publicdrawings[i].y <= maxY )
+					|| 
+					( this.paint.publicdrawings[i].x1 >= minX
+					&& this.paint.publicdrawings[i].x1 <= maxX
+					&& this.paint.publicdrawings[i].y1 >= minY
+					&& this.paint.publicdrawings[i].y1 <= maxY )) {
+						var player = this.playerFromId(socketid);
+						peopleWhoDrewInTheAreaHash[socketid] = true;
+						peopleWhoDrewInTheAreaHash.length++;
+						if(player){
+							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+						}
+						else{
+							this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+								if (result.error) {
+									this.chat.addMessage("Inspect tool", "Error: " + result.error);
+									return;
+								}
+								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+							}.bind(this));
+						}
+					}
+				continue;
+			}
+			
+		}
+		
+		
 
 		var pointsamt = this.paint.publicdrawings[i].points.length;
 		
@@ -1971,7 +2221,7 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 		}
 
 		if (result.success) {
-			setTimeout(this.getMyProtectedRegions, 2000);
+			setTimeout(this.getMyProtectedRegions.bind(this), 2000);
 			this.chat.addMessage("Regions", result.success);
 		}
 	}.bind(this));
@@ -2006,12 +2256,16 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
 			element.parentNode.removeChild(element);
 		}
 
-		setTimeout(this.getMyProtectedRegions, 2000);
+		setTimeout(this.getMyProtectedRegions.bind(this), 2000);
 		this.chat.addMessage("Regions", "Removed the region");
 	}.bind(this));
 };
 
 DrawTogether.prototype.getMyProtectedRegions = function (callback) {
+	if (!this.network.socket) {
+		console.log("Network socket was not defined.");
+		return;
+	}
 	this.network.socket.emit("getmyprotectedregions", function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
@@ -2077,6 +2331,86 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
 	exportwindow.classList.add("exportwindow");
 	exportwindow.appendChild(img);
+};
+
+DrawTogether.prototype.exportVideo = function (from, to) {
+	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
+	
+	var settings = QuickSettings.create(0, 0, "Specific settings");
+	settings.addText("Name", "Your title");
+	settings.addRange("Frames", 1, 200, 10, 1);
+	exportVideoWindow.appendChild(settings._panel);
+	
+	var container = exportVideoWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+	
+	var renderButton = container.appendChild(document.createElement("div"));
+	renderButton.appendChild(document.createTextNode("Render"));
+	renderButton.className = "drawtogether-button";
+	renderButton.addEventListener("click", function () {
+		var exportFuncs = {
+			boolean: "getBoolean",
+			range: "getRangeValue",
+			dropdown: "getDropDownValue"
+		};
+		
+		var captureSettings = {
+			name: settings.getText("Name"),
+			workersPath: ''
+		};
+		
+		for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
+			var funcName = exportFuncs[this.defaultVideoExportSettings[k].type];
+			var value = this.videoExportSettings[funcName](this.defaultVideoExportSettings[k].title)
+			if (typeof value == "object") value = value.value;
+			captureSettings[this.defaultVideoExportSettings[k].title] = value;
+		}
+		
+		console.log("CaptureSettings:", captureSettings);
+		
+		var capturer = new CCapture(captureSettings);
+		capturer.start();
+		
+		var frames = settings.getRangeValue("Frames");
+		
+		var frameWidth = Math.abs(to[0] - from[0]) / frames;
+		
+		var start = [
+			Math.min(from[0], to[0]),
+			Math.min(from[1], to[1])
+		];
+		
+		var endY = Math.max(from[1], to[1]);
+		
+		for (var k = 0; k < frames; k++) {
+			var tempFrom = [
+				start[0] + frameWidth * k,
+				start[1]
+			];
+			
+			var tempTo = [
+				tempFrom[0] + frameWidth,
+				endY
+			];
+			
+			if (captureSettings.verbose) {
+				console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
+			}
+			
+			capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
+		}
+
+		capturer.stop();
+		capturer.save();
+		
+	}.bind(this));
+	
+	var settingsButton = container.appendChild(document.createElement("div"));
+	settingsButton.appendChild(document.createTextNode("General export settings"));
+	settingsButton.className = "drawtogether-button";
+	settingsButton.addEventListener("click", function () {
+		this.videoExportSettings.show();
+	}.bind(this));
 };
 
 DrawTogether.prototype.createMessage = function createMessage () {
@@ -2311,6 +2645,14 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	for (var k = 0; k < this.defaultUserSettings.length; k++) {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
+	
+	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
+		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
+	}
+	
+	this.videoExportSettings.addButton("Close", function () {
+		this.videoExportSettings.hide();
+	}.bind(this));
 
 	var advancedOptions = QuickSettings.create(30, 10, "Advanced options");
 	advancedOptions.hide();
@@ -2335,6 +2677,11 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.setVerticalMirror(value);
 	}.bind(this));
 
+	advancedOptions.addButton("Generate grid", function () {
+		this.openGenerateGridWindow();
+		advancedOptions.hide();
+	}.bind(this));
+	
 	advancedOptions.addButton("Close (a)", function () {
 		advancedOptions.hide();
 	});
@@ -2355,6 +2702,14 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	openAdvancedButton.addEventListener("click", function () {
 		this.closeSettingsWindow();
 		advancedOptions.show();
+	}.bind(this));
+	
+	var videoExportSettingsButton = settingsContainer.appendChild(document.createElement("div"));
+	videoExportSettingsButton.appendChild(document.createTextNode("Open video export settings"));
+	videoExportSettingsButton.className = "drawtogether-button";
+	videoExportSettingsButton.addEventListener("click", function () {
+		this.closeSettingsWindow();
+		this.videoExportSettings.show();
 	}.bind(this));
 
 	var chatFilterOptions = QuickSettings.create(30, 10, "Chat filter options");
@@ -2856,11 +3211,6 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
 	this.account.checkLogin(function (err, loggedIn) {
-		if(this.account.uKey){
-			this.getFavorites();
-			this.getMyProtectedRegions();
-		}
-
 		var formContainer = accWindow.appendChild(document.createElement("div"));
 		formContainer.className = "drawtogether-account-formcontainer";
 
@@ -2934,6 +3284,9 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 					this.network.socket.emit("uKey", this.account.uKey);
 				}.bind(this));
 			}.bind(this));
+			
+			this.getFavorites();
+			this.getMyProtectedRegions();
 		}
 		
 		var close = formContainer.appendChild(document.createElement("div"));
@@ -3383,6 +3736,101 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
+DrawTogether.prototype.createGridInSelection = function createGridInSelection (from, to) {
+	var generationSettings = QuickSettings.create(50, 50, "Grid settings");
+	generationSettings.addControl({
+		type: "range",
+		title: "Squares",
+		min: 1,
+		max: 50,
+		value: 5,
+		step: 1
+	});
+	
+	generationSettings.addControl({
+		type: "range",
+		title: "Gutter",
+		min: 0,
+		max: 200,
+		value: 0,
+		step: 1
+	});
+	
+	generationSettings.addButton("Generate", function () {
+		var squares = generationSettings.getRangeValue("Squares");
+		var gutter = generationSettings.getRangeValue("Gutter");
+		
+		var totalWidth = Math.abs(to[0] - from[0]);
+		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
+		var sqheight = Math.abs(to[1] - from[1]);
+		
+		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+		
+		if (this.reputation >= 5 || (totalWidth > 1000 || sqwidth > 200)) {
+			console.log("Generating grid", squares, sqwidth, sqheight);
+			this.paint.generateGrid(
+				leftTop,
+				squares,
+				sqwidth,
+				sqheight,
+				gutter
+			);
+		} else {
+			this.chat.addMessage("Grids wider than 1000 pixels or higher than 200 are limited to users with 5+ reputation.");
+		}
+	}.bind(this));
+	
+	generationSettings.addButton("Cancel", function () {
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+	});
+};
+
+DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
+	var generationSettings = QuickSettings.create(50, 50, "Generate grid");
+
+	generationSettings.addInfo("How to use", "The size of the lines is determined by your brush size. The color by the brush color.");
+	generationSettings.addInfo("Sizes", "The width and height are per square.");
+	
+	generationSettings.addText("Left top x", Math.round(this.paint.public.leftTopX));
+	generationSettings.addText("Left top y", Math.round(this.paint.public.leftTopY));
+	
+	generationSettings.addRange("Squares", 1, 30, 5, 1);
+	generationSettings.addRange("Width", 1, 500, 100, 1);
+	generationSettings.addRange("Height", 1, 500, 100, 1);
+	
+	generationSettings.addControl({
+		type: "range",
+		title: "Gutter",
+		min: 0,
+		max: 200,
+		value: 0,
+		step: 1
+	});
+	
+	generationSettings.addButton("Generate", function () {
+		var squares = generationSettings.getRangeValue("Squares");
+		var sqwidth = generationSettings.getRangeValue("Width");
+		var sqheight = generationSettings.getRangeValue("Height");
+		
+		if (this.reputation >= 5 || (squares <= 5 && sqwidth <= 200 && sqheight <= 200)) {
+			console.log("Generating grid", squares, sqwidth, sqheight);
+			this.paint.generateGrid(
+				[parseInt(generationSettings.getText("Left top x")), parseInt(generationSettings.getText("Left top y"))],
+				squares,
+				sqwidth,
+				sqheight,
+				generationSettings.getRangeValue("Gutter")
+			);
+		} else {
+			this.chat.addMessage("Grids with more than 6 squares or squares bigger than 200 pixels are limited to users with 5+ reputation.");
+		}
+	}.bind(this));
+	
+	generationSettings.addButton("close", function () {
+		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+	});
+};
+
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	var premiumBuyWindow = this.gui.createWindow({ title: "Premium" });
 
@@ -3555,14 +4003,20 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("We now have a referral program"));
+	title.appendChild(document.createTextNode("Making animations got easier!"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("You can now see the previous frame transparently above the current frame when making animations. Simply select all the frames, say how many frames there are and click show."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Recent new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Referral program (earn more rep) (Account -> Referral)",
+	var features = ["See the previous frames in animations (Select tool -> show frames)",
+					"Grid creating tool (Select tool or advanced options)",
+					"Export videos/gifs (Select tool -> Export video)",
+	                "Referral program (earn more rep) (Account -> Referral)",
 	                "50R+ and premium users no longer use ink",
 	                "Added Chat Filter (Settings -> Chat filter options)",
 	                "Inspect tool to catch griefers (Select tool -> Inspect)",
