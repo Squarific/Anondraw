@@ -1128,7 +1128,8 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					if (!tempSocket) continue;
 					if(tempSocket.ip === targetSocket.ip)
-						usersWithSameIp.push(tempSocket);
+						if (socket.reputation >= (tempSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE)
+							usersWithSameIp.push(tempSocket);
 				}
 			}
 
