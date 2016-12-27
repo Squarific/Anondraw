@@ -1117,6 +1117,21 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
+			
+			var usersWithSameIp = [];
+			
+			if (protocol.io.nsps['/'].adapter.rooms[targetSocket.room]) {
+				var sroom = protocol.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
+
+				for (var id in sroom) {
+					var tempSocket = protocol.socketFromId(id);
+
+					if (!tempSocket) continue;
+					if(tempSocket.ip === targetSocket.ip)
+						if (socket.reputation >= (tempSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE)
+							usersWithSameIp.push(tempSocket);
+				}
+			}
 
 			var extraPayload = {type: "ban", arg1: new Date(Date.now() + parseInt(options[1]) * 60 * 1000), arg2: targetSocket.ip};
 
@@ -1127,13 +1142,16 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.informClient(socket, "Error while trying to kickban account: " + err);
 						return;
 					}
+					
+					for (var k = 0; k < usersWithSameIp.length; k++) {
+						protocol.informClient(socket, "Banning " + usersWithSameIp[k].name);
+						protocol.informClient(usersWithSameIp[k], "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
-					protocol.informClient(socket, "You banned " + targetSocket.name);
-					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
-
-					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
-					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					targetSocket.disconnect();
+						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
+						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
+						
+						usersWithSameIp[k].disconnect();
+					}
 				});
 			}
 
@@ -1143,13 +1161,16 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.informClient(socket, "Error while trying to kickban ip: " + err);
 						return;
 					}
+					protocol.informClient(socket, "You banned ip " + targetSocket.ip);
+					for (var k = 0; k < usersWithSameIp.length; k++) {
+						protocol.informClient(socket, "Banning " + usersWithSameIp[k].name);
+						protocol.informClient(usersWithSameIp[k], "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
-					protocol.informClient(socket, "You banned " + targetSocket.ip);
-					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
-
-					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
-					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					targetSocket.disconnect();
+						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
+						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
+						
+						usersWithSameIp[k].disconnect();
+					}
 				});
 			}
 		});
