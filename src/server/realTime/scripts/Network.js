@@ -1117,6 +1117,17 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
+			
+			var sroom = this.io.nsps['/'].adapter.rooms[room].sockets;
+			var duplicateUsers = [];
+
+			for (var id in sroom) {
+				var socket = this.socketFromId(id);
+
+				if (!socket) continue;
+				if(socket.ip === targetSocket.ip)
+					duplicateUsers.push(socket);
+			}
 
 			var extraPayload = {type: "ban", arg1: new Date(Date.now() + parseInt(options[1]) * 60 * 1000), arg2: targetSocket.ip};
 
@@ -1133,7 +1144,10 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
 					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					targetSocket.disconnect();
+					for (var socket in duplicateUsers) {
+						socket.disconnect();
+					}
+					//targetSocket.disconnect();
 				});
 			}
 
@@ -1149,7 +1163,10 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
 					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					targetSocket.disconnect();
+					for (var socket in duplicateUsers) {
+						socket.disconnect();
+					}
+					//targetSocket.disconnect();
 				});
 			}
 		});
