@@ -1120,8 +1120,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			
 			var duplicateUsers = [];
 			
-			if (this.io.nsps['/'].adapter.rooms[targetSocket.room]) {
-				var sroom = this.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
+			if (protocol.io.nsps['/'].adapter.rooms[targetSocket.room]) {
+				var sroom = protocol.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
 
 				for (var id in sroom) {
 					var tempSocket = this.socketFromId(id);
