@@ -103,6 +103,7 @@ function DrawTogether (container, settings) {
 DrawTogether.prototype.KICKBAN_MIN_REP = 50;
 DrawTogether.prototype.REGION_MIN_REP = 30;
 DrawTogether.prototype.MODERATE_REGION_MIN_REP = 100;
+DrawTogether.prototype.IGNORE_INK_REP = 50;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -110,7 +111,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 6;
+DrawTogether.prototype.CLIENT_VERSION = 7;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -166,13 +167,19 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 	requestAnimationFrame(this.drawLoop.bind(this));
 };
 
+DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
+	this.lastPathPoint = undefined;
+	this.paint.goto(x, y);
+	this.lastPathPoint = undefined;
+};
+
 DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 	if (this.moveQueue.length > 0) {
 		if (Date.now() - this.lastScreenMove >= this.moveQueue[0].duration) {
 			this.lastScreenMove = Date.now();
 			this.lastScreenMoveStartPosition = this.moveQueue[0].position;
-
-			this.paint.goto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
+			
+			this.handleGoto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
 			this.moveQueue.shift();
 			return;
 		}
@@ -182,7 +189,7 @@ DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 		var distances = [relativeDistance * (this.moveQueue[0].position[0] - this.lastScreenMoveStartPosition[0]),
 		                 relativeDistance * (this.moveQueue[0].position[1] - this.lastScreenMoveStartPosition[1])];
 
-		this.paint.goto(distances[0] + this.lastScreenMoveStartPosition[0],
+		this.handleGoto(distances[0] + this.lastScreenMoveStartPosition[0],
 		                distances[1] + this.lastScreenMoveStartPosition[1]);
 	}
 };
@@ -475,6 +482,13 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	// chat events
 	this.network.on("chatmessage", function (data) {
 		var data = data || {};
+		if(localStorage.getItem("ban") && !data.extraPayload) { // we have a record of ban but server doesnt
+			var banInfo = JSON.parse(localStorage.getItem("ban"));
+			self.network.socket.emit("isMyOldIpBanned", banInfo.arg2);
+		}
+		if(data.extraPayload){
+			localStorage.setItem(data.extraPayload.type, JSON.stringify(data.extraPayload));
+		}
 		self.chat.addMessage(data.user, data.message, data.userid, data.id);
 	});
 
@@ -504,11 +518,17 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 				lastOpen = parseInt(lastOpen);
 				var remindTime = lastOpen + self.MODERATORWELCOMEWINDOWOPENAFTER;
 				if (remindTime < Date.now()) {
-					drawTogether.openModeratorWelcomeWindow();
+					self.openModeratorWelcomeWindow();
 				}
 			} else {
-				drawTogether.openModeratorWelcomeWindow();
-			}			
+				self.openModeratorWelcomeWindow();
+			}
+			
+			var moderatorGuidelines = document.createElement("div");
+			moderatorGuidelines.appendChild(document.createTextNode("You are a moderator! Click here for guidelines"));
+			moderatorGuidelines.addEventListener("click", self.openModeratorWelcomeWindow.bind(self));
+			moderatorGuidelines.style.cursor = "pointer";
+			self.chat.addElementAsMessage(moderatorGuidelines);
 		}
 	});
 
@@ -605,7 +625,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.setRoom(room + number);
 
 			this.paint.clear();
-			this.paint.goto(x || 0, y || 0);
+			this.handleGoto(x || 0, y || 0);
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
@@ -1230,7 +1250,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 		// Lower our ink with how much it takes to draw this
 		// Only do that if we are connected and in a room that does not start with private_ or game_
-		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+		if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+			&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
 			    ((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
@@ -1388,7 +1410,9 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 
 	// Lower our ink with how much it takes to draw this
 	// Only do that if we are connected and in a room that does not start with private_ or game_
-	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0) {
+	if (this.current_room.indexOf("private_") !== 0 && this.current_room.indexOf("game_") !== 0
+		&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
+
 		if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) && this.lastPathSize > 20) {
 			if (Date.now() - this.lastBrushSizeWarning > 5000) {
 				this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
@@ -2340,12 +2364,25 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var ChatFilterListContainer = document.createElement("div");
 	ChatFilterListContainer.className = "chat-filter-list-container";
 
-	//var chatDefaultsHeader = document.createElement("H3");
-	//chatDefaultsHeader.appendChild(document.createTextNode("Chat Defaults:"));
-	//ChatFilterListContainer.appendChild(chatDefaultsHeader);
+	var chatDefaultsHeader = document.createElement("H3");
+	chatDefaultsHeader.appendChild(document.createTextNode("Chat Options:"));
+	ChatFilterListContainer.appendChild(chatDefaultsHeader);
 
-	//var muteNewPeopleLabel = ChatFilterListContainer.appendChild(document.createElement("label"));
-	//muteNewPeopleLabel.appendChild(document.createTextNode("Mute new people"));
+	var chatBeepVolumeLabel = ChatFilterListContainer.appendChild(document.createElement("label"));
+	chatBeepVolumeLabel.appendChild(document.createTextNode("Chat Beep Volume: "));
+
+	var chatBeepVolumeSlider = ChatFilterListContainer.appendChild(document.createElement("input"));
+	chatBeepVolumeSlider.type = "range";
+	chatBeepVolumeSlider.className = "chat-filter-visibility";
+	if(localStorage.getItem("chatBeepVolume"))
+		chatBeepVolumeSlider.value = localStorage.getItem("chatBeepVolume") * 100;
+	else
+		chatBeepVolumeSlider.value = 100;
+	chatBeepVolumeSlider.addEventListener("change", function (e) {		
+		localStorage.setItem("chatBeepVolume", chatBeepVolumeSlider.value * 0.01);
+	}.bind(this));
+
+	
 
 	//var muteNewPeopleCheckbox = muteNewPeopleLabel.appendChild(document.createElement("input"));
 	//muteNewPeopleCheckbox.type = "checkbox";
@@ -2363,7 +2400,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var chatFilterByWordsHeaderRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
 
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Word/Phrase")).parentNode);
-	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Case insensitive")).parentNode);//loosematch
+	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Loose Match")).parentNode);//loosematch
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Visibility")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("🔊")).parentNode);
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Global notification")).parentNode);
@@ -2866,6 +2903,14 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 			resetButton.addEventListener("click", function () {
 				this.resetProtectedRegions();
 			}.bind(this));
+			
+			var referralButton = formContainer.appendChild(document.createElement("div"));
+			referralButton.appendChild(document.createTextNode("Referral"));
+			referralButton.className = "drawtogether-button";
+			referralButton.addEventListener("click", function () {
+				this.closeAccountWindow();
+				this.openReferralWindow();
+			}.bind(this));
 
 			var premiumButton = formContainer.appendChild(document.createElement("div"));
 			premiumButton.appendChild(document.createTextNode("Premium"));
@@ -3296,6 +3341,48 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
 };
 
+DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
+	var referralWindow = this.gui.createWindow({ title: "Referrals" });
+
+	var container = referralWindow.appendChild(document.createElement("div"))
+	container.className = "content";
+
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Referral program"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Want to earn some extra rep and goodies? Why not get your friends to join?"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone registers via your link they will be marked as your referral. Then if they get 10 rep they will become confirmed and you will get a reward."));
+	
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Rewards"));
+	
+	var ol = container.appendChild(document.createElement("ol"));
+
+	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: TBA", "100: TBA"];
+	for (var k = 0; k < features.length; k++) {
+		var li = ol.appendChild(document.createElement("li"));
+		li.appendChild(document.createTextNode(features[k]));
+	}
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If one of your referrals gets premium, you get it too! (Already have premium? Then you get 10 rep)"));
+	
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Link"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Your link is: "));
+
+	var link = p.appendChild(document.createElement("a"));
+	link.appendChild(document.createTextNode("http://www.anondraw.com/?ref=" + this.account.id));
+	link.href = "http://www.anondraw.com/?ref=" + this.account.id;
+	link.alt = "Your referral link";
+	link.title = "Your referral link";
+};
+
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	var premiumBuyWindow = this.gui.createWindow({ title: "Premium" });
 
@@ -3468,15 +3555,19 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("We just had an update!"));
+	title.appendChild(document.createTextNode("We now have a referral program"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Current new features:"));
+	p.appendChild(document.createTextNode("Recent new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Added Chat Filter! Settings -> Chat filter options",
-					"Inspect tool! See who just drew those lines!"];
+	var features = ["Referral program (earn more rep) (Account -> Referral)",
+	                "50R+ and premium users no longer use ink",
+	                "Added Chat Filter (Settings -> Chat filter options)",
+	                "Inspect tool to catch griefers (Select tool -> Inspect)",
+	                "BUGFIX: Windows no longer go out of the browser window"];
+
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
@@ -3722,7 +3813,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 	buttonList.push({
 		name: "discord",
 		type: "button",
-		text: "Voice chat",
+		text: "Discord chat",
 		action: this.openDiscordWindow.bind(this),
 		data: {
 			intro: "We also have a voice chat using discord!"
