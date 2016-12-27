@@ -1928,10 +1928,10 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
 							}.bind(this));
 						}
-						break;
 					}
+				continue;
 			}
-			continue;
+			
 		}
 		
 		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
