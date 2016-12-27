@@ -1118,15 +1118,18 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
 			
-			var sroom = this.io.nsps['/'].adapter.rooms[room].sockets;
 			var duplicateUsers = [];
+			
+			if (this.io.nsps['/'].adapter.rooms[targetSocket.room]) {
+				var sroom = this.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
 
-			for (var id in sroom) {
-				var tempSocket = this.socketFromId(id);
+				for (var id in sroom) {
+					var tempSocket = this.socketFromId(id);
 
-				if (!tempSocket) continue;
-				if(tempSocket.ip === targetSocket.ip)
-					duplicateUsers.push(tempSocket);
+					if (!tempSocket) continue;
+					if(tempSocket.ip === targetSocket.ip)
+						duplicateUsers.push(tempSocket);
+				}
 			}
 
 			var extraPayload = {type: "ban", arg1: new Date(Date.now() + parseInt(options[1]) * 60 * 1000), arg2: targetSocket.ip};
