@@ -1124,7 +1124,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				var sroom = protocol.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
 
 				for (var id in sroom) {
-					var tempSocket = this.socketFromId(id);
+					var tempSocket = protocol.socketFromId(id);
 
 					if (!tempSocket) continue;
 					if(tempSocket.ip === targetSocket.ip)
