@@ -1147,8 +1147,10 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
 					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					for (var tempSocket in duplicateUsers) {
-						tempSocket.disconnect();
+
+					for (var k = 0; k < duplicateUsers.length; k++) {
+						console.log(duplicateUsers[k].name);
+						duplicateUsers[k].disconnect();
 					}
 					//targetSocket.disconnect();
 				});
@@ -1166,8 +1168,10 @@ Protocol.prototype.bindIO = function bindIO () {
 
 					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
 					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					for (var tempSocket in duplicateUsers) {
-						tempSocket.disconnect();
+					
+					for (var k = 0; k < duplicateUsers.length; k++) {
+						console.log(duplicateUsers[k].name);
+						duplicateUsers[k].disconnect();
 					}
 					//targetSocket.disconnect();
 				});
