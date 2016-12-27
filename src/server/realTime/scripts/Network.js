@@ -1150,10 +1150,8 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
 						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
 						
-						console.log(usersWithSameIp[k].name);
 						usersWithSameIp[k].disconnect();
 					}
-					//targetSocket.disconnect();
 				});
 			}
 
@@ -1171,10 +1169,8 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
 						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
 						
-						console.log(usersWithSameIp[k].name);
 						usersWithSameIp[k].disconnect();
 					}
-					//targetSocket.disconnect();
 				});
 			}
 		});
