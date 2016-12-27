@@ -114,7 +114,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 9;
+DrawTogether.prototype.CLIENT_VERSION = 10;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -3970,14 +3970,18 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("You can now export videos!"));
+	title.appendChild(document.createTextNode("Making animations got easier!"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("You can now see the previous frame transparently above the current frame when making animations. Simply select all the frames, say how many frames there are and click show."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Recent new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Grid creating tool (Select tool or advanced options)",
+	var features = ["See the previous frames in animations (Select tool -> show frames)",
+					"Grid creating tool (Select tool or advanced options)",
 					"Export videos/gifs (Select tool -> Export video)",
 	                "Referral program (earn more rep) (Account -> Referral)",
 	                "50R+ and premium users no longer use ink",
