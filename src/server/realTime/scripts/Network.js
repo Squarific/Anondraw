@@ -420,6 +420,8 @@ Protocol.prototype.bindIO = function bindIO () {
 	this.io.on("connection", function (socket) {
 		socket.ink = 50;
 		socket.emit("setink", socket.ink);
+		
+		socket.lastIpInkMessage = Date.now();
 
 		socket.permissions = {}; //{someid: true/false}
 		socket.messages = {};
