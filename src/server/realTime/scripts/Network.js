@@ -1133,11 +1133,12 @@ Protocol.prototype.bindIO = function bindIO () {
 					var tempSocket = protocol.socketFromId(id);
 
 					if (!tempSocket) continue;
-					if(tempSocket.ip === targetSocket.ip)
+					if(tempSocket.ip === targetSocket.ip && tempSocket.id != targetSocket.id) // dont add target socket yet because it's not always in the room list meaning it might be added twice if it is. 
 						if (socket.reputation >= (tempSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE)
 							usersWithSameIp.push(tempSocket);
 				}
 			}
+			usersWithSameIp.push(targetSocket);
 
 			var extraPayload = {type: "ban", arg1: new Date(Date.now() + parseInt(options[1]) * 60 * 1000), arg2: targetSocket.ip};
 
@@ -1177,6 +1178,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						
 						usersWithSameIp[k].disconnect();
 					}
+					
 				});
 			}
 		});
