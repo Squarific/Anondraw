@@ -1,4 +1,4 @@
-function DrawTogether (container, settings) {
+function DrawTogether (container, settings, emotesHash) {
 	// Normalize settings, set container
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
@@ -38,6 +38,7 @@ function DrawTogether (container, settings) {
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
 	this.bindSocketHandlers();
+	this.emotesHash = emotesHash;
 
 	// Initialize the dom elements
 	this.initDom();
@@ -1174,7 +1175,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 DrawTogether.prototype.createChat = function createChat () {
 	var chatContainer = this.container.appendChild(document.createElement("div"));
 	chatContainer.className = "drawtogether-chat-container";
-	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings);
+	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings, this.emotesHash);
 	this.chatContainer = chatContainer;
 	this.chat.addMessage("Welcome to anondraw, the free interactive group drawing app.");
 

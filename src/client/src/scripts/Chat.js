@@ -1,4 +1,4 @@
-function Chat (container, onmessage, userSettings) {
+function Chat (container, onmessage, userSettings, emotesHash) {
 	this.messagesDom = container.appendChild(document.createElement("div"));
 	this.messagesDom.classList.add("messagecontainer");
 
@@ -27,6 +27,8 @@ function Chat (container, onmessage, userSettings) {
 
 	this.onMessage = onmessage || function () {};
 	this.messageSound = new Audio("sounds/message.wav");
+
+	this.emotesHash = emotesHash;
 
 	//Visibility compatibility 
 	// Set the name of the hidden property and the change event for visibility
@@ -71,7 +73,7 @@ Chat.prototype.string2Color = function string2Color (str) {
     
     return "hsl("+ h +", "+ s*100 +"%, "+ l*70 +"%)";
 };
-
+/*
 Chat.prototype.emotesOrder = [
 	"CasualLama","Nyan","RedCoat","BCouch","FUNgineer","GrammarKing",
 	"JonCarnage","NotLikeThis","OMGScoots","NoNoSpot","OSkomodo","ShazBotstix",
@@ -246,6 +248,7 @@ Chat.prototype.emotesHash = {
 	"twitchRaid": "images/emotes/twitchRaid.png",
 	"WillDraw4Rep": "images/emotes/WillDraw4Rep.png"
 };
+*/
 
 Chat.prototype.urlRegex = /(((http|ftp)s?):\/\/)?([\d\w]+\.)+[\d\w]{2,}(\/\S+)?/;
 Chat.prototype.strictMatch1 = '(?:^|\\W)(';

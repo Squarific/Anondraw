@@ -66,11 +66,17 @@
 			}
 			
 			// Draw and paint online
-			var urlInfo = location.hash.substr(1, location.hash.length).split(",")
+			var urlInfo = location.hash.substr(1, location.hash.length).split(",");
 
 			var room = urlInfo[0];
 			var x = parseInt(urlInfo[1]);
 			var y = parseInt(urlInfo[2]);
+
+			var emotesHash = { 
+			{{#emojiList}}
+				"{{{emojiName}}}":"{{{emojiPath}}}"{{^last}}, {{/last}}
+			{{/emojiList}}
+			};
 
 			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
 				room: room || "main",
@@ -80,7 +86,7 @@
 				accountServer: "http://{{ service.player.host }}:{{ service.player.port }}",
 				leftTopX: x || 0,
 				leftTopY: y || 0
-			});
+			}, emotesHash);
 		</script>
 		<!-- Go to www.addthis.com/dashboard to customize your tools -->
 		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-53c4fbf2311fe8f1" async="async"></script>
