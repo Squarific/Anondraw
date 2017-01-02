@@ -1266,8 +1266,6 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paintContainer = drawContainer;
 
 	this.paint = new Paint(drawContainer);
-	this.paint.public.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
-	this.paint.background.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
 	this.setLoadImage();
 
@@ -2661,6 +2659,9 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			this.paint.background.settings.maxLoadedChunks = chunks;
 		}.bind(this)
 	});
+	
+	this.paint.public.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	this.paint.background.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
 	
 	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
 		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
