@@ -1266,6 +1266,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paintContainer = drawContainer;
 
 	this.paint = new Paint(drawContainer);
+	this.paint.public.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	this.paint.background.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
 	this.setLoadImage();
 
