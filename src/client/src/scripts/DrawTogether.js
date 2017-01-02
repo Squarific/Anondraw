@@ -2660,8 +2660,8 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		}.bind(this)
 	});
 	
-	this.paint.public.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
-	this.paint.background.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	this.paint.public.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	this.paint.background.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
 	
 	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
 		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
