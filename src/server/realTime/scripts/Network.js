@@ -40,7 +40,7 @@ var FORGET_SOCKET_AFTER = 18 * 60 * 1000;
 
 var INFORM_CLIENT_TIME_BETWEEN_MESSAGE = 1000;
 
-var SAME_IP_INK_MESSAGE = "You will not get any ink because someone else on your ip has already gotten some.";
+var SAME_IP_INK_MESSAGE = "You will get less ink because someone else on your ip has already gotten some. If you get an account with more than " + SHARE_IP_MIN_REP + " reputation you will get full ink.";
 
 var PERMISSIONS = {
 	DRAWING: 1,
@@ -300,19 +300,23 @@ Protocol.prototype.inkTick = function inkTick () {
 
 	for (var id in this.io.nsps['/'].connected) {
 		var socket = this.io.nsps['/'].connected[id];
+		var divide = 1;
 
 		if (ips.indexOf(socket.ip) !== -1 && socket.reputation < SHARE_IP_MIN_REP) {
-			if (Date.now() - socket.lastIpInkMessage > 30000) {
+			if (Date.now() - socket.lastIpInkMessage > 60000) {
 				this.informClient(socket, SAME_IP_INK_MESSAGE);
 				socket.lastIpInkMessage = Date.now();
 			}
-			continue;
+			
+			// We divide the ink we get by 2 for every shared ip
+			for (var k = 0; k < ips.length; k++)
+				if (ips[k] === socket.ip) divide *= 2;
 		}
 
 		// If ink is NaN we need to reset it
 		if (socket.ink !== socket.ink) socket.ink = 0;
 
-		var extra = BASE_GEN + PER_REP_GEN * (socket.reputation || 0);
+		var extra = (BASE_GEN + PER_REP_GEN * (socket.reputation || 0)) / divide;
 		socket.ink = Math.min(socket.ink + extra, socket.uKey ? MAX_INK : MAX_GUEST_INK);
 
 		socket.emit("setink", socket.ink);
@@ -420,6 +424,8 @@ Protocol.prototype.bindIO = function bindIO () {
 	this.io.on("connection", function (socket) {
 		socket.ink = 50;
 		socket.emit("setink", socket.ink);
+		
+		socket.lastIpInkMessage = Date.now();
 
 		socket.permissions = {}; //{someid: true/false}
 		socket.messages = {};
@@ -1117,6 +1123,22 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
+			
+			var usersWithSameIp = [];
+			
+			if (protocol.io.nsps['/'].adapter.rooms[targetSocket.room]) {
+				var sroom = protocol.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
+
+				for (var id in sroom) {
+					var tempSocket = protocol.socketFromId(id);
+
+					if (!tempSocket) continue;
+					if(tempSocket.ip === targetSocket.ip && tempSocket.id != targetSocket.id) // dont add target socket yet because it's not always in the room list meaning it might be added twice if it is. 
+						if (socket.reputation >= (tempSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE)
+							usersWithSameIp.push(tempSocket);
+				}
+			}
+			usersWithSameIp.push(targetSocket);
 
 			var extraPayload = {type: "ban", arg1: new Date(Date.now() + parseInt(options[1]) * 60 * 1000), arg2: targetSocket.ip};
 
@@ -1127,13 +1149,16 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.informClient(socket, "Error while trying to kickban account: " + err);
 						return;
 					}
+					
+					for (var k = 0; k < usersWithSameIp.length; k++) {
+						protocol.informClient(socket, "Banning " + usersWithSameIp[k].name);
+						protocol.informClient(usersWithSameIp[k], "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
-					protocol.informClient(socket, "You banned " + targetSocket.name);
-					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3]);
-
-					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
-					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					targetSocket.disconnect();
+						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
+						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
+						
+						usersWithSameIp[k].disconnect();
+					}
 				});
 			}
 
@@ -1143,13 +1168,17 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.informClient(socket, "Error while trying to kickban ip: " + err);
 						return;
 					}
+					protocol.informClient(socket, "You banned ip " + targetSocket.ip);
+					for (var k = 0; k < usersWithSameIp.length; k++) {
+						protocol.informClient(socket, "Banning " + usersWithSameIp[k].name);
+						protocol.informClient(usersWithSameIp[k], "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
-					protocol.informClient(socket, "You banned " + targetSocket.ip);
-					protocol.informClient(targetSocket, "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
-
-					protocol.drawTogether.undoDrawings(targetSocket.room, targetSocket.id, true);
-					protocol.io.to(targetSocket.room).emit("undodrawings", targetSocket.id, true);
-					targetSocket.disconnect();
+						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
+						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
+						
+						usersWithSameIp[k].disconnect();
+					}
+					
 				});
 			}
 		});
