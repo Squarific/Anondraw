@@ -143,7 +143,7 @@ DrawTogether.prototype.defaultUserSettings = [{
 		title: "Show welcome",
 		type: "boolean",
 		value: true
-}];
+	}];
 
 DrawTogether.prototype.defaultVideoExportSettings = [{
 		title: "framerate",
@@ -2645,6 +2645,19 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	for (var k = 0; k < this.defaultUserSettings.length; k++) {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
+	
+	this.userSettings.addControl({
+		title: "Loaded chunks",
+		type: "range",
+		value: 100,
+		step: 5,
+		min: 10,
+		max: 2000,
+		callback: function (chunks) {
+			this.paint.public.settings.maxLoadedChunks = chunks;
+			this.paint.background.settings.maxLoadedChunks = chunks;
+		}.bind(this)
+	});
 	
 	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
 		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
