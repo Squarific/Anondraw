@@ -3852,7 +3852,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions", "Save more than five favorites at once"];
+	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions", "Save more than five favorites at once", "Add your own custom emote(subject to approval)"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
