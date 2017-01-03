@@ -3731,7 +3731,7 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: TBA", "100: TBA"];
+	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: you'll get an anondraw tshirt (no delivery to the moon)", "100: TBA"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
