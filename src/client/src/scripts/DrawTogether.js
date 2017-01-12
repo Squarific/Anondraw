@@ -144,7 +144,7 @@ DrawTogether.prototype.defaultUserSettings = [{
 		title: "Show welcome",
 		type: "boolean",
 		value: true
-}];
+	}];
 
 DrawTogether.prototype.defaultVideoExportSettings = [{
 		title: "framerate",
@@ -2647,6 +2647,22 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
 	
+	this.userSettings.addControl({
+		title: "Loaded chunks",
+		type: "range",
+		value: 100,
+		step: 5,
+		min: 10,
+		max: 2000,
+		callback: function (chunks) {
+			this.paint.public.settings.maxLoadedChunks = chunks;
+			this.paint.background.settings.maxLoadedChunks = chunks;
+		}.bind(this)
+	});
+	
+	this.paint.public.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	this.paint.background.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	
 	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
 		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
 	}
@@ -3715,7 +3731,7 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: TBA", "100: TBA"];
+	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: you'll get an anondraw tshirt (no delivery to the moon)", "100: TBA"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
