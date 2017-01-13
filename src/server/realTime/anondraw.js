@@ -1,3 +1,4 @@
+Error.stackTraceLimit = Infinity;
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 var http = require("http");
