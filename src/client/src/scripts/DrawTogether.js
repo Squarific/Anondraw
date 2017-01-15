@@ -2127,8 +2127,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 		
 		if(!this.paint.publicdrawings[i].points) {
 			if(this.paint.publicdrawings[i].type === 'line') {
-				if (
-					( this.paint.publicdrawings[i].x >= minX
+				if (( this.paint.publicdrawings[i].x >= minX
 					&& this.paint.publicdrawings[i].x <= maxX
 					&& this.paint.publicdrawings[i].y >= minY
 					&& this.paint.publicdrawings[i].y <= maxY )
@@ -2154,13 +2153,27 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 						}
 					}
 				continue;
+			} 
+			else if(this.paint.publicdrawings[i].type === 'text') {
+				if (( this.paint.publicdrawings[i].x >= minX
+					&& this.paint.publicdrawings[i].x <= maxX
+					&& this.paint.publicdrawings[i].y >= minY
+					&& this.paint.publicdrawings[i].y <= maxY )
+					|| 
+					( this.paint.publicdrawings[i].x1 >= minX
+					&& this.paint.publicdrawings[i].x1 <= maxX
+					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size >= minY
+					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size <= maxY )) {
+					
+				}
+				continue;
 			}
 			
 		}
 		
 		
 
-		var pointsamt = this.paint.publicdrawings[i].points.length;
+		var pointsamt = this.paint.publicdrawings[i].points.length || 0;
 		
 		//var checkEveryX = Math.round(pointsamt / 5);
 
@@ -4142,9 +4155,6 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "How do I chat?",
 		answer: "There is a chat to the right or if you are on mobile you can click on the chat button."
-	}, {
-		question: "Can I make animations?",
-		answer: 'Yes you can, for more info on how making these animations work, you can watch <a href="https://www.youtube.com/watch?v=wZ47oOPqNAQ">this video</a>'
 	}, {
 		question: "How big is the canvas?",
 		answer: "The interactive canvas has an infinite size. You could move as far away from the center as you'd like."
