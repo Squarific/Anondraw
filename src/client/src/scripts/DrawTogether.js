@@ -789,7 +789,7 @@ DrawTogether.prototype.changeName = function changeName (name) {
 
 DrawTogether.prototype.changeNameDelayed = function () {
 	clearTimeout(this.changeNameTimeout);
-	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 2350);
+	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 1650);
 };
 
 DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
