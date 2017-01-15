@@ -2164,7 +2164,21 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 					&& this.paint.publicdrawings[i].x1 <= maxX
 					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size >= minY
 					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size <= maxY )) {
-					
+						var player = this.playerFromId(socketid);
+							peopleWhoDrewInTheAreaHash[socketid] = true;
+							peopleWhoDrewInTheAreaHash.length++;
+							if(player){
+								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+							}
+							else{
+								this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+									if (result.error) {
+										this.chat.addMessage("Inspect tool", "Error: " + result.error);
+										return;
+									}
+									this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+								}.bind(this));
+							}
 				}
 				continue;
 			}
