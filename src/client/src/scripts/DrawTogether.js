@@ -1,4 +1,4 @@
-function DrawTogether (container, settings) {
+function DrawTogether (container, settings, emotesHash) {
 	// Normalize settings, set container
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
@@ -41,6 +41,7 @@ function DrawTogether (container, settings) {
 	this.network = new Network(this.settings.loadbalancer);
 	this.account = new Account(this.settings.accountServer);
 	this.bindSocketHandlers();
+	this.emotesHash = emotesHash;
 
 	// Initialize the dom elements
 	this.initDom();
@@ -114,7 +115,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 9;
+DrawTogether.prototype.CLIENT_VERSION = 10;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -143,7 +144,7 @@ DrawTogether.prototype.defaultUserSettings = [{
 		title: "Show welcome",
 		type: "boolean",
 		value: true
-}];
+	}];
 
 DrawTogether.prototype.defaultVideoExportSettings = [{
 		title: "framerate",
@@ -1231,7 +1232,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 DrawTogether.prototype.createChat = function createChat () {
 	var chatContainer = this.container.appendChild(document.createElement("div"));
 	chatContainer.className = "drawtogether-chat-container";
-	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings);
+	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings, this.emotesHash);
 	this.chatContainer = chatContainer;
 	this.chat.addMessage("Welcome to anondraw, the free interactive group drawing app.");
 
@@ -2646,6 +2647,22 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
 	
+	this.userSettings.addControl({
+		title: "Loaded chunks",
+		type: "range",
+		value: 100,
+		step: 5,
+		min: 10,
+		max: 2000,
+		callback: function (chunks) {
+			this.paint.public.settings.maxLoadedChunks = chunks;
+			this.paint.background.settings.maxLoadedChunks = chunks;
+		}.bind(this)
+	});
+	
+	this.paint.public.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	this.paint.background.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
+	
 	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
 		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
 	}
@@ -3714,7 +3731,7 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: TBA", "100: TBA"];
+	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: you'll get an anondraw tshirt (no delivery to the moon)", "100: TBA"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
@@ -3851,7 +3868,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions", "Save more than five favorites at once"];
+	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions", "Save more than five favorites at once", "Add your own custom emote(subject to approval)"];
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
@@ -4003,14 +4020,18 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("You can now export videos!"));
+	title.appendChild(document.createTextNode("Making animations got easier!"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("You can now see the previous frame transparently above the current frame when making animations. Simply select all the frames, say how many frames there are and click show."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Recent new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Grid creating tool (Select tool or advanced options)",
+	var features = ["See the previous frames in animations (Select tool -> show frames)",
+					"Grid creating tool (Select tool or advanced options)",
 					"Export videos/gifs (Select tool -> Export video)",
 	                "Referral program (earn more rep) (Account -> Referral)",
 	                "50R+ and premium users no longer use ink",
@@ -4121,6 +4142,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "How do I chat?",
 		answer: "There is a chat to the right or if you are on mobile you can click on the chat button."
+	}, {
+		question: "Can I make animations?",
+		answer: 'Yes you can, for more info on how making these animations work, you can watch <a href="https://www.youtube.com/watch?v=wZ47oOPqNAQ">this video</a>'
 	}, {
 		question: "How big is the canvas?",
 		answer: "The interactive canvas has an infinite size. You could move as far away from the center as you'd like."

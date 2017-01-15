@@ -5,11 +5,37 @@ let minify = require("node-minify").minify;
 let mustache = require("mustache")
 let exec = require("child_process").execSync;
 
+var imagefolder = './dist/images/emotes';
+
+let emojiList = [];
+
+var emojifiles = fs.readdirSync(imagefolder);
+	
+emojifiles.forEach(function(filename) {
+	var filePath = path.join(imagefolder, filename);
+	var stats = fs.statSync(filePath);
+	if(stats.isFile()){
+		emojiList.push({"name": filename.slice(0, -4), "path": 'images/emotes/' + filename});
+		console.log('Name:', filename.slice(0, -4), 'directory:', 'images/emotes/' + filename);
+	}
+});
+if (emojiList.length > 0)
+	emojiList[emojiList.length -1].last = 1;
+
 let config = _.merge(
 	require("./info.json"), 
 	require("../server/common/config.js"),
 	{ 
-	   version: exec("git rev-parse --short HEAD", { encoding: "utf8" }).trim() 
+		version: exec("git rev-parse --short HEAD", { encoding: "utf8" }).trim() 
+	},
+	{
+		"emojiList": emojiList,
+		"emojiName": function () {
+			return this.name;
+		},
+		"emojiPath": function () {
+			return this.path;
+		}
 	}
 );
 
