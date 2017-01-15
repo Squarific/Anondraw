@@ -4170,6 +4170,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 		question: "How do I chat?",
 		answer: "There is a chat to the right or if you are on mobile you can click on the chat button."
 	}, {
+		question: "Can I make animations?",
+		answer: 'Yes you can, for more info on how making these animations work, you can watch <a href="https://www.youtube.com/watch?v=wZ47oOPqNAQ">this video</a>'
+	}, {
 		question: "How big is the canvas?",
 		answer: "The interactive canvas has an infinite size. You could move as far away from the center as you'd like."
 	}, {
