@@ -2127,8 +2127,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 		
 		if(!this.paint.publicdrawings[i].points) {
 			if(this.paint.publicdrawings[i].type === 'line') {
-				if (
-					( this.paint.publicdrawings[i].x >= minX
+				if (( this.paint.publicdrawings[i].x >= minX
 					&& this.paint.publicdrawings[i].x <= maxX
 					&& this.paint.publicdrawings[i].y >= minY
 					&& this.paint.publicdrawings[i].y <= maxY )
@@ -2154,13 +2153,41 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 						}
 					}
 				continue;
+			} 
+			else if(this.paint.publicdrawings[i].type === 'text') {
+				if (( this.paint.publicdrawings[i].x >= minX
+					&& this.paint.publicdrawings[i].x <= maxX
+					&& this.paint.publicdrawings[i].y >= minY
+					&& this.paint.publicdrawings[i].y <= maxY )
+					|| 
+					( this.paint.publicdrawings[i].x1 >= minX
+					&& this.paint.publicdrawings[i].x1 <= maxX
+					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size >= minY
+					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size <= maxY )) {
+						var player = this.playerFromId(socketid);
+							peopleWhoDrewInTheAreaHash[socketid] = true;
+							peopleWhoDrewInTheAreaHash.length++;
+							if(player){
+								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+							}
+							else{
+								this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+									if (result.error) {
+										this.chat.addMessage("Inspect tool", "Error: " + result.error);
+										return;
+									}
+									this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+								}.bind(this));
+							}
+				}
+				continue;
 			}
 			
 		}
 		
 		
 
-		var pointsamt = this.paint.publicdrawings[i].points.length;
+		var pointsamt = this.paint.publicdrawings[i].points.length || 0;
 		
 		//var checkEveryX = Math.round(pointsamt / 5);
 
