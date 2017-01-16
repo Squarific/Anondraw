@@ -38,6 +38,17 @@ var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndS
 function saveAndShutdown () {
 	console.log("SAVING AND SHUTTING DOWN");
 	var rooms = Object.keys(drawTogether.drawings);
+	
+	rooms.sort(function(roomNameA, roomNameB) {// sorts least to greatest 1, 5, 6, 10
+		if (protocol.getUserCount(roomNameA) < protocol.getUserCount(roomNameB)) {
+			return -1;// sort a to a lower index than b
+		}
+		if (protocol.getUserCount(roomNameA) > protocol.getUserCount(roomNameB)) {
+			return 1;// sort b to a lower index than a
+		}
+		return 0;// unchanged indexes
+	}.bind(this));
+	
 	var roomCount = rooms.length;
 
 	for (var k = 0; k < rooms.length; k++) {
