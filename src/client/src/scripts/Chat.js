@@ -119,7 +119,6 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		var matchContainsWordRegex = '';
 
 		if(chatFilterByWordsArr[k].looseMatch){
-			console.log("looseMatch");
 			matchContainsWordRegex = chatFilterByWordsArr[k].inputText;
 		} else
 		{
