@@ -35,10 +35,13 @@ imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
-function roomSavedCallback (err) {
-	if(err && ( typeof attempts != 'undefined' && attempts < 2 ) ) {
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, [room, roomCount, ++attempts]));
+var roomCount = -1;
+
+function roomSavedCallback (room, roomCount, attempts, err) {
+	if(err && attempts < 2 ) {
+		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, roomCount, ++attempts));
 	}
+	room;
 	roomCount--;
 	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
 	if (roomCount == 0) process.exit(0);
@@ -52,14 +55,14 @@ function saveAndShutdown () {
 		return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
 	}.bind(this));
 	
-	var roomCount = rooms.length;
+	roomCount = rooms.length;
 
 	for (var k = 0; k < rooms.length; k++) {
 		var room = rooms[k];
 		var attempts = 1;
 
 		console.log("SAVING ROOM", room);
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, [room, roomCount, attempts]));
+		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, roomCount, attempts));
 	}
 
 	console.log("LETTING THE CLIENTS KNOW");
