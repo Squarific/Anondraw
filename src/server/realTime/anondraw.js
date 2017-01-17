@@ -40,13 +40,7 @@ function saveAndShutdown () {
 	var rooms = Object.keys(drawTogether.drawings);
 	
 	rooms.sort(function(roomNameA, roomNameB) {// sorts least to greatest 1, 5, 6, 10
-		if (protocol.getUserCount(roomNameA) < protocol.getUserCount(roomNameB)) {
-			return -1;// sort a to a lower index than b
-		}
-		if (protocol.getUserCount(roomNameA) > protocol.getUserCount(roomNameB)) {
-			return 1;// sort b to a lower index than a
-		}
-		return 0;// unchanged indexes
+		return protocol.getUserCount(roomNameA) -  protocol.getUserCount(roomNameB);
 	}.bind(this));
 	
 	var roomCount = rooms.length;
