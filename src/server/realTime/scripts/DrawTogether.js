@@ -1,7 +1,6 @@
 var CACHE_LENGTH = 4000; //How many drawingparts are held before being send to permanent
 var PARTS_PER_DRAWING = 10;
 var CACHE_IGNORE = 200; // How many drawings we ignore in the cache count
-var last_send_to_img_server = new Date();
 var WAIT_BEFORE_SYNC_RETRY = 20000;
 
 function DrawTogether (background) {
@@ -36,7 +35,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	// then we will sync the drawings with the background server
 	if ( ( this.drawings[room].currentParts > CACHE_LENGTH || this.drawings[room].ignoreCache ) &&
 	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].ignoreCache ) &&
-		( new Date() - last_send_to_img_server > WAIT_BEFORE_SYNC_RETRY ) &&
+		( new Date() - (this.drawings[room].last_send_to_img_server || 0) > WAIT_BEFORE_SYNC_RETRY ) &&
 	    !this.drawings[room].sending &&
 	    !room.indexOf("game_") == 0 &&
 	    !room.indexOf("private_game_") == 0) {
@@ -52,7 +51,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		else console.log("No finalize handler");
 
 		this.background.sendDrawings(room, this.drawings[room].slice(0, this.drawings[room].sendLength), function (err) {
-			last_send_to_img_server = new Date();
+			this.drawings[room].last_send_to_img_server = new Date();
 			if (err) {
 				this.drawings[room].sending = false;
 				this.drawings[room].ignoreCache = true;
