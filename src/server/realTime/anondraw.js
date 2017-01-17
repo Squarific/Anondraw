@@ -37,11 +37,10 @@ var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndS
 
 var roomCount = -1;
 
-function roomSavedCallback (room, roomCount, attempts, err) {
+function roomSavedCallback (room, attempts, err) {
 	if(err && attempts < 2 ) {
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, roomCount, ++attempts));
+		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
 	}
-	room;
 	roomCount--;
 	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
 	if (roomCount == 0) process.exit(0);
@@ -62,7 +61,7 @@ function saveAndShutdown () {
 		var attempts = 1;
 
 		console.log("SAVING ROOM", room);
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, roomCount, attempts));
+		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, attempts));
 	}
 
 	console.log("LETTING THE CLIENTS KNOW");
