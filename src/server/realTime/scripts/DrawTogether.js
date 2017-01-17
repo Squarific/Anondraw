@@ -1,6 +1,7 @@
 var CACHE_LENGTH = 4000; //How many drawingparts are held before being send to permanent
 var PARTS_PER_DRAWING = 10;
 var CACHE_IGNORE = 200; // How many drawings we ignore in the cache count
+var LAST_SEND_TO_IMG_SERVER = new Date();
 
 function DrawTogether (background) {
 	this.drawings = {};
@@ -28,12 +29,13 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
-
+	
 	// If we have enough drawings and they are long enough
 	// and if we are not yet sending anything and this is not a gameroom
 	// then we will sync the drawings with the background server
 	if ( ( this.drawings[room].currentParts > CACHE_LENGTH || this.drawings[room].forceSend ) &&
 	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].forceSend ) &&
+		( new Date() - LAST_SEND_TO_IMG_SERVER < 20000 ) &&
 	    !this.drawings[room].sending &&
 	    !room.indexOf("game_") == 0 &&
 	    !room.indexOf("private_game_") == 0) {
@@ -49,6 +51,14 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		else console.log("No finalize handler");
 
 		this.background.sendDrawings(room, this.drawings[room].slice(0, this.drawings[room].sendLength), function (err) {
+			LAST_SEND_TO_IMG_SERVER = new Date();
+			if (err) {
+				this.drawings[room].sending = false;
+				this.drawings[room].forceSend = true;
+				console.log("[SENDDRAWING][ERROR] ", err);
+				return;
+			}
+			
 			this.drawings[room].splice(0, this.drawings[room].sendLength);
 
 			// Reset the amount of parts, we recount instead of
@@ -61,10 +71,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 				console.log("Room " + room + " synced.");
 			this.drawings[room].sending = false;
 			this.drawings[room].forceSend = false;
-			if (err) {
-				console.log("[SENDDRAWING][ERROR] ", err);
-				return;
-			}
+			
 		}.bind(this));
 	}
 
