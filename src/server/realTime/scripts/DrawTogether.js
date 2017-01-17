@@ -35,7 +35,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	// then we will sync the drawings with the background server
 	if ( ( this.drawings[room].currentParts > CACHE_LENGTH || this.drawings[room].forceSend ) &&
 	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].forceSend ) &&
-		( new Date() - LAST_SEND_TO_IMG_SERVER < 20000 ) &&
+		( new Date() - LAST_SEND_TO_IMG_SERVER > 20000 ) &&
 	    !this.drawings[room].sending &&
 	    !room.indexOf("game_") == 0 &&
 	    !room.indexOf("private_game_") == 0) {
