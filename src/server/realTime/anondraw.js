@@ -37,7 +37,7 @@ var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndS
 
 function roomSavedCallback (err) {
 	if(err && ( typeof attempts != 'undefined' && attempts < 2 ) ) {
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, roomCount, ++attempts));
 	}
 	roomCount--;
 	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
@@ -59,7 +59,7 @@ function saveAndShutdown () {
 		var attempts = 1;
 
 		console.log("SAVING ROOM", room);
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, attempts));
+		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, roomCount, attempts));
 	}
 
 	console.log("LETTING THE CLIENTS KNOW");
