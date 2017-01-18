@@ -1,6 +1,7 @@
 var CACHE_LENGTH = 4000; //How many drawingparts are held before being send to permanent
 var PARTS_PER_DRAWING = 10;
 var CACHE_IGNORE = 200; // How many drawings we ignore in the cache count
+var WAIT_BEFORE_SYNC_RETRY = 20000;
 
 function DrawTogether (background) {
 	this.drawings = {};
@@ -12,7 +13,7 @@ DrawTogether.prototype.forceSend = function forceSend (callback){
 	var message = "Rooms ";
 	for( var room in this.drawings ) {
 		if(!this.drawings[room].sending){
-			this.drawings[room].forceSend = true;
+			this.drawings[room].ignoreCache = true;
 			message += room + " ";
 		}
 
@@ -28,12 +29,13 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 
 	// If it is a path, add how many points there are, otherwise add the value for drawings
 	this.drawings[room].currentParts += drawing.points ? drawing.points.length : PARTS_PER_DRAWING;
-
+	
 	// If we have enough drawings and they are long enough
 	// and if we are not yet sending anything and this is not a gameroom
 	// then we will sync the drawings with the background server
-	if ( ( this.drawings[room].currentParts > CACHE_LENGTH || this.drawings[room].forceSend ) &&
-	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].forceSend ) &&
+	if ( ( this.drawings[room].currentParts > CACHE_LENGTH || this.drawings[room].ignoreCache ) &&
+	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].ignoreCache ) &&
+		( new Date() - (this.drawings[room].last_send_to_img_server || 0) > WAIT_BEFORE_SYNC_RETRY ) &&
 	    !this.drawings[room].sending &&
 	    !room.indexOf("game_") == 0 &&
 	    !room.indexOf("private_game_") == 0) {
@@ -41,7 +43,7 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
 
-		var cacheIgnore = (this.drawings[room].forceSend) ? 0 : CACHE_IGNORE; // ignore cache on forcesync
+		var cacheIgnore = (this.drawings[room].ignoreCache) ? 0 : CACHE_IGNORE; // ignore cache on forcesync
 		
 		this.drawings[room].sendLength = this.drawings[room].length - cacheIgnore; 
 
@@ -49,22 +51,27 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 		else console.log("No finalize handler");
 
 		this.background.sendDrawings(room, this.drawings[room].slice(0, this.drawings[room].sendLength), function (err) {
+			this.drawings[room].last_send_to_img_server = new Date();
+			if (err) {
+				this.drawings[room].sending = false;
+				this.drawings[room].ignoreCache = true;
+				console.log("[SENDDRAWING][ERROR] ", err);
+				return;
+			}
+			
 			this.drawings[room].splice(0, this.drawings[room].sendLength);
 
 			// Reset the amount of parts, we recount instead of
 			// subtracting what we send to ensure it never goes out of sync
 			this.drawings[room].currentParts = this.countParts(this.drawings[room], cacheIgnore);
 			
-			if(this.drawings[room].forceSend)
+			if(this.drawings[room].ignoreCache)
 				console.log("Room " + room + " force synced.");
 			else
 				console.log("Room " + room + " synced.");
 			this.drawings[room].sending = false;
-			this.drawings[room].forceSend = false;
-			if (err) {
-				console.log("[SENDDRAWING][ERROR] ", err);
-				return;
-			}
+			this.drawings[room].ignoreCache = false;
+			
 		}.bind(this));
 	}
 
