@@ -38,7 +38,7 @@ var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndS
 var roomCount = -1;
 
 function roomSavedCallback (room, attempts, err) {
-	if(err && attempts < 2 ) {
+	if(err) {
 		console.log("ROOM ERROR:", room, err);
 		if(attempts < 2){
 			background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
