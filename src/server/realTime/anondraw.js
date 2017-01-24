@@ -42,8 +42,8 @@ function roomSavedCallback (room, attempts, err) {
 		console.log("ROOM SHUTDOWN ERROR:", room, err);
 		if(attempts < 2){
 			background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+			return;
 		}
-		return;
 	}
 	roomCount--;
 	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
