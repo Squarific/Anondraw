@@ -39,7 +39,10 @@ var roomCount = -1;
 
 function roomSavedCallback (room, attempts, err) {
 	if(err && attempts < 2 ) {
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+		console.log("ROOM ERROR:", room, err);
+		if(attempts < 2){
+			background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+		}
 		return;
 	}
 	roomCount--;
