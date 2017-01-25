@@ -115,7 +115,7 @@ DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 10;
+DrawTogether.prototype.CLIENT_VERSION = 11;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -789,7 +789,7 @@ DrawTogether.prototype.changeName = function changeName (name) {
 
 DrawTogether.prototype.changeNameDelayed = function () {
 	clearTimeout(this.changeNameTimeout);
-	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 750);
+	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 1650);
 };
 
 DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
@@ -2127,8 +2127,7 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 		
 		if(!this.paint.publicdrawings[i].points) {
 			if(this.paint.publicdrawings[i].type === 'line') {
-				if (
-					( this.paint.publicdrawings[i].x >= minX
+				if (( this.paint.publicdrawings[i].x >= minX
 					&& this.paint.publicdrawings[i].x <= maxX
 					&& this.paint.publicdrawings[i].y >= minY
 					&& this.paint.publicdrawings[i].y <= maxY )
@@ -2154,13 +2153,41 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 						}
 					}
 				continue;
+			} 
+			else if(this.paint.publicdrawings[i].type === 'text') {
+				if (( this.paint.publicdrawings[i].x >= minX
+					&& this.paint.publicdrawings[i].x <= maxX
+					&& this.paint.publicdrawings[i].y >= minY
+					&& this.paint.publicdrawings[i].y <= maxY )
+					|| 
+					( this.paint.publicdrawings[i].x1 >= minX
+					&& this.paint.publicdrawings[i].x1 <= maxX
+					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size >= minY
+					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size <= maxY )) {
+						var player = this.playerFromId(socketid);
+							peopleWhoDrewInTheAreaHash[socketid] = true;
+							peopleWhoDrewInTheAreaHash.length++;
+							if(player){
+								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+							}
+							else{
+								this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+									if (result.error) {
+										this.chat.addMessage("Inspect tool", "Error: " + result.error);
+										return;
+									}
+									this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+								}.bind(this));
+							}
+				}
+				continue;
 			}
 			
 		}
 		
 		
 
-		var pointsamt = this.paint.publicdrawings[i].points.length;
+		var pointsamt = this.paint.publicdrawings[i].points.length || 0;
 		
 		//var checkEveryX = Math.round(pointsamt / 5);
 
@@ -4020,17 +4047,18 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("Making animations got easier!"));
+	title.appendChild(document.createTextNode("Performance: chunk unloading"));
 	
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("You can now see the previous frame transparently above the current frame when making animations. Simply select all the frames, say how many frames there are and click show."));
+	p.appendChild(document.createTextNode("There is now a maximum amount of chunks that can be loaded to increase performance and combat out of memory errors. We also fixed a bug causing unloaded chunks to never load again."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Recent new features:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["See the previous frames in animations (Select tool -> show frames)",
+	var features = ["Maximum amount of loaded chunks for performance",
+					"See the previous frames in animations (Select tool -> show frames)",
 					"Grid creating tool (Select tool or advanced options)",
 					"Export videos/gifs (Select tool -> Export video)",
 	                "Referral program (earn more rep) (Account -> Referral)",
@@ -4142,6 +4170,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "How do I chat?",
 		answer: "There is a chat to the right or if you are on mobile you can click on the chat button."
+	}, {
+		question: "Can I make animations?",
+		answer: 'Yes you can, for more info on how making these animations work, you can watch <a href="https://www.youtube.com/watch?v=wZ47oOPqNAQ">this video</a>'
 	}, {
 		question: "How big is the canvas?",
 		answer: "The interactive canvas has an infinite size. You could move as far away from the center as you'd like."

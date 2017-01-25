@@ -1,3 +1,4 @@
+Error.stackTraceLimit = Infinity;
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 var http = require("http");
@@ -34,20 +35,37 @@ imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
+var roomCount = -1;
+
+function roomSavedCallback (room, attempts, err) {
+	if(err) {
+		console.log("ROOM SHUTDOWN ERROR:", room, err);
+		if(attempts < 2){
+			background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+			return;
+		}
+	}
+	roomCount--;
+	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
+	if (roomCount == 0) process.exit(0);
+}
+
 function saveAndShutdown () {
 	console.log("SAVING AND SHUTTING DOWN");
 	var rooms = Object.keys(drawTogether.drawings);
-	var roomCount = rooms.length;
+	
+	rooms.sort(function(roomNameA, roomNameB) {// sorts least to greatest 1, 5, 6, 10
+		return protocol.getUserCount(roomNameA) - protocol.getUserCount(roomNameB);
+	}.bind(this));
+	
+	roomCount = rooms.length;
 
 	for (var k = 0; k < rooms.length; k++) {
 		var room = rooms[k];
+		var attempts = 1;
 
 		console.log("SAVING ROOM", room);
-		background.sendDrawings(room, drawTogether.drawings[room], function (room) {
-			roomCount--;
-			console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
-			if (roomCount == 0) process.exit(0);
-		}.bind(this, room));
+		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, attempts));
 	}
 
 	console.log("LETTING THE CLIENTS KNOW");
