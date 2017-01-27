@@ -4126,7 +4126,7 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 	title.appendChild(document.createTextNode("Ban times"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("If someone blatently griefs, feel free to ban them for over a week."));
+	p.appendChild(document.createTextNode("If someone blatantly griefs, feel free to ban them for over a week."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("If someone is spamming or being annoying, a 5 minute timeout should suffice."));
