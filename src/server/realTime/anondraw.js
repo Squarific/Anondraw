@@ -35,9 +35,15 @@ imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
-function roomSavedCallback (err) {
-	if(err && ( typeof attempts != 'undefined' && attempts < 2 ) ) {
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+var roomCount = -1;
+
+function roomSavedCallback (room, attempts, err) {
+	if(err) {
+		console.log("ROOM SHUTDOWN ERROR:", room, err);
+		if(attempts < 2){
+			background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+			return;
+		}
 	}
 	roomCount--;
 	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
@@ -49,10 +55,10 @@ function saveAndShutdown () {
 	var rooms = Object.keys(drawTogether.drawings);
 	
 	rooms.sort(function(roomNameA, roomNameB) {// sorts least to greatest 1, 5, 6, 10
-		return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
+		return protocol.getUserCount(roomNameA) - protocol.getUserCount(roomNameB);
 	}.bind(this));
 	
-	var roomCount = rooms.length;
+	roomCount = rooms.length;
 
 	for (var k = 0; k < rooms.length; k++) {
 		var room = rooms[k];
