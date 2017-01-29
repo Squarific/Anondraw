@@ -78,6 +78,10 @@ function saveAndShutdown () {
 		return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
 	}.bind(this));
 	
+	for (var k = 0; k < rooms.length; k++) {
+		console.log("room " rooms[k], "Has " +  protocol.getUserCount(rooms[k]) + "people");
+	}
+	
 	var attempts = 0;
 	var index = rooms.length - 1;
 	
