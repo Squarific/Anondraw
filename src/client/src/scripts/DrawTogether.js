@@ -1185,7 +1185,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	}
 
 	if (player.memberlevel == 1) {
-		icons += "🎄";
+		icons += "❤";
 		nameText.className += " premium";
 	}
 
@@ -1241,7 +1241,9 @@ DrawTogether.prototype.createChat = function createChat () {
 		disable: "left",
 		minPosition: -275,
 		maxPosition: 0,
-		slideIntent: 40
+		slideIntent: 40,
+		minDragDistance: 30,
+		tapToClose: false
 	});
 };
 
@@ -2488,7 +2490,9 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 		disable: "left",
 		minPosition: -275,
 		maxPosition: 0,
-		slideIntent: 40
+		slideIntent: 40,
+		minDragDistance: 30,
+		tapToClose: false
 	});
 };
 
@@ -4126,7 +4130,7 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 	title.appendChild(document.createTextNode("Ban times"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("If someone blatently griefs, feel free to ban them for over a week."));
+	p.appendChild(document.createTextNode("If someone blatantly griefs, feel free to ban them for over a week."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("If someone is spamming or being annoying, a 5 minute timeout should suffice."));
