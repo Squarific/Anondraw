@@ -36,27 +36,28 @@ var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
 function roomSavedCallbackSync(rooms, attempts, err) {
+	attempts = attempts || 0;
 	var index = rooms.length - 1;
 	if( index < 0 ) {
 		process.exit(0);
 		return;
 	}
-	var currentRoomName = rooms[index];
+	var currentRoomName = rooms.pop();
 	
 	if(err) {
-		console.log("ROOM SHUTDOWN ERROR:", rooms[index], err);
+		console.log("ROOM SHUTDOWN ERROR:", currentRoomName, err);
 		if(attempts <= 3){
 			setTimeout(function(){ 
-				background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, ++attempts));
+				background.sendDrawings(currentRoomName, drawTogether.drawings[currentRoomName], roomSavedCallbackSync.bind(this, rooms, ++attempts));
 			}.bind(this), 3000 * attempts);
 			
 			return;
 		}
 	}
-	rooms.pop();
+	
 	index = rooms.length - 1;
-	if(err)
-		console.log("ROOM", currentRoomName, "HAS NOT BEEN SAVED", rooms.length, "ROOMS TO GO");
+	
+	console.log("ROOM", currentRoomName, "HAS", (err) ? "NOT" : "", "BEEN SAVED", rooms.length, "ROOMS TO GO");
 	else
 		console.log("ROOM", currentRoomName, "HAS BEEN SAVED", rooms.length, "ROOMS TO GO");	
 	
@@ -65,8 +66,8 @@ function roomSavedCallbackSync(rooms, attempts, err) {
 		return;
 	}
 	
-	console.log("SAVING ROOM", rooms[index]);
-	background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, 0));
+	console.log("SAVING ROOM", currentRoomName);
+	background.sendDrawings(currentRoomName, drawTogether.drawings[currentRoomName], roomSavedCallbackSync.bind(this, rooms, 0));
 	
 }
 
@@ -77,12 +78,8 @@ function saveAndShutdown () {
 	rooms.sort(function(roomNameA, roomNameB) {// sorts  greatest to least 10, 5, 4, 1
 		return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
 	}.bind(this));
-	
-	var attempts = 0;
-	var index = rooms.length - 1;
-	
-	if (index >= 0) 
-		background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, attempts));
+		
+	roomSavedCallbackSync(rooms);
 
 	console.log("LETTING THE CLIENTS KNOW");
 	io.emit("chatmessage", {
