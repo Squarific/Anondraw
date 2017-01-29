@@ -36,7 +36,6 @@ var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
 function roomSavedCallbackSync(rooms, attempts, err) {
-	attempts = attempts || 0;
 	if (rooms.length === 0) {
 		process.exit(0);
 		return;
@@ -71,11 +70,15 @@ function saveAndShutdown () {
 	console.log("SAVING AND SHUTTING DOWN");
 	var rooms = Object.keys(drawTogether.drawings);
 	
-	rooms.sort(function(roomNameA, roomNameB) {// sorts  greatest to least 10, 5, 4, 1
-		return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
-	}.bind(this));
+	if(rooms.length > 0){
+		rooms.sort(function(roomNameA, roomNameB) {// sorts  greatest to least 10, 5, 4, 1
+			return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
+		}.bind(this));
 		
-	roomSavedCallbackSync(rooms);
+		var lastRoom = rooms[rooms.length - 1];
+		background.sendDrawings(lastRoom, drawTogether.drawings[lastRoom], roomSavedCallbackSync.bind(this, rooms, 0));
+
+	}
 
 	console.log("LETTING THE CLIENTS KNOW");
 	io.emit("chatmessage", {
