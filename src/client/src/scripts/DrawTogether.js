@@ -1241,7 +1241,8 @@ DrawTogether.prototype.createChat = function createChat () {
 		disable: "left",
 		minPosition: -275,
 		maxPosition: 0,
-		slideIntent: 40
+		slideIntent: 40,
+		minDragDistance: 30
 	});
 };
 
