@@ -36,15 +36,12 @@ var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
 function roomSavedCallbackSync(rooms, attempts, err) {
-	if (rooms.length === 0) {
-		process.exit(0);
-		return;
-	}
 	var currentRoomName = rooms.pop();
 	
 	if(err) {
 		console.log("ROOM SHUTDOWN ERROR:", currentRoomName, err);
 		if(attempts <= 3){
+			rooms.push(currentRoomName);
 			setTimeout(function(){ 
 				background.sendDrawings(currentRoomName, drawTogether.drawings[currentRoomName], roomSavedCallbackSync.bind(this, rooms, ++attempts));
 			}.bind(this), 3000 * attempts);
