@@ -37,8 +37,7 @@ var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndS
 
 function roomSavedCallbackSync(rooms, attempts, err) {
 	attempts = attempts || 0;
-	var index = rooms.length - 1;
-	if( index < 0 ) {
+	if (rooms.length === 0) {
 		process.exit(0);
 		return;
 	}
@@ -55,11 +54,7 @@ function roomSavedCallbackSync(rooms, attempts, err) {
 		}
 	}
 	
-	index = rooms.length - 1;
-	
 	console.log("ROOM", currentRoomName, "HAS", (err) ? "NOT" : "", "BEEN SAVED", rooms.length, "ROOMS TO GO");
-	else
-		console.log("ROOM", currentRoomName, "HAS BEEN SAVED", rooms.length, "ROOMS TO GO");	
 	
 	if (rooms.length === 0) {
 		process.exit(0);
