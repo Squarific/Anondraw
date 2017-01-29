@@ -2490,7 +2490,9 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 		disable: "left",
 		minPosition: -275,
 		maxPosition: 0,
-		slideIntent: 40
+		slideIntent: 40,
+		minDragDistance: 30,
+		tapToClose: false
 	});
 };
 
