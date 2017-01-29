@@ -35,19 +35,22 @@ imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
-var roomCount = -1;
-
-function roomSavedCallback (room, attempts, err) {
+function roomSavedCallbackSync(rooms, index, attempts, err) {
 	if(err) {
-		console.log("ROOM SHUTDOWN ERROR:", room, err);
+		console.log("ROOM SHUTDOWN ERROR:", rooms[index], err);
 		if(attempts < 2){
-			background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+			background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, index, ++attempts));
 			return;
 		}
 	}
-	roomCount--;
-	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
-	if (roomCount == 0) process.exit(0);
+	
+	console.log("ROOM", rooms[index], "HAS BEEN SAVED", rooms.length - index, "ROOMS TO GO");
+	if(index + 1 >= rooms.length)
+		return;
+	
+	console.log("SAVING ROOM", rooms[index]);
+	background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, ++index, ++attempts));
+	
 }
 
 function saveAndShutdown () {
@@ -58,15 +61,10 @@ function saveAndShutdown () {
 		return protocol.getUserCount(roomNameA) - protocol.getUserCount(roomNameB);
 	}.bind(this));
 	
-	roomCount = rooms.length;
-
-	for (var k = 0; k < rooms.length; k++) {
-		var room = rooms[k];
-		var attempts = 1;
-
-		console.log("SAVING ROOM", room);
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, attempts));
-	}
+	var index = 0
+	var attempts = 0;
+	
+	roomSavedCallbackSync(rooms, index, attempts);
 
 	console.log("LETTING THE CLIENTS KNOW");
 	io.emit("chatmessage", {
