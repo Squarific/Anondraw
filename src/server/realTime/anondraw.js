@@ -45,8 +45,11 @@ function roomSavedCallbackSync(rooms, attempts, err) {
 	
 	if(err) {
 		console.log("ROOM SHUTDOWN ERROR:", rooms[index], err);
-		if(attempts < 2){
-			background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, ++attempts));
+		if(attempts <= 3){
+			setTimeout(function(){ 
+				background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, ++attempts));
+			}.bind(this), 3000 * attempts);
+			
 			return;
 		}
 	}
