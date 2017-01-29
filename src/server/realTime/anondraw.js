@@ -46,7 +46,7 @@ function roomSavedCallbackSync(rooms, index, attempts, err) {
 	index = index + 1;
 	var roomsLeft = rooms.length - index;
 	
-	console.log("ROOM", rooms[index], "HAS BEEN SAVED", roomsLeft, "ROOMS TO GO");
+	console.log("ROOM", rooms[index - 1], "HAS BEEN SAVED", roomsLeft, "ROOMS TO GO");
 	
 	if(roomsLeft <= 0)
 		process.exit(0);
