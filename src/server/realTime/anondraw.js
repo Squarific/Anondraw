@@ -35,26 +35,34 @@ imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
-function roomSavedCallbackSync(rooms, index, attempts, err) {
+function roomSavedCallbackSync(rooms, attempts, err) {
+	var index = rooms.length - 1;
+	if( index < 0 ) {
+		process.exit(0);
+		return;
+	}
+	var currentRoomName = rooms[index];
+	
 	if(err) {
 		console.log("ROOM SHUTDOWN ERROR:", rooms[index], err);
 		if(attempts < 2){
-			background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, index, ++attempts));
+			background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, ++attempts));
 			return;
 		}
 	}
-	index = index + 1;
-	var roomsLeft = rooms.length - index;
+	rooms.pop();
+	if(err)
+		console.log("ROOM", currentRoomName, "HAS NOT BEEN SAVED", rooms.length, "ROOMS TO GO");
+	else
+		console.log("ROOM", currentRoomName, "HAS BEEN SAVED", rooms.length, "ROOMS TO GO");	
 	
-	console.log("ROOM", rooms[index - 1], "HAS BEEN SAVED", roomsLeft, "ROOMS TO GO");
-	
-	if(roomsLeft <= 0){
+	if (rooms.length === 0) {
 		process.exit(0);
 		return;
 	}
 	
 	console.log("SAVING ROOM", rooms[index]);
-	background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, index, ++attempts));
+	background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, 0));
 	
 }
 
@@ -62,14 +70,12 @@ function saveAndShutdown () {
 	console.log("SAVING AND SHUTTING DOWN");
 	var rooms = Object.keys(drawTogether.drawings);
 	
-	rooms.sort(function(roomNameA, roomNameB) {// sorts least to greatest 1, 5, 6, 10
-		return protocol.getUserCount(roomNameA) - protocol.getUserCount(roomNameB);
+	rooms.sort(function(roomNameA, roomNameB) {// sorts  greatest to least 10, 5, 4, 1
+		return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
 	}.bind(this));
 	
-	var index = 0
 	var attempts = 0;
-	
-	roomSavedCallbackSync(rooms, index, attempts);
+	roomSavedCallbackSync(rooms, attempts);
 
 	console.log("LETTING THE CLIENTS KNOW");
 	io.emit("chatmessage", {
@@ -83,11 +89,6 @@ function saveAndShutdown () {
 	});
 	
 	server.close();
-
-	// If there were no rooms, just shutdown now
-	if (rooms.length === 0) {
-		process.exit(0);
-	}
 }
 
 // Shut down, send drawings and stop all connections
