@@ -79,7 +79,10 @@ function saveAndShutdown () {
 	}.bind(this));
 	
 	var attempts = 0;
-	roomSavedCallbackSync(rooms, attempts);
+	var index = rooms.length - 1;
+	
+	if (index >= 0) 
+		background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, attempts));
 
 	console.log("LETTING THE CLIENTS KNOW");
 	io.emit("chatmessage", {
@@ -93,6 +96,11 @@ function saveAndShutdown () {
 	});
 	
 	server.close();
+	
+	// If there were no rooms, just shutdown now
+	if (rooms.length === 0) {
+		process.exit(0);
+	}
 }
 
 // Shut down, send drawings and stop all connections
