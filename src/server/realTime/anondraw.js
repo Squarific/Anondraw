@@ -51,6 +51,7 @@ function roomSavedCallbackSync(rooms, attempts, err) {
 		}
 	}
 	rooms.pop();
+	index = rooms.length - 1;
 	if(err)
 		console.log("ROOM", currentRoomName, "HAS NOT BEEN SAVED", rooms.length, "ROOMS TO GO");
 	else
