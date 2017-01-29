@@ -341,6 +341,7 @@ Protocol.prototype.sendDrawing = function sendDrawing (room, socketid, drawing) 
 };
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
+	if (!this.io.nsps['/'].adapter.rooms[room]) return 0;
 	return Object.keys(this.io.nsps['/'].adapter.rooms[room].sockets || {}).length;
 };
 
