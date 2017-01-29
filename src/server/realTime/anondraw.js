@@ -60,9 +60,10 @@ function roomSavedCallbackSync(rooms, attempts, err) {
 		process.exit(0);
 		return;
 	}
+	var nextRoomName = rooms[rooms.length - 1];
 	
-	console.log("SAVING ROOM", currentRoomName);
-	background.sendDrawings(currentRoomName, drawTogether.drawings[currentRoomName], roomSavedCallbackSync.bind(this, rooms, 0));
+	console.log("SAVING ROOM", nextRoomName);
+	background.sendDrawings(nextRoomName, drawTogether.drawings[nextRoomName], roomSavedCallbackSync.bind(this, rooms, 0));
 	
 }
 
