@@ -43,14 +43,17 @@ function roomSavedCallbackSync(rooms, index, attempts, err) {
 			return;
 		}
 	}
+	index = index + 1;
+	var roomsLeft = rooms.length - index;
 	
-	console.log("ROOM", rooms[index], "HAS BEEN SAVED", rooms.length - (index + 1), "ROOMS TO GO");
-	if(index + 1 >= rooms.length)
+	console.log("ROOM", rooms[index], "HAS BEEN SAVED", roomsLeft, "ROOMS TO GO");
+	
+	if(roomsLeft <= 0)
 		process.exit(0);
 		return;
 	
 	console.log("SAVING ROOM", rooms[index]);
-	background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, ++index, ++attempts));
+	background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, index, ++attempts));
 	
 }
 
