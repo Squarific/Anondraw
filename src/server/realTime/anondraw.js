@@ -48,9 +48,10 @@ function roomSavedCallbackSync(rooms, index, attempts, err) {
 	
 	console.log("ROOM", rooms[index - 1], "HAS BEEN SAVED", roomsLeft, "ROOMS TO GO");
 	
-	if(roomsLeft <= 0)
+	if(roomsLeft <= 0){
 		process.exit(0);
 		return;
+	}
 	
 	console.log("SAVING ROOM", rooms[index]);
 	background.sendDrawings(rooms[index], drawTogether.drawings[rooms[index]], roomSavedCallbackSync.bind(this, rooms, index, ++attempts));
