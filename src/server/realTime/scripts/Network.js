@@ -463,7 +463,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.name = names[Math.floor(Math.random() * names.length)] + " " + names[Math.floor(Math.random() * names.length)];
 		socket.emit("initname", socket.name);
 
-		console.log("[CONNECTION] " + socket.ip);
+		console.log("[CONNECTION] " + socket.ip + " id: " + socket.id);
 
 		socket.on("isMyOldIpBanned", function (oldIp, callback) {
 			if(oldIp === socket.ip){ 
