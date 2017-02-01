@@ -44,8 +44,3 @@ input.paint-texttool {
 	background: white;
 	padding: .3em;
 }
-
-.control-integer-input {
-	-webkit-appearance: none;
-	margin:0;
-}
