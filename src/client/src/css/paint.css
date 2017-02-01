@@ -44,3 +44,7 @@ input.paint-texttool {
 	background: white;
 	padding: .3em;
 }
+
+.control-integer-input {
+	width: inherit !important;
+}
