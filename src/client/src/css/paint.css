@@ -60,7 +60,9 @@ input.paint-texttool {
 .control-integer-output {
 	display: inline-block;
 	position: absolute;
-	left: 43%;
+	left: 42%;
+	width: 38px;
+	text-align: center;
 	color: #456762;
 	pointer-events: none;
 }
