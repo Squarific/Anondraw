@@ -61,8 +61,7 @@ input.paint-texttool {
 	display: inline-block;
 	position: absolute;
 	left: 43%;
-	padding-top: .1em;
-	color: black;
+	color: #456762;
 	pointer-events: none;
 }
 
