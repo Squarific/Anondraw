@@ -714,12 +714,6 @@ input.paint-texttool {
       width:9em;
     }
 
-	.control-integer-input {
-	width: inherit !important;
-	}
-	.control-integer {
-		width: inherit !important;
-	}
 .control-button {
   display: inline-block;
   padding: 0 .5em;
