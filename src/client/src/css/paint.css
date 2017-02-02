@@ -72,6 +72,7 @@ input.paint-texttool {
 .control-integer-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 10px;
+  width: 10px;
   border-radius: 0px;
   background: #999999;
   cursor: pointer;
@@ -80,6 +81,7 @@ input.paint-texttool {
 
 .control-integer-input::-moz-range-thumb {
   height: 10px;
+  width: 10px;
   border: none;
   border-radius: 0px;
   background: #999999;
@@ -88,6 +90,7 @@ input.paint-texttool {
 
 .control-integer-input::-ms-thumb {
   height: 10px;
+  width: 10px;
   border-radius: 0px;
   background: #999999;
   cursor: pointer;
