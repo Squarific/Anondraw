@@ -48,7 +48,7 @@ var PERMISSIONS = {
 	CHANGE_PERMISSIONS: 4
 };
 
-var MAX_DISTANCE_BETWEEN_PATH_POINTS = 50;
+var MAX_DISTANCE_BETWEEN_PATH_POINTS = 1000;
 
 function deepCopyWithoutFunctions (target, alreadyDone) {
 	var newObject = {};
