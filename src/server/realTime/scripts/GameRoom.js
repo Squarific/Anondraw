@@ -62,6 +62,7 @@ GameRoom.prototype.chatmessage = function chatmessage (socket, message) {
 	if (socket == this.currentPlayer) return;
 
 	if (!message || typeof message.toLowerCase !== "function") return;
+	if (!this.currentWord || typeof this.currentWord.toLowerCase !== "function") return;
 
 	if (message.toLowerCase().indexOf(this.currentWord.toLowerCase()) !== -1) {
 		// Word has been guessed, get a new word and assign next player
