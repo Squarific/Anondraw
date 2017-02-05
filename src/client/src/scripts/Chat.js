@@ -326,7 +326,7 @@ Chat.prototype.createEmote = function createEmote (name, url) {
 	img.onload = function() {
 		
 		img.onload = null;
-		if (max_scroll - this.messageDom.getBoundingClientRect().height * 2 <= old_scroll ) 
+		if (max_scroll - img.parentNode.getBoundingClientRect().height * 2 <= old_scroll ) 
 			this.scrollChat();
 	}.bind(this);
 
