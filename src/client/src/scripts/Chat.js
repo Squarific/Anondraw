@@ -322,9 +322,11 @@ Chat.prototype.createEmote = function createEmote (name, url) {
 
 	img.className = "drawtogether-emote";
 	img.onload = function() {
+		var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+		var old_scroll = Math.ceil(this.messagesDom.scrollTop);
 		img.onload = null;
+		if (max_scroll - messageDom.getBoundingClientRect().height * 2 <= old_scroll ) 
 		this.scrollChat();
-		console.log("loaded image");
 	}.bind(this);
 
 	return img;
