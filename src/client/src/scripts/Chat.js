@@ -325,7 +325,7 @@ Chat.prototype.createEmote = function createEmote (name, url) {
 		img.onload = null;
 		this.scrollChat();
 		console.log("loaded image");
-	};
+	}.bind(this);
 
 	return img;
 };
