@@ -48,6 +48,8 @@ var PERMISSIONS = {
 	CHANGE_PERMISSIONS: 4
 };
 
+var MAX_DISTANCE_BETWEEN_PATH_POINTS = 1000;
+
 function deepCopyWithoutFunctions (target, alreadyDone) {
 	var newObject = {};
 	if (!alreadyDone) alreadyDone = [];
@@ -341,7 +343,8 @@ Protocol.prototype.sendDrawing = function sendDrawing (room, socketid, drawing) 
 };
 
 Protocol.prototype.getUserCount = function getUserCount (room) {
-	return Object.keys(this.io.nsps['/'].adapter.rooms[room] || {}).length;
+	if (!this.io.nsps['/'].adapter.rooms[room]) return 0;
+	return Object.keys(this.io.nsps['/'].adapter.rooms[room].sockets || {}).length;
 };
 
 Protocol.prototype.informClient = function informClient (socket, message, extraPayload) {
@@ -463,7 +466,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.name = names[Math.floor(Math.random() * names.length)] + " " + names[Math.floor(Math.random() * names.length)];
 		socket.emit("initname", socket.name);
 
-		console.log("[CONNECTION] " + socket.ip);
+		console.log("[CONNECTION] " + socket.ip + " id: " + socket.id);
 
 		socket.on("isMyOldIpBanned", function (oldIp, callback) {
 			if(oldIp === socket.ip){ 
@@ -960,6 +963,12 @@ Protocol.prototype.bindIO = function bindIO () {
 
 				socket.ink -= usage;
 			}
+			
+			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * (socket.reputation || 1)) {
+				protocol.informClient(socket, "Something went wrong. (#PPTF)");
+				callback();
+				return;
+			}
 
 			socket.lastPathPoint = point;
 			callback(protocol.drawTogether.addPathPoint(socket.room, socket.id, point));
@@ -1386,6 +1395,15 @@ Protocol.prototype.bindIO = function bindIO () {
 			socket.broadcast.to(socket.room).emit("ep", socket.id);
 		});
 	}.bind(this));
+};
+
+Protocol.prototype.utils = {
+	distance: function (x1, y1, x2, y2) {
+		// Returns the distance between (x1, y1) and (x2, y2)
+		var xDis = x1 - x2,
+		    yDis = y1 - y2;
+		return Math.sqrt(xDis * xDis + yDis * yDis);
+	}
 };
 
 module.exports = Protocol;

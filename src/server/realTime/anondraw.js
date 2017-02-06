@@ -35,37 +35,46 @@ imgur.setCredentials(config.service.realtime.imgur.user, config.service.realtime
 var Protocol = require("./scripts/Network.js");
 var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndShutdown);
 
-var roomCount = -1;
-
-function roomSavedCallback (room, attempts, err) {
+function roomSavedCallbackSync(rooms, attempts, err) {
+	var currentRoomName = rooms.pop();
+	
 	if(err) {
-		console.log("ROOM SHUTDOWN ERROR:", room, err);
-		if(attempts < 2){
-			background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, ++attempts));
+		console.log("ROOM SHUTDOWN ERROR:", currentRoomName, err);
+		if(attempts <= 3){
+			rooms.push(currentRoomName);
+			setTimeout(function(){ 
+				background.sendDrawings(currentRoomName, drawTogether.drawings[currentRoomName], roomSavedCallbackSync.bind(this, rooms, ++attempts));
+			}.bind(this), 3000 * attempts);
+			
 			return;
 		}
 	}
-	roomCount--;
-	console.log("ROOM", room, "HAS BEEN SAVED", roomCount, "ROOMS TO GO");
-	if (roomCount == 0) process.exit(0);
+	
+	console.log("ROOM", currentRoomName, "HAS", (err) ? "NOT" : "", "BEEN SAVED", rooms.length, "ROOMS TO GO");
+	
+	if (rooms.length === 0) {
+		process.exit(0);
+		return;
+	}
+	var nextRoomName = rooms[rooms.length - 1];
+	
+	console.log("SAVING ROOM", nextRoomName);
+	background.sendDrawings(nextRoomName, drawTogether.drawings[nextRoomName], roomSavedCallbackSync.bind(this, rooms, 0));
+	
 }
 
 function saveAndShutdown () {
 	console.log("SAVING AND SHUTTING DOWN");
 	var rooms = Object.keys(drawTogether.drawings);
 	
-	rooms.sort(function(roomNameA, roomNameB) {// sorts least to greatest 1, 5, 6, 10
-		return protocol.getUserCount(roomNameA) - protocol.getUserCount(roomNameB);
-	}.bind(this));
-	
-	roomCount = rooms.length;
+	if(rooms.length > 0){
+		rooms.sort(function(roomNameA, roomNameB) {// sorts  greatest to least 10, 5, 4, 1
+			return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
+		}.bind(this));
+		
+		var lastRoom = rooms[rooms.length - 1];
+		background.sendDrawings(lastRoom, drawTogether.drawings[lastRoom], roomSavedCallbackSync.bind(this, rooms, 0));
 
-	for (var k = 0; k < rooms.length; k++) {
-		var room = rooms[k];
-		var attempts = 1;
-
-		console.log("SAVING ROOM", room);
-		background.sendDrawings(room, drawTogether.drawings[room], roomSavedCallback.bind(this, room, attempts));
 	}
 
 	console.log("LETTING THE CLIENTS KNOW");
@@ -80,7 +89,7 @@ function saveAndShutdown () {
 	});
 	
 	server.close();
-
+	
 	// If there were no rooms, just shutdown now
 	if (rooms.length === 0) {
 		process.exit(0);
