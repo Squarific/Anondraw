@@ -187,6 +187,10 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 	}
 };
 
+Chat.prototype.scrollChat = function scrollChat() {
+	this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+};
+
 Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
 	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
@@ -197,7 +201,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 	messageDom.appendChild(elem);
 
 	if (max_scroll - elem.getBoundingClientRect().height <= old_scroll) { // is scrolled all the way down minus elem height
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+		this.scrollChat();
 	}
 };
 
@@ -266,7 +270,7 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 	}
 
 	if (max_scroll - messageDom.getBoundingClientRect().height * 2 <= old_scroll ) {//scrolled all the way down minus new message * 2 to account for margins
-		this.messagesDom.scrollTop = this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height;
+		this.scrollChat();
 	}
 };
 
@@ -317,6 +321,14 @@ Chat.prototype.createEmote = function createEmote (name, url) {
 	img.src = url;
 
 	img.className = "drawtogether-emote";
+	var max_scroll = Math.floor(this.messagesDom.scrollHeight - this.messagesDom.getBoundingClientRect().height);
+	var old_scroll = Math.ceil(this.messagesDom.scrollTop);
+	img.onload = function() {
+		
+		img.onload = null;
+		if (max_scroll - img.parentNode.getBoundingClientRect().height * 2 <= old_scroll ) 
+			this.scrollChat();
+	}.bind(this);
 
 	return img;
 };
