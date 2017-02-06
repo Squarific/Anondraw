@@ -964,7 +964,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 			
-			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS) {
+			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * (socket.reputation || 1)) {
 				protocol.informClient(socket, "Something went wrong. (#PPTF)");
 				callback();
 				return;
