@@ -2596,6 +2596,7 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 	for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 		var option = document.createElement("option");
 		option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
+		option.textContent = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 		regionListBox2.add(option);
 	};
 
@@ -2649,6 +2650,7 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 		for(var i = 0; i < clonedPlayerList.length; i++) {
 			var option = document.createElement("option");
 			option.label = clonedPlayerList[i].name;
+			option.textContent = clonedPlayerList[i].name;
 			regionListBox1.add(option);
 		};
 
