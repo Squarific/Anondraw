@@ -2568,6 +2568,7 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 				for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 					var option = document.createElement("option");
 					option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
+					option.textContent = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 					regionListBox2.add(option);
 				};
 
@@ -2657,6 +2658,7 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 		for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 			var option = document.createElement("option");
 			option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
+			option.textContent = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 			regionListBox2.add(option);
 		};
 		var rep = (this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
