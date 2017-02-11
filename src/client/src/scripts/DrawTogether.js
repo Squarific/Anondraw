@@ -1944,13 +1944,15 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	
 	}.bind(this));
 	var permissionCounter = regionEditPermissionsButton.appendChild(document.createElement("div"));
-	permissionCounter.className = "reg-editpermissions-button-counter";
-	if(permissions.length > 0)
+	
+	if(permissions.length > 0){
+		permissionCounter.className = "reg-editpermissions-button-counter";
 		permissionCounter.textContent = permissions.length.toString();
-	else if(this.myRegions[index].minRepAllowed < 300)
+	}
+	else if(this.myRegions[index].minRepAllowed < 300){
+		permissionCounter.className = "reg-editpermissions-button-counter";
 		permissionCounter.textContent = this.myRegions[index].minRepAllowed + 'R+';
-	else
-		permissionCounter.textContent = '';
+	}
 
 	var permissionsButtonImage = regionEditPermissionsButton.appendChild(document.createElement("img"));
 	permissionsButtonImage.src = "images/icons/permission.png";
