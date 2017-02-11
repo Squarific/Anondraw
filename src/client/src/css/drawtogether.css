@@ -1112,7 +1112,8 @@ input.paint-texttool {
 
 .reg-editpermissions-button-counter {
 	position: absolute;
-	font-size: 7px;
+	font-size: 0.54em;
+	min-width: 1.5em;
 	bottom: 3px;
 	background: #1c434c;
 	padding: 2px;
@@ -1120,7 +1121,7 @@ input.paint-texttool {
 	padding-top: 0px;
 	border-style: solid;
 	border-width: 1px;
-	margin-left: 12px;
+	margin-left: 10px;
 	pointer-events: none;
 }
 
