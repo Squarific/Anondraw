@@ -2081,14 +2081,13 @@ DrawTogether.prototype.getFavorites = function () {
 	this.account.getFavorites(drawTogether.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
-
 			return;
 		}
 		// sort favorites alphabetically
 		this.favList = result.sort(function sortMyFavorites(a, b){ 
 			if(a.name.toUpperCase() < b.name.toUpperCase()) return 1;
-            if(a.name.toUpperCase() > b.name.toUpperCase()) return -1;
-            return 0;
+			if(a.name.toUpperCase() > b.name.toUpperCase()) return -1;
+			return 0;
 		});
 	}.bind(this));
 };
