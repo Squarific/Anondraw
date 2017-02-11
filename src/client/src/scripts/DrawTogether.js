@@ -1943,12 +1943,14 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		}
 	
 	}.bind(this));
-	if(permissions.length > 0){
-		var permissionCounter = regionEditPermissionsButton.appendChild(document.createElement("div"));
-		permissionCounter.className = "reg-editpermissions-button-counter";
+	var permissionCounter = regionEditPermissionsButton.appendChild(document.createElement("div"));
+	permissionCounter.className = "reg-editpermissions-button-counter";
+	if(permissions.length > 0)
 		permissionCounter.textContent = permissions.length.toString();
-	}
-	
+	else if(this.myRegions[index].minRepAllowed < 300) {
+		permissionCounter.textContent = this.myRegions[index].minRepAllowed + 'R+';
+	else
+		permissionCounter.textContent = '';
 
 	var permissionsButtonImage = regionEditPermissionsButton.appendChild(document.createElement("img"));
 	permissionsButtonImage.src = "images/icons/permission.png";
