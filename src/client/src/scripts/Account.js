@@ -10,7 +10,7 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
 };
 
-Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, callback) {
+Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, room, callback) {
 	this.request("/setcoordfavorite", {
 		uKey: this.uKey,
 		room: room,
@@ -22,7 +22,7 @@ Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, callback)
 	}, this.parseData.bind(this, callback));
 };
 
-Account.prototype.removeFavorite = function (x, y, name, callback) {
+Account.prototype.removeFavorite = function (x, y, name, room, callback) {
 	this.request("/removefavorite", {
 		uKey: this.uKey,
 		room: room,
@@ -32,7 +32,7 @@ Account.prototype.removeFavorite = function (x, y, name, callback) {
 	}, this.parseData.bind(this, callback));
 };
 
-Account.prototype.renameFavorite = function (x, y, name, callback) {
+Account.prototype.renameFavorite = function (x, y, name, room, callback) {
 	this.request("/renamefavorite", {
 		uKey: this.uKey,
 		room: room,
@@ -42,7 +42,7 @@ Account.prototype.renameFavorite = function (x, y, name, callback) {
 	}, this.parseData.bind(this, callback));
 };
 
-Account.prototype.createFavorite = function (x, y, name, callback) {
+Account.prototype.createFavorite = function (x, y, name, room, callback) {
 	this.request("/createfavorite", {
 		uKey: this.uKey,
 		room: room,
