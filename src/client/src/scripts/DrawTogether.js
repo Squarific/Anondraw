@@ -1947,7 +1947,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	
 	if(permissions.length > 0){
 		permissionCounter.className = "reg-editpermissions-button-counter";
-		permissionCounter.textContent = permissions.length.toString() + '\uD83D\uDC64'; //👤 BUST IN SILHOUETTE symbol
+		permissionCounter.textContent = '\uD83D\uDC64' + permissions.length.toString(); //👤 BUST IN SILHOUETTE symbol
 	}
 	else if(this.myRegions[index].minRepAllowed < 300){
 		permissionCounter.className = "reg-editpermissions-button-counter";
