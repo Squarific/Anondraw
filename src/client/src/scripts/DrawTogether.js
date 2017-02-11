@@ -1943,6 +1943,12 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		}
 	
 	}.bind(this));
+	if(permissions.length > 0){
+		var permissionCounter = regionEditPermissionsButton.appendChild(document.createElement("div"));
+		permissionCounter.className = "reg-editpermissions-button-counter";
+		permissionCounter.textContent = permissions.length.toString();
+	}
+	
 
 	var permissionsButtonImage = regionEditPermissionsButton.appendChild(document.createElement("img"));
 	permissionsButtonImage.src = "images/icons/permission.png";
