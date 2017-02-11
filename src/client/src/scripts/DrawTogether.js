@@ -2083,12 +2083,16 @@ DrawTogether.prototype.getFavorites = function () {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
 			return;
 		}
-		// sort favorites alphabetically
-		this.favList = result.sort(function sortMyFavorites(a, b){ 
-			if(a.name.toUpperCase() < b.name.toUpperCase()) return 1;
-			if(a.name.toUpperCase() > b.name.toUpperCase()) return -1;
-			return 0;
-		});
+		if(result){
+			// sort favorites alphabetically
+			this.favList = result.sort(function sortMyFavorites(a, b){ 
+				if(a.name.toUpperCase() < b.name.toUpperCase()) return 1;
+				if(a.name.toUpperCase() > b.name.toUpperCase()) return -1;
+				return 0;
+			});
+		}
+		else
+			this.favList = [];
 	}.bind(this));
 };
 
