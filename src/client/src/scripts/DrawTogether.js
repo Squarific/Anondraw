@@ -1947,7 +1947,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	permissionCounter.className = "reg-editpermissions-button-counter";
 	if(permissions.length > 0)
 		permissionCounter.textContent = permissions.length.toString();
-	else if(this.myRegions[index].minRepAllowed < 300) {
+	else if(this.myRegions[index].minRepAllowed < 300)
 		permissionCounter.textContent = this.myRegions[index].minRepAllowed + 'R+';
 	else
 		permissionCounter.textContent = '';
