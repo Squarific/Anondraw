@@ -2081,11 +2081,18 @@ DrawTogether.prototype.getFavorites = function () {
 	this.account.getFavorites(drawTogether.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
-
 			return;
 		}
-
-		this.favList = result;
+		if(result){
+			// sort favorites alphabetically
+			this.favList = result.sort(function sortMyFavorites(a, b){ 
+				if(a.name.toUpperCase() < b.name.toUpperCase()) return 1;
+				if(a.name.toUpperCase() > b.name.toUpperCase()) return -1;
+				return 0;
+			});
+		}
+		else
+			this.favList = [];
 	}.bind(this));
 };
 
@@ -2300,8 +2307,11 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 		if (err) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
 		}
-		if(result)
-			this.myRegions = result;
+		if(result){
+			this.myRegions = result.sort(function sortMyRegionsById(a, b){
+				return b.regionId - a.regionId;
+			});
+		}
 		else
 			this.myRegions = [];
 
