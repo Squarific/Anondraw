@@ -980,7 +980,7 @@ input.paint-texttool {
   bottom:5em;
 	display: none;
   max-height: 75%;
-  overflow-y:auto;
+  overflow-y:scroll;
 }
 
 .fav-button-confirmation { 
