@@ -19,3 +19,40 @@ FROM accountbans
     JOIN users AS banner ON banned_by = banner.id
 GROUP BY to_id, startdate
 ORDER BY startdate;
+
+-- Most unique rep given:
+SELECT COUNT(*), last_username
+FROM (
+    SELECT *
+    FROM reputations
+    GROUP BY from_id, to_id
+) AS innertable
+    JOIN users ON users.id = innertable.from_id
+GROUP BY from_id
+ORDER BY COUNT(*) DESC
+LIMIT 20;
+
+-- Most rep gotten:
+SELECT COUNT(*), last_username
+FROM reputations
+    JOIN users ON users.id = reputations.to_id
+GROUP BY to_id
+ORDER BY COUNT(*) DESC
+LIMIT 100;
+
+-- Most unique rep gotten:
+SELECT COUNT(*), last_username
+FROM (SELECT * FROM reputations GROUP BY from_id, to_id) AS innertable
+    JOIN users ON users.id = innertable.to_id
+GROUP BY to_id ORDER BY COUNT(*) DESC
+LIMIT 20;
+
+-- Rep per count
+SELECT repcount, COUNT(*)
+FROM (
+    SELECT COUNT(*) as repcount
+    FROM reputations JOIN users ON users.id = reputations.to_id
+    GROUP BY to_id ORDER BY COUNT(*) DESC
+) as groupedrep
+GROUP BY repcount;
+ 
