@@ -2300,8 +2300,12 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 		if (err) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
 		}
-		if(result)
+		if(result){
+			result.sort(function sortMyRegionsById(a, b){
+				return a.regionId - b.regionId;
+			});
 			this.myRegions = result;
+		}
 		else
 			this.myRegions = [];
 
