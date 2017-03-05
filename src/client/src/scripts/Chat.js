@@ -206,15 +206,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
-	var foundCoordinates = message.match(this.coordinateRegex);
-	if(foundCoordinates)
-	for (var i = 0; i < foundCoordinates.length; i++) {
-		if(foundCoordinates[i].indexOf('http') != -1)
-			continue;
-		var original = foundCoordinates[i];
-		foundCoordinates[i].trim();
-		message.replace(original, foundCoordinates[i]);
-	}
+
 	//message = message.replace(this.coordinateRegex, " $2,$3 "); // removes spaces from between coordinates so it can be split below
 	var messages = message.split(" ");
 	var temp;
