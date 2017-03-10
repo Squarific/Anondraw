@@ -3808,6 +3808,25 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
+DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGridPreview() {
+	var squares = generationSettings.getRangeValue("Squares");
+	var gutter = generationSettings.getRangeValue("Gutter");
+	
+	var totalWidth = Math.abs(to[0] - from[0]);
+	var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
+	var sqheight = Math.abs(to[1] - from[1]);
+	
+	var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+	
+	this.paint.previewGrid(
+			leftTop,
+			squares,
+			sqwidth,
+			sqheight,
+			gutter
+		);
+};
+
 DrawTogether.prototype.createGridInSelection = function createGridInSelection (from, to) {
 	var generationSettings = QuickSettings.create(50, 50, "Grid settings");
 	generationSettings.addControl({
@@ -3816,7 +3835,8 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		min: 1,
 		max: 50,
 		value: 5,
-		step: 1
+		step: 1,
+		callback: updateGeneratedGridPreview.bind(this)
 	});
 	
 	generationSettings.addControl({
@@ -3825,7 +3845,8 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		min: 0,
 		max: 200,
 		value: 0,
-		step: 1
+		step: 1,
+		callback: updateGeneratedGridPreview.bind(this)
 	});
 	
 	generationSettings.addButton("Generate", function () {
