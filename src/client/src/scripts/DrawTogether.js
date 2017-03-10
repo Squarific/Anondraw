@@ -3836,7 +3836,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		max: 50,
 		value: 5,
 		step: 1,
-		callback: this.updateGeneratedGridPreview.bind(this)
+		callback: this.updateGeneratedGridPreview
 	});
 	
 	generationSettings.addControl({
@@ -3846,7 +3846,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		max: 200,
 		value: 0,
 		step: 1,
-		callback: this.updateGeneratedGridPreview.bind(this)
+		callback: this.updateGeneratedGridPreview
 	});
 	
 	generationSettings.addButton("Generate", function () {
