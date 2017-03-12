@@ -3881,7 +3881,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		clearTimeout(this.updateGridPreviewTimeout);
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
 		this.updateGeneratedGridPreview("Clear Grid Preview");
-	}.bind(this);
+	}.bind(this));
 	
 	var loop = function loop(){
 		this.updateGeneratedGridPreview(generationSettings, from, to);
