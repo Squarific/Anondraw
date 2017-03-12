@@ -3887,7 +3887,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		this.updateGeneratedGridPreview(generationSettings, from, to);
 		this.updateGridPreviewTimeout = setTimeout(loop.bind(this), 1000);
 	};	
-	loop();
+	loop.apply(this);
 };
 
 DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
