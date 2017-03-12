@@ -3808,7 +3808,21 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
+DrawTogether.prototype.updateGeneratedGridPreviewLoop = function updateGeneratedGridPreviewLoop(oldColor, oldSize, generationSettings, from, to) {
+	if(oldColor != this.paint.current_color && oldSize != this.paint.current_size){
+		oldColor = this.paint.current_color;
+		oldSize = this.paint.current_size;
+		this.updateGeneratedGridPreview(generationSettings, from, to);
+	}
+	this.updateGridPreviewTimeout = setTimeout(updateGeneratedGridPreviewLoop, 2000, oldColor, oldSize, generationSettings, from, to);
+	
+};
+
 DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGridPreview(generationSettings, from, to) {
+	if(generationSettings == "Clear Grid Preview"){
+		this.paint.previewGrid([0,0],0,0,0,0);
+		return;
+	}
 	var squares = generationSettings.getRangeValue("Squares");
 	var gutter = generationSettings.getRangeValue("Gutter");
 	
@@ -3874,8 +3888,16 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 	}.bind(this));
 	
 	generationSettings.addButton("Cancel", function () {
+		clearTimeout(this.updateGridPreviewTimeout);
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
+		updateGeneratedGridPreview("Clear Grid Preview");
 	});
+	
+	this.updateGridPreviewTimeout = setTimeout(function(){
+		var oldColor = this.paint.current_color;
+		var oldSize = this.paint.current_size;
+		updateGeneratedGridPreviewLoop(oldColor, oldSize, generationSettings, from, to);
+	}.bind, 1000);
 };
 
 DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
