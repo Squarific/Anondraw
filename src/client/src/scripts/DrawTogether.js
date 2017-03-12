@@ -2389,6 +2389,7 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 	var settings = QuickSettings.create(0, 0, "Specific settings");
 	settings.addText("Name", "Your title");
 	settings.addRange("Frames", 1, 200, 10, 1);
+	settings.addRange("Gutter", 0, 200, 0, 1);
 	exportVideoWindow.appendChild(settings._panel);
 	
 	var container = exportVideoWindow.appendChild(document.createElement("div"))
@@ -2422,6 +2423,7 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 		capturer.start();
 		
 		var frames = settings.getRangeValue("Frames");
+		var gutter = settings.getRangeValue("Gutter");
 		
 		var frameWidth = Math.abs(to[0] - from[0]) / frames;
 		
@@ -2434,7 +2436,7 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 		
 		for (var k = 0; k < frames; k++) {
 			var tempFrom = [
-				start[0] + frameWidth * k,
+				start[0] + frameWidth * k * gutter,
 				start[1]
 			];
 			
