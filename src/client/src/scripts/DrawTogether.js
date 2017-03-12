@@ -3814,7 +3814,7 @@ DrawTogether.prototype.updateGeneratedGridPreviewLoop = function updateGenerated
 		oldSize = this.paint.current_size;
 		this.updateGeneratedGridPreview(generationSettings, from, to);
 	}
-	this.updateGridPreviewTimeout = setTimeout(this.updateGeneratedGridPreviewLoop, 2000, oldColor, oldSize, generationSettings, from, to);
+	this.updateGridPreviewTimeout = setTimeout(this.updateGeneratedGridPreviewLoop.bind(this), 2000, oldColor, oldSize, generationSettings, from, to);
 	
 };
 
