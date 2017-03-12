@@ -2425,7 +2425,7 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 		var frames = settings.getRangeValue("Frames");
 		var gutter = settings.getRangeValue("Gutter");
 		
-		var frameWidth = Math.abs(to[0] - from[0] - (frames * gutter)) / frames;
+		var frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
 		
 		var start = [
 			Math.min(from[0], to[0]),
