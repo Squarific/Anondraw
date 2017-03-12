@@ -2436,7 +2436,7 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 		
 		for (var k = 0; k < frames; k++) {
 			var tempFrom = [
-				start[0] + frameWidth * k * gutter,
+				start[0] + frameWidth * k + k * gutter,
 				start[1]
 			];
 			
