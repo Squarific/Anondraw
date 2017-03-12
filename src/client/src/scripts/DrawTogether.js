@@ -3808,16 +3808,6 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
-DrawTogether.prototype.updateGeneratedGridPreviewLoop = function updateGeneratedGridPreviewLoop(oldColor, oldSize, generationSettings, from, to) {
-	if(oldColor != this.paint.current_color || oldSize != this.paint.current_size){
-		oldColor = this.paint.current_color;
-		oldSize = this.paint.current_size;
-		this.updateGeneratedGridPreview(generationSettings, from, to);
-	}
-	this.updateGridPreviewTimeout = setTimeout(this.updateGeneratedGridPreviewLoop.bind(this), 2000, oldColor, oldSize, generationSettings, from, to);
-	
-};
-
 DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGridPreview(generationSettings, from, to) {
 	if(generationSettings == "Clear Grid Preview"){
 		this.paint.previewGrid([0,0],0,0,0,0);
@@ -3893,11 +3883,11 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		this.updateGeneratedGridPreview("Clear Grid Preview");
 	});
 	
-	this.updateGridPreviewTimeout = setTimeout(function(){
-		var oldColor = this.paint.current_color;
-		var oldSize = this.paint.current_size;
-		this.updateGeneratedGridPreviewLoop(oldColor, oldSize, generationSettings, from, to);
-	}.bind(this), 1000);
+	var loop = function loop(){
+		this.updateGeneratedGridPreview(generationSettings, from, to);
+		this.updateGridPreviewTimeout = setTimeout(loop.bind(this), 1000);
+	};	
+	loop();
 };
 
 DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
