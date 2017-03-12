@@ -3809,7 +3809,7 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 };
 
 DrawTogether.prototype.updateGeneratedGridPreviewLoop = function updateGeneratedGridPreviewLoop(oldColor, oldSize, generationSettings, from, to) {
-	if(oldColor != this.paint.current_color && oldSize != this.paint.current_size){
+	if(oldColor != this.paint.current_color || oldSize != this.paint.current_size){
 		oldColor = this.paint.current_color;
 		oldSize = this.paint.current_size;
 		this.updateGeneratedGridPreview(generationSettings, from, to);
