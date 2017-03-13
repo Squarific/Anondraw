@@ -2462,7 +2462,7 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 			var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
 			exportwindow.classList.add("exportwindow");
 			exportwindow.appendChild(img);
-		} );
+		}.bind(this) );
 		//capturer.save();
 		
 	}.bind(this));
