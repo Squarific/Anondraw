@@ -3880,7 +3880,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 			sqheight: sqheight,
 			gutter: gutter
 		})
-	});
+	}.bind(this));
 	
 	generationSettings.addButton("Generate", function () {
 		var squares = generationSettings.getRangeValue("Squares");
