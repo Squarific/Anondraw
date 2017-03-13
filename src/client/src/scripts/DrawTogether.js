@@ -14,7 +14,8 @@ function DrawTogether (container, settings, emotesHash) {
 	this.playerList = [];
 	this.moveQueue = [];
 	this.favList = [];
-	this.myRegions = []; // Specific to the user
+	this.myRegions = [];
+	this.myAnimations = [];
 	this.ink = 0;
 	this.previousInk = Infinity;
 
@@ -2453,7 +2454,16 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 		}
 
 		capturer.stop();
-		capturer.save();
+		capturer.save( function( blob ) {
+			var img = document.createElement("img");
+			img.src = URL.createObjectURL(blob);
+			img.alt = "Exported image";
+			
+			var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
+			exportwindow.classList.add("exportwindow");
+			exportwindow.appendChild(img);
+		} );
+		//capturer.save();
 		
 	}.bind(this));
 	
@@ -3853,6 +3863,23 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		value: 0,
 		step: 1,
 		callback: this.updateGeneratedGridPreview.bind(this, generationSettings, from, to)
+	});
+	generationSettings.addButton("Save for animation manager", function() {
+		var squares = generationSettings.getRangeValue("Squares");
+		var gutter = generationSettings.getRangeValue("Gutter");
+		
+		var totalWidth = Math.abs(to[0] - from[0]);
+		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
+		var sqheight = Math.abs(to[1] - from[1]);
+		
+		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+		this.myAnimations.push({
+			leftTop: leftTop,
+			squares: squares,
+			sqwidth: sqwidth,
+			sqheight: sqheight,
+			gutter: gutter
+		})
 	});
 	
 	generationSettings.addButton("Generate", function () {
