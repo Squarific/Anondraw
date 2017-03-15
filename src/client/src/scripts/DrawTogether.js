@@ -2384,13 +2384,13 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	exportwindow.appendChild(img);
 };
 
-DrawTogether.prototype.exportVideo = function (from, to) {
+DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter) {
 	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
 	
 	var settings = QuickSettings.create(0, 0, "Specific settings");
 	settings.addText("Name", "Your title");
-	settings.addRange("Frames", 1, 200, 10, 1);
-	settings.addRange("Gutter", 0, 200, 0, 1);
+	settings.addRange("Frames", 1, squares || 200, 10, 1);
+	settings.addRange("Gutter", 0, 200, gutter || 0, 1);
 	exportVideoWindow.appendChild(settings._panel);
 	
 	var container = exportVideoWindow.appendChild(document.createElement("div"))
@@ -2426,14 +2426,14 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 		var frames = settings.getRangeValue("Frames");
 		var gutter = settings.getRangeValue("Gutter");
 		
-		var frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
+		var frameWidth = sqwidth || Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
 		
-		var start = [
+		var start = leftTop || [
 			Math.min(from[0], to[0]),
 			Math.min(from[1], to[1])
 		];
-		
-		var endY = Math.max(from[1], to[1]);
+		// if leftTop exists endY is leftTop's y + the height of the square
+		var endY = leftTop && ( leftTop[1] + sqheight ) || Math.max(from[1], to[1]);
 		
 		for (var k = 0; k < frames; k++) {
 			var tempFrom = [
@@ -3879,7 +3879,8 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 			sqwidth: sqwidth,
 			sqheight: sqheight,
 			gutter: gutter
-		})
+		});
+		this.exportVideo(null, null, leftTop, squares, sqwidth, sqheight, gutter);
 	}.bind(this));
 	
 	generationSettings.addButton("Generate", function () {
