@@ -2384,6 +2384,72 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	exportwindow.appendChild(img);
 };
 
+DrawTogether.prototype.exportVideoRender = function (from, to, leftTop, squares, sqwidth, sqheight, gutter) {
+	var exportFuncs = {
+			boolean: "getBoolean",
+			range: "getRangeValue",
+			dropdown: "getDropDownValue"
+		};
+	
+	var captureSettings = {
+		name: settings.getText("Name"),
+		workersPath: ''
+	};
+	
+	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
+		var funcName = exportFuncs[this.defaultVideoExportSettings[k].type];
+		var value = this.videoExportSettings[funcName](this.defaultVideoExportSettings[k].title)
+		if (typeof value == "object") value = value.value;
+		captureSettings[this.defaultVideoExportSettings[k].title] = value;
+	}
+	
+	console.log("CaptureSettings:", captureSettings);
+	
+	var capturer = new CCapture(captureSettings);
+	capturer.start();
+	
+	var frames = settings.getRangeValue("Frames");
+	var gutter = settings.getRangeValue("Gutter");
+	
+	var frameWidth = sqwidth || Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
+	
+	var start = leftTop || [
+		Math.min(from[0], to[0]),
+		Math.min(from[1], to[1])
+	];
+	// if leftTop exists endY is leftTop's y + the height of the square
+	var endY = leftTop && ( leftTop[1] + sqheight ) || Math.max(from[1], to[1]);
+	
+	for (var k = 0; k < frames; k++) {
+		var tempFrom = [
+			start[0] + frameWidth * k + k * gutter,
+			start[1]
+		];
+		
+		var tempTo = [
+			tempFrom[0] + frameWidth,
+			endY
+		];
+		
+		if (captureSettings.verbose) {
+			console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
+		}
+		
+		capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
+	}
+
+	capturer.stop();
+	capturer.save( function( blob ) {
+		var img = document.createElement("img");
+		img.src = URL.createObjectURL(blob);
+		img.alt = "Exported image";
+		
+		var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
+		exportwindow.classList.add("exportwindow");
+		exportwindow.appendChild(img);
+	}.bind(this) );
+};
+
 DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter) {
 	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
 	
@@ -2400,71 +2466,7 @@ DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwid
 	renderButton.appendChild(document.createTextNode("Render"));
 	renderButton.className = "drawtogether-button";
 	renderButton.addEventListener("click", function () {
-		var exportFuncs = {
-			boolean: "getBoolean",
-			range: "getRangeValue",
-			dropdown: "getDropDownValue"
-		};
-		
-		var captureSettings = {
-			name: settings.getText("Name"),
-			workersPath: ''
-		};
-		
-		for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
-			var funcName = exportFuncs[this.defaultVideoExportSettings[k].type];
-			var value = this.videoExportSettings[funcName](this.defaultVideoExportSettings[k].title)
-			if (typeof value == "object") value = value.value;
-			captureSettings[this.defaultVideoExportSettings[k].title] = value;
-		}
-		
-		console.log("CaptureSettings:", captureSettings);
-		
-		var capturer = new CCapture(captureSettings);
-		capturer.start();
-		
-		var frames = settings.getRangeValue("Frames");
-		var gutter = settings.getRangeValue("Gutter");
-		
-		var frameWidth = sqwidth || Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
-		
-		var start = leftTop || [
-			Math.min(from[0], to[0]),
-			Math.min(from[1], to[1])
-		];
-		// if leftTop exists endY is leftTop's y + the height of the square
-		var endY = leftTop && ( leftTop[1] + sqheight ) || Math.max(from[1], to[1]);
-		
-		for (var k = 0; k < frames; k++) {
-			var tempFrom = [
-				start[0] + frameWidth * k + k * gutter,
-				start[1]
-			];
-			
-			var tempTo = [
-				tempFrom[0] + frameWidth,
-				endY
-			];
-			
-			if (captureSettings.verbose) {
-				console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
-			}
-			
-			capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
-		}
-
-		capturer.stop();
-		capturer.save( function( blob ) {
-			var img = document.createElement("img");
-			img.src = URL.createObjectURL(blob);
-			img.alt = "Exported image";
-			
-			var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
-			exportwindow.classList.add("exportwindow");
-			exportwindow.appendChild(img);
-		}.bind(this) );
-		//capturer.save();
-		
+		this.exportVideoRender(from, to, leftTop, squares, sqwidth, sqheight, gutter);		
 	}.bind(this));
 	
 	var settingsButton = container.appendChild(document.createElement("div"));
