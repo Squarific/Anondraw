@@ -2384,7 +2384,7 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	exportwindow.appendChild(img);
 };
 
-DrawTogether.prototype.exportVideoRender = function (from, to, leftTop, squares, sqwidth, sqheight, gutter) {
+DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter) {
 	var exportFuncs = {
 			boolean: "getBoolean",
 			range: "getRangeValue",
@@ -2392,7 +2392,7 @@ DrawTogether.prototype.exportVideoRender = function (from, to, leftTop, squares,
 		};
 	
 	var captureSettings = {
-		name: settings.getText("Name"),
+		name: fileName,
 		workersPath: ''
 	};
 	
@@ -2408,8 +2408,8 @@ DrawTogether.prototype.exportVideoRender = function (from, to, leftTop, squares,
 	var capturer = new CCapture(captureSettings);
 	capturer.start();
 	
-	var frames = settings.getRangeValue("Frames");
-	var gutter = settings.getRangeValue("Gutter");
+	var frames = squares;
+	var gutter = gutter || 0;
 	
 	var frameWidth = sqwidth || Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
 	
