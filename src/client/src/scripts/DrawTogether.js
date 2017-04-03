@@ -2385,6 +2385,23 @@ DrawTogether.prototype.exportImage = function (from, to) {
 };
 
 DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter, xOffset, yOffset) {
+	
+	var start = leftTop || [
+		Math.min(from[0], to[0]),
+		Math.min(from[1], to[1])
+	];
+	start[0] = Math.floor(start[0]);
+	start[1] = Math.floor(start[1]);
+	
+	var endY = 0;
+	if(leftTop)
+		endY = leftTop[1] + sqheight;
+	else
+		endY = Math.max(from[1], to[1]);
+	
+	endY[0] = Math.ceil(endY[0]);
+	endY[1] = Math.ceil(endY[1]);
+	
 	var exportFuncs = {
 			boolean: "getBoolean",
 			range: "getRangeValue",
@@ -2417,16 +2434,7 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	else
 		frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
 	
-	var start = leftTop || [
-		Math.min(from[0], to[0]),
-		Math.min(from[1], to[1])
-	];
 	
-	var endY = 0;
-	if(leftTop)
-		endY = leftTop[1] + sqheight;
-	else
-		endY =  Math.max(from[1], to[1]);
 	
 	for (var k = 0; k < frames; k++) {
 		var tempFrom = [
