@@ -2421,8 +2421,12 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 		Math.min(from[0], to[0]),
 		Math.min(from[1], to[1])
 	];
-	// if leftTop exists endY is leftTop's y + the height of the square
-	var endY = leftTop && ( leftTop[1] + sqheight ) || Math.max(from[1], to[1]);
+	
+	var endY = 0;
+	if(leftTop)
+		endY = leftTop[1] + sqheight;
+	else
+		endY =  Math.max(from[1], to[1]);
 	
 	for (var k = 0; k < frames; k++) {
 		var tempFrom = [
