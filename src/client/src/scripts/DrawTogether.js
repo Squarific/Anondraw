@@ -2458,6 +2458,27 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	}.bind(this) );
 };
 
+DrawTogether.prototype.renderMyAnimation = function (myAnimation) {
+	this.exportVideoRender(
+		myAnimation.name || '',
+		null, null,
+		myAnimation.leftTop,
+		myAnimation.squares,
+		myAnimation.sqwidth,
+		myAnimation.sqheight,
+		myAnimation.gutter );
+};
+
+DrawTogether.prototype.exportMyAnimation = function (myAnimation) {
+	this.exportVideo(
+		null, null,
+		myAnimation.leftTop,
+		myAnimation.squares,
+		myAnimation.sqwidth,
+		myAnimation.sqheight,
+		myAnimation.gutter );
+};
+
 DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter) {
 	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
 	
@@ -3884,6 +3905,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		
 		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
 		this.myAnimations.push({
+			name: null,
 			leftTop: leftTop,
 			squares: squares,
 			sqwidth: sqwidth,
