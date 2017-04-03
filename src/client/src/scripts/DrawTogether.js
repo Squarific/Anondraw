@@ -2474,7 +2474,7 @@ DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwid
 	renderButton.appendChild(document.createTextNode("Render"));
 	renderButton.className = "drawtogether-button";
 	renderButton.addEventListener("click", function () {
-		this.exportVideoRender(from, to, leftTop, squares, sqwidth, sqheight, gutter);		
+		this.exportVideoRender(settings.getText("Name"), from, to, leftTop, squares, sqwidth, sqheight, gutter);		
 	}.bind(this));
 	
 	var settingsButton = container.appendChild(document.createElement("div"));
