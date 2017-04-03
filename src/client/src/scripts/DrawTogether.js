@@ -2411,7 +2411,11 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	var frames = squares;
 	var gutter = gutter || 0;
 	
-	var frameWidth = sqwidth || Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
+	var frameWidth = 0;
+	if (sqwidth)
+		frameWidth = sqwidth
+	else
+		frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
 	
 	var start = leftTop || [
 		Math.min(from[0], to[0]),
