@@ -2434,11 +2434,11 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	else
 		frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
 	
-	
+	frameWidth = Math.floor(frameWidth);
 	
 	for (var k = 0; k < frames; k++) {
 		var tempFrom = [
-			start[0] + frameWidth * k + k * gutter + (xOffset && k !== 0 ? xOffset : 0) - k,
+			start[0] + frameWidth * k + k * gutter + (xOffset && k !== 0 ? xOffset : 0),
 			start[1] + (yOffset || 0)
 		];
 		
