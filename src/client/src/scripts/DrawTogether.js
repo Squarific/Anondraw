@@ -2384,7 +2384,7 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	exportwindow.appendChild(img);
 };
 
-DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter) {
+DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter, xOffset, yOffset) {
 	var exportFuncs = {
 			boolean: "getBoolean",
 			range: "getRangeValue",
@@ -2417,7 +2417,7 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	else
 		frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
 	
-	var start = leftTop || [
+	var start = [leftTop[0] + xOffset || 0, leftTop[1] + yOffset || 0] || [
 		Math.min(from[0], to[0]),
 		Math.min(from[1], to[1])
 	];
