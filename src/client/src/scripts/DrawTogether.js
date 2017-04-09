@@ -3867,7 +3867,7 @@ DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGrid
 	var squares = generationSettings.getRangeValue("Squares");
 	var gutter = generationSettings.getRangeValue("Gutter");
 	
-	var totalWidth = Math.abs(to[0] - from[0]);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0])/(squares))*squares;
 	var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 	var sqheight = Math.abs(to[1] - from[1]);
 	
