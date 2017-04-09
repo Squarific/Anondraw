@@ -59,14 +59,14 @@ function DrawTogether (container, settings, emotesHash) {
 	} else if (this.settings.mode == "join") {
 		if (this.settings.room.indexOf("private_") == 0) {
 			if (this.settings.room.indexOf("private_game_") == 0) {
-				ga("send", "event", "autojoin", "privategame");
+//				ga("send", "event", "autojoin", "privategame");
 			} else {
-				ga("send", "event", "autojoin", "private");
+//				ga("send", "event", "autojoin", "private");
 			}
 		} else if (this.settings.room.indexOf("game_")) {
-			ga("send", "event", "autojoin", "game");
+//			ga("send", "event", "autojoin", "game");
 		} else {
-			ga("send", "event", "autojoin", "public");
+//			ga("send", "event", "autojoin", "public");
 		}
 		this.changeRoom(this.settings.room,
 		                undefined,
@@ -561,8 +561,8 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		console.log("We have memberlevel ", level);
 
 		if (self.memberlevel > 0 && !localStorage.getItem("buyreported")) {
-			goog_report_buy();
-			ga("send", "event", "conversion", "buypremium");
+//			goog_report_buy();
+//			ga("send", "event", "conversion", "buypremium");
 			localStorage.setItem("buyreported", true);
 		}
 	});
@@ -712,7 +712,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 };
 
 DrawTogether.prototype.joinGame = function joinGame () {
-	ga("send", "event", "modeselector", "publicgame");
+//	ga("send", "event", "modeselector", "publicgame");
 	this.network.joinGame(this.controls.byName.name.input.value == "Uberlord", function (err, room, drawings) {
 		if (err && err.indexOf("Too many users") !== -1) {
 			this.chat.addMessage("Couldn't join gameroom, too many users.");
@@ -747,7 +747,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 };
 
 DrawTogether.prototype.createPrivateGame = function createPrivateGame () {
-	ga("send", "event", "modeselector", "newprivategame");
+//	ga("send", "event", "modeselector", "newprivategame");
 	this.changeRoom("private_game_" + Math.random().toString(36).substr(2, 5));
 };
 
@@ -894,17 +894,17 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
 	this.settingsWindow.style.display = "block";
-	ga("send", "event", "openwindow", "settings");
+//	ga("send", "event", "openwindow", "settings");
 };
 
 DrawTogether.prototype.openChatFilterWindow = function openChatFilterWindow () {
 	this.chatFilterOptions.style.display = "block";
-	ga("send", "event", "openwindow", "chatFilter");
+//	ga("send", "event", "openwindow", "chatFilter");
 };
 
 DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	this.shareWindow.style.display = "block";
-	ga("send", "event", "openwindow", "share");
+//	ga("send", "event", "openwindow", "share");
 
 	this.preview.width = this.shareWindow.offsetWidth * 0.9;
 	this.preview.height = this.preview.width * (this.paint.public.canvas.height / this.paint.public.canvas.width);
@@ -916,7 +916,7 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 
 DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 	this.roomWindow.style.display = "block";
-	ga("send", "event", "openwindow", "rooms");
+//	ga("send", "event", "openwindow", "rooms");
 
 	this.network.getRooms(function (err, rooms) {
 		while (this.publicRoomsContainer.firstChild)
@@ -938,7 +938,7 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 
 DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
 	this.accWindow.style.display = "block";
-	ga("send", "event", "openwindow", "account");
+//	ga("send", "event", "openwindow", "account");
 };
 
 DrawTogether.prototype.openModeSelector = function openModeSelector () {
@@ -1260,7 +1260,7 @@ DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
 		setTimeout(this.setLoadImage.bind(this, loadTime * 2), loadTime * 2);
 	}.bind(this);
 
-	loadImage.src = "images/loadingChunk.png?v=1";
+	loadImage.src = "images/loadingChunk.png";
 };
 
 DrawTogether.prototype.createDrawZone = function createDrawZone () {
@@ -3519,8 +3519,8 @@ DrawTogether.prototype.formRegister = function formRegister () {
 			return;
 		}
 
-		goog_report_register();
-		ga("send", "event", "conversion", "register");
+//		goog_report_register();
+//		ga("send", "event", "conversion", "register");
 		this.network.socket.emit("uKey", this.account.uKey);
 		this.createAccountWindow();
 		this.getFavorites();
@@ -3668,9 +3668,9 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	publicButton.innerHTML = '<img src="images/multi.png"/><br/>Draw with everyone';
 	publicButton.addEventListener("click", function () {
 		this.changeRoom("main");
-		ga("send", "event", "modeselector", "strangers");
+//		ga("send", "event", "modeselector", "strangers");
 		this.selectWindow.style.display = "";
-		goog_report_join();
+//		goog_report_join();
 	}.bind(this));
 
 	var privateButton = buttonContainer.appendChild(document.createElement("div"));
@@ -3679,9 +3679,9 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	privateButton.addEventListener("click", function () {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room
 		this.changeRoom(this.settings.room, undefined, 0, 0, true);
-		ga("send", "event", "modeselector", "private");
+//		ga("send", "event", "modeselector", "private");
 		this.selectWindow.style.display = "";
-		goog_report_join();
+//		goog_report_join();
 	}.bind(this));
 
 	/*var privateButton = buttonContainer.appendChild(document.createElement("div"));
@@ -3703,9 +3703,9 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 			else if (whom == "Join strangers") this.joinGame();
 			else if (whom == "Create private room") this.createPrivateGame();
 		}.bind(this));
-		ga("send", "event", "modeselector", "game");
+//		ga("send", "event", "modeselector", "game");
 		this.selectWindow.style.display = "";
-		goog_report_join();
+//		goog_report_join();
 	}.bind(this));
 
 	selectWindow.appendChild(this.createFAQDom());
@@ -3718,7 +3718,7 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	contactInfo.appendChild(document.createTextNode("Feedback/contact: info@anondraw.com"));
 	contactInfo.classList.add("contactinfo");
 
-	pw_load();
+//	pw_load();
 };
 
 DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings () {
@@ -3866,12 +3866,18 @@ DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGrid
 	}
 	var squares = generationSettings.getRangeValue("Squares");
 	var gutter = generationSettings.getRangeValue("Gutter");
-	
-	var totalWidth = Math.floor(Math.abs(to[0] - from[0])/(squares))*squares;
+
+	var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
+	if(gutter>maxgutter) gutter=maxgutter;
+	var guttertotal=gutter*(squares-1);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
+
+	var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+
 	var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 	var sqheight = Math.abs(to[1] - from[1]);
 	
-	var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+	var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
 	
 	this.paint.previewGrid(
 			leftTop,
@@ -3907,11 +3913,17 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		var squares = generationSettings.getRangeValue("Squares");
 		var gutter = generationSettings.getRangeValue("Gutter");
 		
-		var totalWidth = Math.floor(Math.abs(to[0] - from[0])/(squares))*squares;
+	var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
+	if(gutter>maxgutter) gutter=maxgutter;
+	var guttertotal=gutter*(squares-1);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
+
+	var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+
 		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 		var sqheight = Math.abs(to[1] - from[1]);
 		
-		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+		var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
 		this.myAnimations.push({
 			name: null,
 			leftTop: leftTop,
@@ -3927,11 +3939,18 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		var squares = generationSettings.getRangeValue("Squares");
 		var gutter = generationSettings.getRangeValue("Gutter");
 		
-		var totalWidth = Math.floor(Math.abs(to[0] - from[0])/(squares))*squares;
+
+	var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
+	if(gutter>maxgutter) gutter=maxgutter;
+	var guttertotal=gutter*(squares-1);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
+
+	var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+
 		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 		var sqheight = Math.abs(to[1] - from[1]);
 		
-		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+		var leftTop = leftMargin+ [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
 		
 		if (this.reputation >= 5 || (totalWidth > 1000 || sqwidth > 200)) {
 			console.log("Generating grid", squares, sqwidth, sqheight);
@@ -4112,14 +4131,14 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 		introJs()
 		.setOptions({ 'tooltipPosition': 'auto', 'showProgress': true })
 		.onchange(function () {
-			ga("send", "event", "tutorial", "next");
+//			ga("send", "event", "tutorial", "next");
 		})
 		.onexit(function () {
-			ga("send", "event", "tutorial", "exit");
+//			ga("send", "event", "tutorial", "exit");
 			this.openWelcomeWindow();
 		}.bind(this))
 		.oncomplete(function () {
-			ga("send", "event", "tutorial", "complete");
+///			ga("send", "event", "tutorial", "complete");
 			this.openWelcomeWindow();
 		}.bind(this))
 		.start();
