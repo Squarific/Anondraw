@@ -1,6 +1,6 @@
 var drawingTypes = ["line", "brush", "block"];
 var tinycolor = require("tinycolor2");
-var FIX_CANVAS_PIXEL_SIZE = 0.5;
+var FIX_CANVAS_PIXEL_SIZE = 0;
 
 function decodeDrawing (drawing) {
     drawing.color = tinycolor(drawing.color);
