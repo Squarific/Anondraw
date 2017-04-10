@@ -3950,7 +3950,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 		var sqheight = Math.abs(to[1] - from[1]);
 		
-		var leftTop = leftMargin+ [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
+		var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
 		
 		if (this.reputation >= 5 || (totalWidth > 1000 || sqwidth > 200)) {
 			console.log("Generating grid", squares, sqwidth, sqheight);
