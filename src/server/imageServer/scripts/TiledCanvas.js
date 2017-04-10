@@ -23,6 +23,7 @@ function TiledCanvas (canvas, settings) {
     this.settings = this.normalizeDefaults(settings, this.defaultSettings);
     this.contextQueue = [];
     this.context = this.createContext();
+	this.context.antialias = 'none';
 }
 
 TiledCanvas.prototype.defaultSettings = {
