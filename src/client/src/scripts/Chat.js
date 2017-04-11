@@ -124,11 +124,9 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		{
 			matchContainsWordRegex = this.strictMatch1 + chatFilterByWordsArr[k].inputText + this.strictMatch2;
 		}
-		var strRegExPattern = '\\b'+searchStr+'\\b'; 
+		
 		var messageContainsWord = new RegExp(matchContainsWordRegex, this.matchSearchMode).test(message);
-
-		//var messageContainsWord = (chatFilterByWordsArr[k].looseMatch) ? (message.toLowerCase().indexOf(chatFilterByWordsArr[k].inputText) !== -1) : (message.indexOf(chatFilterByWordsArr[k].inputText) !== -1)
-
+		
 		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
 			console.log(chatFilterByWordsArr[k].visibility);
 			var opacityfordom = chatFilterByWordsArr[k].visibility * 0.01;
@@ -206,15 +204,7 @@ Chat.prototype.addElementAsMessage = function addElementAsMessage (elem) {
 };
 
 Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) {
-	var foundCoordinates = message.match(this.coordinateRegex);
-	if(foundCoordinates)
-	for (var i = 0; i < foundCoordinates.length; i++) {
-		if(foundCoordinates[i].indexOf('http') != -1)
-			continue;
-		var original = foundCoordinates[i];
-		foundCoordinates[i].trim();
-		message.replace(original, foundCoordinates[i]);
-	}
+
 	//message = message.replace(this.coordinateRegex, " $2,$3 "); // removes spaces from between coordinates so it can be split below
 	var messages = message.split(" ");
 	var temp;
