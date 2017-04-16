@@ -2461,10 +2461,7 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 		if(captureSettings.format === "webm"){
 			var video = document.createElement("video");
 			video.autoplay = true;
-			var source = video.appendChild(document.createElement("source"));
-			source.src = URL.createObjectURL(blob);
-			source.type = "video/webm";
-			source.alt = "Exported image";
+			video.src = URL.createObjectURL(blob);
 			
 			exportwindow.classList.add("exportwindow");
 			exportwindow.appendChild(video);
