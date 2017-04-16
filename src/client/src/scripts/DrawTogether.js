@@ -2455,15 +2455,19 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	}
 
 	capturer.stop();
-	capturer.save( function( blob ) {
-		var img = document.createElement("img");
-		img.src = URL.createObjectURL(blob);
-		img.alt = "Exported image";
-		
-		var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
-		exportwindow.classList.add("exportwindow");
-		exportwindow.appendChild(img);
-	}.bind(this) );
+	if(captureSettings.format === "webm") 
+		capturer.save(); //directly save webm format
+	else
+		capturer.save( function( blob ) {
+			var exportwindow = this.gui.createWindow({ title: "Exported animation (right click to save)" });
+
+			var img = document.createElement("img");
+			img.src = URL.createObjectURL(blob);
+			img.alt = "Exported image";
+			
+			exportwindow.classList.add("exportwindow");
+			exportwindow.appendChild(img);
+		}.bind(this) );
 };
 
 DrawTogether.prototype.renderMyAnimation = function (myAnimation) {
