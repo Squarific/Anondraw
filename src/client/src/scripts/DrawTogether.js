@@ -2456,13 +2456,28 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 
 	capturer.stop();
 	capturer.save( function( blob ) {
-		var img = document.createElement("img");
-		img.src = URL.createObjectURL(blob);
-		img.alt = "Exported image";
+		var exportwindow = this.gui.createWindow({ title: "Exported animation (right click to save)" });
 		
-		var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
-		exportwindow.classList.add("exportwindow");
-		exportwindow.appendChild(img);
+		if(captureSettings.format === "webm"){
+			var video = document.createElement("video");
+			video.autoplay = true;
+			var source = video.appendChild(document.createElement("source"));
+			source.src = URL.createObjectURL(blob);
+			source.type = "video/webm";
+			source.alt = "Exported image";
+			
+			exportwindow.classList.add("exportwindow");
+			exportwindow.appendChild(video);
+		}
+		else
+		{
+			var img = document.createElement("img");
+			img.src = URL.createObjectURL(blob);
+			img.alt = "Exported image";
+			
+			exportwindow.classList.add("exportwindow");
+			exportwindow.appendChild(img);
+		}
 	}.bind(this) );
 };
 
