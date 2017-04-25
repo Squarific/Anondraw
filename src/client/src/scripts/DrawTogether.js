@@ -2806,7 +2806,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	
 	// addControl persistently remembers last state 
 	advancedOptions.addControl({
-        type: "boolean"
+        type: "boolean",
         title: "Blur on zoom",
         value: false,
 		callback: function (val) {
