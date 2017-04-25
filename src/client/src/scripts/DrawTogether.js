@@ -2813,12 +2813,15 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			this.paint.public.settings.blurOnZoom = val;
 			this.paint.background.settings.blurOnZoom = val;
 			this.paint.local.settings.blurOnZoom = val;
+			this.paint.public.relativeZoom(1);
+			this.paint.background.relativeZoom(1);
+			this.paint.local.relativeZoom(1);
 		}.bind(this)
     });
 	
 	advancedOptions.addControl({
         type: "range",
-        title: "Threshold for Zoom Level with Blur",
+        title: "The zoom-in level where it becomes pixelated",
         value: 3,
 		step: 1,
 		min: 1,
@@ -2827,6 +2830,9 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			this.paint.public.settings.zoomLevelOnBlur = val;
 			this.paint.background.settings.zoomLevelOnBlur = val;
 			this.paint.local.settings.zoomLevelOnBlur = val;
+			this.paint.public.relativeZoom(1);
+			this.paint.background.relativeZoom(1);
+			this.paint.local.relativeZoom(1);
 		}.bind(this)
     });
 
