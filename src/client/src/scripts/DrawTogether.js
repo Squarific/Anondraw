@@ -2803,6 +2803,32 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	advancedOptions.addBoolean("Flip vertical (k)", false, function (value) {
 		this.paint.setVerticalMirror(value);
 	}.bind(this));
+	
+	// addControl persistently remembers last state 
+	advancedOptions.addControl({
+        type: "boolean"
+        title: "Blur on zoom",
+        value: false,
+		callback: function (val) {
+			this.paint.public.blurOnZoom = val;
+			this.paint.background.blurOnZoom = val;
+			this.paint.local.blurOnZoom = val;
+		}.bind(this)
+    });
+	
+	advancedOptions.addControl({
+        type: "range"
+        title: "Threshold for Zoom Level with Blur",
+        value: 3,
+		step: 1,
+		min: 1,
+		max: 30,
+		callback: function (val) {
+			this.paint.public.zoomLevelOnBlur = val;
+			this.paint.background.zoomLevelOnBlur = val;
+			this.paint.local.zoomLevelOnBlur = val;
+		}.bind(this)
+    });
 
 	advancedOptions.addButton("Generate grid", function () {
 		this.openGenerateGridWindow();
