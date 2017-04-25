@@ -2804,20 +2804,33 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.setVerticalMirror(value);
 	}.bind(this));
 	
+	var blurOnZoomCallback = function blurOnZoomCallback (val) {
+		this.paint.public.settings.blurOnZoom = val;
+		this.paint.background.settings.blurOnZoom = val;
+		this.paint.local.settings.blurOnZoom = val;
+		this.paint.public.relativeZoom(1);
+		this.paint.background.relativeZoom(1);
+		this.paint.local.relativeZoom(1);
+	};
+	
 	// addControl persistently remembers last state 
 	advancedOptions.addControl({
         type: "boolean",
         title: "Blur on zoom",
         value: false,
-		callback: function (val) {
-			this.paint.public.settings.blurOnZoom = val;
-			this.paint.background.settings.blurOnZoom = val;
-			this.paint.local.settings.blurOnZoom = val;
-			this.paint.public.relativeZoom(1);
-			this.paint.background.relativeZoom(1);
-			this.paint.local.relativeZoom(1);
-		}.bind(this)
+		callback: blurOnZoomCallback.bind(this)
     });
+	
+	blurOnZoomCallback(this.advancedOptions.getBoolean("Blur on zoom"));	
+	
+	var zoomLevelCallback = function (val) {
+		this.paint.public.settings.zoomLevelToPixelate = val;
+		this.paint.background.settings.zoomLevelToPixelate = val;
+		this.paint.local.settings.zoomLevelToPixelate = val;
+		this.paint.public.relativeZoom(1);
+		this.paint.background.relativeZoom(1);
+		this.paint.local.relativeZoom(1);
+	};
 	
 	advancedOptions.addControl({
         type: "range",
@@ -2826,15 +2839,10 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		step: 1,
 		min: 1,
 		max: 30,
-		callback: function (val) {
-			this.paint.public.settings.zoomLevelToPixelate = val;
-			this.paint.background.settings.zoomLevelToPixelate = val;
-			this.paint.local.settings.zoomLevelToPixelate = val;
-			this.paint.public.relativeZoom(1);
-			this.paint.background.relativeZoom(1);
-			this.paint.local.relativeZoom(1);
-		}.bind(this)
+		callback: zoomLevelCallback.bind(this)
     });
+	
+	zoomLevelCallback(this.advancedOptions.getRangeValue("The zoom-in level where it becomes pixelated"));
 
 	advancedOptions.addButton("Generate grid", function () {
 		this.openGenerateGridWindow();
