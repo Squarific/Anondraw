@@ -2811,7 +2811,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.public.relativeZoom(1);
 		this.paint.background.relativeZoom(1);
 		this.paint.local.relativeZoom(1);
-	};
+	}.bind(this);
 	
 	// addControl persistently remembers last state 
 	advancedOptions.addControl({
@@ -2830,7 +2830,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.public.relativeZoom(1);
 		this.paint.background.relativeZoom(1);
 		this.paint.local.relativeZoom(1);
-	};
+	}.bind(this);
 	
 	advancedOptions.addControl({
         type: "range",
