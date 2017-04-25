@@ -2817,7 +2817,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
     });
 	
 	advancedOptions.addControl({
-        type: "range"
+        type: "range",
         title: "Threshold for Zoom Level with Blur",
         value: 3,
 		step: 1,
