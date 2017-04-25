@@ -14,7 +14,8 @@ function DrawTogether (container, settings, emotesHash) {
 	this.playerList = [];
 	this.moveQueue = [];
 	this.favList = [];
-	this.myRegions = []; // Specific to the user
+	this.myRegions = [];
+	this.myAnimations = [];
 	this.ink = 0;
 	this.previousInk = Infinity;
 
@@ -1259,7 +1260,7 @@ DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
 		setTimeout(this.setLoadImage.bind(this, loadTime * 2), loadTime * 2);
 	}.bind(this);
 
-	loadImage.src = "images/loadingChunk.png?v=1";
+	loadImage.src = "images/loadingChunk.png";
 };
 
 DrawTogether.prototype.createDrawZone = function createDrawZone () {
@@ -2383,12 +2384,120 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	exportwindow.appendChild(img);
 };
 
-DrawTogether.prototype.exportVideo = function (from, to) {
+DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter, xOffset, yOffset) {
+	
+	var start = leftTop || [
+		Math.min(from[0], to[0]),
+		Math.min(from[1], to[1])
+	];
+	start[0] = Math.floor(start[0]);
+	start[1] = Math.floor(start[1]);
+	
+	var endY = 0;
+	if(leftTop)
+		endY = leftTop[1] + sqheight;
+	else
+		endY = Math.max(from[1], to[1]);
+	
+	endY[0] = Math.ceil(endY[0]);
+	endY[1] = Math.ceil(endY[1]);
+	
+	var exportFuncs = {
+			boolean: "getBoolean",
+			range: "getRangeValue",
+			dropdown: "getDropDownValue"
+		};
+	
+	var captureSettings = {
+		name: fileName,
+		workersPath: ''
+	};
+	
+	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
+		var funcName = exportFuncs[this.defaultVideoExportSettings[k].type];
+		var value = this.videoExportSettings[funcName](this.defaultVideoExportSettings[k].title)
+		if (typeof value == "object") value = value.value;
+		captureSettings[this.defaultVideoExportSettings[k].title] = value;
+	}
+	
+	console.log("CaptureSettings:", captureSettings);
+	
+	var capturer = new CCapture(captureSettings);
+	capturer.start();
+	
+	var frames = squares;
+	var gutter = gutter || 0;
+	
+	var frameWidth = 0;
+	if (sqwidth)
+		frameWidth = sqwidth
+	else
+		frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
+	
+	frameWidth = Math.floor(frameWidth);
+	
+	for (var k = 0; k < frames; k++) {
+		var tempFrom = [
+			start[0] + frameWidth * k + k * gutter + (xOffset && k !== 0 ? xOffset : 0),
+			start[1] + (yOffset || 0)
+		];
+		
+		var tempTo = [
+			tempFrom[0] + frameWidth,
+			endY
+		];
+		
+		if (captureSettings.verbose) {
+			console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
+		}
+		
+		capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
+	}
+
+	capturer.stop();
+	if(captureSettings.format === "webm") 
+		capturer.save(); //directly save webm format
+	else
+		capturer.save( function( blob ) {
+			var exportwindow = this.gui.createWindow({ title: "Exported animation (right click to save)" });
+
+			var img = document.createElement("img");
+			img.src = URL.createObjectURL(blob);
+			img.alt = "Exported image";
+			
+			exportwindow.classList.add("exportwindow");
+			exportwindow.appendChild(img);
+		}.bind(this) );
+};
+
+DrawTogether.prototype.renderMyAnimation = function (myAnimation) {
+	this.exportVideoRender(
+		myAnimation.name || '',
+		null, null,
+		myAnimation.leftTop,
+		myAnimation.squares,
+		myAnimation.sqwidth,
+		myAnimation.sqheight,
+		myAnimation.gutter );
+};
+
+DrawTogether.prototype.exportMyAnimation = function (myAnimation) {
+	this.exportVideo(
+		null, null,
+		myAnimation.leftTop,
+		myAnimation.squares,
+		myAnimation.sqwidth,
+		myAnimation.sqheight,
+		myAnimation.gutter );
+};
+
+DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter) {
 	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
 	
 	var settings = QuickSettings.create(0, 0, "Specific settings");
 	settings.addText("Name", "Your title");
-	settings.addRange("Frames", 1, 200, 10, 1);
+	settings.addRange("Frames", 1, squares || 200, 10, 1);
+	settings.addRange("Gutter", 0, 200, gutter || 0, 1);
 	exportVideoWindow.appendChild(settings._panel);
 	
 	var container = exportVideoWindow.appendChild(document.createElement("div"))
@@ -2398,61 +2507,7 @@ DrawTogether.prototype.exportVideo = function (from, to) {
 	renderButton.appendChild(document.createTextNode("Render"));
 	renderButton.className = "drawtogether-button";
 	renderButton.addEventListener("click", function () {
-		var exportFuncs = {
-			boolean: "getBoolean",
-			range: "getRangeValue",
-			dropdown: "getDropDownValue"
-		};
-		
-		var captureSettings = {
-			name: settings.getText("Name"),
-			workersPath: ''
-		};
-		
-		for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
-			var funcName = exportFuncs[this.defaultVideoExportSettings[k].type];
-			var value = this.videoExportSettings[funcName](this.defaultVideoExportSettings[k].title)
-			if (typeof value == "object") value = value.value;
-			captureSettings[this.defaultVideoExportSettings[k].title] = value;
-		}
-		
-		console.log("CaptureSettings:", captureSettings);
-		
-		var capturer = new CCapture(captureSettings);
-		capturer.start();
-		
-		var frames = settings.getRangeValue("Frames");
-		
-		var frameWidth = Math.abs(to[0] - from[0]) / frames;
-		
-		var start = [
-			Math.min(from[0], to[0]),
-			Math.min(from[1], to[1])
-		];
-		
-		var endY = Math.max(from[1], to[1]);
-		
-		for (var k = 0; k < frames; k++) {
-			var tempFrom = [
-				start[0] + frameWidth * k,
-				start[1]
-			];
-			
-			var tempTo = [
-				tempFrom[0] + frameWidth,
-				endY
-			];
-			
-			if (captureSettings.verbose) {
-				console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
-			}
-			
-			capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
-		}
-
-		capturer.stop();
-		capturer.save();
-		
+		this.exportVideoRender(settings.getText("Name"), from, to, leftTop, settings.getRangeValue("Frames"), sqwidth, sqheight, settings.getRangeValue("Gutter"));		
 	}.bind(this));
 	
 	var settingsButton = container.appendChild(document.createElement("div"));
@@ -3808,6 +3863,35 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
+DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGridPreview(generationSettings, from, to) {
+	if(generationSettings == "Clear Grid Preview"){
+		this.paint.previewGrid([0,0],0,0,0,0);
+		return;
+	}
+	var squares = generationSettings.getRangeValue("Squares");
+	var gutter = generationSettings.getRangeValue("Gutter");
+
+	var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
+	if(gutter>maxgutter) gutter=maxgutter;
+	var guttertotal=gutter*(squares-1);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
+
+	var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+
+	var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
+	var sqheight = Math.abs(to[1] - from[1]);
+	
+	var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
+	
+	this.paint.previewGrid(
+			leftTop,
+			squares,
+			sqwidth,
+			sqheight,
+			gutter
+		);
+};
+
 DrawTogether.prototype.createGridInSelection = function createGridInSelection (from, to) {
 	var generationSettings = QuickSettings.create(50, 50, "Grid settings");
 	generationSettings.addControl({
@@ -3816,7 +3900,8 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		min: 1,
 		max: 50,
 		value: 5,
-		step: 1
+		step: 1,
+		callback: this.updateGeneratedGridPreview.bind(this, generationSettings, from, to)
 	});
 	
 	generationSettings.addControl({
@@ -3825,18 +3910,51 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		min: 0,
 		max: 200,
 		value: 0,
-		step: 1
+		step: 1,
+		callback: this.updateGeneratedGridPreview.bind(this, generationSettings, from, to)
 	});
+	generationSettings.addButton("Save for animation manager", function() {
+		var squares = generationSettings.getRangeValue("Squares");
+		var gutter = generationSettings.getRangeValue("Gutter");
+		
+	var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
+	if(gutter>maxgutter) gutter=maxgutter;
+	var guttertotal=gutter*(squares-1);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
+
+	var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+
+		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
+		var sqheight = Math.abs(to[1] - from[1]);
+		
+		var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
+		this.myAnimations.push({
+			name: null,
+			leftTop: leftTop,
+			squares: squares,
+			sqwidth: sqwidth,
+			sqheight: sqheight,
+			gutter: gutter
+		});
+		this.exportVideo(null, null, leftTop, squares, sqwidth, sqheight, gutter);
+	}.bind(this));
 	
 	generationSettings.addButton("Generate", function () {
 		var squares = generationSettings.getRangeValue("Squares");
 		var gutter = generationSettings.getRangeValue("Gutter");
 		
-		var totalWidth = Math.abs(to[0] - from[0]);
+
+	var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
+	if(gutter>maxgutter) gutter=maxgutter;
+	var guttertotal=gutter*(squares-1);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
+
+	var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+
 		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 		var sqheight = Math.abs(to[1] - from[1]);
 		
-		var leftTop = [Math.min(from[0], to[0]), Math.min(from[1], to[1])];
+		var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
 		
 		if (this.reputation >= 5 || (totalWidth > 1000 || sqwidth > 200)) {
 			console.log("Generating grid", squares, sqwidth, sqheight);
@@ -3853,8 +3971,16 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 	}.bind(this));
 	
 	generationSettings.addButton("Cancel", function () {
+		clearTimeout(this.updateGridPreviewTimeout);
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
-	});
+		this.updateGeneratedGridPreview("Clear Grid Preview");
+	}.bind(this));
+	
+	var loop = function loop(){
+		this.updateGeneratedGridPreview(generationSettings, from, to);
+		this.updateGridPreviewTimeout = setTimeout(loop.bind(this), 300);
+	};	
+	loop.apply(this);
 };
 
 DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
