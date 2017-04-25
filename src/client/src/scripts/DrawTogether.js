@@ -2810,9 +2810,9 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
         title: "Blur on zoom",
         value: false,
 		callback: function (val) {
-			this.paint.public.blurOnZoom = val;
-			this.paint.background.blurOnZoom = val;
-			this.paint.local.blurOnZoom = val;
+			this.paint.public.settings.blurOnZoom = val;
+			this.paint.background.settings.blurOnZoom = val;
+			this.paint.local.settings.blurOnZoom = val;
 		}.bind(this)
     });
 	
@@ -2824,9 +2824,9 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		min: 1,
 		max: 30,
 		callback: function (val) {
-			this.paint.public.zoomLevelOnBlur = val;
-			this.paint.background.zoomLevelOnBlur = val;
-			this.paint.local.zoomLevelOnBlur = val;
+			this.paint.public.settings.zoomLevelOnBlur = val;
+			this.paint.background.settings.zoomLevelOnBlur = val;
+			this.paint.local.settings.zoomLevelOnBlur = val;
 		}.bind(this)
     });
 
