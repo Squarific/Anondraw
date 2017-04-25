@@ -2827,9 +2827,9 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		min: 1,
 		max: 30,
 		callback: function (val) {
-			this.paint.public.settings.zoomLevelOnBlur = val;
-			this.paint.background.settings.zoomLevelOnBlur = val;
-			this.paint.local.settings.zoomLevelOnBlur = val;
+			this.paint.public.settings.zoomLevelToPixelate = val;
+			this.paint.background.settings.zoomLevelToPixelate = val;
+			this.paint.local.settings.zoomLevelToPixelate = val;
 			this.paint.public.relativeZoom(1);
 			this.paint.background.relativeZoom(1);
 			this.paint.local.relativeZoom(1);
