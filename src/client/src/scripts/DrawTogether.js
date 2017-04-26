@@ -4414,6 +4414,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "Can I play this like draw something but online?",
 		answer: "Yes, there is a gamemode where you get words and other people have to guess what you just drew."
+	}, {
+		question: "I'd like to donate, is that possible?",
+		answer: "Yea it is, the best way would be to buy premium, that way you get something in return. If you feel like just throwing money in but don't want premium for some reaosn, you can also always use <a href=\"http://www.paypal.me/anondraw\">http://www.paypal.me/anondraw</a>"
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
