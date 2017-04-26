@@ -2803,6 +2803,46 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	advancedOptions.addBoolean("Flip vertical (k)", false, function (value) {
 		this.paint.setVerticalMirror(value);
 	}.bind(this));
+	
+	var blurOnZoomCallback = function blurOnZoomCallback (val) {
+		this.paint.public.settings.blurOnZoom = val;
+		this.paint.background.settings.blurOnZoom = val;
+		this.paint.local.settings.blurOnZoom = val;
+		this.paint.public.relativeZoom(1);
+		this.paint.background.relativeZoom(1);
+		this.paint.local.relativeZoom(1);
+	}.bind(this);
+	
+	// addControl persistently remembers last state 
+	advancedOptions.addControl({
+        type: "boolean",
+        title: "Blur on zoom",
+        value: false,
+		callback: blurOnZoomCallback.bind(this)
+    });
+	
+	blurOnZoomCallback(this.advancedOptions.getBoolean("Blur on zoom"));	
+	
+	var zoomLevelCallback = function (val) {
+		this.paint.public.settings.zoomLevelToPixelate = val;
+		this.paint.background.settings.zoomLevelToPixelate = val;
+		this.paint.local.settings.zoomLevelToPixelate = val;
+		this.paint.public.relativeZoom(1);
+		this.paint.background.relativeZoom(1);
+		this.paint.local.relativeZoom(1);
+	}.bind(this);
+	
+	advancedOptions.addControl({
+        type: "range",
+        title: "The zoom-in level where it becomes pixelated",
+        value: 3,
+		step: 1,
+		min: 1,
+		max: 30,
+		callback: zoomLevelCallback.bind(this)
+    });
+	
+	zoomLevelCallback(this.advancedOptions.getRangeValue("The zoom-in level where it becomes pixelated"));
 
 	advancedOptions.addButton("Generate grid", function () {
 		this.openGenerateGridWindow();
@@ -4374,6 +4414,9 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "Can I play this like draw something but online?",
 		answer: "Yes, there is a gamemode where you get words and other people have to guess what you just drew."
+	}, {
+		question: "I'd like to donate, is that possible?",
+		answer: "Yea it is, the best way would be to buy premium, that way you get something in return. If you feel like just throwing money in but don't want premium for some reaosn, you can also always use <a href=\"http://www.paypal.me/anondraw\">http://www.paypal.me/anondraw</a>"
 	}];
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
