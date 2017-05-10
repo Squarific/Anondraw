@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html style="padding:0; margin:0; height:100%;">
 	<head>
-		<base href="/">
+		<base href="/" />
 		<!-- 
 			This is the anondraw draw online source code
 			It allows you to draw with friends in group
@@ -17,6 +17,8 @@
 		<meta property="fb:admins" content="{{ facebookAdmin }}" />
 		<meta name="description" content="{{ description }}">
 		<link rel="shortcut icon" href="favicon.ico?v={{ version }}">
+		
+		<link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700" rel="stylesheet">
 
 		<meta property="og:image" content="http://www.anondraw.com/images/promotional/logo-modern.png?v={{ version }}" />
 
@@ -65,28 +67,20 @@
 				localStorage.setItem("drawtogether-referrer", getParameterByName("ref"));
 			}
 			
-			// Draw and paint online
-			var urlInfo = location.hash.substr(1, location.hash.length).split(",");
-
-			var room = urlInfo[0];
-			var x = parseInt(urlInfo[1]);
-			var y = parseInt(urlInfo[2]);
-
 			var emotesHash = { 
 			{{#emojiList}}
 				"{{{emojiName}}}":"{{{emojiPath}}}"{{^last}}, {{/last}}
 			{{/emojiList}}
 			};
-
-			var drawTogether = new DrawTogether(document.getElementById("fullscreen"), {
-				room: room || "main",
-				mode: (room) ? "join" : "ask",
+			
+			var collabSettings = {
 				loadbalancer: "http://{{ service.loadbalancer.host }}:{{ service.loadbalancer.port }}",
 				imageServer: "http://{{ service.image.host }}:{{ service.image.port }}",
 				accountServer: "http://{{ service.player.host }}:{{ service.player.port }}",
-				leftTopX: x || 0,
-				leftTopY: y || 0
-			}, emotesHash);
+				emotesHash: emotesHash
+			};
+			
+			var anondraw = new Anondraw(document.getElementById("fullscreen"), collabSettings);
 		</script>
 		<!-- Go to www.addthis.com/dashboard to customize your tools -->
 		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-53c4fbf2311fe8f1" async="async"></script>
@@ -109,16 +103,9 @@
 			 
 			reformal_wdg_bimage = "bea4c2c8eb82d05891ddd71584881b56.png";
 		</script>
-		<style type="text/css">.furjbqy {z-index:1000 !important;} .furjbqy a {padding: .5em;} .furjbqy table {background:#273849;}</style>
+		<style type="text/css">.furjbqy {display:none !important;}</style>
 		<script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=anondraw">
 		</script>
-
-		<noscript>
-			<a href="http://anondraw.idea.informer.com">Anondraw feedback</a>
-			<a href="http://idea.informer.com">
-				<img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" />
-			</a>
-		</noscript>
 		<!-- Google Code for Register Conversion Page
 		In your html page, add the snippet and call
 		goog_report_conversion when someone clicks on the

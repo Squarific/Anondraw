@@ -1,0 +1,107 @@
+.topbar {
+	background:#364350;
+	font-family: 'Noto Sans', sans-serif;
+}
+
+.topbar a {
+	float:right;
+}
+
+.topbar .logo {
+	font-size: 2em;
+    font-weight: bold;
+    padding: 0.5em;
+    padding-left: 1.5em;
+    display: inline-block;
+    color: #eef2f5;
+    text-shadow: -2px 2px 4px #111921;
+}
+
+.button {
+	display: inline-block;
+	padding: 0.75em;
+	padding-left: 1.5em;
+	padding-right: 1.5em;
+	background: #252d35;
+    color: white;
+    text-decoration: none;
+	border-radius: 0.2em;
+	margin:0.25em;
+	transition:0.1s;
+}
+
+.button:hover {
+	background: #485869;
+}
+
+.trybutton {
+	background:#6c987d;
+}
+
+.trybutton:hover {
+	background:#89b59a;
+}
+
+.signup {
+	background:#6c987d;
+	position: relative;
+    top: 0.5em;
+	margin-right:3em;
+}
+
+.signup:hover {
+	background:#89b59a;
+}
+
+.login {
+	background:#566b80;
+	position: relative;
+    top: 0.5em;
+}
+
+.login:hover {
+	background:#778fa7;
+}
+
+.headerImage {
+	width: 100%;
+}
+
+.feature-image {
+	display:inline-block;
+	height:20em;
+}
+
+.feature-container {
+	display:flex;
+	text-align:center;
+	width:70em;
+	max-width:80%;
+	margin:5em auto;
+	box-shadow: 1px 1px 10px 0px #a5afb9;
+}
+
+.feature-text-container {
+	display:inline-block;
+	font-family: 'Noto Sans', sans-serif;
+	padding:3em;
+	text-align:left;
+	color:#ced4d8;
+	background: #364350;
+}
+
+.feature-container .feature-text {
+	display:inline-block;
+	padding: 0.5em;
+	padding-left:0;
+	font-size:1.1em;
+}
+
+.feature-text-container h2 {
+	display:inline-block;
+	font-size:1.4em;
+	padding: 1em;
+	padding-left:0;
+	border-bottom:solid 2px #4c5a69;
+	margin:0;
+}

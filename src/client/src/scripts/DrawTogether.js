@@ -1,4 +1,4 @@
-function DrawTogether (container, settings, emotesHash) {
+function DrawTogether (container, settings, emotesHash, account) {
 	// Normalize settings, set container
 	this.container = container;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
@@ -40,7 +40,7 @@ function DrawTogether (container, settings, emotesHash) {
 	this.regionsContainer = null;
 
 	this.network = new Network(this.settings.loadbalancer);
-	this.account = new Account(this.settings.accountServer);
+	this.account = account || new Account(this.settings.accountServer);
 	this.bindSocketHandlers();
 	this.emotesHash = emotesHash;
 
@@ -942,7 +942,7 @@ DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
 };
 
 DrawTogether.prototype.openModeSelector = function openModeSelector () {
-	this.selectWindow.style.display = "block";
+	this.selectWindow.style.display = "flex";
 };
 
 DrawTogether.prototype.closeChatFilterWindow = function closeChatFilterWindow () {
@@ -3650,16 +3650,6 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	selectWindow.className = "drawtogether-selectwindow";
 	this.selectWindow = selectWindow;
 
-	var text = selectWindow.appendChild(document.createElement("h1"));
-	text.appendChild(document.createTextNode("Anondraw - Draw with friends or strangers!"));
-	text.className = "drawtogether-welcome-text";
-
-	var text = selectWindow.appendChild(document.createElement("div"));
-	text.className = "drawtogether-welcome-text-box";
-	
-	var textContainer = text.appendChild(document.createElement("span"));
-	textContainer.appendChild(document.createTextNode("Realtime paint on an unlimited canvas."));
-
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
 	buttonContainer.className = "drawtogether-buttoncontainer";
 
@@ -3707,16 +3697,6 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 		goog_report_join();
 	}.bind(this));
-
-	selectWindow.appendChild(this.createFAQDom());
-
-	this.redditDrawings = selectWindow.appendChild(document.createElement("div"));
-	this.redditDrawings.className = "drawtogether-redditdrawings";
-	this.populateRedditDrawings();
-
-	var contactInfo = selectWindow.appendChild(document.createElement("div"));
-	contactInfo.appendChild(document.createTextNode("Feedback/contact: info@anondraw.com"));
-	contactInfo.classList.add("contactinfo");
 
 	pw_load();
 };
@@ -4399,7 +4379,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		value: "",
 		text: "Home",
-		title: "Go to home menu",
+		title: "Go to the home screen",
 		action: this.openModeSelector.bind(this),
 		data: {
 			intro: "Use this to return to the FAQ and mode selection."
