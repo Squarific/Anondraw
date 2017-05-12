@@ -19,6 +19,7 @@
 
 .button {
 	display: inline-block;
+	cursor:pointer;
 	padding: 0.75em;
 	padding-left: 1.5em;
 	padding-right: 1.5em;
@@ -40,6 +41,14 @@
 
 .trybutton:hover {
 	background:#89b59a;
+}
+
+.feature-container:nth-child(even) .trybutton {
+	background:#b185e2;
+}
+
+.feature-container:nth-child(even) .trybutton:hover {
+	background:#c399f3;
 }
 
 .signup {
@@ -69,7 +78,9 @@
 
 .feature-image {
 	display:inline-block;
-	height:20em;
+	width:20em;
+	margin:1em;
+	border:2px solid #eef2f5;
 }
 
 .feature-container {
@@ -79,6 +90,33 @@
 	max-width:80%;
 	margin:5em auto;
 	box-shadow: 1px 1px 10px 0px #a5afb9;
+	background: #364350;
+	align-items:center;
+	color:#ced4d8;
+}
+
+
+@media (max-width:750px) {
+	.feature-container {
+		width:100%;
+		max-width:initial;
+	}
+	
+	.feature-image {
+		width:10em;
+	}
+}
+
+@media (max-width:550px) {	
+	.feature-image {
+		display:none;
+	}
+}
+
+.feature-container:nth-child(even) {
+	flex-direction: row-reverse;
+	background:#556779;
+	color:white;
 }
 
 .feature-text-container {
@@ -86,8 +124,6 @@
 	font-family: 'Noto Sans', sans-serif;
 	padding:3em;
 	text-align:left;
-	color:#ced4d8;
-	background: #364350;
 }
 
 .feature-container .feature-text {
@@ -104,4 +140,79 @@
 	padding-left:0;
 	border-bottom:solid 2px #4c5a69;
 	margin:0;
+}
+
+.card {
+	display:flex;
+	width:70em;
+	max-width:80%;
+	margin:5em auto;
+	box-shadow: 1px 1px 10px 0px #a5afb9;
+	background: #556779;
+	align-items:center;
+	color:#ced4d8;
+}
+
+.accountform {
+	flex-direction:column;
+	text-align:right;
+	padding-top:3em;
+	padding-bottom:3em;
+}
+
+.accountform .button {
+	display: inline-block;
+	text-align:center;
+    min-width: 300px;
+    margin: .5em;
+    border-radius: .2em;
+	background:#6c987d;
+}
+
+.accountform .button:hover {
+	background:#89b59a;
+}
+
+.accountform input {
+	display: inline-block;
+	text-align:center;
+    min-width: 300px;
+    height: 2.3rem;
+    line-height: 2.3rem;
+    margin: .5em;
+    border-radius: .2em;
+    background-color: #e6e6e6;
+}
+
+.accountform span {
+	display:inline-block;
+	min-width: 10em;
+	text-align:left;
+}
+
+@media (max-width:750px) {
+	.card {
+		width:100%;
+		max-width:initial;
+	}
+	
+	.form-container span {
+		width:100%;
+	}
+	
+	.accountform input {
+		min-width:initial;
+		width:90%;
+		width: calc(100% - 1em);
+	}
+	
+	.accountform .button {
+		min-width:initial;
+		width:90%;
+		width: calc(100% - 1em);
+	}
+	
+	.accountform span {
+		text-align:center;
+	}
 }

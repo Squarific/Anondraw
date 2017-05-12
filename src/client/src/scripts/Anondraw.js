@@ -61,13 +61,14 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.setContent(document.createTextNode("Feed"));
 	}.bind(this))
 	.on('/login*', function () {
-		this.setContent(document.createTextNode("Feed"));
+		this.setContent(this.createLoginPage());
 	}.bind(this))
-	.on('/signup*', function () {
-		this.setContent(document.createTextNode("Feed"));
+	.on('/register*', function () {
+		this.setContent(this.createRegisterPage());
 	}.bind(this))
 	.on('/logout', function () {
-		this.setContent(document.createTextNode("Logout"));
+		this.account.logout(function () {});
+		this.setContent(this.createLogoutPage());
 	}.bind(this))
 	.on('/settings*', function () {
 		this.setContent(document.createTextNode("Settings"));
