@@ -158,7 +158,7 @@ Anondraw.prototype.createRegisterPage = function createRegisterPage () {
 
 Anondraw.prototype.createLogoutPage = function createLogoutPage () {
 	var container = document.createElement("div");
-	container.className = "card";
+	container.className = "";
 	
 	/*
 		Top bar
