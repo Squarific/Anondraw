@@ -8,9 +8,11 @@ Anondraw.prototype.createHome = function createHome () {
 	var topBar = container.appendChild(document.createElement("div"));
 	topBar.className = "topbar";
 	
-	var logo = topBar.appendChild(document.createElement("span"));
+	var logo = topBar.appendChild(document.createElement("a"));
 	logo.appendChild(document.createTextNode("Anondraw"));
 	logo.className = "logo";
+	logo.href = "/";
+	logo.setAttribute("data-navigo", "");
 	
 	var registerButton = topBar.appendChild(document.createElement("a"));
 	registerButton.className = "button signup";
@@ -73,7 +75,7 @@ Anondraw.prototype.createHome = function createHome () {
 	div.className = "feature-text-container";
 	
 	var h2 = div.appendChild(document.createElement("h2"));
-	h2.appendChild(document.createTextNode("Socialize and share"));
+	h2.appendChild(document.createTextNode("Socialize and share (coming soon)"));
 	
 	var p = div.appendChild(document.createElement("p"));
 	p.className = "feature-text";
@@ -99,7 +101,7 @@ Anondraw.prototype.createHome = function createHome () {
 	div.className = "feature-text-container";
 	
 	var h2 = div.appendChild(document.createElement("h2"));
-	h2.appendChild(document.createTextNode("Portfolio"));
+	h2.appendChild(document.createTextNode("Portfolio  (coming soon)"));
 	
 	var p = div.appendChild(document.createElement("p"));
 	p.className = "feature-text";

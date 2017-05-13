@@ -67,11 +67,13 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.setContent(this.createRegisterPage());
 	}.bind(this))
 	.on('/logout', function () {
-		this.account.logout(function () {});
 		this.setContent(this.createLogoutPage());
 	}.bind(this))
 	.on('/settings*', function () {
 		this.setContent(document.createTextNode("Settings"));
+	}.bind(this))
+	.on('/new*', function () {
+		this.setContent(document.createTextNode("You are new!"));
 	}.bind(this))
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */
@@ -79,8 +81,6 @@ Anondraw.prototype.createRouter = function createRouter () {
 		
 		if (false) this.router.navigate("/feed");
 		else this.setContent(this.createHome());
-		
-		this.router.updatePageLinks();
 	}.bind(this))
 	.notFound(function (query) {
 		console.log(query);
@@ -123,4 +123,5 @@ Anondraw.prototype.setContent = function setContent (domNode) {
 		this.sideMenu.content.removeChild(this.sideMenu.content.firstChild);
 	
 	this.sideMenu.content.appendChild(domNode);
+	this.router.updatePageLinks();
 };

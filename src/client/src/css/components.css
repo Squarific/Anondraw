@@ -15,6 +15,8 @@
     display: inline-block;
     color: #eef2f5;
     text-shadow: -2px 2px 4px #111921;
+	float:initial;
+	text-decoration:none;
 }
 
 .button {
@@ -154,6 +156,7 @@
 }
 
 .accountform {
+	position:relative;
 	flex-direction:column;
 	text-align:right;
 	padding-top:3em;
@@ -173,9 +176,18 @@
 	background:#89b59a;
 }
 
+.accountform h1 {
+    display: block;
+	background: #364350;
+    width: 100%;
+    text-align: center;
+    padding: 1em;
+}
+
 .accountform input {
 	display: inline-block;
-	text-align:center;
+	text-align:left;
+	padding:0.5em;
     min-width: 300px;
     height: 2.3rem;
     line-height: 2.3rem;
@@ -188,6 +200,52 @@
 	display:inline-block;
 	min-width: 10em;
 	text-align:left;
+	font-weight:bold;
+}
+
+.accountform .status {
+	display:block;
+	background:#6b3232;
+	padding:1.5em;
+	width:100%;
+	margin-bottom:2em;
+	text-align:center;
+}
+
+.accountform .status:empty {
+	display:none;
+}
+
+.status.no-error {
+	background: #364350;
+}
+
+.form-container a {
+	display:inline-block;
+    margin-top: 1em;
+	padding: .5em;
+	color:white;
+	text-decoration:none;
+	font-weight:bold;
+}
+
+.form-container a:hover {
+	color:#ced4d8;
+}
+
+.form-container {
+	margin: 2em;
+}
+
+.disabled:after {
+	content: " ";
+	display:block;
+	position:absolute;
+	top:0;
+	right:0;
+	left:0;
+	bottom:0;
+	background:rgba(255, 255, 255, 0.5);
 }
 
 @media (max-width:750px) {
