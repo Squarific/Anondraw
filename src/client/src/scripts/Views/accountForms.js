@@ -31,6 +31,7 @@ Anondraw.prototype.createLoginPage = function createLoginPage () {
 	var email = inputContainer.appendChild(document.createElement("span"));
 	email.appendChild(document.createTextNode("Email"));
 	var emailInput = inputContainer.appendChild(document.createElement("input"));
+	emailInput.placeholder = "email@example.org";
 	
 	/* Password field */
 	var inputContainer = formContainer.appendChild(document.createElement("div"));
@@ -113,6 +114,7 @@ Anondraw.prototype.createRegisterPage = function createRegisterPage () {
 	var email = inputContainer.appendChild(document.createElement("span"));
 	email.appendChild(document.createTextNode("Email"));
 	var emailInput = inputContainer.appendChild(document.createElement("input"));
+	emailInput.placeholder = "email@example.org";
 	
 	/* Password field */
 	var inputContainer = formContainer.appendChild(document.createElement("div"));
