@@ -2,6 +2,7 @@ function Anondraw (container, settings) {
 	this.settings = settings;
 	this.container = container;
 	this.account = new Account(this.settings.accountServer);
+	this.messages = new Messages(this.settings.messageServer);
 
 	this.collabInitDone = false;
 	this.collabContainer;
@@ -55,7 +56,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.collab.paint.resize();
 	}.bind(this))
 	.on('/messages*', function () {
-		this.setContent(document.createTextNode("Messages"));
+		this.setContent(this.createMessagePage());
 	}.bind(this))
 	.on('/feed*', function () {
 		this.setContent(document.createTextNode("Feed"));
@@ -73,7 +74,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.setContent(document.createTextNode("Settings"));
 	}.bind(this))
 	.on('/new*', function () {
-		this.setContent(document.createTextNode("You are new!"));
+		this.router.navigate("/collab");
 	}.bind(this))
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */

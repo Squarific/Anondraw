@@ -220,6 +220,10 @@
 	background: #364350;
 }
 
+.error {
+	background:#6b3232;
+}
+
 .form-container a {
 	display:inline-block;
     margin-top: 1em;

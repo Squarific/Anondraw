@@ -38,6 +38,7 @@ Anondraw.prototype.createLoginPage = function createLoginPage () {
 	var password = inputContainer.appendChild(document.createElement("span"));
 	password.appendChild(document.createTextNode("Password"));
 	var passwordInput = inputContainer.appendChild(document.createElement("input"));
+	passwordInput.placeholder = "password";
 	passwordInput.type = "password";
 	
 	/* Login button */
@@ -65,7 +66,7 @@ Anondraw.prototype.createLoginPage = function createLoginPage () {
 				return;
 			}
 			
-			this.router.navigate("/");
+			this.router.navigate("/collab");
 		}.bind(this));
 	}.bind(this);
 	
@@ -122,6 +123,7 @@ Anondraw.prototype.createRegisterPage = function createRegisterPage () {
 	password.appendChild(document.createTextNode("Password"));
 	var passwordInput = inputContainer.appendChild(document.createElement("input"));
 	passwordInput.type = "password";
+	passwordInput.placeholder = "password";
 	
 	/* Register button */
 	var registerButton = formContainer.appendChild(document.createElement("div"));
@@ -158,7 +160,6 @@ Anondraw.prototype.createRegisterPage = function createRegisterPage () {
 
 Anondraw.prototype.createLogoutPage = function createLogoutPage () {
 	var container = document.createElement("div");
-	container.className = "";
 	
 	/*
 		Top bar

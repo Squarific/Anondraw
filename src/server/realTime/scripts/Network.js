@@ -31,6 +31,7 @@ var DRAWING_TYPES = ["brush", "line", "block", "path", "text"];
 var MAX_INK = 200000;
 var MAX_GUEST_INK = 5000;
 var MAX_SIZE = 100;
+var MAX_DISTANCE_FROM_LINE_START = 5000;
 
 var BASE_GEN = 300;
 var PER_REP_GEN = 1500;
@@ -887,6 +888,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.drawTogether.addPath(socket.room, socket.id, {socketid: socket.id, type: "path", color: color, size: size});
 			socket.lastPathSize = size;
 			delete socket.lastPathPoint;
+			delete socket.firstPathPoint;
 			socket.broadcast.to(socket.room).emit("sp", {id: socket.id, color: color, size: size});
 		});
 
@@ -938,6 +940,16 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback();
 				protocol.informClient(socket, "Not your turn!");
 				return;
+			}
+			
+			if (!socket.firstPathPoint) {
+				socket.firstPathPoint = point;
+			} else {
+				if (protocol.utils.distance(point[0], point[1], socket.firstPathPoint[0], socket.firstPathPoint[1]) > MAX_DISTANCE_FROM_LINE_START) {
+					callback();
+					protocol.informClient(socket, "PATH TOO FAR FROM STARTPOINT");
+					return;
+				}
 			}
 
 			var objects = protocol.satObjectsFromBrush(point, socket.lastPathPoint || point, socket.lastPathSize);

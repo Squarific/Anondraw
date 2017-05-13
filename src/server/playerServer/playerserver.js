@@ -191,6 +191,26 @@ var server = http.createServer(function (req, res) {
 		});
 		return;
 	}
+	
+	if (parsedUrl.pathname == "/sendmessage") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var to = parsedUrl.query.to;
+		var message = parsedUrl.query.message;
+
+		if (!user) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		console.log("[SEND MESSAGE]", user.id, to, message);
+		playerDatabase.addMessage(user.id, to, message, function (err) {
+			res.end(JSON.stringify({
+				err: err
+			}));
+		});
+		return;
+	}
 
 	if (parsedUrl.pathname == "/setname") {
 		var uKey = parsedUrl.query.uKey;
