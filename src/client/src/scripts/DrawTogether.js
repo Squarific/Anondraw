@@ -2048,7 +2048,7 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 };
 
 DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, element) {
-	this.account.setCoordFavorite(newX, newY, x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.setCoordFavorite(newX, newY, x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Changing coordinate of Favorite", "Error: " + err);
 			return;
@@ -2062,7 +2062,7 @@ DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, elem
 };
 
 DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
-	this.account.removeFavorite(x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.removeFavorite(x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Removing Favorite", "Error: " + err);
 			return;
@@ -2075,7 +2075,7 @@ DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
 	}.bind(this));
 };
 DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
-	this.account.renameFavorite(x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.renameFavorite(x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Renaming Favorite", "Error: " + err);
 			return;
@@ -2089,7 +2089,7 @@ DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
 };
 
 DrawTogether.prototype.getFavorites = function () {
-	this.account.getFavorites(drawTogether.current_room, function (err, result) {
+	this.account.getFavorites(this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
 			return;
@@ -2118,7 +2118,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 		return;
 	}
 
-	this.account.createFavorite(x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.createFavorite(x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Favorite", "Error: " + err);
 			return;
