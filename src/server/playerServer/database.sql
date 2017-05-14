@@ -106,5 +106,6 @@ CREATE TABLE IF NOT EXISTS messages (
 	isRead BIT,
 	INDEX(id),
 	INDEX(fromId),
-	INDEX(toId)
+	INDEX(toId),
+	INDEX(send)
 );

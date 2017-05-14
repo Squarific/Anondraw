@@ -19,7 +19,7 @@ var MessageDatabase = require("./scripts/MessageDatabase.js");
 var Sessions = require("./scripts/Sessions.js");
 
 var playerDatabase = new PlayerDatabase(database);
-var messageDatabase = new messageDatabase(database);
+var messageDatabase = new MessageDatabase(database);
 var sessions = new Sessions();
 
 // Ips from coinbase
