@@ -12,7 +12,7 @@
 }
 
 .menu:hover {
-	width:20em;
+	width:15em;
 }
 
 .menu a.menuItem {
@@ -21,7 +21,7 @@
 	color: white;
 	text-decoration: none;
 	font-weight: bold;
-	width:20em;
+	width:15em;
 }
 
 .menu a.menuItem:first-child {
