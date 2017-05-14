@@ -75,12 +75,14 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/register") {
 		var email = parsedUrl.query.email;
 		var pass = parsedUrl.query.pass;
-		var referral = parsedUrl.query.referral;
+		var referral = parseInt(parsedUrl.query.referral);
 
 		if (!email || !pass) {
 			res.end('{"error": "No user or password provided"}');
 			return;
 		}
+		
+		if (referral !== referral) referral = 0;
 
 		playerDatabase.isIpBanned(req.connection.remoteAddress, function (err, banned, info) {
 			if (err) {
@@ -248,8 +250,11 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/getmessages") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
-		var before = parsedUrl.query.before;
+		var before = parseInt(parsedUrl.query.before);
 		var partner = parsedUrl.query.partner;
+		
+		// If before is NaN, we force it to be undefined
+		if (before !== before) before = undefined;
 
 		if (!user) {
 			res.end('{"error": "You are not logged in!"}');

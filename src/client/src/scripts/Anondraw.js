@@ -55,6 +55,9 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.setContent(this.collabContainer);
 		this.collab.paint.resize();
 	}.bind(this))
+	.on('/messages/:id/:username', function (params) {
+		this.setContent(this.createMessagePage(params));
+	}.bind(this))
 	.on('/messages*', function () {
 		this.setContent(this.createMessagePage());
 	}.bind(this))
@@ -116,7 +119,7 @@ Anondraw.prototype.initCollab = function initCollab () {
 	this.collabContainer = document.createElement("div");
 	this.collabContainer.className = "collab-container";
 
-	this.collab = new DrawTogether(this.collabContainer, settings, this.settings.emotesHash, this.account);
+	this.collab = new DrawTogether(this.collabContainer, settings, this.settings.emotesHash, this.account, this.router);
 };
 
 Anondraw.prototype.setContent = function setContent (domNode) {

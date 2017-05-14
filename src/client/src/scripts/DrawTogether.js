@@ -1,6 +1,7 @@
-function DrawTogether (container, settings, emotesHash, account) {
+function DrawTogether (container, settings, emotesHash, account, router) {
 	// Normalize settings, set container
 	this.container = container;
+	this.router = router;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
 	this.userSettings = QuickSettings.create(0, 0, "settings");
@@ -1076,9 +1077,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var kickbanButton = document.createElement("span");
-		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
-
-		kickbanButton.appendChild(document.createTextNode("B"));
+		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button fa fa-trash";
 
 		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
 
@@ -1086,12 +1085,18 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	}
 
 	var upvoteButton = document.createElement("span");
-	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button"
-	upvoteButton.appendChild(document.createTextNode("▲"));
+	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-caret-up";
 
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
+	
+	var messageButton = document.createElement("span");
+	messageButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-envelope";
+
+	messageButton.addEventListener("click", function (userid, event) {
+		this.router.navigate("/messages/" + userid + "/" + player.name);
+	}.bind(this, player.userid));
 
 	var nameText = document.createElement("span");
 	nameText.className = "drawtogether-player-name";
@@ -1108,6 +1113,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	nameText.appendChild(document.createTextNode(player.name + rep + score + appendedText))
 
 	playerDom.appendChild(upvoteButton);
+	playerDom.appendChild(messageButton);
 	playerDom.appendChild(nameText);
 
 	return playerDom;
@@ -1151,18 +1157,22 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	}.bind(this, player.id));
 
 	var upvoteButton = document.createElement("span");
-	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button"
-	upvoteButton.appendChild(document.createTextNode("▲"));
+	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-caret-up";
 
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
+	
+	var messageButton = document.createElement("span");
+	messageButton.className = "drawtogether-player-button fa fa-envelope";
+
+	messageButton.addEventListener("click", function (userid, event) {
+		this.router.navigate("/messages/" + userid + "/" + player.name);
+	}.bind(this, player.userid));
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var kickbanButton = document.createElement("span");
-		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
-
-		kickbanButton.appendChild(document.createTextNode("B"));
+		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button fa fa-trash";
 
 		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
 
@@ -1193,6 +1203,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
 
 	playerDom.appendChild(upvoteButton);
+	playerDom.appendChild(messageButton);
 	playerDom.appendChild(nameText);
 
 	var iconDom = document.createElement("span");

@@ -12,13 +12,13 @@ MessageDatabase.prototype.addMessage = function addMessage (userId, to, message,
 };
 
 MessageDatabase.prototype.getMessageList = function getMessageList (userId, callback) {
-	this.database.query("SELECT partner, last_username FROM (SELECT toId as partner FROM messages WHERE fromId = 1 UNION DISTINCT SELECT fromId as partner FROM messages WHERE toId = 1) as partners JOIN users ON partners.partner = users.id;", [userId, userId], function (err, rows, fields) {
+	this.database.query("SELECT partner, last_username FROM (SELECT toId as partner FROM messages WHERE fromId = ? UNION DISTINCT SELECT fromId as partner FROM messages WHERE toId = ?) as partners JOIN users ON partners.partner = users.id;", [userId, userId], function (err, rows, fields) {
 		callback(err, rows);
 	});
 };
 
 MessageDatabase.prototype.getMessages = function getMessages (userId, partnerId, beforeId, callback) {
-	var whereClause = "((toId = ? AND fromId = ?) OR (toId = ? AND fromId = ?))" + beforeId ? " AND send < (SELECT send FROM messages WHERE id = ?)": "";
+	var whereClause = "((toId = ? AND fromId = ?) OR (toId = ? AND fromId = ?))" + (beforeId ? " AND send < (SELECT send FROM messages WHERE id = ?)": "");
 	var query = "SELECT * FROM messages WHERE " + whereClause + " ORDER BY send LIMIT " + MESSAGES_PER_REQUEST;
 	var arguments = [userId, partnerId, partnerId, userId, beforeId];
 	
