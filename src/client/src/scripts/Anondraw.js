@@ -2,6 +2,8 @@ function Anondraw (container, settings) {
 	this.settings = settings;
 	this.container = container;
 	this.account = new Account(this.settings.accountServer);
+	
+	this.account.isLoggedIn(function () {});
 	this.messages = new Messages(this.settings.messageServer, this.account);
 
 	this.collabInitDone = false;
@@ -53,6 +55,8 @@ Anondraw.prototype.createRouter = function createRouter () {
 	.on('/collab*', function () {	
 		this.initCollab();
 		this.setContent(this.collabContainer);
+		this.collab.createAccountWindow(); // Dirty quick fix for syncing account status
+		this.collab.network.socket.emit("uKey", this.account.uKey);
 		this.collab.paint.resize();
 	}.bind(this))
 	.on('/messages/:id/:username', function (params) {
@@ -65,10 +69,24 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.setContent(document.createTextNode("Feed"));
 	}.bind(this))
 	.on('/login*', function () {
-		this.setContent(this.createLoginPage());
+		this.account.checkLogin(function (err, loggedIn) {
+			if (loggedIn) {
+				this.router.navigate("/collab");
+				return;
+			}
+			
+			this.setContent(this.createLoginPage());
+		}.bind(this));
 	}.bind(this))
 	.on('/register*', function () {
-		this.setContent(this.createRegisterPage());
+		this.account.checkLogin(function (err, loggedIn) {
+			if (loggedIn) {
+				this.router.navigate("/collab");
+				return;
+			}
+			
+			this.setContent(this.createRegisterPage());
+		}.bind(this));
 	}.bind(this))
 	.on('/logout', function () {
 		this.setContent(this.createLogoutPage());

@@ -3386,7 +3386,6 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	var accWindow = this.container.appendChild(document.createElement("div"));
 	accWindow.className = "drawtogether-window drawtogether-accountwindow";
 	this.accWindow = accWindow;
-	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
 	this.account.checkLogin(function (err, loggedIn) {
 		var formContainer = accWindow.appendChild(document.createElement("div"));
