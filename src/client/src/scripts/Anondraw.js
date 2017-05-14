@@ -2,7 +2,7 @@ function Anondraw (container, settings) {
 	this.settings = settings;
 	this.container = container;
 	this.account = new Account(this.settings.accountServer);
-	this.messages = new Messages(this.settings.messageServer);
+	this.messages = new Messages(this.settings.messageServer, this.account);
 
 	this.collabInitDone = false;
 	this.collabContainer;

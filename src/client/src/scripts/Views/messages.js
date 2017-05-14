@@ -26,6 +26,7 @@ Anondraw.prototype.createMessagePage = function createMessagePage () {
 		if (err) {
 			messages.classList.add("error");
 			messages.appendChild(document.createTextNode(err));
+			console.log(err);
 			return;
 		}
 		
@@ -55,6 +56,7 @@ Anondraw.prototype.createMessagePage = function createMessagePage () {
 				if (err) {
 					messageContainer.classList.add("error");
 					messageContainer.appendChild(document.createTextNode(err));
+					console.log(err);
 					return;
 				}
 				

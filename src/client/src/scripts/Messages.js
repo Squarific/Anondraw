@@ -26,7 +26,7 @@ Messages.prototype.sendMessage = function sendMessage (to, message, callback) {
 // Callback gives (err, data) where err is a string with an http error  or
 // the error returned by the server in the parsed data object (data.error || data.err)
 // data = the parsed json response text
-Messages.prototype.getMessageList = function getMessageList (to, message, callback) {
+Messages.prototype.getMessageList = function getMessageList (callback) {
 	this.request("/getmessagelist", {
 		uKey: this.account.uKey
 	}, this.parseData.bind(this, function (err, data) {
