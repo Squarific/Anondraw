@@ -15,6 +15,7 @@ var database = mysql.createConnection({
 });
 
 var PlayerDatabase = require("./scripts/PlayerDatabase.js");
+var MessageDatabase = require("./scripts/MessageDatabase.js");
 var Sessions = require("./scripts/Sessions.js");
 
 var playerDatabase = new PlayerDatabase(database);
