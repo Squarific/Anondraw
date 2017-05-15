@@ -37,7 +37,7 @@ Anondraw.prototype.createSideMenu = function createSideMenu () {
 		{
 			icon: "bullhorn",
 			text: "Feedback",
-			href: "javascript:MyOtziv.mo_show_box();"
+			href: "javascript:MyOtziv.mo_show_box(); ga('send', 'event', 'feedback', 'open');;"
 		},
 		{
 			icon: "power-off",
@@ -54,6 +54,8 @@ Anondraw.prototype.createRouter = function createRouter () {
 	this.router
 	.on('/collab*', function () {	
 		this.initCollab();
+		ga('set', 'page', '/collab');
+		ga('send', 'pageview');
 		this.setContent(this.collabContainer);
 		this.collab.createAccountWindow(); // Dirty quick fix for syncing account status
 		this.collab.network.socket.emit("uKey", this.account.uKey);
@@ -61,41 +63,61 @@ Anondraw.prototype.createRouter = function createRouter () {
 	}.bind(this))
 	.on('/messages/:id/:username', function (params) {
 		this.setContent(this.createMessagePage(params));
+		ga('set', 'page', '/messages/send');
+		ga('send', 'pageview');
 	}.bind(this))
 	.on('/messages*', function () {
 		this.setContent(this.createMessagePage());
+		ga('set', 'page', '/messages');
+		ga('send', 'pageview');
 	}.bind(this))
 	.on('/feed*', function () {
 		this.setContent(document.createTextNode("Feed"));
+		ga('set', 'page', '/feed');
+		ga('send', 'pageview');
 	}.bind(this))
 	.on('/login*', function () {
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
+				ga('set', 'page', '/alreadyLoggedIn');
+				ga('send', 'pageview');
 				this.router.navigate("/collab");
 				return;
 			}
 			
 			this.setContent(this.createLoginPage());
 		}.bind(this));
+		ga('set', 'page', '/login');
+		ga('send', 'pageview');
 	}.bind(this))
 	.on('/register*', function () {
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
+				ga('set', 'page', '/alreadyLoggedIn');
+				ga('send', 'pageview');
 				this.router.navigate("/collab");
 				return;
 			}
 			
 			this.setContent(this.createRegisterPage());
+			ga('set', 'page', '/register');
+			ga('send', 'pageview');
 		}.bind(this));
 	}.bind(this))
 	.on('/logout', function () {
 		this.setContent(this.createLogoutPage());
+			ga('set', 'page', '/logout');
+			ga('send', 'pageview');
 	}.bind(this))
 	.on('/settings*', function () {
 		this.setContent(document.createTextNode("Settings"));
+		ga('set', 'page', '/settings');
+		ga('send', 'pageview');
 	}.bind(this))
 	.on('/new*', function () {
 		this.router.navigate("/collab");
+		ga('set', 'page', '/new');
+		ga('send', 'pageview');
 	}.bind(this))
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */
@@ -103,10 +125,15 @@ Anondraw.prototype.createRouter = function createRouter () {
 		
 		if (false) this.router.navigate("/feed");
 		else this.setContent(this.createHome());
+		
+		ga('set', 'page', '/');
+		ga('send', 'pageview');
 	}.bind(this))
 	.notFound(function (query) {
 		console.log(query);
-		this.setContent(document.createTextNode("This page could not be found ;("));
+		this.setContent(document.createTextNode("This page could not be found ;("));		
+		ga('set', 'page', '/notfound');
+		ga('send', 'pageview');
 	}.bind(this));
 	
 	this.router.updatePageLinks();
