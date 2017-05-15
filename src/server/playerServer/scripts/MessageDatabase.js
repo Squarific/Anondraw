@@ -12,7 +12,7 @@ MessageDatabase.prototype.addMessage = function addMessage (userId, to, message,
 };
 
 MessageDatabase.prototype.getMessageList = function getMessageList (userId, callback) {
-	this.database.query("SELECT partner, last_username FROM (SELECT toId as partner FROM messages WHERE fromId = ? UNION DISTINCT SELECT fromId as partner FROM messages WHERE toId = ?) as partners JOIN users ON partners.partner = users.id;", [userId, userId], function (err, rows, fields) {
+	this.database.query("SELECT partner, last_username FROM (SELECT toId as partner FROM messages WHERE fromId = ? UNION DISTINCT SELECT fromId as partner FROM messages WHERE toId = ?) as partners JOIN users ON partners.partner = users.id", [userId, userId], function (err, rows, fields) {
 		callback(err, rows);
 	});
 };
