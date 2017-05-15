@@ -19,7 +19,7 @@ MessageDatabase.prototype.getMessageList = function getMessageList (userId, call
 
 MessageDatabase.prototype.getMessages = function getMessages (userId, partnerId, beforeId, callback) {
 	var whereClause = "((toId = ? AND fromId = ?) OR (toId = ? AND fromId = ?))" + (beforeId ? " AND send < (SELECT send FROM messages WHERE id = ?)": "");
-	var query = "SELECT * FROM messages WHERE " + whereClause + " ORDER BY send LIMIT " + MESSAGES_PER_REQUEST;
+	var query = "(SELECT * FROM messages WHERE " + whereClause + " ORDER BY send DESC LIMIT " + MESSAGES_PER_REQUEST + ") ORDER BY send ASC";
 	var arguments = [userId, partnerId, partnerId, userId, beforeId];
 	
 	this.database.query(query, arguments, function (err, results, fields) {
