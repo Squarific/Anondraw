@@ -318,6 +318,7 @@
     margin: 0.5em;
     width: 80%;
 	float:right;
+	overflow:hidden;
 }
 
 .message.fromPartner {
@@ -353,5 +354,13 @@
 	
 	.accountform span {
 		text-align:center;
+	}
+	
+	.messagecard {
+		flex-direction:column;
+	}
+	
+	.conversationContainer {
+		width:100%;
 	}
 }

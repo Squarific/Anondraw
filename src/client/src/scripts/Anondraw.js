@@ -114,6 +114,11 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('set', 'page', '/settings');
 		ga('send', 'pageview');
 	}.bind(this))
+	.on('/faq*', function () {
+		this.setContent(this.createFaqPage());
+		ga('set', 'page', '/faq');
+		ga('send', 'pageview');
+	}.bind(this))
 	.on('/new*', function () {
 		this.router.navigate("/collab");
 		ga('set', 'page', '/new');
@@ -173,4 +178,5 @@ Anondraw.prototype.setContent = function setContent (domNode) {
 	
 	this.sideMenu.content.appendChild(domNode);
 	this.router.updatePageLinks();
+	pw_load ? pw_load() : "";
 };

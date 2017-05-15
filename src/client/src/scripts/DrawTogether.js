@@ -3751,8 +3751,6 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 		goog_report_join();
 	}.bind(this));
-
-	pw_load();
 };
 
 DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings () {

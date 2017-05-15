@@ -164,6 +164,17 @@ Anondraw.prototype.createMessagePage = function createMessagePage (params) {
 		}.bind(this));
 	}.bind(this));
 	
+	var adContainer = container.appendChild(document.createElement("div"));
+	adContainer.className = "adcontainer";
+
+	var ad = '<!-- Project Wonderful Ad Box Code -->' +
+	         '<div style="text-align:center;"><div style="display:inline-block;" id="pw_adbox_80229_5_0"></div></div>' +
+	         '<script type="text/javascript"></script>' +
+	         '<noscript><div style="text-align:center;"><div style="display:inline-block;"><map name="admap80229" id="admap80229"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=80229&type=5" shape="rect" coords="0,0,728,90" title="" alt="" target="_blank" /></map>' +
+	         '<table cellpadding="0" cellspacing="0" style="width:728px;border-style:none;background-color:#eef2f5;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=80229&type=5" style="width:728px;height:90px;border-style:none;" usemap="#admap80229" alt="" /></td></tr><tr><td style="background-color:#eef2f5;" colspan="1"><center><a style="font-size:10px;color:#364350;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=80229&type=5" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table></div></div>' +
+	         '</noscript>' +
+	         '<!-- End Project Wonderful Ad Box Code -->';
+	adContainer.innerHTML = ad;
 	
 	return container;
 }
