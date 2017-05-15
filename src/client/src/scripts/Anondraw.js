@@ -66,6 +66,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.collab.createAccountWindow(); // Dirty quick fix for syncing account status
 		if (this.collab.network.socket) this.collab.network.socket.emit("uKey", this.account.uKey);
 		this.collab.paint.resize();
+		this.collab.chat.scrollChat();
 	}.bind(this))
 	.on('/messages/:id/:username', function (params) {
 		this.setContent(this.createMessagePage(params));
