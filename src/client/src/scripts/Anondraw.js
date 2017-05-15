@@ -35,6 +35,12 @@ Anondraw.prototype.createSideMenu = function createSideMenu () {
 			navigo: true
 		},
 		{
+			icon: "question-circle",
+			text: "FAQ",
+			href: "/faq",
+			navigo: true
+		},
+		{
 			icon: "bullhorn",
 			text: "Feedback",
 			href: "javascript:MyOtziv.mo_show_box(); ga('send', 'event', 'feedback', 'open');;"

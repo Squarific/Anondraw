@@ -329,6 +329,18 @@
 	background:#526475 !important;
 }
 
+.faqcard {
+	flex-direction:column;
+	padding:2em;
+}
+
+.question-container {
+    background: #364350;
+	margin-bottom: 2em;
+    padding: 2em;
+	width: 100%;
+}
+
 
 @media (max-width:750px) {
 	.card {

@@ -11,8 +11,8 @@ Anondraw.prototype.createFaqPage = function createFaqPage () {
 	logo.href = "/";
 	logo.setAttribute("data-navigo", "");
 	
-	var messages = container.appendChild(document.createElement("div"));
-	messages.className = "card faqcard";
+	var faq = container.appendChild(document.createElement("div"));
+	faq.className = "card faqcard";
 	
 	var questions = [{
 		question: "What is anondraw?",
@@ -77,7 +77,7 @@ Anondraw.prototype.createFaqPage = function createFaqPage () {
 
 	for (var qKey = 0; qKey < questions.length; qKey++) {
 		var question = faq.appendChild(document.createElement("div"));
-		question.className = "card questioncard";
+		question.className = "question-container";
 
 		var qhead = question.appendChild(document.createElement("h2"));
 		qhead.className = "question";
