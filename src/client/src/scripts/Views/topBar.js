@@ -26,6 +26,7 @@ Anondraw.prototype.createTopBar = function createTopBar () {
 	
 	var clear = topBar.appendChild(document.createElement("div"));
 	clear.style.clear = "both";
+	console.log(clear);
 	
 	this.account.isLoggedIn(function (err, isLoggedIn) {
 		if (isLoggedIn) {
