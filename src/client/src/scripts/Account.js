@@ -218,6 +218,7 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 			}
 
 			this.id = data.id;
+			this.lastLoginCheck = Date.now();
 			
 			// Our uKey is still valid
 			setTimeout(function () {
