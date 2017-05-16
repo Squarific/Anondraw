@@ -1,15 +1,7 @@
 Anondraw.prototype.createFaqPage = function createFaqPage () {
 	var container = document.createElement("div");
 	
-	
-	var topBar = container.appendChild(document.createElement("div"));
-	topBar.className = "topbar";
-	
-	var logo = topBar.appendChild(document.createElement("a"));
-	logo.appendChild(document.createTextNode("Anondraw"));
-	logo.className = "logo";
-	logo.href = "/";
-	logo.setAttribute("data-navigo", "");
+	container.appendChild(this.createTopBar());
 	
 	var faq = container.appendChild(document.createElement("div"));
 	faq.className = "card faqcard";
