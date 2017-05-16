@@ -133,7 +133,10 @@ Anondraw.prototype.createRouter = function createRouter () {
 	}.bind(this))
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */
-		if (location.hash) location = "collab/" + location.hash;
+		if (location.hash && location.hash.indexOf("pw_adbox") == -1) {
+			this.router.navigate("collab/" + location.hash);
+			return;
+		}
 		
 		if (false) this.router.navigate("/feed");
 		else this.setContent(this.createHome());
