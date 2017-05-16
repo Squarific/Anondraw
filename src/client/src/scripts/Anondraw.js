@@ -134,7 +134,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */
 		if (location.hash && location.hash.indexOf("pw_adbox") == -1) {
-			this.router.navigate("collab/" + location.hash);
+			location = location.origin + "/collab" + location.hash;
 			return;
 		}
 		
