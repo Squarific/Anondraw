@@ -26,6 +26,13 @@ Anondraw.prototype.createHome = function createHome () {
 	loginButton.appendChild(document.createTextNode("Log in"));
 	loginButton.setAttribute("data-navigo", "");
 	
+	this.account.isLoggedIn(function (err, isLoggedIn) {
+		if (isLoggedIn) {
+			registerButton.parentNode.removeChild(registerButton);
+			loginButton.parentNode.removeChild(loginButton);
+		}
+	});
+	
 	topBar.appendChild(document.createElement("div")).style.clear = "both";
 	
 	/*

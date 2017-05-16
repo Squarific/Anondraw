@@ -37,8 +37,10 @@ Anondraw.prototype.createMessagePage = function createMessagePage (params) {
 			var a = messages.appendChild(document.createElement("a"));
 			a.href = "/login";
 			a.appendChild(document.createTextNode("Click here to login"));
+			a.setAttribute("data-navigo", "");
 			console.log(err);
 			messages.style.cursor = "";
+			this.router.updatePageLinks();
 			return;
 		}
 		
