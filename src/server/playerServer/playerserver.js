@@ -39,6 +39,18 @@ var server = http.createServer(function (req, res) {
 		"Access-Control-Allow-Origin": "*",
 		"Content-Type": "application/json"
 	});
+	
+	if (parsedUrl.pathname == "/profile") {
+		var userId = parsedUrl.query.user;
+
+		playerDatabase.getProfile(userId, function (err, data) {
+			res.end(JSON.stringify({
+				err: err,
+				data: data
+			}));
+		});
+		return;
+	}
 
 	if (parsedUrl.pathname == "/login") {
 		var email = parsedUrl.query.email;

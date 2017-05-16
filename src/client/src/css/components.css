@@ -325,6 +325,14 @@
     float: left;
 }
 
+.conversations div.unread {
+	background:#798896;
+}
+
+.conversations div.unread:hover {
+	background:#6e7b88;
+}
+
 .selected {
 	background:#526475 !important;
 }

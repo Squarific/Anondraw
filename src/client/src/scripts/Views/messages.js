@@ -82,6 +82,7 @@ Anondraw.prototype.createMessagePage = function createMessagePage (params) {
 			function showConversation (partner, conversation) {
 				lastSelected ? lastSelected.classList.remove("selected") : "";
 				conversation.classList.add("selected");
+				conversation.classList.remove("unread");
 				lastSelected = conversation;
 				
 				while (conversationContainer.firstChild) conversationContainer.removeChild(conversationContainer.firstChild);
@@ -150,6 +151,7 @@ Anondraw.prototype.createMessagePage = function createMessagePage (params) {
 				var conversation = conversations.appendChild(document.createElement("div"));
 				conversation.appendChild(document.createTextNode(data.list[k].last_username));
 				conversation.addEventListener("click", showConversation.bind(this, data.list[k].partner, conversation));
+				data.list[k].isRead ? "" : conversation.classList.add("unread");
 				if (k == target) showConversation.call(this, data.list[target].partner, conversation);
 			}
 		}.bind(this));

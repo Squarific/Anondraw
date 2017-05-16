@@ -6,13 +6,13 @@ function MessageDatabase (database) {
 
 /* callback(err, messageId) */
 MessageDatabase.prototype.addMessage = function addMessage (userId, to, message, callback) {
-	this.database.query("INSERT INTO messages (fromId, toId, message, send) VALUES (?, ?, ?, ?)", [userId, to, message, new Date()], function (err, results, fields) {
+	this.database.query("INSERT INTO messages (fromId, toId, message, send, read) VALUES (?, ?, ?, ?, 0)", [userId, to, message, new Date()], function (err, results, fields) {
 		callback(err, results.insertId);
 	});
 };
 
 MessageDatabase.prototype.getMessageList = function getMessageList (userId, callback) {
-	this.database.query("SELECT partner, last_username FROM (SELECT toId as partner FROM messages WHERE fromId = ? UNION DISTINCT SELECT fromId as partner FROM messages WHERE toId = ?) as partners JOIN users ON partners.partner = users.id", [userId, userId], function (err, rows, fields) {
+	this.database.query("SELECT partner, last_username, MIN(isRead) FROM (SELECT toId as partner, isRead FROM messages WHERE fromId = 1 UNION ALL SELECT fromId, isRead as partner FROM messages WHERE toId = 1) as partners JOIN users ON partners.partner = users.id GROUP BY partner", [userId, userId], function (err, rows, fields) {
 		callback(err, rows);
 	});
 };
