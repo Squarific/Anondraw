@@ -27,7 +27,7 @@ MessageDatabase.prototype.getMessages = function getMessages (userId, partnerId,
 	});
 	
 	arguments.push(userId);
-	this.database.query("UPDATE messages SET isRead = 1 WHERE " + whereClause + " AND toId = ?", arguments);
+	this.database.query("UPDATE messages SET isRead = 1 WHERE toId = ? AND fromId = ?", [userId, partnerId]);
 };
 
 module.exports = MessageDatabase;
