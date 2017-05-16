@@ -12,7 +12,7 @@ MessageDatabase.prototype.addMessage = function addMessage (userId, to, message,
 };
 
 MessageDatabase.prototype.getMessageList = function getMessageList (userId, callback) {
-	this.database.query("SELECT partner, last_username, CAST(MIN(isRead) AS INT) as isRead FROM (SELECT toId as partner, isRead FROM messages WHERE fromId = 1 UNION ALL SELECT fromId, isRead as partner FROM messages WHERE toId = 1) as partners JOIN users ON partners.partner = users.id GROUP BY partner", [userId, userId], function (err, rows, fields) {
+	this.database.query("SELECT partner, last_username, CAST(MIN(isRead) AS INT) as isRead FROM (SELECT toId as partner, 1 as isRead FROM messages WHERE fromId = ? UNION ALL SELECT fromId as partner, isRead FROM messages WHERE toId = ?) as partners JOIN users ON partners.partner = users.id GROUP BY partner", [userId, userId], function (err, rows, fields) {
 		callback(err, rows);
 	});
 };
@@ -26,7 +26,8 @@ MessageDatabase.prototype.getMessages = function getMessages (userId, partnerId,
 		callback(err, results);
 	});
 	
-	this.database.query("UPDATE messages SET isRead = 1 WHERE " + whereClause, arguments);
+	arguments.push(userId);
+	this.database.query("UPDATE messages SET isRead = 1 WHERE " + whereClause + " AND toId = ?", arguments);
 };
 
 module.exports = MessageDatabase;
