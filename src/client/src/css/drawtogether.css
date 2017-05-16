@@ -476,7 +476,7 @@ input.paint-texttool {
   overflow: hidden;
   overflow-y: auto;
   background: #364350;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Noto Sans", sans-serif;
   font-size: .8em;
 }
 
@@ -574,7 +574,7 @@ input.paint-texttool {
   width: 20rem;
   overflow: hidden;
   background: #E0E5E7;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Noto Sans", sans-serif;
   font-size: 0.8em; }
   .drawtogether-chat-container .messagecontainer {
     height: calc(100% - 3rem);
