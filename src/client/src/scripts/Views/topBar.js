@@ -24,7 +24,8 @@ Anondraw.prototype.createTopBar = function createTopBar () {
 	loginButton.appendChild(document.createTextNode("Log in"));
 	loginButton.setAttribute("data-navigo", "");
 	
-	var clear = topBar.appendChild(document.createElement("div")).style.clear = "both";
+	var clear = topBar.appendChild(document.createElement("div"));
+	clear.style.clear = "both";
 	
 	this.account.isLoggedIn(function (err, isLoggedIn) {
 		if (isLoggedIn) {
