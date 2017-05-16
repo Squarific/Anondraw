@@ -26,7 +26,6 @@ Anondraw.prototype.createTopBar = function createTopBar () {
 	
 	var clear = topBar.appendChild(document.createElement("div"));
 	clear.style.clear = "both";
-	console.log(clear);
 	
 	this.account.isLoggedIn(function (err, isLoggedIn) {
 		if (isLoggedIn) {
@@ -41,7 +40,7 @@ Anondraw.prototype.createTopBar = function createTopBar () {
 			collabButton.setAttribute("data-navigo", "");
 			
 			this.router.updatePageLinks();
-			var clear = topBar.appendChild(document.createElement("div")).style.clear = "both";
+			clear = topBar.appendChild(document.createElement("div")).style.clear = "both";
 		}
 	}.bind(this));
 	
