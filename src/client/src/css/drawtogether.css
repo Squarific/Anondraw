@@ -1,10 +1,9 @@
-@import url("http://fonts.googleapis.com/css?family=Open+Sans");
 html, body {
   margin: 0;
   padding: 0;}
 
 body, input, textarea, button {
-  font-family: "Open Sans";
+  font-family: 'Noto Sans', sans-serif;
   font-size: 1em; }
 
 input, button, textarea {
