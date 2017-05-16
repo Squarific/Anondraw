@@ -6,7 +6,7 @@ function MessageDatabase (database) {
 
 /* callback(err, messageId) */
 MessageDatabase.prototype.addMessage = function addMessage (userId, to, message, callback) {
-	this.database.query("INSERT INTO messages (fromId, toId, message, send, read) VALUES (?, ?, ?, ?, 0)", [userId, to, message, new Date()], function (err, results, fields) {
+	this.database.query("INSERT INTO messages (fromId, toId, message, send, isRead) VALUES (?, ?, ?, ?, 0)", [userId, to, message, new Date()], function (err, results, fields) {
 		callback(err, results && results.insertId);
 	});
 };
