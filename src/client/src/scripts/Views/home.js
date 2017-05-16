@@ -30,8 +30,16 @@ Anondraw.prototype.createHome = function createHome () {
 		if (isLoggedIn) {
 			registerButton.parentNode.removeChild(registerButton);
 			loginButton.parentNode.removeChild(loginButton);
+			
+			var collabButton = topBar.appendChild(document.createElement("a"));
+			collabButton.className = "button";
+			collabButton.href = "/collab";
+			collabButton.appendChild(document.createTextNode("Open Collab App"));
+			collabButton.setAttribute("data-navigo", "");
+			
+			this.router.updatePageLinks();
 		}
-	});
+	}.bind(this));
 	
 	topBar.appendChild(document.createElement("div")).style.clear = "both";
 	
