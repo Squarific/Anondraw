@@ -40,7 +40,8 @@ Anondraw.prototype.createTopBar = function createTopBar () {
 			collabButton.setAttribute("data-navigo", "");
 			
 			this.router.updatePageLinks();
-			clear = topBar.appendChild(document.createElement("div")).style.clear = "both";
+			clear = topBar.appendChild(document.createElement("div"));
+			clear.style.clear = "both";
 		}
 	}.bind(this));
 	
