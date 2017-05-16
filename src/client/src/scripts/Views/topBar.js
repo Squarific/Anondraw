@@ -24,22 +24,24 @@ Anondraw.prototype.createTopBar = function createTopBar () {
 	loginButton.appendChild(document.createTextNode("Log in"));
 	loginButton.setAttribute("data-navigo", "");
 	
+	var clear = topBar.appendChild(document.createElement("div")).style.clear = "both";
+	
 	this.account.isLoggedIn(function (err, isLoggedIn) {
 		if (isLoggedIn) {
 			registerButton.parentNode.removeChild(registerButton);
 			loginButton.parentNode.removeChild(loginButton);
+			clear.parentNode.removeChild(clear);
 			
 			var collabButton = topBar.appendChild(document.createElement("a"));
-			collabButton.className = "button";
+			collabButton.className = "button signup";
 			collabButton.href = "/collab";
 			collabButton.appendChild(document.createTextNode("Open Collab App"));
 			collabButton.setAttribute("data-navigo", "");
 			
 			this.router.updatePageLinks();
+			var clear = topBar.appendChild(document.createElement("div")).style.clear = "both";
 		}
 	}.bind(this));
-	
-	topBar.appendChild(document.createElement("div")).style.clear = "both";
 	
 	return topBar;
 };
