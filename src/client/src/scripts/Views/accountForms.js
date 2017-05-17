@@ -52,7 +52,7 @@ Anondraw.prototype.createLoginPage = function createLoginPage () {
 			if (err) {
 				error.appendChild(document.createTextNode(err));
 				accountForm.classList.remove("disabled");
-				ga("send", "event", "error", "register");
+				ga("send", "event", "error", "login");
 				return;
 			}
 			
