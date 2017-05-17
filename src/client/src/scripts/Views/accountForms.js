@@ -52,6 +52,7 @@ Anondraw.prototype.createLoginPage = function createLoginPage () {
 			if (err) {
 				error.appendChild(document.createTextNode(err));
 				accountForm.classList.remove("disabled");
+				ga("send", "event", "error", "register");
 				return;
 			}
 			
@@ -129,8 +130,12 @@ Anondraw.prototype.createRegisterPage = function createRegisterPage () {
 			if (err) {
 				error.appendChild(document.createTextNode(err));
 				accountForm.classList.remove("disabled");
+				ga("send", "event", "error", "register");
 				return;
 			}
+			
+			goog_report_register();
+			ga("send", "event", "conversion", "register");
 			
 			this.router.navigate("/new");
 		}.bind(this));
