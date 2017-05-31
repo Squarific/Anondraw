@@ -6,6 +6,15 @@ from users as u
 group by u.id
 order by reputation desc ;
 
+-- Reputation per user only users who are referred
+select u.id, count(*) as reputation, u.last_username, referral
+from users as u
+    inner join reputations as r
+        on r.to_id = u.id
+where referral != 0
+group by u.id
+order by reputation desc ;
+
 -- Accountbans with last_username, startdate, enddate, reputation, banned_by, banner.last_username and reason
 SELECT
     users.last_username,

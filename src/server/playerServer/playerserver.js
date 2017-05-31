@@ -15,9 +15,11 @@ var database = mysql.createConnection({
 });
 
 var PlayerDatabase = require("./scripts/PlayerDatabase.js");
+var MessageDatabase = require("./scripts/MessageDatabase.js");
 var Sessions = require("./scripts/Sessions.js");
 
 var playerDatabase = new PlayerDatabase(database);
+var messageDatabase = new MessageDatabase(database);
 var sessions = new Sessions();
 
 // Ips from coinbase
@@ -37,6 +39,18 @@ var server = http.createServer(function (req, res) {
 		"Access-Control-Allow-Origin": "*",
 		"Content-Type": "application/json"
 	});
+	
+	if (parsedUrl.pathname == "/profile") {
+		var userId = parsedUrl.query.user;
+
+		playerDatabase.getProfile(userId, function (err, data) {
+			res.end(JSON.stringify({
+				err: err,
+				data: data
+			}));
+		});
+		return;
+	}
 
 	if (parsedUrl.pathname == "/login") {
 		var email = parsedUrl.query.email;
@@ -73,12 +87,14 @@ var server = http.createServer(function (req, res) {
 	if (parsedUrl.pathname == "/register") {
 		var email = parsedUrl.query.email;
 		var pass = parsedUrl.query.pass;
-		var referral = parsedUrl.query.referral;
+		var referral = parseInt(parsedUrl.query.referral);
 
 		if (!email || !pass) {
 			res.end('{"error": "No user or password provided"}');
 			return;
 		}
+		
+		if (referral !== referral) referral = 0;
 
 		playerDatabase.isIpBanned(req.connection.remoteAddress, function (err, banned, info) {
 			if (err) {
@@ -187,6 +203,80 @@ var server = http.createServer(function (req, res) {
 			res.end(JSON.stringify({
 				err: err,
 				list: list
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/sendmessage") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var to = parsedUrl.query.to;
+		var message = parsedUrl.query.message;
+		
+		if (message.length > 1024) {
+			res.end('{"error": "Messages should not be longer than 1024 characters"}');
+			return;
+		}
+
+		if (!user) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		console.log("[SEND MESSAGE]", user.id, to, message);
+		messageDatabase.addMessage(user.id, to, message, function (err, id) {
+			res.end(JSON.stringify({
+				err: err,
+				id: id
+			}));
+		});
+		return;
+	}
+	
+	/*
+		Returns the list of conversations for a given user
+	*/
+	if (parsedUrl.pathname == "/getmessagelist") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		messageDatabase.getMessageList(user.id, function (err, list) {
+			res.end(JSON.stringify({
+				err: err,
+				list: list
+			}));
+		});
+		return;
+	}
+	
+	/*
+		Returns the MESSAGES_PER_REQUEST messages before the given message
+		if no message is given, gives the last MESSAGES_PER_REQUEST messages
+	*/
+	if (parsedUrl.pathname == "/getmessages") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var before = parseInt(parsedUrl.query.before);
+		var partner = parsedUrl.query.partner;
+		
+		// If before is NaN, we force it to be undefined
+		if (before !== before) before = undefined;
+
+		if (!user) {
+			res.end('{"error": "You are not logged in!"}');
+			return;
+		}
+
+		messageDatabase.getMessages(user.id, partner, before, function (err, messages) {
+			res.end(JSON.stringify({
+				err: err,
+				messages: messages
 			}));
 		});
 		return;

@@ -1,6 +1,7 @@
-function DrawTogether (container, settings, emotesHash) {
+function DrawTogether (container, settings, emotesHash, account, router) {
 	// Normalize settings, set container
 	this.container = container;
+	this.router = router;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
 	this.userSettings = QuickSettings.create(0, 0, "settings");
@@ -40,7 +41,7 @@ function DrawTogether (container, settings, emotesHash) {
 	this.regionsContainer = null;
 
 	this.network = new Network(this.settings.loadbalancer);
-	this.account = new Account(this.settings.accountServer);
+	this.account = account || new Account(this.settings.accountServer);
 	this.bindSocketHandlers();
 	this.emotesHash = emotesHash;
 
@@ -942,7 +943,7 @@ DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
 };
 
 DrawTogether.prototype.openModeSelector = function openModeSelector () {
-	this.selectWindow.style.display = "block";
+	this.selectWindow.style.display = "flex";
 };
 
 DrawTogether.prototype.closeChatFilterWindow = function closeChatFilterWindow () {
@@ -1076,9 +1077,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var kickbanButton = document.createElement("span");
-		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
-
-		kickbanButton.appendChild(document.createTextNode("B"));
+		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button fa fa-trash";
 
 		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
 
@@ -1086,12 +1085,18 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	}
 
 	var upvoteButton = document.createElement("span");
-	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button"
-	upvoteButton.appendChild(document.createTextNode("▲"));
+	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-caret-up";
 
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
+	
+	var messageButton = document.createElement("span");
+	messageButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-envelope";
+
+	messageButton.addEventListener("click", function (userid, event) {
+		this.router.navigate("/messages/" + userid + "/" + player.name);
+	}.bind(this, player.userid));
 
 	var nameText = document.createElement("span");
 	nameText.className = "drawtogether-player-name";
@@ -1108,6 +1113,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	nameText.appendChild(document.createTextNode(player.name + rep + score + appendedText))
 
 	playerDom.appendChild(upvoteButton);
+	playerDom.appendChild(messageButton);
 	playerDom.appendChild(nameText);
 
 	return playerDom;
@@ -1151,18 +1157,22 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	}.bind(this, player.id));
 
 	var upvoteButton = document.createElement("span");
-	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button"
-	upvoteButton.appendChild(document.createTextNode("▲"));
+	upvoteButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-caret-up";
 
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
+	
+	var messageButton = document.createElement("span");
+	messageButton.className = "drawtogether-player-button fa fa-envelope";
+
+	messageButton.addEventListener("click", function (userid, event) {
+		this.router.navigate("/messages/" + userid + "/" + player.name);
+	}.bind(this, player.userid));
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var kickbanButton = document.createElement("span");
-		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button";
-
-		kickbanButton.appendChild(document.createTextNode("B"));
+		kickbanButton.className = "drawtogether-player-button drawtogether-kickban-button fa fa-trash";
 
 		kickbanButton.addEventListener("click", this.kickban.bind(this, player.id));
 
@@ -1193,6 +1203,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
 
 	playerDom.appendChild(upvoteButton);
+	playerDom.appendChild(messageButton);
 	playerDom.appendChild(nameText);
 
 	var iconDom = document.createElement("span");
@@ -2048,7 +2059,7 @@ DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 };
 
 DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, element) {
-	this.account.setCoordFavorite(newX, newY, x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.setCoordFavorite(newX, newY, x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Changing coordinate of Favorite", "Error: " + err);
 			return;
@@ -2062,7 +2073,7 @@ DrawTogether.prototype.setCoordFavorite = function (newX, newY, x, y, name, elem
 };
 
 DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
-	this.account.removeFavorite(x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.removeFavorite(x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Removing Favorite", "Error: " + err);
 			return;
@@ -2075,7 +2086,7 @@ DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
 	}.bind(this));
 };
 DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
-	this.account.renameFavorite(x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.renameFavorite(x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Renaming Favorite", "Error: " + err);
 			return;
@@ -2089,7 +2100,7 @@ DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
 };
 
 DrawTogether.prototype.getFavorites = function () {
-	this.account.getFavorites(drawTogether.current_room, function (err, result) {
+	this.account.getFavorites(this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
 			return;
@@ -2118,7 +2129,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 		return;
 	}
 
-	this.account.createFavorite(x, y, name, drawTogether.current_room, function (err, result) {
+	this.account.createFavorite(x, y, name, this.current_room, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Favorite", "Error: " + err);
 			return;
@@ -3375,7 +3386,6 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	var accWindow = this.container.appendChild(document.createElement("div"));
 	accWindow.className = "drawtogether-window drawtogether-accountwindow";
 	this.accWindow = accWindow;
-	this.accWindow.appendChild(document.createTextNode("Loading session data ..."));
 
 	this.account.checkLogin(function (err, loggedIn) {
 		var formContainer = accWindow.appendChild(document.createElement("div"));
@@ -3694,16 +3704,6 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	selectWindow.className = "drawtogether-selectwindow";
 	this.selectWindow = selectWindow;
 
-	var text = selectWindow.appendChild(document.createElement("h1"));
-	text.appendChild(document.createTextNode("Anondraw - Draw with friends or strangers!"));
-	text.className = "drawtogether-welcome-text";
-
-	var text = selectWindow.appendChild(document.createElement("div"));
-	text.className = "drawtogether-welcome-text-box";
-	
-	var textContainer = text.appendChild(document.createElement("span"));
-	textContainer.appendChild(document.createTextNode("Realtime paint on an unlimited canvas."));
-
 	var buttonContainer = selectWindow.appendChild(document.createElement("div"));
 	buttonContainer.className = "drawtogether-buttoncontainer";
 
@@ -3751,18 +3751,6 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 		this.selectWindow.style.display = "";
 		goog_report_join();
 	}.bind(this));
-
-	selectWindow.appendChild(this.createFAQDom());
-
-	this.redditDrawings = selectWindow.appendChild(document.createElement("div"));
-	this.redditDrawings.className = "drawtogether-redditdrawings";
-	this.populateRedditDrawings();
-
-	var contactInfo = selectWindow.appendChild(document.createElement("div"));
-	contactInfo.appendChild(document.createTextNode("Feedback/contact: info@anondraw.com"));
-	contactInfo.classList.add("contactinfo");
-
-	pw_load();
 };
 
 DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings () {
@@ -4446,7 +4434,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		value: "",
 		text: "Home",
-		title: "Go to home menu",
+		title: "Go to the home screen",
 		action: this.openModeSelector.bind(this),
 		data: {
 			intro: "Use this to return to the FAQ and mode selection."
