@@ -1215,7 +1215,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	var player = anondraw.collab.playerFromId("/#GlaB-8yeOKYPWSfBAAAN")
+	var player = this.playerFromId(playerid);
 	var personText = "this person";
 	if(player && player.name) {
 		personText = player.name;
