@@ -391,7 +391,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		if (self.current_room) {
 			var room = self.current_room;
 			delete self.current_room;
-			self.changeRoom(room, undefined, 0, 0, true);
+			self.changeRoom(room, undefined, self.paint.public.leftTopX || 0, self.paint.public.leftTopY || 0, true);
 		}
 	});
 
