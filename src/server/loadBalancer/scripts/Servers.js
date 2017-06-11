@@ -177,6 +177,7 @@ Servers.prototype.clean = function clean () {
 			var url = servers[k].url.slice(7); // slice out 'http://'
 			this.servers.splice(k, 1);
 			var id = this.add(url);
+			k--;
 			console.log("[REMOVEDHTTP]", id, url);
 		}
 	}
