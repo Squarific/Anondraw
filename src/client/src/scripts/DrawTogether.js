@@ -391,7 +391,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		if (self.current_room) {
 			var room = self.current_room;
 			delete self.current_room;
-			self.changeRoom(room, undefined, 0, 0, true);
+			self.changeRoom(room, undefined, self.paint.public.leftTopX || 0, self.paint.public.leftTopY || 0, true);
 		}
 	});
 
@@ -1219,7 +1219,12 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 };
 
 DrawTogether.prototype.kickban = function kickban (playerid) {
-	this.gui.prompt("How long do you want to kickban this person for? (minutes)", ["freepick", "10 year", "1 year", "1 month", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
+	var player = this.playerFromId(playerid);
+	var personText = "this person";
+	if(player && player.name) {
+		personText = player.name;
+	}
+	this.gui.prompt("How long do you want to kickban "+ personText +" for? (minutes)", ["freepick", "10 year", "1 year", "1 month", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
 		if (minutes == "10 year") minutes = 10 * 356 * 24 * 60;
 		if (minutes == "1 year") minutes = 356 * 24 * 60;
