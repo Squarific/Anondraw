@@ -19,7 +19,8 @@ function Register (server, key, io, port, listenServer) {
 	} else {
 		getIp(function (err, ip) {
 			if (err) throw err;
-
+			
+			ip = ip.replace(/(^\w+:|^)\/\//, '');
 			console.log("[STARTUP] Our ip is ", ip);
 			this.ip = ip;
 			this.register();
