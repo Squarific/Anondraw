@@ -173,13 +173,6 @@ Servers.prototype.clean = function clean () {
 			this.servers.splice(k, 1);
 			k--;
 		}
-		if (servers[k].url.indexOf("http://") == 0) {
-			var url = servers[k].url.slice(7); // slice out 'http://'
-			this.servers.splice(k, 1);
-			var id = this.add(url);
-			k--;
-			console.log("[REMOVEDHTTP]", id, url);
-		}
 	}
 };
 
