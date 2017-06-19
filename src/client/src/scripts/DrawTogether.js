@@ -1218,6 +1218,20 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	return playerDom;
 };
 
+DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom (playerName) {
+	var snapshotDom = document.createElement("div");
+	
+	var proofImgWindow = document.createElement("span");
+	proofImgWindow.className = "drawtogether-player-button";
+	proofImgWindow.textContent = "Open image proof";
+	proofImgWindow.addEventListener("click", function (e) {
+		this.exportImageFromSrc("Proof of grief by " + playerName, this.lastBanSnapshot);
+	}.bind(this));
+	
+	snapshotDom.appendChild(proofImgWindow);
+	return snapshotDom;
+};
+
 DrawTogether.prototype.kickban = function kickban (playerid) {
 	var player = this.playerFromId(playerid);
 	var personText = "this person";
@@ -1257,10 +1271,11 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 							this.chat.addMessage("SERVER", data.error || data.success);
 							if(data.success) {
 								this.takeSnapshotTimeout = setTimeout(function () {
-									ctx.drawImage(anondraw.collab.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
-									ctx.drawImage(anondraw.collab.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
+									ctx.drawImage(this.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
+									ctx.drawImage(this.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
 									this.lastBanSnapshot = tempSnapshotCanvas.toDataURL("image/png");
-									window.open(this.lastBanSnapshot, '_blank');  
+									this.chat.addElementAsMessage(createSnapshotChatDom(personText));
+									
 									this.takeSnapshotTimeout = undefined;
 								}.bind(this), 2000);
 							}
@@ -2424,6 +2439,16 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	img.alt = "Exported image";
 	
 	var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
+	exportwindow.classList.add("exportwindow");
+	exportwindow.appendChild(img);
+};
+
+DrawTogether.prototype.exportImageFromSrc = function (title, src) {
+	var img = document.createElement("img");
+	img.src = src
+	img.alt = "Exported image";
+	
+	var exportwindow = this.gui.createWindow({ title: title });
 	exportwindow.classList.add("exportwindow");
 	exportwindow.appendChild(img);
 };
