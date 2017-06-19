@@ -1228,7 +1228,7 @@ DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom (p
 		this.exportImageFromSrc("Proof of grief by " + playerName + " (right click to save)", this.lastBanSnapshot);
 	}.bind(this));
 	
-	var proofImgDownload = document.createElemet("a");
+	var proofImgDownload = document.createElement("a");
 	proofImgDownload.textContent = "Download image.";
 	proofImgDownload.href = this.lastBanSnapshot;
 	
