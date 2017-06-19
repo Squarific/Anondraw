@@ -1274,7 +1274,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 									ctx.drawImage(this.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
 									ctx.drawImage(this.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
 									this.lastBanSnapshot = tempSnapshotCanvas.toDataURL("image/png");
-									this.chat.addElementAsMessage(createSnapshotChatDom(personText));
+									this.chat.addElementAsMessage(this.createSnapshotChatDom(personText));
 									
 									this.takeSnapshotTimeout = undefined;
 								}.bind(this), 2000);
