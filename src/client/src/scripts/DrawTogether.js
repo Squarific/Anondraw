@@ -1220,8 +1220,32 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 				if (reason == "Cancel") return;
 				this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes. Reason: " + reason, ["Yes", "No"], function (confirmation) {
 					if (confirmation == "Yes") {
+						//snapshot
+						var tempSnapshotCanvas = document.createElement("canvas");
+						var canvasHeight = this.paint.public.canvas.height
+						var canvasWidth = this.paint.public.canvas.width;
+
+						tempSnapshotCanvas.width = canvasWidth;
+						tempSnapshotCanvas.height = canvasHeight * 2;
+
+						var ctx = tempSnapshotCanvas.getContext("2d");
+						ctx.drawImage(this.paint.background.canvas, 0, 0, canvasWidth, canvasHeight);
+						ctx.drawImage(this.paint.public.canvas, 0, 0, canvasWidth, canvasHeight);
+						this.lastBanSnapshot;
+						
 						this.network.socket.emit("kickban", [playerid, minutes, type, reason], function (data) {
 							this.chat.addMessage("SERVER", data.error || data.success);
+							if(data.success) {
+								this.takeSnapshotTimeout = setTimeout(function () {
+									ctx.drawImage(anondraw.collab.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
+									ctx.drawImage(anondraw.collab.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
+									this.lastBanSnapshot = asdf.toDataURL("image/png");
+									window.open(asdf.toDataURL("image/png"), '_blank');  
+									this.takeSnapshotTimeout = undefined;
+								}.bind(this), 2000);
+							}
+								
+							//if success then second snapshot and upload
 						}.bind(this));
 					}
 				}.bind(this));
