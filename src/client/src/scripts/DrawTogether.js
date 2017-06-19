@@ -1259,8 +1259,8 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 								this.takeSnapshotTimeout = setTimeout(function () {
 									ctx.drawImage(anondraw.collab.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
 									ctx.drawImage(anondraw.collab.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
-									this.lastBanSnapshot = asdf.toDataURL("image/png");
-									window.open(asdf.toDataURL("image/png"), '_blank');  
+									this.lastBanSnapshot = tempSnapshotCanvas.toDataURL("image/png");
+									window.open(this.lastBanSnapshot, '_blank');  
 									this.takeSnapshotTimeout = undefined;
 								}.bind(this), 2000);
 							}
