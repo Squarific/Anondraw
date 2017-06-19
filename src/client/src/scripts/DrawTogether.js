@@ -1225,11 +1225,11 @@ DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom (p
 	proofImgWindow.className = "drawtogether-player-button";
 	proofImgWindow.textContent = "View image before/after proof";
 	proofImgWindow.addEventListener("click", function (e) {
-		this.exportImageFromSrc("Proof of grief by " + playerName + " (right click to save), this.lastBanSnapshot);
+		this.exportImageFromSrc("Proof of grief by " + playerName + " (right click to save)", this.lastBanSnapshot);
 	}.bind(this));
 	
 	var proofImgDownload = document.createElemet("a");
-	proofImgDownload.textContent = "Download image."
+	proofImgDownload.textContent = "Download image.";
 	proofImgDownload.href = this.lastBanSnapshot;
 	
 	var cleanName =  playerName.replace(/([^a-z0-9]+)/gi, '-');
