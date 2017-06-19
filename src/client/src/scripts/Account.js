@@ -1,9 +1,23 @@
 function Account (server, uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";
 	this.mail = localStorage.getItem("drawtogether-mail");
+	this.lastLoginCheck; //Date.now() that we last checked if we were logged in
 	this.server = server;
 	setInterval(this.checkLogin.bind(this), 30 * 60 * 1000);
 }
+
+// Amount of time that we will assume we are logged in
+Account.prototype.loginCheckTimeout = 45 * 60 * 1000;
+
+// Same as checkLogin but caches result for loginCheckTimeout milliseconds
+Account.prototype.isLoggedIn = function (callback) {
+	if (Date.now() - this.lastLoginCheck < this.loginCheckTimeout) {
+		callback(null, !!this.uKey);
+		return;
+	}
+	
+	this.checkLogin(callback);
+};
 
 // Callback (err)
 Account.prototype.login = function login (email, unhashedPass, callback) {
@@ -75,6 +89,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 			this.uKey = data.uKey;
 			this.id = data.id;
 			this.mail = email;
+			this.lastLoginCheck = Date.now();
 			localStorage.setItem("drawtogether-uKey", data.uKey);
 			localStorage.setItem("drawtogether-mail", email);
 			localStorage.setItem("drawtogether-pass", pass);
@@ -106,6 +121,7 @@ Account.prototype.register = function register (email, pass, callback) {
 			this.uKey = data.uKey;
 			this.id = data.id;
 			this.mail = email;
+			this.lastLoginCheck = Date.now();
 			localStorage.setItem("drawtogether-uKey", data.uKey);
 			localStorage.setItem("drawtogether-mail", email);
 			localStorage.setItem("drawtogether-pass", pass);
@@ -202,6 +218,7 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 			}
 
 			this.id = data.id;
+			this.lastLoginCheck = Date.now();
 			
 			// Our uKey is still valid
 			setTimeout(function () {
@@ -229,11 +246,6 @@ Account.prototype.getReputationList = function getReputationList (callback) {
 
 		callback(null, data);
 	}));
-};
-
-// Send the feedback
-Account.prototype.feedback = function feedback (feedbackText) {
-
 };
 
 // Make a get request to the account server to the given path with the given options

@@ -52,3 +52,8 @@ Instead a `$NODE_ENV$.config.json` will be chosen if the environmental variable
 - `export NODE_ENV=` can use `src/config.json`
 - `export NODE_ENV=beta` can use `/beta.config.json`
 - `export NODE_ENV=production` can use `/production.config.json`
+
+## Hotfixes
+
+- https://github.com/websockets/ws/pull/810
+    - applied this pull request changes to ws in realtime's `node_modules/ws/lib/Sender.js` which prevents call stack crashes.

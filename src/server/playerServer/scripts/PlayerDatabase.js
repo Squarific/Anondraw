@@ -39,6 +39,10 @@ function isBannedHandler (callback, err, rows) {
 	});
 }
 
+PlayerDatabase.prototype.getProfile = function getProfile (userId, callback) {
+	this.database.query();
+};
+
 // Callback see isbannedhandler
 PlayerDatabase.prototype.isIpBanned = function isIpBanned (ip, callback) {
 	this.database.query("SELECT enddate, reason FROM ipbans WHERE ip = ? AND enddate > ?", [ip, new Date()], isBannedHandler.bind(this, callback));

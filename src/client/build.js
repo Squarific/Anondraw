@@ -44,7 +44,7 @@ build();
 function build() {
 	new minify({
 		type: "gcc",
-		fileIn: "src/scripts/*.js",
+		fileIn: "src/scripts/**/*.js",
 		fileOut: "dist/anondraw.min.js",
 		options: [ "--language_in=ES5" ],
 		callback: function(err, min) {

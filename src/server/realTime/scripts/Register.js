@@ -19,7 +19,8 @@ function Register (server, key, io, port, listenServer) {
 	} else {
 		getIp(function (err, ip) {
 			if (err) throw err;
-
+			
+			ip = ip.replace(/(^\w+:|^)\/\//, '');
 			console.log("[STARTUP] Our ip is ", ip);
 			this.ip = ip;
 			this.register();
@@ -42,6 +43,7 @@ function Register (server, key, io, port, listenServer) {
 				res.end('{"error": "Invalid key"}');
 				return;
 			}
+			console.log("[CLOSEROOM] Sent close room for room:", room);
 
 			// Disconnect all clients in the room
 			var sRoom = this.io.nsps['/'].adapter.rooms[room];

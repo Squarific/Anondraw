@@ -1,34 +1,14 @@
-@import url("http://fonts.googleapis.com/css?family=Open+Sans");
 html, body {
   margin: 0;
   padding: 0;}
 
 body, input, textarea, button {
-  font-family: "Open Sans";
+  font-family: 'Noto Sans', sans-serif;
   font-size: 1em; }
 
 input, button, textarea {
   border: none;
   outline: none; }
-
-h1 {
-  color:white;
-  margin:0;
-  padding:0.5em;
-  font-size: 1.5em;
-
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#5b84a3+0,3a5774+100 */
-  background: #5b84a3; /* Old browsers */
-  background: -moz-linear-gradient(-45deg,  #5b84a3 0%, #3a5774 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(-45deg,  #5b84a3 0%,#3a5774 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(135deg,  #5b84a3 0%,#3a5774 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5b84a3', endColorstr='#3a5774',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
-
-}
-
-h2 {
-  color:white;
-}
 
 input.paint-texttool {
   margin-left:50px !important;
@@ -179,9 +159,12 @@ input.paint-texttool {
   top: 0;
   right: 0;
   left: 0;
-  min-height:100%;
+  bottom: 0;
   text-align: center;
   z-index: 300;
+  overflow-x:hidden;
+  align-items: center;
+  justify-content: center;
 
   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#a7bdd3+0,67a9bf+100 */
   background: #a7bdd3; /* Old browsers */
@@ -213,6 +196,10 @@ input.paint-texttool {
   .drawtogether-selectwindow .drawtogether-modeselect-button:hover {
     background-color: #DDE6F0; }
 
+	.headerImage {
+		min-width:100%;
+	}
+	
     .drawtogether-faq {
         display:inline-block;
         min-width:20em;
@@ -488,8 +475,8 @@ input.paint-texttool {
   width: 20rem;
   overflow: hidden;
   overflow-y: auto;
-  background: #233445;
-  font-family: "Open Sans", sans-serif;
+  background: #364350;
+  font-family: "Noto Sans", sans-serif;
   font-size: .8em;
 }
 
@@ -587,7 +574,7 @@ input.paint-texttool {
   width: 20rem;
   overflow: hidden;
   background: #E0E5E7;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Noto Sans", sans-serif;
   font-size: 0.8em; }
   .drawtogether-chat-container .messagecontainer {
     height: calc(100% - 3rem);
@@ -601,11 +588,6 @@ input.paint-texttool {
     margin: .8em;
     background: rgba(0, 0, 0, 0.05);
   }
-
-  .chat-message span {
-    margin-right:1em;
-  }
-
   .chat-message a {
     color:#2d455d;
   }
@@ -636,7 +618,7 @@ input.paint-texttool {
     line-height: 3rem;
     text-align: center;
     color: #fff;
-    background:#456789;
+    background:#323e4a;
     cursor: pointer;
     -webkit-transition-duration: 0.1s;
     -moz-transition-duration: 0.1s;
@@ -645,7 +627,7 @@ input.paint-texttool {
     -moz-transition-property: background-color;
     transition-property: background-color; }
     .drawtogether-chat-container .button-small:hover {
-      background-color: #233445; }
+      background-color: #485869; }
 
 .drawtogether-paint-container,
 .drawtogether-control-container {
@@ -681,8 +663,7 @@ input.paint-texttool {
     -webkit-touch-callout: none;
     -moz-touch-callout: none;
     touch-callout: none;
-    z-index: 100; 
-    margin-left:38px;}
+    z-index: 100;}
     .drawtogether-paint-container .control-container [class^='control-'], .drawtogether-paint-container .control-container .sp-replacer {
       float: left;
       height: 2rem; }
@@ -700,7 +681,6 @@ input.paint-texttool {
  */
 .drawtogether-control-container {
   height: 3rem;
-  padding-left:38px;
   overflow: hidden;
   box-shadow: 0 0 .5em #000; }
   .drawtogether-control-container .control-button,

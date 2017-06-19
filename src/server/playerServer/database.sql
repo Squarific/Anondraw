@@ -96,3 +96,16 @@ CREATE TABLE IF NOT EXISTS accountbans (
     reason TEXT,
     INDEX (userid, enddate)
 );
+
+CREATE TABLE IF NOT EXISTS messages (
+	id BIGINT AUTO_INCREMENT,
+	fromId INT,
+	toId INT,
+	message TEXT,
+	send DATETIME,
+	isRead BIT,
+	INDEX(id),
+	INDEX(fromId),
+	INDEX(toId),
+	INDEX(send)
+);
