@@ -1223,12 +1223,22 @@ DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom (p
 	
 	var proofImgWindow = document.createElement("span");
 	proofImgWindow.className = "drawtogether-player-button";
-	proofImgWindow.textContent = "Open image proof";
+	proofImgWindow.textContent = "View image before/after proof";
 	proofImgWindow.addEventListener("click", function (e) {
-		this.exportImageFromSrc("Proof of grief by " + playerName, this.lastBanSnapshot);
+		this.exportImageFromSrc("Proof of grief by " + playerName + " (right click to save), this.lastBanSnapshot);
 	}.bind(this));
 	
+	var proofImgDownload = document.createElemet("a");
+	proofImgDownload.textContent = "Download image."
+	proofImgDownload.href = this.lastBanSnapshot;
+	
+	var cleanName =  playerName.replace(/([^a-z0-9]+)/gi, '-');
+	var cleanDate = new String( new Date() ).replace(/([^a-z0-9 _()]+)/gi, '-');
+	var filename = "grief by " + cleanName + " saved on " + cleanDate + ".png";
+	proofImgDownload.download = filename;
+	
 	snapshotDom.appendChild(proofImgWindow);
+	snapshotDom.appendChild(proofImgDownload);
 	return snapshotDom;
 };
 
