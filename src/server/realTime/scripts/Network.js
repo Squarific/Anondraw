@@ -600,8 +600,15 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
-		socket.on("uploadimage", function (base64, banAlbum, callback) {
-			var album = banAlbum ? "oG8bJ" : "L3ntm";
+		socket.on("uploadimage", function (base64, toAlbum, callback) {
+			var banAlbum == false;
+			
+			if(toAlbum == "main")
+				album = "L3ntm"
+			else if(toAlbum == "ban") {
+				album = "oG8bJ";
+				banAlbum = true;
+			}
 			
 			if (!banAlbum && Date.now() - socket.lastImgurUpload < 10000) {
 				callback({ error: "You are uploading too quickly! Wait a few seconds."})

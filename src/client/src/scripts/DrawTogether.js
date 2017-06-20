@@ -1264,7 +1264,6 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 				if (reason == "Cancel") return;
 				this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes. Reason: " + reason, ["Yes", "No"], function (confirmation) {
 					if (confirmation == "Yes") {
-						//snapshot
 						var tempSnapshotCanvas = document.createElement("canvas");
 						var canvasHeight = this.paint.public.canvas.height
 						var canvasWidth = this.paint.public.canvas.width;
@@ -1284,13 +1283,11 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 									ctx.drawImage(this.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
 									ctx.drawImage(this.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
 									this.lastBanSnapshot = tempSnapshotCanvas.toDataURL("image/png");
+									this.uploadBanImage();
 									this.chat.addElementAsMessage(this.createSnapshotChatDom(personText));
-									
 									this.takeSnapshotTimeout = undefined;
 								}.bind(this), 2000);
 							}
-								
-							//if success then second snapshot and upload
 						}.bind(this));
 					}
 				}.bind(this));
@@ -3671,21 +3668,33 @@ DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
 	msg.appendChild(document.createTextNode(success));
 };
 
-DrawTogether.prototype.uploadImage = function uploadImage (banAlbum) {
+DrawTogether.prototype.uploadImage = function uploadImage (album) {
 	// Remove the previous url
 	while (this.imgurUrl.firstChild) {
 		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
 	}
-
+	if(!album) album = "main";
 	this.showShareMessage("Uploading...");
 	// Let the server upload the drawing to imgur and give us the url back
-	this.network.socket.emit("uploadimage", this.preview.toDataURL().split(",")[1], banAlbum, function (data) {
+	this.network.socket.emit("uploadimage", this.preview.toDataURL().split(",")[1], album, function (data) {
 		if (data.error) {
 			this.showShareError(data.error);
 			return;
 		}
 
 		this.showImgurUrl(data.url);
+	}.bind(this));
+};
+
+DrawTogether.prototype.uploadBanImage = function uploadBanImage () {
+	var album = "ban";
+	this.showShareMessage("Uploading...");
+	
+	this.network.socket.emit("uploadimage", this.lastBanSnapshot.split(",")[1], album, function (data) {
+		if (data.error) {
+			console.log("ban image error", data.error);
+		}
+		console.log("ban image url", data.url);
 	}.bind(this));
 };
 
