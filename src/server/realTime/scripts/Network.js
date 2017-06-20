@@ -600,19 +600,28 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
-		socket.on("uploadimage", function (base64, callback) {
-			if (Date.now() - socket.lastImgurUpload < 10000) {
+		socket.on("uploadimage", function (base64, toAlbum, callback) {
+			var banAlbum = false;
+			
+			if(toAlbum == "main")
+				album = "L3ntm"
+			else if(toAlbum == "ban") {
+				album = "oG8bJ";
+				banAlbum = true;
+			}
+			
+			if (!banAlbum && Date.now() - socket.lastImgurUpload < 10000) {
 				callback({ error: "You are uploading too quickly! Wait a few seconds."})
 				return;
 			}
 
 			socket.lastImgurUpload = Date.now();
-			console.log("Imgur upload request from " + socket.ip);
+			console.log("Imgur upload request from " + socket.ip + " to album:" + toAlbum);
 
 			callback = (typeof callback == "function") ? callback : function () {};
-			protocol.imgur.uploadBase64(base64, "L3ntm")
+			protocol.imgur.uploadBase64(base64, album)
 			.then(function (json) {
-				console.log("[IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
+				console.log("[" + banAlbum ? "BAN " : "" + "IMAGE UPLOAD] id:" + socket.userid + " ip:" + socket.ip + " " + json.data.link);
 				callback({
 					url: json.data.link
 				});
