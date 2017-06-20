@@ -3612,7 +3612,7 @@ DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
 	msg.appendChild(document.createTextNode(success));
 };
 
-DrawTogether.prototype.uploadImage = function uploadImage () {
+DrawTogether.prototype.uploadImage = function uploadImage (banAlbum) {
 	// Remove the previous url
 	while (this.imgurUrl.firstChild) {
 		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
@@ -3620,7 +3620,7 @@ DrawTogether.prototype.uploadImage = function uploadImage () {
 
 	this.showShareMessage("Uploading...");
 	// Let the server upload the drawing to imgur and give us the url back
-	this.network.socket.emit("uploadimage", this.preview.toDataURL().split(",")[1], function (data) {
+	this.network.socket.emit("uploadimage", this.preview.toDataURL().split(",")[1], banAlbum, function (data) {
 		if (data.error) {
 			this.showShareError(data.error);
 			return;
