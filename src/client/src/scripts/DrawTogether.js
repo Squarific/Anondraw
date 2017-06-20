@@ -1218,6 +1218,30 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	return playerDom;
 };
 
+DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom (playerName) {
+	var snapshotDom = document.createElement("div");
+	
+	var proofImgWindow = document.createElement("span");
+	proofImgWindow.className = "drawtogether-player-button";
+	proofImgWindow.textContent = "View image before/after proof";
+	proofImgWindow.addEventListener("click", function (e) {
+		this.exportImageFromSrc("Proof of grief by " + playerName + " (right click to save)", this.lastBanSnapshot);
+	}.bind(this));
+	
+	var proofImgDownload = document.createElement("a");
+	proofImgDownload.textContent = "Download image.";
+	proofImgDownload.href = this.lastBanSnapshot;
+	
+	var cleanName =  playerName.replace(/([^a-z0-9]+)/gi, '-');
+	var cleanDate = new String( new Date() ).replace(/([^a-z0-9 _()]+)/gi, '-');
+	var filename = "grief by " + cleanName + " saved on " + cleanDate + ".png";
+	proofImgDownload.download = filename;
+	
+	snapshotDom.appendChild(proofImgWindow);
+	snapshotDom.appendChild(proofImgDownload);
+	return snapshotDom;
+};
+
 DrawTogether.prototype.kickban = function kickban (playerid) {
 	var player = this.playerFromId(playerid);
 	var personText = "this person";
@@ -1240,8 +1264,33 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 				if (reason == "Cancel") return;
 				this.gui.prompt("Are you sure you want to ban " + this.usernameFromSocketid(playerid) + " (bantype: " + type + ") for " + minutes + " minutes. Reason: " + reason, ["Yes", "No"], function (confirmation) {
 					if (confirmation == "Yes") {
+						//snapshot
+						var tempSnapshotCanvas = document.createElement("canvas");
+						var canvasHeight = this.paint.public.canvas.height
+						var canvasWidth = this.paint.public.canvas.width;
+
+						tempSnapshotCanvas.width = canvasWidth;
+						tempSnapshotCanvas.height = canvasHeight * 2;
+
+						var ctx = tempSnapshotCanvas.getContext("2d");
+						ctx.drawImage(this.paint.background.canvas, 0, 0, canvasWidth, canvasHeight);
+						ctx.drawImage(this.paint.public.canvas, 0, 0, canvasWidth, canvasHeight);
+						this.lastBanSnapshot;
+						
 						this.network.socket.emit("kickban", [playerid, minutes, type, reason], function (data) {
 							this.chat.addMessage("SERVER", data.error || data.success);
+							if(data.success) {
+								this.takeSnapshotTimeout = setTimeout(function () {
+									ctx.drawImage(this.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
+									ctx.drawImage(this.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
+									this.lastBanSnapshot = tempSnapshotCanvas.toDataURL("image/png");
+									this.chat.addElementAsMessage(this.createSnapshotChatDom(personText));
+									
+									this.takeSnapshotTimeout = undefined;
+								}.bind(this), 2000);
+							}
+								
+							//if success then second snapshot and upload
 						}.bind(this));
 					}
 				}.bind(this));
@@ -2400,6 +2449,16 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	img.alt = "Exported image";
 	
 	var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
+	exportwindow.classList.add("exportwindow");
+	exportwindow.appendChild(img);
+};
+
+DrawTogether.prototype.exportImageFromSrc = function (title, src) {
+	var img = document.createElement("img");
+	img.src = src
+	img.alt = "Exported image";
+	
+	var exportwindow = this.gui.createWindow({ title: title });
 	exportwindow.classList.add("exportwindow");
 	exportwindow.appendChild(img);
 };
