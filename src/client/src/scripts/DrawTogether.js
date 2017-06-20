@@ -3678,7 +3678,6 @@ DrawTogether.prototype.uploadImage = function uploadImage (album) {
 
 DrawTogether.prototype.uploadBanImage = function uploadBanImage () {
 	var album = "ban";
-	this.showShareMessage("Uploading...");
 	
 	this.network.socket.emit("uploadimage", this.lastBanSnapshot.split(",")[1], album, function (data) {
 		if (data.error) {
