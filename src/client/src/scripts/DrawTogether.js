@@ -2858,7 +2858,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	advancedOptions.addInfo("Tip 1:", "Press ESC to undo anything out of this menu.");
 	advancedOptions.addInfo("Tip 2:", "U can also use the keys mentioned between the ( and ).");
 
-	advancedOptions.addRange("Rotation (e and r)", -180, 180, 0, 1, function (value) {
+	advancedOptions.addRange("Rotation (r)", -180, 180, 0, 1, function (value) {
 		this.paint.setRotation(value);
 	}.bind(this));
 
