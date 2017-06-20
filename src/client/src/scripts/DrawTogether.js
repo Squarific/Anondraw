@@ -1228,17 +1228,7 @@ DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom (p
 		this.exportImageFromSrc("Proof of grief by " + playerName + " (right click to save)", this.lastBanSnapshot);
 	}.bind(this));
 	
-	var proofImgDownload = document.createElement("a");
-	proofImgDownload.textContent = "Download image.";
-	proofImgDownload.href = this.lastBanSnapshot;
-	
-	var cleanName =  playerName.replace(/([^a-z0-9]+)/gi, '-');
-	var cleanDate = new String( new Date() ).replace(/([^a-z0-9 _()]+)/gi, '-');
-	var filename = "grief by " + cleanName + " saved on " + cleanDate + ".png";
-	proofImgDownload.download = filename;
-	
 	snapshotDom.appendChild(proofImgWindow);
-	snapshotDom.appendChild(proofImgDownload);
 	return snapshotDom;
 };
 
