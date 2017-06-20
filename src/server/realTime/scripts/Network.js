@@ -621,7 +621,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			callback = (typeof callback == "function") ? callback : function () {};
 			protocol.imgur.uploadBase64(base64, album)
 			.then(function (json) {
-				console.log("[" + banAlbum ? "BAN " : "" + "IMAGE UPLOAD] " + socket.ip + " " + json.data.link);
+				console.log("[" + banAlbum ? "BAN " : "" + "IMAGE UPLOAD] id:" + socket.userid + " ip:" + socket.ip + " " + json.data.link);
 				callback({
 					url: json.data.link
 				});
