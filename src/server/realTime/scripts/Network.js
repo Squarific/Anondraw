@@ -601,7 +601,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 
 		socket.on("uploadimage", function (base64, toAlbum, callback) {
-			var banAlbum == false;
+			var banAlbum = false;
 			
 			if(toAlbum == "main")
 				album = "L3ntm"
@@ -616,7 +616,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			socket.lastImgurUpload = Date.now();
-			console.log("Imgur upload request from " + socket.ip);
+			console.log("Imgur upload request from " + socket.ip + " to album:" + toAlbum);
 
 			callback = (typeof callback == "function") ? callback : function () {};
 			protocol.imgur.uploadBase64(base64, album)
