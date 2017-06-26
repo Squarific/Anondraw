@@ -38,15 +38,15 @@ PrivateChats.prototype.createChatWindow = function createChatWindow (userId) {
 	
 	this.windows[userId] = this.gui.createWindow({ title: "chat" });
 	
-	this.setupChatWindow(this.windows[userId]);
+	this.setupChatWindow(userId);
 };
 
 /*
 	Creates the dom elements in the given userid window
 */
 PrivateChats.prototype.setupChatWindow = function setupChatWindow (userId) {
-	this.setupMessages();
-	this.SetupInput();	
+	this.setupMessages(userId);
+	this.SetupInput(userId);	
 };
 
 PrivateChats.prototype.setupMessages = function setupMessages (userId) {
