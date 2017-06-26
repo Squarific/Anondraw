@@ -17,6 +17,7 @@ function PrivateChats (container, server, account, messages) {
 */
 PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 	this.socket.on("message", function (fromId, toId, sendDate, message) {
+		console.log("Message received", fromId, toId, sendDate, message);
 		this.addMessage(fromId, true, sendDate, message);
 	}.bind(this));
 	
@@ -81,6 +82,7 @@ PrivateChats.prototype.setupInput = function setupInput (userId) {
 	Adds a message to the given window
 */
 PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDate, text) {
+	console.log(userId);
 	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow();
 	
 	var message = this.windows[userId].messageContainer.appendChild(document.createElement("div"));
