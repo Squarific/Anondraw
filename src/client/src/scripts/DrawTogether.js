@@ -1100,7 +1100,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	messageButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-envelope";
 
 	messageButton.addEventListener("click", function (userid, event) {
-		this.pms.createChatWindow(userid);
+		this.pms.createChatWindow(userid, player.name);
 	}.bind(this, player.userid));
 
 	var nameText = document.createElement("span");

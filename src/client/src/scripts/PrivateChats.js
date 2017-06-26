@@ -31,16 +31,26 @@ PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 	Creates a chat window if one does not exist yet for the
 	given userid
 */
-PrivateChats.prototype.createChatWindow = function createChatWindow (userId) {
+PrivateChats.prototype.createChatWindow = function createChatWindow (userId, name) {
 	if (!userId) { console.log("No userId provided when creating chat window"); return; }
 	if (this.windows[userId] && this.windows[userId].parent) {
 		console.log("A window for user " + userId + " was already open.");
 		return;
 	}
 	
-	this.windows[userId] = this.gui.createWindow({ title: "chat" });
+	this.windows[userId] = this.gui.createWindow({ title: "Chat with " + (name ? name : userId)});
 	
 	this.setupChatWindow(userId);
+	
+	if (!name)
+		this.messages.getName(userId, function (err, data) {
+			while (this.windows[userId].children[0].firstChild)
+				this.windows[userId].children[0].removeChild(
+					this.windows[userId].children[0].firstChild);
+					
+			this.windows[userId].children[0].appendChild(
+				document.createTextNode("Chat with " + data.name));
+		}.bind(this));
 };
 
 /*
@@ -64,7 +74,7 @@ PrivateChats.prototype.setupInput = function setupInput (userId) {
 	messageInput.focus();
 	messageInput.maxLength = 1024;
 	messageInput.addEventListener("keydown", function (event) {
-		if (event.keyCode == 13) {
+		if (event.keyCode == 13 && messageInput.value !== "") {
 			this.messages.sendMessage(userId, messageInput.value, function (err, data) {
 				if (err) {
 					this.addError(userId, "Could not send message: " + err);

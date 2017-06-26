@@ -3,6 +3,21 @@ function Messages (server, account) {
 	this.server = server;
 }
 
+// Get the name for a given userId
+// Callback gives (err, name)
+Messages.prototype.getName = function getName(userId, callback) {
+	this.request("/getname", {
+		userId: userId
+	}, this.parseData.bind(this, function (err, data) {
+		if (err || !data || data.error || data.err) {
+			callback(err || data.error || data.err, data);
+			return;
+		}
+
+		callback(null, data);
+	}));
+};
+
 // Send a message
 // Callback gives (err, data) where err is a string with an http error  or
 // the error returned by the server in the parsed data object (data.error || data.err)

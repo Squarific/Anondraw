@@ -208,6 +208,19 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 	
+	if (parsedUrl.pathname == "/getname") {
+		var userId = parsedUrl.query.userId;
+		
+		playerDatabase.getName(userId, function (err, name) {
+			res.end(JSON.stringify({
+				err: err,
+				name: name
+			});
+		});
+		
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/sendmessage") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);

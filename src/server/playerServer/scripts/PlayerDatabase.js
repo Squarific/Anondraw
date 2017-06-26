@@ -53,6 +53,12 @@ PlayerDatabase.prototype.isIdBanned = function isIdBanned (id, callback) {
 	this.database.query("SELECT enddate, reason FROM accountbans WHERE userid = ? AND enddate > ?", [id, new Date()], isBannedHandler.bind(this, callback));
 };
 
+PlayerDatabase.prototype.getName = function getName (id, callback) {
+	this.database.query("SELECT last_username FROM users WHERE id = ?", [id], function (err, rows) {
+		callback(err, rows && rows[0] && rows[0].last_username);
+	});
+};
+
 PlayerDatabase.prototype.banIp = function banIp (ip, by, minutes, reason, callback) {
 	var startdate = new Date();
 	var enddate = new Date(Date.now() + parseInt(minutes) * 60 * 1000);
