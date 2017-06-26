@@ -1210,7 +1210,10 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
 
 	playerDom.appendChild(upvoteButton);
-	playerDom.appendChild(messageButton);
+	
+	if (messageButton)
+		playerDom.appendChild(messageButton);
+
 	playerDom.appendChild(nameText);
 
 	var iconDom = document.createElement("span");
