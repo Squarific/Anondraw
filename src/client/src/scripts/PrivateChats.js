@@ -18,7 +18,7 @@ function PrivateChats (container, server, account, messages) {
 PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 	this.socket.on("message", function (fromId, toId, sendDate, message) {
 		this.addMessage(fromId, true, sendDate, message);
-	});
+	}.bind(this));
 	
 	this.socket.emit("listen", this.account.uKey);
 	this.account.addEventListener("change", function () {
@@ -80,12 +80,12 @@ PrivateChats.prototype.setupInput = function setupInput (userId) {
 /*
 	Adds a message to the given window
 */
-PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDate, message) {
+PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDate, text) {
 	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow();
 	
 	var message = this.windows[userId].messageContainer.appendChild(document.createElement("div"));
 	message.className = "message " + partner ? "fromPartner" : "";
-	message.appendChild(document.createTextNode(message));
+	message.appendChild(document.createTextNode(text));
 	message.title = (new Date(sendDate)).toLocaleString();
 	
 	// Scroll the new message into view
