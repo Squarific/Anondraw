@@ -1,3 +1,8 @@
+/*
+	Events:
+		change=the status of the ukey changed (logout, register, login, failed check, ...)
+*/
+
 function Account (server, uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";
 	this.mail = localStorage.getItem("drawtogether-mail");
@@ -93,6 +98,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 			localStorage.setItem("drawtogether-uKey", data.uKey);
 			localStorage.setItem("drawtogether-mail", email);
 			localStorage.setItem("drawtogether-pass", pass);
+			this.dispatchEvent({ type: "change" });
 			setTimeout(callback, 0);
 		} else if (req.readyState == 4) {
 			callback("Connection error, status code: " + req.status);
@@ -126,6 +132,7 @@ Account.prototype.register = function register (email, pass, callback) {
 			localStorage.setItem("drawtogether-mail", email);
 			localStorage.setItem("drawtogether-pass", pass);
 			setTimeout(callback, 0);
+			this.dispatchEvent({ type: "change" });
 		} else if (req.readyState == 4) {
 			callback("Connection error, status code: " + req.status);
 		}
@@ -153,6 +160,7 @@ Account.prototype.logout = function logout (callback) {
 			delete this.uKey;
 			delete this.mail;
 			delete this.id;
+			this.dispatchEvent({ type: "change" });
 
 			setTimeout(function () {
 				callback(null, true)
@@ -211,6 +219,7 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 					
 					// Our uKey expired and we don't have the email/pass in localstorage
 					callback(null, false);
+					this.dispatchEvent({ type: "change" });
 					return;
 				}
 				callback(data.error);			
@@ -305,3 +314,116 @@ Account.prototype.parseData = function parseData (callback, err, request ) {
 
 	callback(err, data);
 };
+
+/**
+ * Event dispatcher
+ * License mit
+ * https://github.com/mrdoob/eventdispatcher.js
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+var EventDispatcher = function () {}
+
+EventDispatcher.prototype = {
+
+	constructor: EventDispatcher,
+
+	apply: function ( object ) {
+
+		object.addEventListener = EventDispatcher.prototype.addEventListener;
+		object.hasEventListener = EventDispatcher.prototype.hasEventListener;
+		object.removeEventListener = EventDispatcher.prototype.removeEventListener;
+		object.dispatchEvent = EventDispatcher.prototype.dispatchEvent;
+
+	},
+
+	addEventListener: function ( type, listener ) {
+
+		if ( this._listeners === undefined ) this._listeners = {};
+
+		var listeners = this._listeners;
+
+		if ( listeners[ type ] === undefined ) {
+
+			listeners[ type ] = [];
+
+		}
+
+		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+
+			listeners[ type ].push( listener );
+
+		}
+
+	},
+
+	hasEventListener: function ( type, listener ) {
+
+		if ( this._listeners === undefined ) return false;
+
+		var listeners = this._listeners;
+
+		if ( listeners[ type ] !== undefined && listeners[ type ].indexOf( listener ) !== - 1 ) {
+
+			return true;
+
+		}
+
+		return false;
+
+	},
+
+	removeEventListener: function ( type, listener ) {
+
+		if ( this._listeners === undefined ) return;
+
+		var listeners = this._listeners;
+		var listenerArray = listeners[ type ];
+
+		if ( listenerArray !== undefined ) {
+
+			var index = listenerArray.indexOf( listener );
+
+			if ( index !== - 1 ) {
+
+				listenerArray.splice( index, 1 );
+
+			}
+
+		}
+
+	},
+
+	dispatchEvent: function ( event ) {
+			
+		if ( this._listeners === undefined ) return;
+
+		var listeners = this._listeners;
+		var listenerArray = listeners[ event.type ];
+
+		if ( listenerArray !== undefined ) {
+
+			event.target = this;
+
+			var array = [];
+			var length = listenerArray.length;
+
+			for ( var i = 0; i < length; i ++ ) {
+
+				array[ i ] = listenerArray[ i ];
+
+			}
+
+			for ( var i = 0; i < length; i ++ ) {
+
+				array[ i ].call( this, event );
+
+			}
+
+		}
+
+	}
+
+};
+
+EventDispatcher.prototype.apply(Account.prototype);

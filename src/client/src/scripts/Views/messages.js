@@ -91,6 +91,7 @@ Anondraw.prototype.createMessagePage = function createMessagePage (params) {
 				
 				var messageInput = conversationContainer.appendChild(document.createElement("input"));
 				messageInput.focus();
+				messageInput.maxLength = 1024;
 				messageInput.addEventListener("keydown", function (event) {
 					if (event.keyCode == 13) {
 						this.messages.sendMessage(partner, messageInput.value, function (err, data) {
@@ -135,7 +136,7 @@ Anondraw.prototype.createMessagePage = function createMessagePage (params) {
 						if (data.messages[k].fromId == partner) message.classList.add("fromPartner");
 						
 						message.appendChild(document.createTextNode(data.messages[k].message));
-						message.title = (new Date(data.messages[k].message.send)).toLocaleString();
+						message.title = (new Date(data.messages[k].send)).toLocaleString();
 					}
 					
 					messageContainer.scrollTop = messageContainer.scrollHeight - messageContainer.getBoundingClientRect().height;

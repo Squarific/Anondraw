@@ -208,11 +208,34 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 	
+	if (parsedUrl.pathname == "/getname") {
+		var userId = parsedUrl.query.userId;
+		
+		playerDatabase.getName(userId, function (err, name) {
+			res.end(JSON.stringify({
+				err: err,
+				name: name
+			}));
+		});
+		
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/sendmessage") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var to = parsedUrl.query.to;
 		var message = parsedUrl.query.message;
+		
+		if (!message) {
+			res.end('{"error": "You need to put something in the message"}');
+			return;
+		}
+		
+		if (!to) {
+			res.end('{"error": "You need to specify who you want to send a message to"}');
+			return;
+		}
 		
 		if (message.length > 1024) {
 			res.end('{"error": "Messages should not be longer than 1024 characters"}');
@@ -230,6 +253,10 @@ var server = http.createServer(function (req, res) {
 				err: err,
 				id: id
 			}));
+			
+			if (!err && listeners[to])
+				for (var k = 0; k < listeners[to].length; k++)
+					listeners[to][k].emit("message", user.id, to, new Date(), message);
 		});
 		return;
 	}
@@ -978,3 +1005,48 @@ var server = http.createServer(function (req, res) {
 
 	res.end('{"error": "Unknown command"}');
 }.bind(this)).listen(config.service.player.port);
+
+var app = http.createServer(handler);
+var io = require('socket.io')(app);
+var fs = require('fs');
+
+app.listen(config.service.messages.port);
+
+function handler (req, res) {
+    res.writeHead(200);
+    res.end("Sup");
+}
+
+var listeners = {};
+
+function addListener (socket, userid) {
+	listeners[userid] = listeners[userid] || [];
+	listeners[userid].push(socket);
+
+	socket.userid = userid;
+}
+
+function removeListener (socket) {
+	if (listeners[socket.userid])
+		while (listeners[socket.userid].indexOf(socket) != -1)
+			listeners[socket.userid].splice(listeners[socket.userid].indexOf(socket), 1);
+}
+
+/*
+	server events:    listen uKey
+	client events:    message fromId, toId, send, text
+*/
+io.on('connection', function (socket) {
+	socket.on('listen', function (uKey) {
+		removeListener(socket);
+		
+		var user = sessions.getUser("uKey", uKey);
+		if (!user) return;
+		
+		addListener(socket, user.id);		
+	});
+	
+	socket.on('disconnect', function () {
+		removeListener(socket);
+	});
+});

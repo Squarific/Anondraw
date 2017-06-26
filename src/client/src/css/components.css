@@ -317,6 +317,7 @@
     border-radius: 0.2em;
     margin: 0.5em;
     width: 80%;
+	color:white;
 	float:right;
 	overflow:hidden;
 }
@@ -349,6 +350,23 @@
 	width: 100%;
 }
 
+.pmwindowcontent {
+	width:315px;
+	height:300px;
+	overflow:auto;
+}
+
+.pmcontainer input {
+	display: inline-block;
+    text-align: left;
+    padding: .5em;
+    min-width: 300px;
+    height: 2.3rem;
+    line-height: 2.3rem;
+    margin: .5em;
+    border-radius: .2em;
+    background-color: white;
+}
 
 @media (max-width:750px) {
 	.card {

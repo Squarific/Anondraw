@@ -1,7 +1,8 @@
-function DrawTogether (container, settings, emotesHash, account, router) {
+function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	// Normalize settings, set container
 	this.container = container;
 	this.router = router;
+	this.pms = pms;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
 	this.userSettings = QuickSettings.create(0, 0, "settings");
@@ -1099,7 +1100,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	messageButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-envelope";
 
 	messageButton.addEventListener("click", function (userid, event) {
-		this.router.navigate("/messages/" + userid + "/" + player.name);
+		this.pms.createChatWindow(userid, player.name);
 	}.bind(this, player.userid));
 
 	var nameText = document.createElement("span");
@@ -1167,12 +1168,14 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 	
-	var messageButton = document.createElement("span");
-	messageButton.className = "drawtogether-player-button fa fa-envelope";
+	if (player.userid) {
+		var messageButton = document.createElement("span");
+		messageButton.className = "drawtogether-player-button fa fa-envelope";
 
-	messageButton.addEventListener("click", function (userid, event) {
-		this.router.navigate("/messages/" + userid + "/" + player.name);
-	}.bind(this, player.userid));
+		messageButton.addEventListener("click", function (userid, event) {
+			this.pms.createChatWindow(userid, player.name);
+		}.bind(this, player.userid));
+	}
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var kickbanButton = document.createElement("span");
@@ -1207,7 +1210,10 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
 
 	playerDom.appendChild(upvoteButton);
-	playerDom.appendChild(messageButton);
+	
+	if (messageButton)
+		playerDom.appendChild(messageButton);
+
 	playerDom.appendChild(nameText);
 
 	var iconDom = document.createElement("span");

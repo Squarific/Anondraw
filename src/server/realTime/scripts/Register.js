@@ -47,11 +47,11 @@ function Register (server, key, io, port, listenServer) {
 
 			// Disconnect all clients in the room
 			var sRoom = this.io.nsps['/'].adapter.rooms[room];
-			for (var id in sRoom) {
+			for (var id in sRoom.sockets) {
 				if (this.io.nsps['/'].connected[id])
 					this.io.nsps['/'].connected[id].disconnect();
 			}
-			
+	
 			res.end('{"success": "Disconnected all clients in room ' + room + '"}');
 			return;
 		}
