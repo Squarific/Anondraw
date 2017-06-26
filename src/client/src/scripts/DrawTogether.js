@@ -1173,7 +1173,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 		messageButton.className = "drawtogether-player-button fa fa-envelope";
 
 		messageButton.addEventListener("click", function (userid, event) {
-			this.pms.createChatWindow(userid);
+			this.pms.createChatWindow(userid, player.name);
 		}.bind(this, player.userid));
 	}
 

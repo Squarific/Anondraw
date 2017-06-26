@@ -44,11 +44,11 @@ PrivateChats.prototype.createChatWindow = function createChatWindow (userId, nam
 	
 	if (!name)
 		this.messages.getName(userId, function (err, data) {
-			while (this.windows[userId].children[0].firstChild)
-				this.windows[userId].children[0].removeChild(
-					this.windows[userId].children[0].firstChild);
+			while (this.windows[userId].children[0].children[0].firstChild)
+				this.windows[userId].children[0].children[0].removeChild(
+					this.windows[userId].children[0].children[0].firstChild);
 					
-			this.windows[userId].children[0].appendChild(
+			this.windows[userId].children[0].children[0].appendChild(
 				document.createTextNode("Chat with " + data.name));
 		}.bind(this));
 };
