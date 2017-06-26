@@ -1168,7 +1168,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 	
-	if (!player.userid) {
+	if (player.userid) {
 		var messageButton = document.createElement("span");
 		messageButton.className = "drawtogether-player-button fa fa-envelope";
 
