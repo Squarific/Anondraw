@@ -215,7 +215,7 @@ var server = http.createServer(function (req, res) {
 			res.end(JSON.stringify({
 				err: err,
 				name: name
-			});
+			}));
 		});
 		
 		return;
