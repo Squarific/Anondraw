@@ -351,10 +351,12 @@
 }
 
 .pmwindowcontent {
-	width:300px;
+	width:315px;
+	height:300px;
+	overflow:auto;
 }
 
-.pmwindowcontent input {
+.pmcontainer input {
 	display: inline-block;
     text-align: left;
     padding: .5em;
@@ -363,7 +365,7 @@
     line-height: 2.3rem;
     margin: .5em;
     border-radius: .2em;
-    background-color: #e6e6e6;
+    background-color: white;
 }
 
 @media (max-width:750px) {
