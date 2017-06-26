@@ -254,7 +254,7 @@ var server = http.createServer(function (req, res) {
 				id: id
 			}));
 			
-			if (!err)
+			if (!err && listeners[to])
 				for (var k = 0; k < listeners[to].length; k++)
 					listeners[to][k].emit("message", user.id, to, new Date(), message);
 		});
