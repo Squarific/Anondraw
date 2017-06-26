@@ -65,7 +65,7 @@ PrivateChats.prototype.setupInput = function setupInput (userId) {
 		if (event.keyCode == 13) {
 			this.messages.sendMessage(userId, messageInput.value, function (err, data) {
 				if (err) {
-					this.addError("Could not send message: " + err);
+					this.addError(userId, "Could not send message: " + err);
 					console.log(err);
 					return;
 				}
@@ -97,7 +97,7 @@ PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDa
 /*
 	Adds an error message to the given window
 */
-PrivateChats.prototype.addError = function addError (message) {
+PrivateChats.prototype.addError = function addError (userId, message) {
 	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow();
 	
 	var message = this.windows[userId].messageContainer.appendChild(document.createElement("div"));
