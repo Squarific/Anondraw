@@ -11,7 +11,7 @@ function Anondraw (container, settings) {
 	
 	this.account.isLoggedIn(function () {});
 	this.messages = new Messages(this.settings.messageServer, this.account);
-	this.privateChats = new PrivateChats(this.pmContainer, this.settings.privateChatServer, this.account);
+	this.privateChats = new PrivateChats(this.pmContainer, this.settings.privateChatServer, this.account, this.messages);
 
 	this.collabInitDone = false;
 	this.collabContainer;
