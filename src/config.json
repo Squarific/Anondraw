@@ -30,10 +30,10 @@
                 "password": "imgur password"
             }
         },
-		"messages": {
-			"host": "beta.anondraw.com",
-			"port": 2552
-		}
+        "messages": {
+            "host": "beta.anondraw.com",
+            "port": 2552
+        }
     },
     "mysql": {
         "host":     "localhost",
