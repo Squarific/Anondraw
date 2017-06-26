@@ -97,12 +97,12 @@ PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDa
 /*
 	Adds an error message to the given window
 */
-PrivateChats.prototype.addError = function addError (userId, message) {
+PrivateChats.prototype.addError = function addError (userId, text) {
 	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow();
 	
 	var message = this.windows[userId].messageContainer.appendChild(document.createElement("div"));
 	message.className = "message error";
-	message.appendChild(document.createTextNode(message));
+	message.appendChild(document.createTextNode(text));
 	
 	// Scroll the new message into view
 	this.windows[userId].messageContainer.scrollTop =
