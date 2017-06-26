@@ -54,7 +54,7 @@ PrivateChats.prototype.setupChatWindow = function setupChatWindow (userId) {
 PrivateChats.prototype.setupMessages = function setupMessages (userId) {
 	// Container for the messages
 	var messageContainer = this.windows[userId].appendChild(document.createElement("div"));
-	messageContainer.className = "messageContainer";
+	messageContainer.className = "pmwindowcontent";
 	
 	this.windows[userId].messageContainer = messageContainer;
 };
