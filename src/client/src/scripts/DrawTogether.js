@@ -1168,12 +1168,14 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
 	
-	var messageButton = document.createElement("span");
-	messageButton.className = "drawtogether-player-button fa fa-envelope";
+	if (!player.userid) {
+		var messageButton = document.createElement("span");
+		messageButton.className = "drawtogether-player-button fa fa-envelope";
 
-	messageButton.addEventListener("click", function (userid, event) {
-		this.pms.createChatWindow(userid);
-	}.bind(this, player.userid));
+		messageButton.addEventListener("click", function (userid, event) {
+			this.pms.createChatWindow(userid);
+		}.bind(this, player.userid));
+	}
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
 		var kickbanButton = document.createElement("span");

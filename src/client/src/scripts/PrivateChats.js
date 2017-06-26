@@ -69,7 +69,7 @@ PrivateChats.prototype.setupInput = function setupInput (userId) {
 					console.log(err);
 					return;
 				}
-			});
+			}.bind(this));
 			
 			this.addMessage(userId, false, Date.now(), messageInput.value);
 			messageInput.value = "";
