@@ -86,7 +86,7 @@ PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDa
 	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow(userId);
 	
 	var message = this.windows[userId].messageContainer.appendChild(document.createElement("div"));
-	message.className = "message " + partner ? "fromPartner" : "";
+	message.className = "message " + (partner ? "fromPartner" : "");
 	message.appendChild(document.createTextNode(text));
 	message.title = (new Date(sendDate)).toLocaleString();
 	
