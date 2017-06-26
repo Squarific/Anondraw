@@ -10,7 +10,7 @@
 }
 
 .gui-window {
-  position: absolute;
+  position: fixed;
   left: 50px;
   top: 50px;
   z-index: 150;

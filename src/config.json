@@ -29,7 +29,11 @@
                 "user": "anondraw",
                 "password": "imgur password"
             }
-        }
+        },
+		"messages": {
+			"host": "beta.anondraw.com",
+			"port": 2552
+		}
     },
     "mysql": {
         "host":     "localhost",

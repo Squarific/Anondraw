@@ -1,7 +1,8 @@
-function DrawTogether (container, settings, emotesHash, account, router) {
+function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	// Normalize settings, set container
 	this.container = container;
 	this.router = router;
+	this.pms = pms;
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
 
 	this.userSettings = QuickSettings.create(0, 0, "settings");
@@ -1099,7 +1100,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	messageButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-envelope";
 
 	messageButton.addEventListener("click", function (userid, event) {
-		this.router.navigate("/messages/" + userid + "/" + player.name);
+		this.pms.createChatWindow(userid);
 	}.bind(this, player.userid));
 
 	var nameText = document.createElement("span");

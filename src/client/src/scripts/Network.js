@@ -1,7 +1,6 @@
 function Network (mainServer) {
 	this.mainServer = mainServer;
 	this.socket;
-	this.oldSockets = {};
 
 	this.callbacks = {};
 }

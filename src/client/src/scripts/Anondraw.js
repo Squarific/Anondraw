@@ -1,10 +1,17 @@
 function Anondraw (container, settings) {
 	this.settings = settings;
-	this.container = container;
+	
+	this.container = container.appendChild(document.createElement("div"));
+	this.container.className = "fillParent";
+	
+	this.pmContainer = container.appendChild(document.createElement("div"));
+	this.pmContainer.className = "fillParent";
+	
 	this.account = new Account(this.settings.accountServer);
 	
 	this.account.isLoggedIn(function () {});
 	this.messages = new Messages(this.settings.messageServer, this.account);
+	this.privateChats = new PrivateChats(this.pmContainer, this.settings.privateChatServer, this.account);
 
 	this.collabInitDone = false;
 	this.collabContainer;
@@ -179,7 +186,7 @@ Anondraw.prototype.initCollab = function initCollab () {
 	this.collabContainer = document.createElement("div");
 	this.collabContainer.className = "collab-container";
 
-	this.collab = new DrawTogether(this.collabContainer, settings, this.settings.emotesHash, this.account, this.router);
+	this.collab = new DrawTogether(this.collabContainer, settings, this.settings.emotesHash, this.account, this.router, this.privateChats);
 };
 
 Anondraw.prototype.setContent = function setContent (domNode) {
