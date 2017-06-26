@@ -32,6 +32,7 @@ PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 	given userid
 */
 PrivateChats.prototype.createChatWindow = function createChatWindow (userId) {
+	if (!userId) { console.log("No userId provided when creating chat window"); return; }
 	if (this.windows[userId] && this.windows[userId].parent) {
 		console.log("A window for user " + userId + " was already open.");
 		return;
@@ -82,8 +83,7 @@ PrivateChats.prototype.setupInput = function setupInput (userId) {
 	Adds a message to the given window
 */
 PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDate, text) {
-	console.log(userId);
-	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow();
+	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow(userId);
 	
 	var message = this.windows[userId].messageContainer.appendChild(document.createElement("div"));
 	message.className = "message " + partner ? "fromPartner" : "";
@@ -100,7 +100,7 @@ PrivateChats.prototype.addMessage = function addMessage (userId, partner, sendDa
 	Adds an error message to the given window
 */
 PrivateChats.prototype.addError = function addError (userId, text) {
-	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow();
+	if (!this.windows[userId] || !this.windows[userId].parentNode) this.createChatWindow(userId);
 	
 	var message = this.windows[userId].messageContainer.appendChild(document.createElement("div"));
 	message.className = "message error";
