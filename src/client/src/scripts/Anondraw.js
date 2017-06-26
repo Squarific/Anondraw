@@ -5,7 +5,7 @@ function Anondraw (container, settings) {
 	this.container.className = "fillParent";
 	
 	this.pmContainer = container.appendChild(document.createElement("div"));
-	this.pmContainer.className = "fillParent";
+	this.pmContainer.className = "pmcontainer";
 	
 	this.account = new Account(this.settings.accountServer);
 	
