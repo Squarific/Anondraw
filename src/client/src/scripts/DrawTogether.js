@@ -1172,7 +1172,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	messageButton.className = "drawtogether-player-button fa fa-envelope";
 
 	messageButton.addEventListener("click", function (userid, event) {
-		this.router.navigate("/messages/" + userid + "/" + player.name);
+		this.pms.createChatWindow(userid);
 	}.bind(this, player.userid));
 
 	if (this.reputation >= this.KICKBAN_MIN_REP) {
