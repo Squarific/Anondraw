@@ -46,7 +46,7 @@ PrivateChats.prototype.createChatWindow = function createChatWindow (userId) {
 */
 PrivateChats.prototype.setupChatWindow = function setupChatWindow (userId) {
 	this.setupMessages(userId);
-	this.SetupInput(userId);	
+	this.setupInput(userId);	
 };
 
 PrivateChats.prototype.setupMessages = function setupMessages (userId) {
