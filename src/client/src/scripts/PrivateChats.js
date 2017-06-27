@@ -32,6 +32,12 @@ function PrivateChats (container, server, account, messages) {
 PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 	this.socket.on("message", function (fromId, toId, sendDate, message) {
 		console.log("Message received", fromId, toId, sendDate, message);
+		
+		if (this.isUserBlocked(fromId)) {
+			console.log("Private message from " + fromId + " was blocked.");
+			return;
+		}
+	
 		this.addMessage(fromId, true, sendDate, message);
 		
 		if (Notification.permission !== "granted")
@@ -76,6 +82,22 @@ PrivateChats.prototype.createChatWindow = function createChatWindow (userId, nam
 			this.windows[userId].children[0].children[0].appendChild(
 				document.createTextNode("Chat with " + data.name));
 		}.bind(this));
+};
+
+/*
+	Returns if user is blocked given userid
+*/
+PrivateChats.prototype.isUserBlocked = function isUserBlocked (userId) {
+	var chatFilterByPlayerArrStringified = localStorage.getItem("chatFilterByPlayerArr");
+	if (chatFilterByPlayerArrStringified)
+		var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
+	if (chatFilterByPlayerArr)
+		for (var k = 0; k < chatFilterByPlayerArr.length; k++) {
+			if (chatFilterByPlayerArr[k].userid && chatFilterByPlayerArr[k].userid == userId)
+				if (chatFilterByPlayerArr[k].visibility == 0)
+					return true;
+		}
+	return false;
 };
 
 /*
