@@ -32,6 +32,12 @@ function PrivateChats (container, server, account, messages) {
 PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 	this.socket.on("message", function (fromId, toId, sendDate, message) {
 		console.log("Message received", fromId, toId, sendDate, message);
+		
+		if (this.isUserBlocked(fromId)) {
+			console.log("Private message from " + fromId + " was blocked.");
+			return;
+		}
+	
 		this.addMessage(fromId, true, sendDate, message);
 		
 		if (Notification.permission !== "granted")
@@ -60,11 +66,6 @@ PrivateChats.prototype.createChatWindow = function createChatWindow (userId, nam
 	if (!userId) { console.log("No userId provided when creating chat window"); return; }
 	if (this.windows[userId] && this.windows[userId].parent) {
 		console.log("A window for user " + userId + " was already open.");
-		return;
-	}
-	
-	if (this.isUserBlocked(userId)) {
-		console.log("Private message from " + userId + " was blocked.");
 		return;
 	}
 	
