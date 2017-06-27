@@ -17,7 +17,7 @@
 .gui-window {
   position: fixed;
   left: 50px;
-  top: 50px;
+  top: 150px;
   z-index: 150;
   background: #ddd;
 }
