@@ -8,6 +8,20 @@ function PrivateChats (container, server, account, messages) {
 	this.bindSocketListeners();
 
 	this.windows = {};
+	
+	//Visibility compatibility 
+	// Set the name of the hidden property and the change event for visibility
+	//var this.hidden, this.visibilityChange; 
+	if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+		this.hidden = "hidden";
+		this.visibilityChange = "visibilitychange";
+	} else if (typeof document.msHidden !== "undefined") {
+		this.hidden = "msHidden";
+		this.visibilityChange = "msvisibilitychange";
+	} else if (typeof document.webkitHidden !== "undefined") {
+		this.hidden = "webkitHidden";
+		this.visibilityChange = "webkitvisibilitychange";
+	}
 }
 
 /*
@@ -19,6 +33,17 @@ PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 	this.socket.on("message", function (fromId, toId, sendDate, message) {
 		console.log("Message received", fromId, toId, sendDate, message);
 		this.addMessage(fromId, true, sendDate, message);
+		
+		if (Notification.permission !== "granted")
+			Notification.requestPermission();
+		else {
+			if (document[this.hidden]) {
+				var notification = new Notification("PM: ", {
+					icon: 'http://www.anondraw.com/favicon.ico',
+					body: message,
+				});
+			}
+		}
 	}.bind(this));
 	
 	this.socket.emit("listen", this.account.uKey);
