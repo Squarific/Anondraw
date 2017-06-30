@@ -114,6 +114,7 @@ DrawTogether.prototype.IGNORE_INK_REP = 50;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
+DrawTogether.prototype.SCUTTLERS_MESSAGE_EVERY = 7 * 24 * 60 * 60 * 1000;
 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
@@ -708,6 +709,12 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			// We are not new, check if we already saw all the awesome new features
 			} else if (parseInt(localStorage.getItem("newfeaturewindowversion")) !== this.CLIENT_VERSION) {
 				this.openNewFeatureWindow();
+			
+			// Ha lets just self promote scuttlers then
+			} else if (!localStorage.getItem("scuttlers_trailer")
+				|| Date.now() - parseInt(localStorage.getItem("scuttlers_trailer")) > this.SCUTTLERS_MESSAGE_EVERY) {
+				localStorage.setItem("scuttlers_trailer", Date.now());
+				this.openScuttlersWindow();
 			}
 
 			this.removeLoading();
@@ -3919,6 +3926,22 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 
 	var container = discordWindow.appendChild(document.createElement("div"));
 	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
+};
+
+DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
+	var scuttlersWindow = this.gui.createWindow({ title: "Scuttlers trailer"});
+	
+	var content = scuttlersWindow.appendChild(document.createElement("div"));
+	content.className = "content";
+	
+	var title = container.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Scuttlers trailer"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("I'm developing a game called scuttlers. Feel free to check out the trailer and let me know what you think!"));
+	
+	var video = content.appendChild(document.createElement("div"));
+	video.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/pE737MO-8YQ" frameborder="0" allowfullscreen></iframe>';
 };
 
 DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
