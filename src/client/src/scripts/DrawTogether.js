@@ -3934,10 +3934,10 @@ DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
 	var content = scuttlersWindow.appendChild(document.createElement("div"));
 	content.className = "content";
 	
-	var title = container.appendChild(document.createElement("h2"));
+	var title = content.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Scuttlers trailer"));
 	
-	var p = container.appendChild(document.createElement("p"));
+	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("I'm developing a game called scuttlers. Feel free to check out the trailer and let me know what you think!"));
 	
 	var video = content.appendChild(document.createElement("div"));
