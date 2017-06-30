@@ -3931,6 +3931,8 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
 	var scuttlersWindow = this.gui.createWindow({ title: "Scuttlers trailer"});
 	
+	ga("send", "event", "window", "scuttlers");
+	
 	var content = scuttlersWindow.appendChild(document.createElement("div"));
 	content.className = "content";
 	
