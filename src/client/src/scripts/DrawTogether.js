@@ -3942,6 +3942,13 @@ DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
 	
 	var video = content.appendChild(document.createElement("div"));
 	video.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/pE737MO-8YQ" frameborder="0" allowfullscreen></iframe>';
+	
+	var p = content.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("More info: "));
+	
+	var a = p.appendChild(document.createElement("a"));
+	a.href = "https://www.playscuttlers.com";
+	a.alt = "Scuttlers official website";
 };
 
 DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
