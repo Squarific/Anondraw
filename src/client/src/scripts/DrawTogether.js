@@ -3951,6 +3951,7 @@ DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
 	var a = p.appendChild(document.createElement("a"));
 	a.href = "https://www.playscuttlers.com";
 	a.alt = "Scuttlers official website";
+	a.appendChild(document.createTextNode("https://www.playscuttlers.com"));
 };
 
 DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
