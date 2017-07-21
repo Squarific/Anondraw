@@ -108,7 +108,7 @@ var server = http.createServer(function (req, res) {
 
 		playerDatabase.reset(code, pass, function (err, id, email) {
 			if (err) {
-				res.end('{"error": "' + err + '"}');
+				res.end('{"err": "' + err + '"}');
 				return;
 			}
 			
