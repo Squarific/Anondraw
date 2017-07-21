@@ -89,7 +89,7 @@ var server = http.createServer(function (req, res) {
 		mailgun.send({
 			subject: "Password reset for anondraw.com",
 			recipient: email,
-			body: 'Click <a href="http://www.anondraw.com/reset?code=' + code + '">here</a> to reset your password.'
+			body: 'Click <a href="' + config.mail.forgotlink + '/reset?code=' + code + '">here</a> to reset your password.'
 		});
 
 		playerDatabase.forgot(email, req.connection.remoteAddress, code, function (err) {

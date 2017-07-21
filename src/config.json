@@ -44,6 +44,7 @@
     "mail": {
         "key": "mailgunkey",
         "domain": "mg.anondraw.com",
-        "sender": "forgot@anondraw.com"
+        "sender": "forgot@anondraw.com",
+        "forgotlink": "http://www.anondraw.com"
     }
 }

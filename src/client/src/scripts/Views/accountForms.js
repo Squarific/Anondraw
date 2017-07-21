@@ -235,7 +235,7 @@ Anondraw.prototype.createForgotPage = function createForgotPage () {
 	registerButton.className = "button forgot-pw-button";
 	
 	var forgot = formContainer.appendChild(document.createElement("div"));
-	forgot.appendChild(document.createTextNode("We will send you a link where you can reset your password."));
+	forgot.appendChild(document.createTextNode("We will send you an email with a link. Click it to reset your password."));
 	
 	var reset = function reset () {
 		if (accountForm.classList.contains("disabled")) return;
@@ -251,7 +251,12 @@ Anondraw.prototype.createForgotPage = function createForgotPage () {
 				return;
 			}
 			
-			error.appendChild(document.createTextNode("An email has been send!"));
+			error.classList.add("no-error");
+			error.appendChild(document.createTextNode("An email has been send, you can now click the link inside of it to reset your password."));
+			
+			accountForm.classList.remove("disabled");
+			inputContainer.parentNode.removeChild(inputContainer);
+			registerButton.parentNode.removeChild(registerButton);
 		}.bind(this));
 	}.bind(this);
 	
