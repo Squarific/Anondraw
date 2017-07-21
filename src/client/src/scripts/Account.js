@@ -92,7 +92,7 @@ Account.prototype.forgot = function (email, callback) {
 Account.prototype.reset = function (code, pass, callback) {
 	this.request("/reset", {
 		code: code,
-		pass, pass,
+		pass: pass,
 	}, this.parseData.bind(this, function (err, data) {
 		if (err) {
 			callback(err);
