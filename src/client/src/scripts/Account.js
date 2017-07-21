@@ -90,9 +90,10 @@ Account.prototype.forgot = function (email, callback) {
 	Callback (err, data) where data: {id, email, uKey}
 */
 Account.prototype.reset = function (code, unhashedPass, callback) {
+	var pass = CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64);
 	this.request("/reset", {
 		code: code,
-		pass: CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64)
+		pass: pass
 	}, this.parseData.bind(this, function (err, data) {
 		if (err) {
 			callback(err);
