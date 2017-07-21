@@ -12,6 +12,15 @@ ALTER TABLE users ADD COLUMN bio TEXT;
 ALTER TABLE users ADD COLUMN last_online DATETIME;
 ALTER TABLE users ADD COLUMN register_datetime DATETIME;
 
+CREATE TABLE IF NOT EXISTS forgotkeys (
+	email VARCHAR(255),
+	ip VARCHAR(48),
+	code VARCHAR(16) UNIQUE,
+	created DATETIME,
+	active BIT,
+	INDEX(code, created, active)
+);
+
 CREATE TABLE IF NOT EXISTS friendlist (
     from_id INT,
     to_id INT,

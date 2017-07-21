@@ -78,6 +78,42 @@ Account.prototype.getFavorites = function (room, callback) {
 	}, this.parseData.bind(this, callback));
 };
 
+Account.prototype.forgot = function (email, callback) {
+	this.request("/forgot", {
+		email: email
+	}, this.parseData.bind(this, callback));
+};
+
+/*
+	Resets the pass for the given code
+	Also logs us in with the new pass
+	Callback (err, data) where data: {id, email, uKey}
+*/
+Account.prototype.reset = function (code, pass, callback) {
+	this.request("/reset", {
+		code: code,
+		pass, pass,
+	}, this.parseData.bind(this, function (err, data) {
+		if (err) {
+			callback(err);
+			return;
+		}
+		
+		this.uKey = data.uKey;
+		this.id = data.id;
+		this.mail = data.email;
+		this.lastLoginCheck = Date.now();
+		
+		localStorage.setItem("drawtogether-uKey", data.uKey);
+		localStorage.setItem("drawtogether-mail", email);
+		localStorage.setItem("drawtogether-pass", pass);
+		
+		this.dispatchEvent({ type: "change" });
+		
+		callback(null, data);
+	}));
+};
+
 // Callback (err)
 Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 	var req = new XMLHttpRequest();

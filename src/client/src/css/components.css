@@ -224,9 +224,14 @@
 	background:#6b3232 !important;
 }
 
-.form-container a {
+.loginhelp {
 	margin-top: 1em;
 	padding: .5em;
+}
+
+.loginhelp a {
+	text-align:center;
+	min-width:15em;
 }
 
 .card a {

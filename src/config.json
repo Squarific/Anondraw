@@ -40,5 +40,10 @@
         "database": "anondraw",
         "user":     "anondraw",
         "password": "anondraw"
+    },
+    "mail": {
+        "key": "mailgunkey",
+        "domain": "mg.anondraw.com",
+        "sender": "forgot@anondraw.com"
     }
 }

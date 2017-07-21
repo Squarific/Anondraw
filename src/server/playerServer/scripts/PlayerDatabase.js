@@ -59,6 +59,51 @@ PlayerDatabase.prototype.getName = function getName (id, callback) {
 	});
 };
 
+PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
+	this.database.query("INSERT INTO forgotkeys (email, ip, code, created, active) VALUES (?, ?, ?, ?, 1)", [email, ip, code, new Date()], function (err, result) {
+		callback(err);
+	});
+};
+
+/*
+	Takes an unencrypted password and a forgotkey code and puts the hash as pass
+	for the user with the given code
+	
+	Callback(err, id, email)
+*/
+PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
+	// SET PASS, DISABLE CODE
+	this.database.query("SELECT id, email FROM users JOIN forgotkeys ON users.email = forgotkeys.email WHERE code = ? AND active = 1 AND created < ? - INTERVAL 1 DAY; UPDATE forgotkeys SET active = 0 WHERE code = ?", [code, new Date(), code], function (err, rows) {
+		if (err) {
+			console.log("[RESET] DB ERROR 1:", err);
+			callback("Reset database error #1");
+			return;
+		}
+		
+		if (!rows || rows.length < 1) {
+			callback("Code does not exist or has already been used!");
+			return;
+		}
+				
+		this.setPassword(rows[0].id, pass, function (err) {
+			if (err) {
+				console.log("[RESET] DB ERROR 2:", err);
+				callback("Reset database error #2");
+				return;
+			}
+			
+			callback(null, rows[0].id, rows[0].email);
+		});
+	});
+};
+
+/*
+	Takes an unencrypted password and puts the hash as the password for the given user
+*/
+PlayerDatabase.prototype.setPassword = function setPassword (id, pass, callback) {
+	this.database.query("UPDATE users SET pass = ? WHERE id = ?", [pass, id], callback);
+};
+
 PlayerDatabase.prototype.banIp = function banIp (ip, by, minutes, reason, callback) {
 	var startdate = new Date();
 	var enddate = new Date(Date.now() + parseInt(minutes) * 60 * 1000);

@@ -104,6 +104,20 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('set', 'page', '/login');
 		ga('send', 'pageview');
 	}.bind(this))
+	.on('/forgot*', function () {
+		this.account.checkLogin(function (err, loggedIn) {
+			if (loggedIn) {
+				ga('set', 'page', '/alreadyLoggedIn');
+				ga('send', 'pageview');
+				this.router.navigate("/collab");
+				return;
+			}
+			
+			this.setContent(this.createForgotPage());
+		}.bind(this));
+		ga('set', 'page', '/forgot');
+		ga('send', 'pageview');
+	}.bind(this))
 	.on('/register*', function () {
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
@@ -153,7 +167,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 	}.bind(this))
 	.notFound(function (query) {
 		console.log(query);
-		this.setContent(document.createTextNode("This page could not be found ;("));		
+		this.setContent(document.createTextNode("This page does not seem to exist. Did you type it wrong? If not, contact info@anondraw.com"));		
 		ga('set', 'page', '/notfound');
 		ga('send', 'pageview');
 	}.bind(this));

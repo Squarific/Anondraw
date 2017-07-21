@@ -35,12 +35,20 @@ Anondraw.prototype.createLoginPage = function createLoginPage () {
 	loginButton.appendChild(document.createTextNode("Log in"));
 	loginButton.className = "button login-button";
 	
-	var signup = formContainer.appendChild(document.createElement("div"));
-	signup.appendChild(document.createTextNode("Not yet signed up? "));
-	var gotosignupbutton = signup.appendChild(document.createElement("a"));
+	var loginhelp = formContainer.appendChild(document.createElement("div"));
+	loginhelp.className = "loginhelp";
+	loginhelp.appendChild(document.createTextNode("Not yet signed up? "));
+	var gotosignupbutton = loginhelp.appendChild(document.createElement("a"));
 	gotosignupbutton.href = "/register";
-	gotosignupbutton.appendChild(document.createTextNode("Click here to create an account"));
+	gotosignupbutton.appendChild(document.createTextNode("Create an account"));
 	gotosignupbutton.setAttribute("data-navigo", "");
+	
+	loginhelp.appendChild(document.createElement("br"));
+	loginhelp.appendChild(document.createTextNode("Forgot your password? "));
+	var gotoforgotbutton = loginhelp.appendChild(document.createElement("a"));
+	gotoforgotbutton.href = "/forgot";
+	gotoforgotbutton.appendChild(document.createTextNode("Reset it here"));
+	gotoforgotbutton.setAttribute("data-navigo", "");
 	
 	var login = function login () {
 		if (accountForm.classList.contains("disabled")) return;
@@ -188,6 +196,68 @@ Anondraw.prototype.createLogoutPage = function createLogoutPage () {
 		}
 		
 		statusText.appendChild(document.createTextNode("You have been successfully logged out!"));
+	});
+	
+	return container;
+};
+
+Anondraw.prototype.createForgotPage = function createForgotPage () {
+	var container = document.createElement("div");
+	
+	/*
+		Top bar
+	*/
+	
+	container.appendChild(this.createTopBar());
+	
+	var accountForm = container.appendChild(document.createElement("div"));
+	accountForm.className = "card accountform";
+	
+	var title = accountForm.appendChild(document.createElement("h1"));
+	title.appendChild(document.createTextNode("Forgot password"));
+	
+	var formContainer = accountForm.appendChild(document.createElement("div"));
+	formContainer.className = "form-container";
+	
+	var error = formContainer.appendChild(document.createElement("div"));
+	error.className = "status";
+	
+	/* Email field */
+	var inputContainer = formContainer.appendChild(document.createElement("div"));
+	var email = inputContainer.appendChild(document.createElement("span"));
+	email.appendChild(document.createTextNode("Email"));
+	var emailInput = inputContainer.appendChild(document.createElement("input"));
+	emailInput.placeholder = "email@example.org";
+	
+	/* Register button */
+	var registerButton = formContainer.appendChild(document.createElement("div"));
+	registerButton.appendChild(document.createTextNode("Send reset link"));
+	registerButton.className = "button forgot-pw-button";
+	
+	var forgot = formContainer.appendChild(document.createElement("div"));
+	forgot.appendChild(document.createTextNode("We will send you a link where you can reset your password."));
+	
+	var reset = function reset () {
+		if (accountForm.classList.contains("disabled")) return;
+		accountForm.classList.add("disabled");
+		
+		while (error.firstChild) error.removeChild(error.firstChild);
+		
+		this.account.forgot(emailInput.value, function (err) {
+			if (err) {
+				error.appendChild(document.createTextNode(err));
+				accountForm.classList.remove("disabled");
+				ga("send", "event", "error", "forgot");
+				return;
+			}
+			
+			error.appendChild(document.createTextNode("An email has been send!"));
+		}.bind(this));
+	}.bind(this);
+	
+	registerButton.addEventListener("click", reset);
+	emailInput.addEventListener("keydown", function (event) {
+		if (event.keyCode == 13) reset();
 	});
 	
 	return container;

@@ -3,6 +3,7 @@ var config = require("../common/config.js");
 
 var http = require("http");
 var mysql = require("mysql");
+var mailgun = require('mailgun-send');
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
 
@@ -14,6 +15,12 @@ var database = mysql.createConnection({
 	multipleStatements: true
 });
 
+mailgun.config({
+	key: config.mail.key,
+	domain: config.mail.domain,
+	sender: config.mail.sender
+});
+
 var PlayerDatabase = require("./scripts/PlayerDatabase.js");
 var MessageDatabase = require("./scripts/MessageDatabase.js");
 var Sessions = require("./scripts/Sessions.js");
@@ -21,6 +28,8 @@ var Sessions = require("./scripts/Sessions.js");
 var playerDatabase = new PlayerDatabase(database);
 var messageDatabase = new MessageDatabase(database);
 var sessions = new Sessions();
+
+var forgots = {};
 
 // Ips from coinbase
 var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", "54.175.255.194",
@@ -30,6 +39,16 @@ var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", 
 "54.175.255.210", "54.175.255.211", "54.175.255.212", "54.175.255.213", "54.175.255.214",
 "54.175.255.215", "54.175.255.216", "54.175.255.217", "54.175.255.218", "54.175.255.219",
 "54.175.255.220", "54.175.255.221", "54.175.255.222", "54.175.255.223"];
+
+function randomString (length) {
+	var chars = "abcdefghijklmnopqrstuvwxyz1234567890";
+	var string = "";
+
+	for (var k = 0; k < length; k++)
+		string += chars[Math.floor(Math.random() * chars.length)];
+
+	return string;
+}
 
 var server = http.createServer(function (req, res) {
 	var url = require("url");
@@ -47,6 +66,58 @@ var server = http.createServer(function (req, res) {
 			res.end(JSON.stringify({
 				err: err,
 				data: data
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/forgot") {
+		var email = parsedUrl.query.email;
+		
+		if (forgot[req.connection.remoteAddress] &&
+		    Date.now() - forgot[req.connection.remoteAddress] < 5000) {
+			res.end(JSON.stringify({ err: "You are doing this too quickly." }));
+			forgot[req.connection.remoteAddress] = Date.now();
+			return;
+		}
+		
+		forgot[req.connection.remoteAddress] = Date.now();
+		
+		var code = randomString(16);
+		console.log("Forgot pass", req.connection.remoteAddress, email);
+		
+		mailgun.send({
+			subject: "Password reset for anondraw.com",
+			recipient: email,
+			body: 'Click <a href="http://www.anondraw.com/reset?code=' + code + '">here</a> to reset your password.'
+		});
+
+		playerDatabase.forgot(email, req.connection.remoteAddress, code, function (err) {
+			res.end(JSON.stringify({
+				err: err
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/reset") {
+		var code = parsedUrl.query.code;
+		var pass = parsedUrl.query.pass;
+		
+		console.log("Resetting password", code, req.connection.remoteAddress, pass);
+
+		playerDatabase.reset(code, pass, function (err, id, email) {
+			if (err) {
+				res.end('{"error": "' + err + '"}');
+				return;
+			}
+			
+			var uKey = sessions.addSession(id, email);
+			playerDatabase.setOnline(id);
+			res.end(JSON.stringify({
+				uKey: uKey,
+				id: id,
+				email: email
 			}));
 		});
 		return;
