@@ -61,7 +61,8 @@ PlayerDatabase.prototype.getName = function getName (id, callback) {
 
 PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
 	this.database.query("INSERT INTO forgotkeys (email, ip, code, created, active) VALUES (?, ?, ?, ?, 1)", [email, ip, code, new Date()], function (err, result) {
-		callback(err);
+		if (err) console.log("Forgot DB error:", err);
+		callback(err ? "Database error" : null);
 	});
 };
 

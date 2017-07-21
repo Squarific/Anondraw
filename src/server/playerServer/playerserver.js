@@ -90,6 +90,8 @@ var server = http.createServer(function (req, res) {
 			subject: "Password reset for anondraw.com",
 			recipient: email,
 			body: 'Click <a href="' + config.mail.forgotlink + '/reset?code=' + code + '">here</a> to reset your password.'
+		}, function (err) {
+			if (err) console.log("Forgot send mail error:", err);
 		});
 
 		playerDatabase.forgot(email, req.connection.remoteAddress, code, function (err) {
