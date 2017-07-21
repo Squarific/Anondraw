@@ -105,7 +105,7 @@ Account.prototype.reset = function (code, pass, callback) {
 		this.lastLoginCheck = Date.now();
 		
 		localStorage.setItem("drawtogether-uKey", data.uKey);
-		localStorage.setItem("drawtogether-mail", email);
+		localStorage.setItem("drawtogether-mail", data.email);
 		localStorage.setItem("drawtogether-pass", pass);
 		
 		this.dispatchEvent({ type: "change" });
