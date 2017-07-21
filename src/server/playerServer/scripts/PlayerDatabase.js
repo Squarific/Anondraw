@@ -103,7 +103,7 @@ PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
 	Takes an unencrypted password and puts the hash as the password for the given user
 */
 PlayerDatabase.prototype.setPassword = function setPassword (id, pass, callback) {
-	this.database.query("UPDATE users SET pass = ? WHERE id = ?", [pass, id], callback);
+	this.database.query("UPDATE users SET pass = ? WHERE id = ?", [SHA256(pass).toString(), id], callback);
 };
 
 PlayerDatabase.prototype.banIp = function banIp (ip, by, minutes, reason, callback) {
