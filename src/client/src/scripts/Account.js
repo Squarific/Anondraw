@@ -347,6 +347,11 @@ Account.prototype.parseData = function parseData (callback, err, request ) {
 		callback(data.error)						
 		return;
 	}
+	
+	if (data.err) {
+		callback(data.err);
+		return;
+	}
 
 	callback(err, data);
 };
