@@ -229,10 +229,10 @@ Anondraw.prototype.createForgotPage = function createForgotPage () {
 	var emailInput = inputContainer.appendChild(document.createElement("input"));
 	emailInput.placeholder = "email@example.org";
 	
-	/* Register button */
-	var registerButton = formContainer.appendChild(document.createElement("div"));
-	registerButton.appendChild(document.createTextNode("Send reset link"));
-	registerButton.className = "button forgot-pw-button";
+	/* Forgot button */
+	var forgotButton = formContainer.appendChild(document.createElement("div"));
+	forgotButton.appendChild(document.createTextNode("Send reset link"));
+	forgotButton.className = "button forgot-pw-button";
 	
 	var forgot = formContainer.appendChild(document.createElement("div"));
 	forgot.appendChild(document.createTextNode("We will send you an email with a link. Click it to reset your password."));
@@ -256,12 +256,89 @@ Anondraw.prototype.createForgotPage = function createForgotPage () {
 			
 			accountForm.classList.remove("disabled");
 			inputContainer.parentNode.removeChild(inputContainer);
-			registerButton.parentNode.removeChild(registerButton);
+			forgotButton.parentNode.removeChild(forgotButton);
 		}.bind(this));
 	}.bind(this);
 	
-	registerButton.addEventListener("click", reset);
+	forgotButton.addEventListener("click", reset);
 	emailInput.addEventListener("keydown", function (event) {
+		if (event.keyCode == 13) reset();
+	});
+	
+	return container;
+};
+
+function getQueryVariable(variable) {
+    var query = window.location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) == variable) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
+    console.log('Query variable %s not found', variable);
+}
+
+Anondraw.prototype.createResetPage = function createResetPage () {
+	var container = document.createElement("div");
+	
+	/*
+		Top bar
+	*/
+	
+	container.appendChild(this.createTopBar());
+	
+	var accountForm = container.appendChild(document.createElement("div"));
+	accountForm.className = "card accountform";
+	
+	var title = accountForm.appendChild(document.createElement("h1"));
+	title.appendChild(document.createTextNode("Reset password"));
+	
+	var formContainer = accountForm.appendChild(document.createElement("div"));
+	formContainer.className = "form-container";
+	
+	var error = formContainer.appendChild(document.createElement("div"));
+	error.className = "status";
+	
+	/* Password field */
+	var inputContainer = formContainer.appendChild(document.createElement("div"));
+	var password = inputContainer.appendChild(document.createElement("span"));
+	password.appendChild(document.createTextNode("New password"));
+	var passwordInput = inputContainer.appendChild(document.createElement("input"));
+	passwordInput.type = "password";
+	passwordInput.placeholder = "password";
+	
+	/* Reset button */
+	var resetButton = formContainer.appendChild(document.createElement("div"));
+	resetButton.appendChild(document.createTextNode("Reset password"));
+	resetButton.className = "button reset-pw-button";
+	
+	var reset = function reset () {
+		if (accountForm.classList.contains("disabled")) return;
+		accountForm.classList.add("disabled");
+		
+		while (error.firstChild) error.removeChild(error.firstChild);
+		
+		this.account.reset(getQueryVariable("code"), passwordInput.value, function (err, data) {
+			if (err) {
+				error.appendChild(document.createTextNode(err));
+				accountForm.classList.remove("disabled");
+				ga("send", "event", "error", "reset");
+				return;
+			}
+			
+			error.classList.add("no-error");
+			error.appendChild(document.createTextNode("Your password has been reset for '" + data.email + "' and you have been logged in."));
+			
+			accountForm.classList.remove("disabled");
+			inputContainer.parentNode.removeChild(inputContainer);
+			resetButton.parentNode.removeChild(resetButton);
+		}.bind(this));
+	}.bind(this);
+	
+	resetButton.addEventListener("click", reset);
+	passwordInput.addEventListener("keydown", function (event) {
 		if (event.keyCode == 13) reset();
 	});
 	

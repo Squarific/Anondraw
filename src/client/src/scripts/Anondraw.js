@@ -118,6 +118,20 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('set', 'page', '/forgot');
 		ga('send', 'pageview');
 	}.bind(this))
+	.on('/reset*', function () {
+		this.account.checkLogin(function (err, loggedIn) {
+			if (loggedIn) {
+				ga('set', 'page', '/alreadyLoggedIn');
+				ga('send', 'pageview');
+				this.router.navigate("/collab");
+				return;
+			}
+			
+			this.setContent(this.createResetPage());
+		}.bind(this));
+		ga('set', 'page', '/reset');
+		ga('send', 'pageview');
+	}.bind(this))
 	.on('/register*', function () {
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
