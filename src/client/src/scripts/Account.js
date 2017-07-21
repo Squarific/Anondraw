@@ -111,7 +111,7 @@ Account.prototype.reset = function (code, pass, callback) {
 		this.dispatchEvent({ type: "change" });
 		
 		callback(null, data);
-	}));
+	}.bind(this)));
 };
 
 // Callback (err)
