@@ -29,7 +29,7 @@ var playerDatabase = new PlayerDatabase(database);
 var messageDatabase = new MessageDatabase(database);
 var sessions = new Sessions();
 
-var forgots = {};
+var forgot = {};
 
 // Ips from coinbase
 var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", "54.175.255.194",
