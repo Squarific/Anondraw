@@ -73,7 +73,7 @@ PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
 */
 PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
 	// SET PASS, DISABLE CODE
-	this.database.query("SELECT id, users.email FROM users JOIN forgotkeys ON users.email = forgotkeys.email WHERE code = ? AND active = 1 AND created < ? - INTERVAL 1 DAY; UPDATE forgotkeys SET active = 0 WHERE code = ?", [code, new Date(), code], function (err, results) {
+	this.database.query("SELECT id, users.email FROM users JOIN forgotkeys ON users.email = forgotkeys.email WHERE code = ? AND active = 1 AND created > ? - INTERVAL 1 DAY; UPDATE forgotkeys SET active = 0 WHERE code = ?", [code, new Date(), code], function (err, results) {
 		if (err) {
 			console.log("[RESET] DB ERROR 1:", err);
 			callback("Reset database error #1");
