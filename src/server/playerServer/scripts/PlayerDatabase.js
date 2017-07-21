@@ -94,7 +94,7 @@ PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
 			
 			callback(null, rows[0].id, rows[0].email);
 		});
-	});
+	}.bind(this));
 };
 
 /*
