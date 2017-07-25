@@ -1,5 +1,6 @@
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
+var emailTemplate = require("./emailTemplate.js");
 
 var http = require("http");
 var mysql = require("mysql");
@@ -75,9 +76,13 @@ var server = http.createServer(function (req, res) {
 		var email = parsedUrl.query.email;
 		
 		if (forgot[req.connection.remoteAddress] &&
-		    Date.now() - forgot[req.connection.remoteAddress] < 5000) {
+		    Date.now() - forgot[req.connection.remoteAddress] < 30000) {
 			res.end(JSON.stringify({ err: "You are doing this too quickly." }));
-			forgot[req.connection.remoteAddress] = Date.now();
+			return;
+		}
+		
+		if (!email) {
+			res.end(JSON.stringify({ err: "No email provided" }));
 			return;
 		}
 		
@@ -85,11 +90,12 @@ var server = http.createServer(function (req, res) {
 		
 		var code = randomString(16);
 		console.log("Forgot pass", req.connection.remoteAddress, email);
-		
+
+		var forgotLink = config.mail.forgotlink + '/reset?code=' + code;		
 		mailgun.send({
 			subject: "Password reset for anondraw.com",
 			recipient: email,
-			body: 'Click <a href="' + config.mail.forgotlink + '/reset?code=' + code + '">here</a> to reset your password.'
+			body: emailTemplate.replace("$forgotlink", forgotLink)
 		}, function (err) {
 			if (err) console.log("Forgot send mail error:", err);
 		});
