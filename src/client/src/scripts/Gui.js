@@ -92,7 +92,7 @@ Gui.prototype.makeDraggable = function makeDraggable (targetElement, handleEleme
 	var elementStartPos = [];
 	var dragging = false;
 
-	function handleStart () {
+	function handleStart (event) {
 		dragging = true;
 		startPos = [event.clientX || 0, event.clientY || 0];
 
@@ -106,7 +106,7 @@ Gui.prototype.makeDraggable = function makeDraggable (targetElement, handleEleme
 		event.preventDefault();
 	}
 
-	function handleMove () {
+	function handleMove (event) {
 		if (dragging) {
 			targetElement.style.left = elementStartPos[0] - startPos[0] + (event.clientX || event.changedTouches[0].clientX) + "px";
 			targetElement.style.top = elementStartPos[1] - startPos[1] + (event.clientY || event.changedTouches[0].clientY) + "px";
