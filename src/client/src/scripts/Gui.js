@@ -141,7 +141,9 @@ Gui.prototype.createWindow = function createWindow (settings) {
 
 	var titleContainer = windowContainer.appendChild(document.createElement("div"));
 	titleContainer.className = "titlecontainer";
-
+	if(settings.thinTitlebar)
+		titleContainer.classList.add("thin-titlebar");
+	
 	var title = titleContainer.appendChild(document.createElement("span"));
 	title.className = "title";
 	title.appendChild(document.createTextNode(settings.title || "window"));

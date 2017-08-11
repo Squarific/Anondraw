@@ -1,0 +1,22 @@
+.keyframe-top-control-container {
+	
+	
+}
+.keyframe-control {
+	display: inline-block;
+}
+
+.keyframe-control-label {
+	
+}
+.keyframe-fps-input {
+	width: 3em;
+}
+
+.keyframe-labelbar {
+	display: inline-block;
+}
+
+.keyframe-unit { 
+	display: inline-block;
+}
