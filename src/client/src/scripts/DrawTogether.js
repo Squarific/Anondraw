@@ -235,6 +235,15 @@ DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
 	this.lastPathPoint = undefined;
 };
 
+DrawTogether.prototype.handleGotoAndCenter = function handleGotoAndCenter (x, y) {
+	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+	                  this.paint.public.canvas.height / this.paint.public.zoom];
+
+	var targetPosEnd = [x - screenSize[0] / 2,
+	                    y - screenSize[1] / 2];
+	this.handleGoto(targetPosEnd[0], targetPosEnd[1]);
+};
+
 DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 	if (this.moveQueue.length > 0) {
 		if (Date.now() - this.lastScreenMove >= this.moveQueue[0].duration) {
@@ -1694,18 +1703,18 @@ DrawTogether.prototype.updateAnimationManager = function updateAnimationManager 
 	}
 	
 	for (var k = 0; k < this.myAnimations.length; k++) {
-		container.appendChild(this.buildAnimationButtons(this.myAnimations[k]));
+		container.appendChild(this.buildAnimationButtons(this.myAnimations[k], k));
 	}
 };
 //keyframes, name(coords if empty), pencil, export, cloud icon, remove
 
-DrawTogether.prototype.buildAnimationButtons = function buildAnimationButtons (myAnimation) {
+DrawTogether.prototype.buildAnimationButtons = function buildAnimationButtons (myAnimation, index) {
 	var container = document.createElement("div");
 	
 	var keyframeManagerButton = container.appendChild(document.createElement("div"));
 	keyframeManagerButton.className = "coords-button";
 	keyframeManagerButton.appendChild(document.createTextNode("Keyframe Manager"));
-	keyframeManagerButton.addEventListener("click", this.openKeyframeManager.bind(this, myAnimation));
+	keyframeManagerButton.addEventListener("click", this.openKeyframeManager.bind(this, myAnimation, index));
 	
 	
 	var gotoButton = container.appendChild(document.createElement("div"));
@@ -1718,32 +1727,74 @@ DrawTogether.prototype.buildAnimationButtons = function buildAnimationButtons (m
 	exportButton.className = "coords-button";
 	
 	exportButton.appendChild(document.createTextNode("export"));
-	exportButton.addEventListener("click", this.exportMyAnimation.bind(this, myAnimation));
+	exportButton.addEventListener("click", this.exportMyAnimation.bind(this, index));
 	
 	container.appendChild(this.buildAnimationRemoveButton(myAnimation));
 	
 	return container;
 };
 
-DrawTogether.prototype.openKeyframeManager = function openKeyframeManager (myAnimation, event) {
-	if(!this.keyframeManager) this.createKeyframeManager();
-	this.keyframeManager.window.hidden = true;
+DrawTogether.prototype.buildKeyframe = function buildKeyframe (i, frameType, totalCount, hasBufferFrames) {
+	var labelBar = this.keyframeManager.keyframeNumberLabelBar.appendChild(document.createElement("div"));
+	if( totalCount % 5 == 0)
+		labelBar.appendChild(document.createTextNode(totalCount));
+	else
+		labelBar.appendChild(document.createTextNode('\u00A0')); //space character
+	labelBar.className = "keyframe-labelbar";
 	
-	while (this.keyframeManager.keyframeNumberLabelBar.firstChild) 
-		this.keyframeManager.keyframeNumberLabelBar.removeChild(this.keyframeManager.keyframeNumberLabelBar.firstChild);
+	var dividerBorders = labelBar.appendChild(document.createElement("div"));
+	dividerBorders.className = "keyframe-labelbar-digit-divider";
+	
+	var keyFrame = this.keyframeManager.keyframeBar.appendChild(document.createElement("div"));
+	
+	keyFrame.className = "keyframe-unit " + frameType + (hasBufferFrames ? " keyframe-hasBufferFrames" : "");
+	if(frameType != '')
+	keyFrame.addEventListener("click", function keyframeclick(e) {
+		var element = e.srcElement || e.target;
+		if(element.classList.contains("keyframe-selected")){
+			element.classList.remove("keyframe-selected");
+		}
+		else {
+			element.classList.add("keyframe-selected");
+			this.keyframeGoto(this.myAnimations[this.keyframeManager.animationIndex], i);
+		}
+	}.bind(this));
+	
+	
+	
+};
+DrawTogether.prototype.keyframeGoto = function keyframeGoto (myAnimation, keyframeindex) {
+	var offset = keyframeindex * myAnimation.sqwidth + keyframeindex * myAnimation.gutter;
+	this.handleGotoAndCenter(myAnimation.leftTop[0] + offset, myAnimation.leftTop[1]);
+};
+DrawTogether.prototype.openKeyframeManager = function openKeyframeManager (myAnimation, index, event) {
+	if(!this.keyframeManager) this.createKeyframeManager();
+	//this.keyframeManager.window.hidden = true;
+	$(".keyframe-number-labelbar-container .keyframe-labelbar").remove();
+	
 	while (this.keyframeManager.keyframeBar.firstChild)
 		this.keyframeManager.keyframeBar.removeChild(this.keyframeManager.keyframeBar.firstChild);
 	
-	for(var i = 0; i < myAnimation.squares; i++){
-		var labelBar = this.keyframeManager.keyframeNumberLabelBar.appendChild(document.createElement("div"));
-		labelBar.appendChild(document.createTextNode(i + 1));
-		labelBar.className = "keyframe-labelbar"
-		var keyFrame = this.keyframeManager.keyframeBar.appendChild(document.createElement("div"));
-		keyFrame.className = "keyframe-unit"
+	var totalCount = 0;
+	
+	for(var i = 0; i < myAnimation.squares + 20; i++) {
+		var frameType = ''; // non-allocated frame
+		if(i < myAnimation.squares) 
+			frameType = 'keyframe-full keyframe-full-keyed'; // keyframe
+		var hasBufferFrames = myAnimation.bufferFrames && typeof myAnimation.bufferFrames[i] == "number" && myAnimation.bufferFrames[i] > 0;
+		
+		this.buildKeyframe(i, frameType, ++totalCount, hasBufferFrames);
+		if(hasBufferFrames)
+			for(var x = 0; x < myAnimation.bufferFrames[i]; x++){
+				this.buildKeyframe(i, "keyframe-full", ++totalCount); // buffer frame
+				
+			}
+		
 	}
 	
 	this.keyframeManager.fpsInput.value = myAnimation.fps;
 	this.keyframeManager.window.hidden = false;
+	this.keyframeManager.animationIndex = index;
 };
 //keyframes manager
 // fps: numeric updown, onion toggle, blank keyframe: +/-
@@ -1753,7 +1804,11 @@ DrawTogether.prototype.openKeyframeManager = function openKeyframeManager (myAni
 //
 DrawTogether.prototype.createKeyframeManager = function createKeyframeManager () {
 	this.keyframeManager = {
-		window: this.gui.createWindow({ title: "Keyframe Manager", thinTitlebar: true })
+		window: this.gui.createWindow({ 
+			title: "Keyframe Manager", thinTitlebar: true,
+			isModal: true,
+			onclose: function closemanager(ctx) { ctx.hidden = true }
+		})
 	};
 	this.keyframeManager.window.hidden = true;
 	
@@ -1777,6 +1832,10 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 	onionButton.appendChild(document.createTextNode("🌰"));
 	this.keyframeManager.onionButton = onionButton;
 	
+	onionButton.addEventListener("click", function (){
+		
+	});
+	
 	var fpsLabel = topControlsContainer.appendChild(document.createElement("div"));
 	fpsLabel.appendChild(document.createTextNode("Blank Keyframe:"));
 	fpsLabel.className = "keyframe-control keyframe-fps-label";
@@ -1784,10 +1843,12 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 	var plusButton = topControlsContainer.appendChild(document.createElement("div"));
 	plusButton.className = "control-button keyframe-control keyframe-updown-button";
 	plusButton.appendChild(document.createTextNode("+"));
+	plusButton.addEventListener("click", this.addRemoveBufferFrames.bind(this, "add"))
 	
 	var minusButton = topControlsContainer.appendChild(document.createElement("div"));
 	minusButton.className = "control-button keyframe-control keyframe-updown-button";
 	minusButton.appendChild(document.createTextNode("-"));
+	minusButton.addEventListener("click", this.addRemoveBufferFrames.bind(this, "remove"))
 	
 	var bottomControls = this.keyframeManager.window.appendChild(document.createElement("div"));
 	bottomControls.className = "keyframe-bottom-control-container";
@@ -1796,11 +1857,186 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 
 	this.keyframeManager.keyframeNumberLabelBar = keyframeNumberLabelBar;
 	
+	var onionSliderLeft = keyframeNumberLabelBar.appendChild(document.createElement("div"));
+	onionSliderLeft.className = "keyframe-onion-slider keyframe-onion-slider-left";
+	
+	var leftTriangleTop = onionSliderLeft.appendChild(document.createElement("div"));
+	leftTriangleTop.className = "keyframe-onion-triangle keyframe-onion-left-top-triangle";
+	
+	var leftTriangleBottom = onionSliderLeft.appendChild(document.createElement("div"));
+	leftTriangleBottom.className = "keyframe-onion-triangle keyframe-onion-left-bottom-triangle";
+	
+	var onionSliderLeftBall = onionSliderLeft.appendChild(document.createElement("div"));
+	onionSliderLeftBall.className = "keyframe-onion-slider-ball";
+	
+	var onionSliderRight = keyframeNumberLabelBar.appendChild(document.createElement("div"));
+	onionSliderRight.className = "keyframe-onion-slider keyframe-onion-slider-right";
+	
+	var rightTriangleTop = onionSliderRight.appendChild(document.createElement("div"));
+	rightTriangleTop.className = "keyframe-onion-triangle keyframe-onion-right-top-triangle";
+	
+	var rightTriangleBottom = onionSliderRight.appendChild(document.createElement("div"));
+	rightTriangleBottom.className = "keyframe-onion-triangle keyframe-onion-right-bottom-triangle";
+	
+	var onionSliderRightBall = onionSliderRight.appendChild(document.createElement("div"));
+	onionSliderRightBall.className = "keyframe-onion-slider-ball";
+	
+	this.makeSliderDraggable([onionSliderLeftBall], onionSliderLeft, bottomControls, true
+	, function boundsCheck (newLeft) {
+		var respectingOtherSlider = newLeft < (onionSliderRight.offsetLeft - 2);
+		var respectingContainerLeft = newLeft >= 0;
+		var respectingContainerRight = newLeft < bottomControls.getBoundingClientRect().width + bottomControls.scrollLeft;
+		return respectingOtherSlider && respectingContainerLeft && respectingContainerRight;
+	}, this.slideSuccessful.bind(this));
+
+	this.makeSliderDraggable([onionSliderRightBall], onionSliderRight, bottomControls, true
+	, function bounds(newLeft){
+		var respectingOtherSlider = newLeft > (onionSliderLeft.offsetLeft + 2);;
+		var respectingContainerLeft = newLeft > 0;
+		var respectingContainerRight = newLeft < bottomControls.getBoundingClientRect().width + bottomControls.scrollLeft;
+		return respectingOtherSlider && respectingContainerLeft && respectingContainerRight;
+	}, this.slideSuccessful.bind(this));
+	
 	var keyframeBar = bottomControls.appendChild(document.createElement("div"));
 	keyframeBar.className = "keyframe-bar";
 	
 	this.keyframeManager.keyframeBar = keyframeBar;
+	this.keyframeManager.onionSliderRight = onionSliderRight;
+	this.keyframeManager.onionSliderLeft = onionSliderLeft;
 };
+
+DrawTogether.prototype.slideSuccessful = function slideSuccessful (){
+	var keyframes = $(".keyframe-full-keyed");
+	var leftSlidersKeyframeIndex = 0;
+	var rightSlidersKeyframeIndex = 0;
+	for(var i = 0; i < keyframes.length; i++){
+		if(keyframes[i].offsetLeft <= this.keyframeManager.onionSliderLeft.offsetLeft) {
+			leftSlidersKeyframeIndex = i;
+		}
+		if(keyframes[i].offsetLeft <= this.keyframeManager.onionSliderRight.offsetLeft) {
+			rightSlidersKeyframeIndex = i;
+		}
+	}
+	var frames = rightSlidersKeyframeIndex - leftSlidersKeyframeIndex;
+	if(frames <= 0){
+		return;
+	}
+	
+	var anim = this.myAnimations[this.keyframeManager.animationIndex];
+	var fromOffsetX = anim.sqwidth * leftSlidersKeyframeIndex;
+	var from = [anim.leftTop[0] + fromOffsetX, anim.leftTop[1]];
+	var toOffsetX = anim.sqwidth * rightSlidersKeyframeIndex;
+	var to = [anim.leftTop[0] + toOffsetX, anim.leftTop[1] + anim.sqheight];
+	this.paint.frames = [];
+	this.paint.addFrame(from, to, frames, 0.3);
+};
+
+DrawTogether.prototype.makeSliderDraggable = function makeSliderDraggable(handleElements, elementToMove, container, step, boundsCheckFunction, successfulDragFunction) {
+	//var offset = this.keyframeManager.window.offsetLeft;
+	var handler = function handler (handleElement, targetElement){
+		if (!handleElement) handleElement = targetElement;
+
+		var startPos = [];
+		var elementStartPos = [];
+		var dragging = false;
+
+		function handleStart (event) {
+			dragging = true;
+			var offset = this.keyframeManager.window.offsetLeft - $(".keyframe-bottom-control-container")[0].scrollLeft;
+			
+			startPos = [event.clientX || 0, event.clientY || 0];
+			
+			if (event.changedTouches && event.changedTouches[0])
+				startPos = [event.changedTouches[0].clientX - offset || 0,
+							event.changedTouches[0].clientY || 0]
+
+			var boundingRect = targetElement.getBoundingClientRect();
+			elementStartPos = [boundingRect.left, boundingRect.top];
+
+			event.preventDefault();
+		}
+
+		function handleMove (event) {
+			if (dragging) {
+				var offset = this.keyframeManager.window.offsetLeft - $(".keyframe-bottom-control-container")[0].scrollLeft;
+				if(step)
+					var stepWidth = $(".keyframe-labelbar")[0].getBoundingClientRect().width
+				//targetElement.style.left = elementStartPos[0] - startPos[0] + (event.clientX - offset || event.changedTouches[0].clientX  - offset) + "px";
+				var newLeft = elementStartPos[0] - startPos[0] + (event.clientX || event.changedTouches[0].clientX ) - offset;
+				newLeft -= newLeft % stepWidth; //snap
+				newLeft -= 2;
+				if(boundsCheckFunction(newLeft)){
+					targetElement.style.left = newLeft + "px";
+					successfulDragFunction();
+				}
+				//targetElement.style.top = elementStartPos[1] - startPos[1] + (event.clientY || event.changedTouches[0].clientY) + "px";
+				event.preventDefault();
+			}
+		}
+
+		handleElement.addEventListener("mousedown", handleStart.bind(this));
+		handleElement.addEventListener("touchstart", handleStart.bind(this));
+
+		document.addEventListener("mousemove", handleMove.bind(this));
+		document.addEventListener("touchmove", handleMove.bind(this));
+
+		function endDrag () {
+			dragging = false;
+			
+		}
+		handleElement.addEventListener("mouseup", endDrag);
+		handleElement.addEventListener("touchend", endDrag);
+		container.addEventListener("mouseup", endDrag);
+		container.addEventListener("touchend", endDrag);
+	}.bind(this);
+	for(var i = 0; i < handleElements.length; i++){
+		handler(handleElements[i], elementToMove);
+	}
+	
+};
+
+DrawTogether.prototype.addRemoveBufferFrames = function addRemoveBufferFrames(operation) {
+	var fullFrames = $(this.keyframeManager.keyframeBar).children(".keyframe-full");
+	var valueToAdd = 1;
+	if(operation == "remove")
+		valueToAdd = -1;
+	//check for selectedIndexes
+	var trueIndex = 0; // only count keyframes not buffers
+	
+	var selectedIndexes = new Array(this.myAnimations[this.keyframeManager.animationIndex].squares);
+	for(var i = 0; i < fullFrames.length; i++){
+		if(fullFrames[i].classList.contains("keyframe-full-keyed"))
+			if(i != 0)
+				trueIndex++;
+		if(fullFrames[i].classList.contains("keyframe-selected")){
+			if(typeof selectedIndexes[trueIndex] != "number")
+				selectedIndexes[trueIndex] = 0;
+			selectedIndexes[trueIndex]++;
+			
+			var bufferFramesAmt = this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex];
+			
+
+			if(typeof bufferFramesAmt == "undefined"){
+				this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex] = 0;
+			}
+			bufferFramesAmt += valueToAdd * selectedIndexes[trueIndex];
+			bufferFramesAmt = Math.max(0, bufferFramesAmt);
+			this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex] = bufferFramesAmt;
+			
+		}
+	}
+	this.refreshAnimationManager(selectedIndexes);
+};
+
+DrawTogether.prototype.refreshAnimationManager = function refreshAnimationManager(selectedIndexes){
+	$(".keyframe-unit").removeClass("keyframe-selected");
+	this.openKeyframeManager(this.myAnimations[this.keyframeManager.animationIndex],this.keyframeManager.animationIndex);
+	for(var i = 0; i < selectedIndexes.length; i++)
+	{
+		if(selectedIndexes[i] > 0)
+			$(".keyframe-full-keyed").eq(i).addClass("keyframe-selected")
+	}
+}
 
 DrawTogether.prototype.animationRemoveHandler = function animationRemoveHandler (myAnimation, button, event) {
 	if (button.classList.contains("confirm")) {
@@ -2765,16 +3001,28 @@ DrawTogether.prototype.exportMyAnimation = function (myAnimation) {
 		myAnimation.squares,
 		myAnimation.sqwidth,
 		myAnimation.sqheight,
-		myAnimation.gutter );
+		myAnimation.gutter,
+		myAnimation.fps,
+		myAnimation.name);
 };
 
-DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter) {
+DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter, myAnimationIndex) {
 	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
 	
 	var settings = QuickSettings.create(0, 0, "Specific settings");
-	settings.addText("Name", "Your title");
+	var title = (typeof myAnimationIndex == "number") ? this.myAnimations[myAnimationIndex].name : "Your title";
+	settings.addText("Name", title, function (e){
+		console.log(e, myAnimationIndex,this.myAnimations);
+		if(myAnimationIndex){
+			this.myAnimations[myAnimationIndex].name = e.value;
+		}
+	}.bind(this));
 	settings.addRange("Frames", 1, squares || 200, 10, 1);
 	settings.addRange("Gutter", 0, 200, gutter || 0, 1);
+	
+	if(myAnimationIndex)
+		this.videoExportSettings._controls.framerate.control.value = this.myAnimations[myAnimationIndex].fps;
+	
 	exportVideoWindow.appendChild(settings._panel);
 	
 	var container = exportVideoWindow.appendChild(document.createElement("div"))
@@ -4266,7 +4514,8 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 			squares: squares,
 			sqwidth: sqwidth,
 			sqheight: sqheight,
-			gutter: gutter
+			gutter: gutter,
+			bufferFrames: {}
 		});
 		this.updateAnimationsCookie();
 		this.updateAnimationManager();

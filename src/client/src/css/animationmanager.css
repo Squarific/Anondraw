@@ -13,10 +13,131 @@
 	width: 3em;
 }
 
+.keyframe-bottom-control-container {
+	overflow-x: auto;
+	overflow-y: hidden;
+	white-space: nowrap;
+	width: 17.6em;
+}
+.keyframe-number-labelbar-container{
+	position:relative;
+}
 .keyframe-labelbar {
 	display: inline-block;
+	width: 1em;
+	font-size: 0.8em;
+	height: 1.4em;
+}
+.keyframe-labelbar-digit-divider {
+	position: relative;
+	height: 3px;
+	width: 100%;
+	bottom: 3px;
+	border-right: 1px solid #919191;
 }
 
 .keyframe-unit { 
 	display: inline-block;
+	width: 0.8em;
+	position:relative;
+	height: 1.4em;
+	background-color: #ffffff;
+	border-bottom: solid 0.1px #bebebe;
+    border-top: solid 0.1px #bebebe;
+}
+.keyframe-unit:hover {
+	filter: contrast(85%);
+}
+.keyframe-selected {
+	background-color: #a0a0ca !important;
+    border-left: solid 0.1px #bfbfeb !important;
+    border-right: solid 0.1px #bfbfeb !important;
+}
+
+.keyframe-full {
+	background-color: #cccccc;
+	border: solid 0.1px #959595;
+}
+
+.keyframe-unit.keyframe-hasBufferFrames {
+	border-right: none;
+}
+
+.keyframe-unit.keyframe-full:not(.keyframe-full-keyed) {
+    border-right: none;
+    border-left: none;
+}
+
+.keyframe-full-keyed {
+	
+}
+
+.keyframe-full-keyed:before {
+	position:absolute;
+	margin-left: 0.12em;
+	line-height: 1.65em;
+	content: ' \25cF'; /* unicode circle */
+}
+
+.keyframe-unit:nth-child(5n):not(.keyframe-full) {
+	background-color: #eeeeee;
+}
+
+.keyframe-onion-slider {
+	width: 2px;
+    height: 90%;
+   
+    display: block;
+    position: absolute;
+    top: 2%;
+    background-color: black;
+}
+
+.keyframe-onion-slider-left {
+	left: calc((0.8em * 1) - 2px );
+}
+
+.keyframe-onion-slider-right {
+	left: calc((0.8em * 2) - 2px );
+}
+
+.keyframe-onion-slider-ball {
+	width: 7px;
+    height: 7px;
+    background-color: #c3c2ce;
+    border: solid 0.1px black;
+   
+    position: absolute;
+    top: calc(50% - 3.5px);
+    left: -3.0px;
+	 -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    border-radius: 7px;
+}
+.keyframe-onion-triangle {
+	position: absolute;	
+	width: 0;
+	height: 0;
+}
+
+.keyframe-onion-right-top-triangle {
+    left: -3.4px;
+    border-top: 5px solid black;
+    border-left: 5px solid transparent;
+}
+
+.keyframe-onion-right-bottom-triangle { 
+    left: -3.4px;
+	bottom: 0px;
+	border-bottom: 5px solid black;
+	border-left: 5px solid transparent;
+}
+.keyframe-onion-left-top-triangle { 
+	border-top: 5px solid black;
+	border-right: 5px solid transparent;
+}
+.keyframe-onion-left-bottom-triangle { 
+	bottom: 0px;
+	border-bottom: 5px solid black;
+	border-right: 5px solid transparent;
 }
