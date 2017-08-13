@@ -2070,6 +2070,7 @@ DrawTogether.prototype.addRemoveBufferFrames = function addRemoveBufferFrames(op
 			
 
 			if(isNaN(parseFloat(bufferFramesAmt))){
+				bufferFramesAmt = 0;
 				this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex] = 0;
 			}
 			bufferFramesAmt += valueToAdd * selectedIndexes[trueIndex];
