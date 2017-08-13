@@ -562,6 +562,11 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		}
 		self.chat.addMessage(data.user, data.message, data.userid, data.id);
 	});
+	
+	this.network.on("chatanimation", function (data) {
+		var data = data || {};
+		self.chat.addAnimationMessage(data.animation, data.user, self);
+	});
 
 	this.network.on("emote", function (data) {
 		var data = data || {};
@@ -1082,7 +1087,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 		ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
 	else
 	ownerPermissionSentence = "The region owner is offline.";
-	console.log("regionid", messageFromServer.regionid);
+	
 
 	var messageToUser = "This is a protected region. "
 						+ loggedInSentence + " " 
@@ -1496,7 +1501,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		} else {
 			this.updateFavoriteDom();
 			$(".regions-window").hide();
-			this.framesWindow.classList.remove("show");
+			this.animationsWindow.classList.remove("show");
+			//this.framesWindow.classList.remove("show");
 			$(".favorites-window").show();
 		}
 	}.bind(this));
@@ -1517,7 +1523,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		} else {
 			this.getMyProtectedRegions(function(){
 				$(".favorites-window").hide();
-				this.framesWindow.classList.remove("show");
+				this.animationsWindow.classList.remove("show");
+				//this.framesWindow.classList.remove("show");
 				$(".regions-window").show();
 
 				if(!this.myRegions || this.myRegions.length === 0){
@@ -1544,7 +1551,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.regionsContainer.className = "regions-container";
 	
 	var animationsButton = this.paint.coordDiv.appendChild(document.createElement("div"));
-	animationsButton.className = "control-button";
+	animationsButton.className = "control-button anim-manager-button";
 	animationsButton.addEventListener("click", this.toggleAnimationManager.bind(this));
 
 	var animationButtonImage = animationsButton.appendChild(document.createElement("img"));
@@ -1553,7 +1560,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	animationButtonImage.title = "Open Animation Manager";
 	
 	this.createAnimationManager();
-	
+	/*
 	// Frames button
 	var framesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	framesButton.className = "control-button frames-button";
@@ -1565,6 +1572,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	framesButtonImage.title = "Open Frames Manager";
 	
 	this.createFramesManager();
+	*/
 };
 
 DrawTogether.prototype.createFramesManager = function createFramesManager () {
@@ -1681,6 +1689,13 @@ DrawTogether.prototype.getAnimationsFromCookie = function getAnimationsFromCooki
 	else
 		return [];
 };
+DrawTogether.prototype.updateAnimationsCookieDelay = function updateAnimationsCookieDelay () {
+	if(this.updateAnimationsCookieDelayTimeout)
+		clearTimeout(this.updateAnimationsCookieDelayTimeout);
+	
+	this.updateAnimationsCookieDelayTimeout = setTimeout(this.updateAnimationsCookie.bind(this), 2000);
+	
+};
 
 DrawTogether.prototype.updateAnimationsCookie = function updateAnimationsCookie () {
 	localStorage.setItem('myAnimations', JSON.stringify(this.myAnimations));
@@ -1723,15 +1738,24 @@ DrawTogether.prototype.buildAnimationButtons = function buildAnimationButtons (m
 	gotoButton.appendChild(document.createTextNode(gototext));
 	gotoButton.addEventListener("click", this.animationGotoHandler.bind(this, myAnimation));
 	
+	var sendToChatButton = container.appendChild(document.createElement("div"));
+	sendToChatButton.className = "coords-button";
+	sendToChatButton.appendChild(document.createTextNode("send to chat->"));
+	sendToChatButton.addEventListener("click", this.sendAnimationToChat.bind(this, myAnimation));
+	
 	var exportButton = container.appendChild(document.createElement("div"));
 	exportButton.className = "coords-button";
 	
 	exportButton.appendChild(document.createTextNode("export"));
-	exportButton.addEventListener("click", this.exportMyAnimation.bind(this, index));
+	exportButton.addEventListener("click", this.exportMyAnimation.bind(this, myAnimation, index));
 	
 	container.appendChild(this.buildAnimationRemoveButton(myAnimation));
 	
 	return container;
+};
+
+DrawTogether.prototype.sendAnimationToChat = function sendAnimationToChat(myAnimation, event) {
+	this.network.socket.emit("chatanimation", JSON.stringify(myAnimation));
 };
 
 DrawTogether.prototype.buildKeyframe = function buildKeyframe (i, frameType, totalCount, hasBufferFrames) {
@@ -1825,6 +1849,10 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 	fpsInput.min = 1;
 	fpsInput.max = Number.MAX_SAFE_INTEGER;
 	fpsInput.defaultValue = 24;
+	fpsInput.addEventListener("input", function (e) {
+		this.myAnimations[this.keyframeManager.animationIndex].fps = parseInt(e.target.value);
+		this.updateAnimationsCookieDelay();
+	}.bind(this));
 	this.keyframeManager.fpsInput = fpsInput;
 	
 	var onionButton = topControlsContainer.appendChild(document.createElement("div"));
@@ -1833,8 +1861,21 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 	this.keyframeManager.onionButton = onionButton;
 	
 	onionButton.addEventListener("click", function (){
-		
-	});
+		if(onionButton.classList.contains("keyframe-onion-toggle")){
+			onionButton.classList.remove("keyframe-onion-toggle");
+			onionSliderLeft.style.display = "none";
+			onionSliderRight.style.display = "none";
+			this.paint.frames = [];
+			this.paint.redrawFrames();
+		}
+		else{
+			onionButton.classList.add("keyframe-onion-toggle");
+			onionSliderLeft.style.display = "";
+			onionSliderRight.style.display = "";
+			this.slideSuccessful();
+		}
+			
+	}.bind(this));
 	
 	var fpsLabel = topControlsContainer.appendChild(document.createElement("div"));
 	fpsLabel.appendChild(document.createTextNode("Blank Keyframe:"));
@@ -1897,6 +1938,9 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 		return respectingOtherSlider && respectingContainerLeft && respectingContainerRight;
 	}, this.slideSuccessful.bind(this));
 	
+	onionSliderLeft.style.display = "none";
+	onionSliderRight.style.display = "none";
+	
 	var keyframeBar = bottomControls.appendChild(document.createElement("div"));
 	keyframeBar.className = "keyframe-bar";
 	
@@ -1921,14 +1965,23 @@ DrawTogether.prototype.slideSuccessful = function slideSuccessful (){
 	if(frames <= 0){
 		return;
 	}
+	console.log(leftSlidersKeyframeIndex, rightSlidersKeyframeIndex)
 	
 	var anim = this.myAnimations[this.keyframeManager.animationIndex];
-	var fromOffsetX = anim.sqwidth * leftSlidersKeyframeIndex;
+	var fromOffsetX = (anim.sqwidth + anim.gutter) * leftSlidersKeyframeIndex;
+	
+	//fromOffsetX -= anim.gutter * frames;
+	console.log("fromOffsetX",fromOffsetX)
 	var from = [anim.leftTop[0] + fromOffsetX, anim.leftTop[1]];
+	
 	var toOffsetX = anim.sqwidth * rightSlidersKeyframeIndex;
+	toOffsetX += anim.gutter * rightSlidersKeyframeIndex - 1;
+	
+	
 	var to = [anim.leftTop[0] + toOffsetX, anim.leftTop[1] + anim.sqheight];
 	this.paint.frames = [];
-	this.paint.addFrame(from, to, frames, 0.3);
+	this.paint.addFrame(from, to, frames, 0.3, anim.gutter, anim.sqwidth+ anim.gutter);
+	
 };
 
 DrawTogether.prototype.makeSliderDraggable = function makeSliderDraggable(handleElements, elementToMove, container, step, boundsCheckFunction, successfulDragFunction) {
@@ -2016,7 +2069,7 @@ DrawTogether.prototype.addRemoveBufferFrames = function addRemoveBufferFrames(op
 			var bufferFramesAmt = this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex];
 			
 
-			if(typeof bufferFramesAmt == "undefined"){
+			if(isNaN(parseFloat(bufferFramesAmt))){
 				this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex] = 0;
 			}
 			bufferFramesAmt += valueToAdd * selectedIndexes[trueIndex];
@@ -2036,6 +2089,7 @@ DrawTogether.prototype.refreshAnimationManager = function refreshAnimationManage
 		if(selectedIndexes[i] > 0)
 			$(".keyframe-full-keyed").eq(i).addClass("keyframe-selected")
 	}
+	this.updateAnimationsCookieDelay();
 }
 
 DrawTogether.prototype.animationRemoveHandler = function animationRemoveHandler (myAnimation, button, event) {
@@ -2897,7 +2951,7 @@ DrawTogether.prototype.exportImageFromSrc = function (title, src) {
 	exportwindow.appendChild(img);
 };
 
-DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter, xOffset, yOffset) {
+DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter, bufferFrames) {
 	
 	var start = leftTop || [
 		Math.min(from[0], to[0]),
@@ -2951,8 +3005,8 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	
 	for (var k = 0; k < frames; k++) {
 		var tempFrom = [
-			start[0] + frameWidth * k + k * gutter + (xOffset && k !== 0 ? xOffset : 0),
-			start[1] + (yOffset || 0)
+			start[0] + frameWidth * k + k * gutter,
+			start[1]
 		];
 		
 		var tempTo = [
@@ -2963,8 +3017,13 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 		if (captureSettings.verbose) {
 			console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
 		}
-		
 		capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
+		if(bufferFrames && !isNaN(bufferFrames[k])){
+			var bufferFramesAmtAtKeyframe = bufferFrames[k];
+			for(var m = 0; m < bufferFramesAmtAtKeyframe; m++){
+				capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
+			}
+		}
 	}
 
 	capturer.stop();
@@ -2977,7 +3036,7 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 			var img = document.createElement("img");
 			img.src = URL.createObjectURL(blob);
 			img.alt = "Exported image";
-			
+		
 			exportwindow.classList.add("exportwindow");
 			exportwindow.appendChild(img);
 		}.bind(this) );
@@ -2991,10 +3050,11 @@ DrawTogether.prototype.renderMyAnimation = function (myAnimation) {
 		myAnimation.squares,
 		myAnimation.sqwidth,
 		myAnimation.sqheight,
-		myAnimation.gutter );
+		myAnimation.gutter,
+		myAnimation.bufferFrames);
 };
 
-DrawTogether.prototype.exportMyAnimation = function (myAnimation) {
+DrawTogether.prototype.exportMyAnimation = function (myAnimation, index) {
 	this.exportVideo(
 		null, null,
 		myAnimation.leftTop,
@@ -3002,27 +3062,36 @@ DrawTogether.prototype.exportMyAnimation = function (myAnimation) {
 		myAnimation.sqwidth,
 		myAnimation.sqheight,
 		myAnimation.gutter,
-		myAnimation.fps,
-		myAnimation.name);
+		index);
 };
 
 DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter, myAnimationIndex) {
 	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
 	
 	var settings = QuickSettings.create(0, 0, "Specific settings");
-	var title = (typeof myAnimationIndex == "number") ? this.myAnimations[myAnimationIndex].name : "Your title";
-	settings.addText("Name", title, function (e){
-		console.log(e, myAnimationIndex,this.myAnimations);
-		if(myAnimationIndex){
-			this.myAnimations[myAnimationIndex].name = e.value;
+	var title =  "Your title";
+	if(typeof myAnimationIndex == "number" && this.myAnimations[myAnimationIndex].name) 
+		title = this.myAnimations[myAnimationIndex].name;
+	var timeout = null;
+	settings.addText("Name", title, function (value){
+		if(typeof myAnimationIndex == "number"){
+			this.myAnimations[myAnimationIndex].name = value;
+			if(timeout)
+				clearTimeout(timeout)
+			timeout = setTimeout(this.updateAnimationManager.bind(this), 2000);
+			this.updateAnimationsCookieDelay();
 		}
 	}.bind(this));
 	settings.addRange("Frames", 1, squares || 200, 10, 1);
 	settings.addRange("Gutter", 0, 200, gutter || 0, 1);
 	
-	if(myAnimationIndex)
-		this.videoExportSettings._controls.framerate.control.value = this.myAnimations[myAnimationIndex].fps;
-	
+	if(typeof myAnimationIndex == "number"){
+		settings._controls.Frames.container.style.display = "none"
+		settings._controls.Gutter.container.style.display = "none"
+		var fps = this.myAnimations[myAnimationIndex].fps;
+		this.videoExportSettings._controls.framerate.label.textContent = "framerate: " + fps
+		this.videoExportSettings._controls.framerate.control.value = fps;
+	}
 	exportVideoWindow.appendChild(settings._panel);
 	
 	var container = exportVideoWindow.appendChild(document.createElement("div"))
@@ -3032,7 +3101,7 @@ DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwid
 	renderButton.appendChild(document.createTextNode("Render"));
 	renderButton.className = "drawtogether-button";
 	renderButton.addEventListener("click", function () {
-		this.exportVideoRender(settings.getText("Name"), from, to, leftTop, settings.getRangeValue("Frames"), sqwidth, sqheight, settings.getRangeValue("Gutter"));		
+		this.exportVideoRender(settings.getText("Name"), from, to, leftTop, settings.getRangeValue("Frames"), sqwidth, sqheight, settings.getRangeValue("Gutter"), this.myAnimations[myAnimationIndex].bufferFrames);		
 	}.bind(this));
 	
 	var settingsButton = container.appendChild(document.createElement("div"));

@@ -329,6 +329,11 @@ Protocol.prototype.inkTick = function inkTick () {
 	}
 };
 
+Protocol.prototype.sendAnimationMessage = function sendAnimationMessage (room, data) {
+	console.log("[ANIMATIONMESSAGE][" + room + "] " + data.user);
+	this.io.to(room).emit("chatanimation", data);
+};
+
 Protocol.prototype.sendChatMessage = function sendChatMessage (room, data) {
 	console.log("[CHAT][" + room + "] " + data.user + ": " + data.message);
 	this.io.to(room).emit("chatmessage", data);
@@ -491,7 +496,34 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 			});
 		});
- 
+		socket.on("chatanimation", function (animation) {
+			if (!animation) return;
+			
+			if (!socket.room) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You can't chat when not in room."
+				});
+				return;
+			}
+
+			if (Date.now() - socket.lastMessage < 600) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "Don't send messages too fast!."
+				});
+				return;
+			}
+			
+			socket.lastMessage = Date.now();
+			
+			protocol.sendAnimationMessage(socket.room ,{
+				user: socket.name,
+				animation: animation,
+				userid: socket.userid,
+				id: socket.id
+			});
+		});
 		socket.on("chatmessage", function (message) {
 			// User is trying to send a message, if he is in a room
 			// send the message to all other users, otherwise show an error
