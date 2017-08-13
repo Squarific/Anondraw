@@ -1965,13 +1965,13 @@ DrawTogether.prototype.slideSuccessful = function slideSuccessful (){
 	if(frames <= 0){
 		return;
 	}
-	console.log(leftSlidersKeyframeIndex, rightSlidersKeyframeIndex)
+	//console.log(leftSlidersKeyframeIndex, rightSlidersKeyframeIndex)
 	
 	var anim = this.myAnimations[this.keyframeManager.animationIndex];
 	var fromOffsetX = (anim.sqwidth + anim.gutter) * leftSlidersKeyframeIndex;
 	
 	//fromOffsetX -= anim.gutter * frames;
-	console.log("fromOffsetX",fromOffsetX)
+	//console.log("fromOffsetX",fromOffsetX)
 	var from = [anim.leftTop[0] + fromOffsetX, anim.leftTop[1]];
 	
 	var toOffsetX = anim.sqwidth * rightSlidersKeyframeIndex;
