@@ -37,6 +37,10 @@
   line-height:3em;
 }
 
+.thin-titlebar {
+	line-height:1em !important;
+}
+
 .titlecontainer .title {
 	margin: 1em;
 }

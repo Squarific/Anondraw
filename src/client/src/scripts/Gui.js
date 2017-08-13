@@ -141,7 +141,9 @@ Gui.prototype.createWindow = function createWindow (settings) {
 
 	var titleContainer = windowContainer.appendChild(document.createElement("div"));
 	titleContainer.className = "titlecontainer";
-
+	if(settings.thinTitlebar)
+		titleContainer.classList.add("thin-titlebar");
+	
 	var title = titleContainer.appendChild(document.createElement("span"));
 	title.className = "title";
 	title.appendChild(document.createTextNode(settings.title || "window"));
@@ -151,19 +153,19 @@ Gui.prototype.createWindow = function createWindow (settings) {
 		close.appendChild(document.createTextNode("X"))
 		close.className = "close";
 		close.addEventListener("click", function () {
-			if (windowContainer.parentNode)
+			if (windowContainer.parentNode && !settings.isModal)
 				windowContainer.parentNode.removeChild(windowContainer);
 
 			if (typeof settings.onclose == "function")
-				settings.onclose();
+				settings.onclose(windowContainer);
 		});
 
 		close.addEventListener("touchstart", function () {
-			if (windowContainer.parentNode)
+			if (windowContainer.parentNode && !settings.isModal)
 				windowContainer.parentNode.removeChild(windowContainer);
 
 			if (typeof settings.onclose == "function")
-				settings.onclose();
+				settings.onclose(windowContainer);
 		});
 	}
 

@@ -128,9 +128,9 @@ Chat.prototype.addMessage = function addMessage (user, message, userid, socketid
 		var messageContainsWord = new RegExp(matchContainsWordRegex, this.matchSearchMode).test(message);
 		
 		if (chatFilterByWordsArr[k].inputText.length > 1 && messageContainsWord) {
-			console.log(chatFilterByWordsArr[k].visibility);
+			
 			var opacityfordom = chatFilterByWordsArr[k].visibility * 0.01;
-			console.log(opacityfordom);
+			
 			messageDom.style.opacity =  opacityfordom;// 100 to 1.0
 			if (chatFilterByWordsArr[k].overrideMute)
 				overrideMuteAll = true;
@@ -250,7 +250,6 @@ Chat.prototype.addMessageList = function addMessageList (messageDom, messages) {
 		}
 
 		if (messages[k].coordinate) {
-			console.log(messages[k]);
 			messageDom.appendChild(this.createCoordinate(messages[k].coordinate, messages[k].x, messages[k].y));
 			messageDom.appendChild(document.createTextNode('\u00A0')); //&nbsp
 			continue;
@@ -277,7 +276,6 @@ Chat.prototype.createCoordinate = function createCoordinate (coordinateText, x, 
 	a.href = "javascript:void(0);"
 	a.addEventListener("click", function (e) { // dispatch event code from: http://stackoverflow.com/a/33420324
 		e.preventDefault();
-		console.log(x,y);
 		var doc;
 		var node = $(".mouse-coords input:first").val(x)[0];
 		if (node.ownerDocument) {
@@ -302,6 +300,69 @@ Chat.prototype.createCoordinate = function createCoordinate (coordinateText, x, 
 	a.appendChild(document.createTextNode(coordinateText));
 	return a;
 };
+
+Chat.prototype.addAnimationMessage = function addAnimationMessage (animation, user, myAnimationsContext) {
+	var elem = document.createElement("div");
+	
+	var validAnimation = function validAnimation(anim){
+		return typeof anim.fps == "number" 
+			&& anim.leftTop 
+			&& typeof anim.leftTop[0] == "number"
+			&& typeof anim.leftTop[1] == "number"
+			&& typeof anim.squares == "number"
+			&& typeof anim.sqwidth == "number"	
+			&& typeof anim.sqheight == "number"
+			&& typeof anim.gutter == "number"
+			&& anim.bufferFrames;
+	};
+	
+	var userSpan = elem.appendChild(document.createElement("span"));
+		userSpan.appendChild(document.createTextNode(user + "'s animation: "));
+		userSpan.style.color = this.string2Color(user);
+	
+	var aAdd = document.createElement("a");
+	aAdd.href = "javascript:void(0);"
+	aAdd.addEventListener("click", function (e) { // dispatch event code from: http://stackoverflow.com/a/33420324
+		e.preventDefault();
+		anim = JSON.parse(animation);
+		if(validAnimation(anim)){
+			myAnimationsContext.myAnimations.push(anim);
+			
+			myAnimationsContext.updateAnimationManager();
+			myAnimationsContext.updateAnimationsCookieDelay();
+		}
+	
+	}.bind(this));
+
+	aAdd.appendChild(document.createTextNode("Add to animation manager"));
+	
+	elem.appendChild(aAdd);
+	elem.appendChild(document.createTextNode(", "));
+	
+	var aRender = document.createElement("a");
+	aRender.href = "javascript:void(0);"
+	aRender.addEventListener("click", function (e) { 
+		e.preventDefault();
+		anim = JSON.parse(animation);
+		if(validAnimation(anim)){
+			var previousX = myAnimationsContext.paint.public.leftTopX;
+			var previousY = myAnimationsContext.paint.public.leftTopY;
+			this.addElementAsMessage(this.createCoordinate("click to go back to where you were before preview.", previousX, previousY));
+			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth * anim.squares), anim.leftTop[0]);
+			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth *(anim.squares/2)), anim.leftTop[0]);
+			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0], anim.leftTop[1]);
+			setTimeout(myAnimationsContext.renderMyAnimation.bind(myAnimationsContext, anim), 1000);			
+		}
+		
+	}.bind(this));
+
+	aRender.appendChild(document.createTextNode("Preview"));
+	
+	elem.appendChild(aRender);
+	
+	this.addElementAsMessage(elem);
+	
+}; 
 
 Chat.prototype.createEmote = function createEmote (name, url) {
 	var img = document.createElement("img");
