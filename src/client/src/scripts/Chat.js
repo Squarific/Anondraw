@@ -349,7 +349,7 @@ Chat.prototype.addAnimationMessage = function addAnimationMessage (animation, us
 			var previousY = myAnimationsContext.paint.public.leftTopY;
 			this.addElementAsMessage(this.createCoordinate("click to go back to where you were before preview.", previousX, previousY));
 			//myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth * anim.squares), anim.leftTop[0]);
-			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth *(anim.squares/2)), anim.leftTop[0]);
+			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] , anim.leftTop[1]);
 			var chunkSize = myAnimationsContext.paint.background.settings.chunkSize;
 			var zoom = myAnimationsContext.paint.background.zoom;
 			
