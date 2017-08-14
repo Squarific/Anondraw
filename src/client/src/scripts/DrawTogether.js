@@ -3108,7 +3108,7 @@ DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwid
 			this.updateAnimationsCookieDelay();
 		}
 	}.bind(this));
-	settings.addRange("Frames", 1, squares || 200, 10, 1);
+	settings.addRange("Frames", 1, squares || 200, squares || 10, 1);
 	settings.addRange("Gutter", 0, 200, gutter || 0, 1);
 	
 	if(typeof myAnimationIndex == "number"){
