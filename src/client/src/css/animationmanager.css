@@ -126,6 +126,14 @@
     border-left: 5px solid transparent;
 }
 
+.keyframe-onion-toggle {
+	background-color: cadetblue !important;
+}
+
+.keyframe-onion-toggle-loop {
+	border-bottom: .2em solid #9b4387 !important;
+}
+
 .keyframe-onion-right-bottom-triangle { 
     left: -3.4px;
 	bottom: 0px;

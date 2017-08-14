@@ -1862,11 +1862,20 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 	
 	onionButton.addEventListener("click", function (){
 		if(onionButton.classList.contains("keyframe-onion-toggle")){
-			onionButton.classList.remove("keyframe-onion-toggle");
-			onionSliderLeft.style.display = "none";
-			onionSliderRight.style.display = "none";
-			this.paint.frames = [];
-			this.paint.redrawFrames();
+			if(onionButton.classList.contains("keyframe-onion-toggle-loop")){
+				onionButton.classList.remove("keyframe-onion-toggle-loop");
+				onionButton.classList.remove("keyframe-onion-toggle");
+				onionSliderLeft.style.display = "none";
+				onionSliderRight.style.display = "none";
+				this.keyframeManager.onionLoop = false;
+				this.paint.frames = [];
+				this.paint.redrawFrames();
+			}
+			else{
+				onionButton.classList.add("keyframe-onion-toggle-loop");
+				this.keyframeManager.onionLoop = true;
+				this.onionLoopLastFrame();
+			}
 		}
 		else{
 			onionButton.classList.add("keyframe-onion-toggle");
@@ -1947,8 +1956,22 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 	this.keyframeManager.keyframeBar = keyframeBar;
 	this.keyframeManager.onionSliderRight = onionSliderRight;
 	this.keyframeManager.onionSliderLeft = onionSliderLeft;
+	this.keyframeManager.onionLoop = false;
 };
-
+DrawTogether.prototype.onionLoopLastFrame = function onionLoopLastFrame(){
+	var anim = this.myAnimations[this.keyframeManager.animationIndex];
+	var lastFrame = anim.squares -1;
+	var from = [anim.leftTop[0], anim.leftTop[1]];
+	
+	var step = (anim.sqwidth+anim.gutter) * lastFrame;
+	
+	var toOffsetX = anim.sqwidth * lastFrame;
+	toOffsetX += anim.gutter * lastFrame - 1;
+	var to = [anim.leftTop[0] + toOffsetX, anim.leftTop[1] + anim.sqheight];
+	//this.paint.frames = [];
+	
+	this.paint.addFrame(from, to, frames, 0.3, anim.gutter, step, anim.sqwidth);
+};
 DrawTogether.prototype.slideSuccessful = function slideSuccessful (){
 	var keyframes = $(".keyframe-full-keyed");
 	var leftSlidersKeyframeIndex = 0;
@@ -1982,6 +2005,8 @@ DrawTogether.prototype.slideSuccessful = function slideSuccessful (){
 	this.paint.frames = [];
 	this.paint.addFrame(from, to, frames, 0.3, anim.gutter, anim.sqwidth+ anim.gutter);
 	
+	if(this.keyframeManager.onionLoop)
+		this.onionLoopLastFrame();
 };
 
 DrawTogether.prototype.makeSliderDraggable = function makeSliderDraggable(handleElements, elementToMove, container, step, boundsCheckFunction, successfulDragFunction) {
