@@ -350,6 +350,8 @@ Chat.prototype.addAnimationMessage = function addAnimationMessage (animation, us
 			this.addElementAsMessage(this.createCoordinate("click to go back to where you were before preview.", previousX, previousY));
 			//myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth * anim.squares), anim.leftTop[0]);
 			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] , anim.leftTop[1]);
+			
+			myAnimationsContext.videoExportSettings._controls.framerate.control.value = anim.fps;
 			var chunkSize = myAnimationsContext.paint.background.settings.chunkSize;
 			var zoom = myAnimationsContext.paint.background.zoom;
 			
