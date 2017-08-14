@@ -348,10 +348,28 @@ Chat.prototype.addAnimationMessage = function addAnimationMessage (animation, us
 			var previousX = myAnimationsContext.paint.public.leftTopX;
 			var previousY = myAnimationsContext.paint.public.leftTopY;
 			this.addElementAsMessage(this.createCoordinate("click to go back to where you were before preview.", previousX, previousY));
-			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth * anim.squares), anim.leftTop[0]);
+			//myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth * anim.squares), anim.leftTop[0]);
 			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0] + (anim.sqwidth *(anim.squares/2)), anim.leftTop[0]);
-			myAnimationsContext.handleGotoAndCenter(anim.leftTop[0], anim.leftTop[1]);
-			setTimeout(myAnimationsContext.renderMyAnimation.bind(myAnimationsContext, anim), 1000);			
+			var chunkSize = myAnimationsContext.paint.background.settings.chunkSize;
+			var zoom = myAnimationsContext.paint.background.zoom;
+			
+			var lastFrame = anim.squares -1;
+			var toOffsetX = anim.sqwidth * lastFrame;
+			toOffsetX += anim.gutter * lastFrame - 1;
+			var to = [anim.leftTop[0] + toOffsetX, anim.leftTop[1] + anim.sqheight];
+			
+			var startChunkX = Math.floor(anim.leftTop[0] / chunkSize),
+				endChunkX   = Math.ceil(to[0] / chunkSize),
+				startChunkY = Math.floor(anim.leftTop[1] / chunkSize),
+				endChunkY   = Math.ceil(to[1] / chunkSize);
+			
+			for (var chunkX = startChunkX; chunkX < endChunkX; chunkX++) {
+				for (var chunkY = startChunkY; chunkY < endChunkY; chunkY++) {
+					myAnimationsContext.paint.background.drawChunk(chunkX, chunkY);
+				}
+			}
+			
+			setTimeout(myAnimationsContext.renderMyAnimation.bind(myAnimationsContext, anim), 4000);			
 		}
 		
 	}.bind(this));
