@@ -115,6 +115,7 @@ DrawTogether.prototype.IGNORE_INK_REP = 50;
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
 DrawTogether.prototype.SCUTTLERS_MESSAGE_EVERY = 7 * 24 * 60 * 60 * 1000;
+DrawTogether.prototype.SUPPORT_MESSAGE_EVERY = 24 * 60 * 60 * 1000;
 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
@@ -731,6 +732,12 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 				|| Date.now() - parseInt(localStorage.getItem("scuttlers_trailer")) > this.SCUTTLERS_MESSAGE_EVERY) {
 				localStorage.setItem("scuttlers_trailer", Date.now());
 				this.openScuttlersWindow();
+			
+			// Mmmm what else can we spam
+			} else if (!localStorage.getItem("bounty_window")
+				|| Date.now() - parseInt(localStorage.getItem("bounty_window")) > this.SUPPORT_MESSAGE_EVERY) {
+				this.openBountyWindow();
+				localStorage.setItem("bounty_window", Date.now());
 			}
 
 			this.removeLoading();
@@ -4493,6 +4500,36 @@ DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
 	a.href = "https://www.playscuttlers.com";
 	a.alt = "Scuttlers official website";
 	a.appendChild(document.createTextNode("https://www.playscuttlers.com"));
+};
+
+DrawTogether.prototype.openBountyWindow = function openBountyWindow () {
+	var scuttlersWindow = this.gui.createWindow({ title: "New way to support us"});
+	
+	ga("send", "event", "window", "bounty");
+	
+	var content = scuttlersWindow.appendChild(document.createElement("div"));
+	content.className = "content";
+	
+	var title = content.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Introducing bountysource"));
+	
+	var title = content.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("How does it work."));
+	
+	var p = content.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("You go to "));
+	
+	var a = p.appendChild(document.createElement("a"));
+	a.href = "https://www.bountysource.com/trackers/11190661-squarific-anondraw";
+	a.title = "Anondraw bountysource";
+	a.target = "_blank";
+	a.appendChild(document.createTextNode("bountysource"));
+
+	p.appendChild(document.createTextNode(" and put a bounty on whatever feature you want to see. Once enough is pledged, it will get implemented."));
+	
+	var p = content.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("To reward you in the meantime, putting a bounty also gives you rep. Just send a mail to bounty@anondraw.com with the amount you pledged. (0.5 euro = 1rep)."));
+	
 };
 
 DrawTogether.prototype.openReferralWindow = function openReferralWindow () {

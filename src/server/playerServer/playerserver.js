@@ -91,7 +91,7 @@ var server = http.createServer(function (req, res) {
 		var code = randomString(16);
 		console.log("Forgot pass", req.connection.remoteAddress, email);
 
-		var forgotLink = config.mail.forgotlink + '/reset?code=' + code;		
+		var forgotLink = config.mail.forgotlink + '/reset?code=' + code;
 		mailgun.send({
 			subject: "Password reset for anondraw.com",
 			recipient: email,
