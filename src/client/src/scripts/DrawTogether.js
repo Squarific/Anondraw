@@ -149,6 +149,10 @@ DrawTogether.prototype.defaultUserSettings = [{
 		title: "Show welcome",
 		type: "boolean",
 		value: true
+	}, {
+		title: "Direct teleporting",
+		type: "boolean",
+		value: false
 	}];
 
 DrawTogether.prototype.defaultVideoExportSettings = [{
@@ -306,7 +310,10 @@ DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
 DrawTogether.prototype.moveScreenTo = function moveScreenTo (playerid) {
 	var player = this.playerFromId(playerid);
 	if (!player || !player.lastPosition || !player.lastPosition.pos) return;
-
+	if (this.userSettings.getBoolean("Direct teleporting")) {
+		this.handleGotoAndCenter(player.lastPosition.pos[0], player.lastPosition.pos[1]);
+		return;
+	}
 	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
 	                  this.paint.public.canvas.height / this.paint.public.zoom];
 
