@@ -4062,6 +4062,14 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 				this.closeAccountWindow();
 				this.openPremiumBuyWindow();
 			}.bind(this));
+			
+			var bountiesButton = formContainer.appendChild(document.createElement("div"));
+			bountiesButton.appendChild(document.createTextNode("Bounties"));
+			bountiesButton.className = "drawtogether-button";
+			bountiesButton.addEventListener("click", function () {
+				this.closeAccountWindow();
+				this.openBountyWindow();
+			}.bind(this));
 
 			var logoutButton = formContainer.appendChild(document.createElement("div"));
 			logoutButton.appendChild(document.createTextNode("Logout"));
@@ -4525,11 +4533,19 @@ DrawTogether.prototype.openBountyWindow = function openBountyWindow () {
 	a.target = "_blank";
 	a.appendChild(document.createTextNode("bountysource"));
 
-	p.appendChild(document.createTextNode(" and put a bounty on whatever feature you want to see. Once enough is pledged, it will get implemented."));
+	p.appendChild(document.createTextNode(" and put a bounty on whatever feature you want to see. Anyone can then attempt to implement it for the bounty."));
 	
-	var p = content.appendChild(document.createElement("p"));
+	p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("To reward you in the meantime, putting a bounty also gives you rep. Just send a mail to bounty@anondraw.com with the amount you pledged. (0.5 euro = 1rep)."));
 	
+	p = content.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("To add a feature to the bountysource list add an 'issue' to the github here: "));
+	
+	var a = p.appendChild(document.createElement("a"));
+	a.href = "https://github.com/Squarific/Anondraw/issues";
+	a.title = "Anondraw github";
+	a.target = "_blank";
+	a.appendChild(document.createTextNode("github issues"));
 };
 
 DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
