@@ -312,7 +312,7 @@ Account.prototype.getReputationList = function getReputationList (callback) {
 // where callback has to be a function
 Account.prototype.request = function request (path, options, body, callback) {
 	if (!callback && typeof body == "function") {
-		callack = body;
+		callback = body;
 		body = null;
 	}
 	
