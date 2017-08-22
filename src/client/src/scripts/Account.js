@@ -342,7 +342,7 @@ Account.prototype.request = function request (path, options, body, callback) {
 		}
 	});
 
-	req.open("GET", this.server + path + optionString);
+	req.open(body ? "POST" : "GET", this.server + path + optionString);
 	req.send(body);
 };
 

@@ -92,8 +92,6 @@ var server = http.createServer(function (req, res) {
 				return;
 			}
 			
-			console.log(body);
-			
 			var id = randomString(48);
 			fs.writeFile("images/" + id + ".png", body, 'base64', function (err) {
 				if (err) {
