@@ -59,7 +59,7 @@ PlayerDatabase.prototype.getName = function getName (id, callback) {
 	});
 };
 
-PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story) {
+PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story, callback) {
 	this.database.query("INSERT INTO imageposts (userid, image, story, created) VALUES (?, ?, ?, ?)", [userid, postid, story, new Date()], function (err) {
 		if (err) {
 			callback("Couldn't share picture, a database error occured.");
