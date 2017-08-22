@@ -60,6 +60,8 @@ function randomString (length) {
 var server = http.createServer(function (req, res) {
 	var url = require("url");
 	var parsedUrl = url.parse(req.url, true);
+	
+	console.log(req.url);
 
 	res.writeHead(200, {
 		"Access-Control-Allow-Origin": "*",
@@ -93,7 +95,8 @@ var server = http.createServer(function (req, res) {
 			}
 			
 			var id = randomString(48);
-			fs.writeFile("images/" + id + ".png", body, 'base64', function (err) {
+			var data = image.replace(/^data:image/\w+;base64,/, '');
+			fs.writeFile("images/" + id + ".png", data, 'base64', function (err) {
 				if (err) {
 					res.end(JSON.stringify({ error: "Could not save image." }));
 					console.log(err);
