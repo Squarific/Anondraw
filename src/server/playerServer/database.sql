@@ -54,8 +54,8 @@ CREATE TABLE imageposts (
 	image VARCHAR(128),
 	story TEXT,
 	created DATETIME,
-	INDEX (image)
-	INDEX (userid, created)
+	INDEX (image),
+	INDEX (userid, created),
 	INDEX (created)
 );
 

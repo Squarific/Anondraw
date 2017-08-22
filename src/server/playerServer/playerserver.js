@@ -92,7 +92,7 @@ var server = http.createServer(function (req, res) {
 				return;
 			}
 			
-			var id = randomString(128);
+			var id = randomString(48);
 			fs.writeFile("images/" + id + ".png", body, 'base64', function (err) {
 				if (err) {
 					res.end(JSON.stringify({ error: "Could not save image." }));
