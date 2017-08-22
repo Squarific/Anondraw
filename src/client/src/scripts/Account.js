@@ -29,6 +29,16 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
 };
 
+// Takes in a base64 image and story, calls back with an id
+Account.prototype.sharePicture = function sharePicture (image, story, callback) {
+	this.request("/sharepicture", {
+		uKey: this.uKey,
+		story: story
+	},
+	image,
+	this.parseData.bind(this, callback));
+};
+
 Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, room, callback) {
 	this.request("/setcoordfavorite", {
 		uKey: this.uKey,
@@ -298,7 +308,14 @@ Account.prototype.getReputationList = function getReputationList (callback) {
 // Options will be appended with {uKey: "The current ukey"}
 // Callback returns (err, request) with error being a string with the http error (human readable)
 // Request is the XMLHttpRequest with readyState == 4
-Account.prototype.request = function request (path, options, callback) {
+// Two valid calls: request(path, options, callback) or request(path, options, body, callback)
+// where callback has to be a function
+Account.prototype.request = function request (path, options, body, callback) {
+	if (!callback && typeof body == "function") {
+		callack = body;
+		body = null;
+	}
+	
 	var req = new XMLHttpRequest();
 
 	// Build the get parameter string
@@ -326,7 +343,7 @@ Account.prototype.request = function request (path, options, callback) {
 	});
 
 	req.open("GET", this.server + path + optionString);
-	req.send();
+	req.send(body);
 };
 
 // Parses the server returned data as a JSON object

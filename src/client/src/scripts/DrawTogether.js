@@ -2247,18 +2247,39 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 
 DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (event) {
 	this.gui.prompt("What do you want to do with your selection?", [
-		"Export in high quality",
-		"Export video/gif",
-		"Create protected region",
-		"Inspect tool",
-		"Create grid",
-		"Show video frames",
-		"Cancel"
+		{
+			text: "Share to feed",
+			icon: "images/icons/selectwindow/share.png"
+		},
+		{
+			text: "Export video/gif",
+			icon: "images/icons/selectwindow/video.png"
+		},
+		{
+			text: "Create protected region",
+			icon: "images/icons/selectwindow/region.png"
+		},
+		{
+			text: "Inspect tool",
+			icon: "images/icons/selectwindow/inspect.png"
+		},
+		{
+			text: "Create grid",
+			icon: "images/icons/selectwindow/grid.png"
+		},
+		{
+			text: "Show video frames",
+			icon: "images/icons/selectwindow/frames.png"
+		},
+		{
+			text: "Cancel",
+			icon: "images/icons/selectwindow/cancel.png"
+		},
 	], function (answer) {
 		if (answer === "Cancel") return;
 
 		var handlers = {
-			"Export in high quality": this.exportImage.bind(this),
+			"Share to feed": this.exportImage.bind(this),
 			"Export video/gif": this.exportVideo.bind(this),
 			"Create protected region": this.createProtectedRegion.bind(this),
 			"Inspect tool": this.whoDrewInThisArea.bind(this),
@@ -2966,12 +2987,51 @@ DrawTogether.prototype.setMinimumRepInProtectedRegion = function (repAmount, reg
 
 DrawTogether.prototype.exportImage = function (from, to) {
 	var img = document.createElement("img");
-	img.src = this.paint.exportImage(from, to);
+	var imageBase64 = this.paint.exportImage(from, to);
+	img.src = imageBase64;
 	img.alt = "Exported image";
 	
-	var exportwindow = this.gui.createWindow({ title: "Exported image (right click to save)" });
+	var exportwindow = this.gui.createWindow({ title: "Share image to feed" });
 	exportwindow.classList.add("exportwindow");
-	exportwindow.appendChild(img);
+	
+	var content = exportwindow.appendChild(document.createElement("div"));
+	content.className = "content";
+	
+	var imageContainer = content.appendChild(document.createElement("div"));
+	imageContainer.className = "imagecontainer";
+	imageContainer.appendChild(img);
+	
+	var form = content.appendChild(document.createElement("div"));
+	form.classList.add("form");
+	
+	var status = form.appendChild(document.createElement("div"));
+	status.classList.add("status");
+	
+	var textarea = form.appendChild(document.createElement("textarea"));
+	textarea.placeholder = "Share your thoughts";
+	
+	var button = form.appendChild(document.createElement("div"));
+	button.classList = "drawtogether-button share-to-feed";
+	button.appendChild(document.createTextNode("Post"));
+	
+	button.addEventListener("click", function () {
+		form.classList.add("disabled");
+		this.account.sharePicture(imageBase64, textarea.value, function (err) {
+			form.classList.remove("disabled");
+			while (status.firstChild) status.removeChild(status.firstChild);
+			
+			if (err) {
+				status.appendChild(document.createTextNode(err));
+				status.classList.add("error");
+				return;
+			}
+			
+			status.classList.remove("error");
+			textarea.parentNode.removeChild(textarea);
+			button.parentNode.removeChild(button);
+			status.appendChild(document.createTextNode("Your image has been posted!"));
+		});
+	}.bind(this));
 };
 
 DrawTogether.prototype.exportImageFromSrc = function (title, src) {
@@ -5155,7 +5215,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		data: {
 			intro: "Click here if you want to change the room."
 		}
-	}, {
+	}/*, {
 		name: "share-button",
 		type: "button",
 		text: "Share",
@@ -5163,7 +5223,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		data: {
 			intro: "Made something nice? Use this to upload to imgur. Then you can share the imgur link to reddit if you want. Sharing it to reddit will also put it on the frontpage."
 		}
-	}, {
+	}*/, {
 		name: "settings",
 		type: "button",
 		text: "Settings",

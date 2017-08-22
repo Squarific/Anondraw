@@ -59,6 +59,18 @@ PlayerDatabase.prototype.getName = function getName (id, callback) {
 	});
 };
 
+PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story) {
+	this.database.query("INSERT INTO imageposts (userid, image, story, created) VALUES (?, ?, ?, ?)", [userid, postid, story, new Date()], function (err) {
+		if (err) {
+			callback("Couldn't share picture, a database error occured.");
+			console.log("SHAREPICTURE DB ERROR", err, userid, postid, story);
+			return;
+		}
+		
+		callback(null);
+	});
+};
+
 PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
 	this.database.query("INSERT INTO forgotkeys (email, ip, code, created, active) VALUES (?, ?, ?, ?, 1)", [email, ip, code, new Date()], function (err, result) {
 		if (err) console.log("Forgot DB error:", err);

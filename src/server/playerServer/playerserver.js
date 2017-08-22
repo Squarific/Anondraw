@@ -5,6 +5,8 @@ var emailTemplate = require("./emailTemplate.js");
 var http = require("http");
 var mysql = require("mysql");
 var mailgun = require('mailgun-send');
+var fs = require('fs');
+
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
 
@@ -31,6 +33,10 @@ var messageDatabase = new MessageDatabase(database);
 var sessions = new Sessions();
 
 var forgot = {};
+var MAX_STORY_LENGTH = 4096;
+
+var KB = 1024;
+var MB = 1024 * KB;
 
 // Ips from coinbase
 var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", "54.175.255.194",
@@ -59,6 +65,52 @@ var server = http.createServer(function (req, res) {
 		"Access-Control-Allow-Origin": "*",
 		"Content-Type": "application/json"
 	});
+	
+	if (parsedUrl.pathname == "/sharepicture") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var story = parsedUrl.query.story;
+
+		if (!user) {
+			res.end(JSON.stringify({ error: "User not logged in!" }));
+			return;
+		}
+		
+		if (story.length > MAX_STORY_LENGTH) {
+			res.end(JSON.stringify({ error: "Your story is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  story.length }));
+			return;
+		}
+
+		var body = [];
+		req.on('data', function (chunk) {
+			body.push(chunk);
+		}).on('end', function () {
+			body = Buffer.concat(body).toString();
+			
+			if (body.length > 3 * MB) {
+				res.end(JSON.stringify({ error: "Image is too large!" }));
+				return;
+			}
+			
+			var id = randomString(128);
+			fs.writeFile("images/" + id + ".png", body, 'base64', function (err) {
+				if (err) {
+					res.end(JSON.stringify({ error: err }));
+					return;
+				}
+			
+				playerDatabase.sharePicture(user.id, id, story, function (err) {
+					res.end(JSON.stringify({ error: err, id: id }));
+				});
+			});
+			
+		}).on('error', function (err) {
+			console.error(err);
+			res.end(JSON.stringify({ error: "Something went wrong." }));
+		});
+
+		return;
+	}
 	
 	if (parsedUrl.pathname == "/profile") {
 		var userId = parsedUrl.query.user;

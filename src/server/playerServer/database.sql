@@ -49,6 +49,16 @@ CREATE TABLE IF NOT EXISTS reputations (
     INDEX(from_id, to_id)
 );
 
+CREATE TABLE imageposts (
+	userid INT UNSIGNED,
+	image VARCHAR(128),
+	story TEXT,
+	created DATETIME,
+	INDEX (image)
+	INDEX (userid, created)
+	INDEX (created)
+);
+
 --For the possible source values, see PlayerDatabase.js
 ALTER TABLE reputations ADD COLUMN source INT UNSIGNED DEFAULT 0;
 

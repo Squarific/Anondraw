@@ -37,7 +37,9 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 
 	if (typeof options == "object" && typeof options.length == "number") {
 		for (var k = 0; k < options.length; k++) {
-			if (options[k] == "freepick") {
+			var text = options[k].text || options[k];
+
+			if (text == "freepick") {
 				answers.appendChild(this.createFreePick(question, function (answer) {
 					callback(answer);
 					this.container.removeChild(promptContainer);
@@ -46,14 +48,24 @@ Gui.prototype.prompt = function prompt (question, options, callback) {
 			}
 			var optionButton = answers.appendChild(document.createElement("div"));
 			optionButton.className = "gui-prompt-button gui-prompt-option-button";
+			
+			if (text == "Cancel") optionButton.className += " gui-prompt-option-cancel";
 
-			optionButton.appendChild(document.createTextNode(options[k]));
-			optionButton.option = options[k];
+			if (options[k].icon) {
+				var icon = optionButton.appendChild(document.createElement("img"));
+				icon.className = "icon";
+				icon.src = options[k].icon;
+				icon.alt = text;
+			}
+			
+			var textDom = optionButton.appendChild(document.createElement("div"));
+			textDom.appendChild(document.createTextNode(text));
+			textDom.className = "gui-prompt-button-text";
 
-			optionButton.addEventListener("click", function (event) {
+			optionButton.addEventListener("click", function (option, event) {
 				this.container.removeChild(promptContainer);
-				callback(event.target.option);
-			}.bind(this));
+				callback(option);
+			}.bind(this, text));
 		}
 	}
 
