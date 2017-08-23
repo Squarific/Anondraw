@@ -727,6 +727,11 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			// If we are new show the welcome window
 			if (this.userSettings.getBoolean("Show welcome")) {
 				this.openWelcomeWindow();
+			
+			// Lets check out the new sharing
+			} else if (!localStorage.getItem("new share")) {
+				localStorage.setItem("new share", true)
+				this.openExplainShareWindow();
 
 			// We are not new, check if we already saw all the awesome new features
 			} else if (parseInt(localStorage.getItem("newfeaturewindowversion")) !== this.CLIENT_VERSION) {
