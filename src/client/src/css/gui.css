@@ -15,8 +15,6 @@
 }
 
 .exportwindow .imagecontainer {
-	max-height:12em;
-	overflow-y:auto;
 	background: rgba(0, 0, 0, 0.1);
 }
 
