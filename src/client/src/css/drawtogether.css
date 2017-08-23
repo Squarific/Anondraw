@@ -758,6 +758,7 @@ input.paint-texttool {
 
 .drawtogether-sharewindow {
   display: none;
+  color:white;
   position: fixed;
   top: 0;
   bottom: 0;
@@ -770,8 +771,8 @@ input.paint-texttool {
   z-index: 200; }
   .drawtogether-sharewindow .drawtogether-preview-canvas {
     display: block;
-    max-height: 80%;
-    max-width: 80%;
+    max-height: 60%;
+    max-width: 60%;
     margin: 2em auto;
     border-radius: .3em;
     background-image: url("images/transparent.png"); }
@@ -779,6 +780,7 @@ input.paint-texttool {
     display: inline-block;
     margin: 0 .2em;
     padding: 1em;
+	min-width:20em;
     text-decoration: none;
     cursor: pointer;
     background-color: #456789;

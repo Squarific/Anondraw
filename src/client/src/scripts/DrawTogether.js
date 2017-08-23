@@ -654,14 +654,12 @@ DrawTogether.prototype.displayTip = function displayTip () {
 		"Did you know you can use shortcuts? Press C to toggle the color selection!",
 		"Tip: use B to switch to the brush tool. (Others: [l]ine, [c]olor, [p]icker, [g]rab, ...)",
 		"Tip: You get ink faster if you register an account and get reputation!",
-		"Did you know? You can easily upload your drawing to imgur, you can also share it to reddit!",
 		"Did you know? Private rooms always start with private_",
 		"Did you know? There is a member only room where only people with enough reputation can draw.",
 		"Tip: If you type Nyan with a capital, a cat will appear.",
 		"Tip: If you write Kappa with a capital you will get the twitch emote.",
 		"Tip: There are a few commands, try typing /me or /help",
 		"Need more ink? Try creating an account.",
-		"Want to be shown on the frontpage? If you share to reddit it will get added automatically.",
 		"Tip: Use transparency to get nicer effects.",
 		"The ▲ next to peoples name is the upvote button.",
 		"Did you know you can ban people once you have 50+ rep?",
@@ -957,6 +955,13 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	var ctx = this.preview.getContext("2d");
 	ctx.drawImage(this.paint.background.canvas, 0, 0, this.preview.width, this.preview.height);
 	ctx.drawImage(this.paint.public.canvas, 0, 0, this.preview.width, this.preview.height);
+};
+
+DrawTogether.prototype.openExplainShareWindow = function openExplainShareWindow () {
+	this.shareWindow.style.display = "block";
+	ga("send", "event", "openwindow", "explainshare");
+
+	
 };
 
 DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
@@ -2998,6 +3003,9 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	img.src = imageBase64;
 	img.alt = "Exported image";
 	
+	
+	ga("send", "event", "openwindow", "exportImageShare");
+	
 	var exportwindow = this.gui.createWindow({ title: "Share image to feed" });
 	exportwindow.classList.add("exportwindow");
 	
@@ -4372,31 +4380,15 @@ DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	shareWindow.className = "drawtogether-sharewindow";
 	this.shareWindow = shareWindow;
 
-	this.shareError = shareWindow.appendChild(document.createElement("div"));
-	this.imgurUrl = shareWindow.appendChild(document.createElement("div"));
-
-	var preview = shareWindow.appendChild(document.createElement("canvas"));
+	var h1 = shareWindow.appendChild(document.createElement("h1"));
+	h1.appendChild(document.createTextNode("A new way of sharing"));
+	
+	var preview = shareWindow.appendChild(document.createElement("img"));
 	preview.className = "drawtogether-preview-canvas"
-	this.preview = preview;
-
-	var upload = shareWindow.appendChild(document.createElement("div"));
-	upload.className = "drawtogether-button drawtogether-upload-button";
-	upload.appendChild(document.createTextNode("Upload image to imgur"))
-	upload.addEventListener("click", this.uploadImage.bind(this));
-
-	var share = shareWindow.appendChild(document.createElement("a"));
-	share.className = "drawtogether-button drawtogether-share-button";
-	share.appendChild(document.createTextNode("Share image to reddit"))
-	share.href = "#";
-	this.shareToRedditButton = share;
-	share.addEventListener("click", function (shareButton) {
-		if (shareButton.href.indexOf("reddit") === -1) {
-			this.showShareError("First upload the image to imgur before uploading it to reddit!");
-		}
-	}.bind(this, share));
+	preview.src = "images/tutorial/share.gif";
 
 	var close = shareWindow.appendChild(document.createElement("div"));
-	close.appendChild(document.createTextNode("Close share window"));
+	close.appendChild(document.createTextNode("Try it out"));
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeShareWindow.bind(this));
 };
@@ -5238,15 +5230,12 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		data: {
 			intro: "Click here if you want to change the room."
 		}
-	}/*, {
+	}, {
 		name: "share-button",
 		type: "button",
 		text: "Share",
-		action: this.openShareWindow.bind(this),
-		data: {
-			intro: "Made something nice? Use this to upload to imgur. Then you can share the imgur link to reddit if you want. Sharing it to reddit will also put it on the frontpage."
-		}
-	}*/, {
+		action: this.openExplainShareWindow.bind(this),
+	}, {
 		name: "settings",
 		type: "button",
 		text: "Settings",
