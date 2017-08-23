@@ -68,6 +68,16 @@ var server = http.createServer(function (req, res) {
 		"Content-Type": "application/json"
 	});
 	
+	if (parsedUrl.pathname == "/getpicturestories") {
+		playerDatabase.getPictureStories(function (err, stories) {
+			res.end(JSON.stringify({
+				error: err,
+				stories: stories
+			}));
+		});
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/sharepicture") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);

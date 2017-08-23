@@ -29,6 +29,10 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
 };
 
+Account.prototype.getPictureStories = function getPictureStories (callback) {
+	this.request("/getpicturestories", {}, this.parseData.bind(this, callback));
+};
+
 // Takes in a base64 image and story, calls back with an id
 Account.prototype.sharePicture = function sharePicture (image, story, callback) {
 	this.request("/sharepicture", {

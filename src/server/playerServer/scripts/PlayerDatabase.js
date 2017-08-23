@@ -71,6 +71,18 @@ PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, s
 	});
 };
 
+PlayerDatabase.prototype.getPictureStories = function getPictureStories (callback) {
+	this.database.query("SELECT last_username, image, story, created FROM imageposts JOIN users ON imageposts.userid = users.id ORDER BY created DESC LIMIT 50", function (err, rows) {
+		if (err) {
+			callback("Database error #GP1");
+			console.log("GETPICTURESSTORIES DB ERR", err);
+			return;
+		}
+		
+		callback(null, rows);
+	});
+};
+
 PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
 	this.database.query("INSERT INTO forgotkeys (email, ip, code, created, active) VALUES (?, ?, ?, ?, 1)", [email, ip, code, new Date()], function (err, result) {
 		if (err) console.log("Forgot DB error:", err);
