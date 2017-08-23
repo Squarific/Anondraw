@@ -42,7 +42,7 @@ Anondraw.prototype.createPublicFeedStories = function createPublicFeedStories (c
 			imageContainer.className = "imagecontainer";
 			
 			var image = imageContainer.appendChild(document.createElement("img"));
-			image.src = "http://beta.anondraw.com/userimages/" + data.stories[k].image + ".png";
+			image.src = "http://anondraw.com/userimages/" + data.stories[k].image + ".png";
 			image.alt = data.stories[k].story;
 			image.title = data.stories[k].story;
 			
