@@ -42,6 +42,12 @@ Anondraw.prototype.createSideMenu = function createSideMenu () {
 			navigo: true
 		},
 		{
+			icon: "th",
+			text: "Gallery",
+			href: "/gallery",
+			navigo: true
+		},
+		{
 			icon: "question-circle",
 			text: "FAQ",
 			href: "/faq",
@@ -159,6 +165,11 @@ Anondraw.prototype.createRouter = function createRouter () {
 	.on('/faq*', function () {
 		this.setContent(this.createFaqPage());
 		ga('set', 'page', '/faq');
+		ga('send', 'pageview');
+	}.bind(this))
+	.on('/gallery*', function () {
+		this.setContent(this.createPublicFeed());
+		ga('set', 'page', '/gallery');
 		ga('send', 'pageview');
 	}.bind(this))
 	.on('/new*', function () {

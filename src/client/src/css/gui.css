@@ -21,7 +21,7 @@
 }
 
 .exportwindow img {
-  width:9em;
+  max-width:12em;
   max-height:12em;
   background-image:url(images/transparent.png);
   margin:0.5em;

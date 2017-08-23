@@ -373,6 +373,74 @@
     background-color: white;
 }
 
+.gallery {
+	flex-direction:column;
+}
+
+.storiescontainer {
+	width:100%;
+	padding:2em;
+	text-align:center;
+}
+
+.story {
+	display:inline-flex;
+	padding:1em;
+	background:#364350;
+	min-width:17em;
+	min-height:17em;
+	vertical-align:top;
+	margin:0.5em;
+}
+
+.storytext .actualtext {
+	text-align:left;
+	max-height:10em;
+	overflow-y:auto;
+	padding:1em;
+	background:#232b33;
+}
+
+.story:nth-child(even) {
+	background:#404e5d;
+}
+
+.story img {
+	max-width:15em;
+	max-height:15em;
+	background-image:url(images/transparent.png);
+}
+
+.story .imagecontainer {
+	min-width:15em;
+	text-align:center;
+}
+
+.story .credit {
+	margin-top: 0.5em;
+	font-style: italic;
+	text-align:center;
+}
+
+.storytext {
+	display:none;
+	width:100%;
+}
+
+.showstories .storytext {
+	display:block;
+}
+
+.showstories .story {
+	display:flex;
+	width:initial;
+	margin:0;
+}
+
+.showstories .imagecontainer {
+	margin-right:1em;
+}
+
 @media (max-width:750px) {
 	.card {
 		width:100%;
