@@ -669,7 +669,7 @@ DrawTogether.prototype.displayTip = function displayTip () {
 		"Pressing the eye next to someones name will make your screen follow the player."
 	];
 
-	this.displayMessage(tips[Math.floor(Math.random() * tips.length)]);
+	this.chat.addMessage(tips[Math.floor(Math.random() * tips.length)]);
 };
 
 // Try to change the room
