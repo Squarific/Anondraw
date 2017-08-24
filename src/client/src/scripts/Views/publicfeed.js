@@ -41,7 +41,11 @@ Anondraw.prototype.createPublicFeedStories = function createPublicFeedStories (c
 			var imageContainer = story.appendChild(document.createElement("div"));
 			imageContainer.className = "imagecontainer";
 			
-			var image = imageContainer.appendChild(document.createElement("img"));
+			var a = imageContainer.appendChild(document.createElement("a"));
+			a.href = "http://anondraw.com/userimages/" + data.stories[k].image + ".png";
+			a.target = "_blank";
+			
+			var image = a.appendChild(document.createElement("img"));
 			image.src = "http://anondraw.com/userimages/" + data.stories[k].image + ".png";
 			image.alt = data.stories[k].story;
 			image.title = data.stories[k].story;
