@@ -217,6 +217,7 @@ Chat.prototype.addMessageToDom = function addMessageToDom (messageDom, message) 
 			continue;
 		}
 		// Replace if coordinate
+		this.coordinateRegex.lastIndex = 0;
 		if(this.coordinateRegex.test(messages[k])){
 			var first = messages[k].match(/[-]?\d*/)[0]; //first number
 			var last = messages[k].match(/[-]?\d*$/)[0]; // last number	
