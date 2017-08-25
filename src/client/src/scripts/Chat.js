@@ -372,7 +372,7 @@ Chat.prototype.addAnimationMessage = function addAnimationMessage (animation, us
 				}
 			}
 			
-			setTimeout(myAnimationsContext.renderMyAnimation.bind(myAnimationsContext, anim), 4000);			
+			myAnimationsContext.renderMyAnimation(anim);	
 		}
 		
 	}.bind(this));
