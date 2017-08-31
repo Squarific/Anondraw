@@ -1183,6 +1183,10 @@ Protocol.prototype.bindIO = function bindIO () {
 				console.error("[KICKBAN][ERROR] " + socket.name + " (rep: " + socket.reputation + ") tried to ban " + targetSocket.name + " (rep: " + targetSocket.reputation + ") rep difference " + (socket.reputation - targetSocket.reputation) + " required " + REQUIRED_REP_DIFFERENCE);
 				return;
 			}
+			if ([2518].indexOf(socket.userid) > -1) {
+				callback({error: "You're not allowed to ban anymore."});
+				return;
+			}
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
 			

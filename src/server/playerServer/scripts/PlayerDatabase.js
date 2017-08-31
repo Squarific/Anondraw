@@ -11,7 +11,8 @@ var REFERRAL_CONFIRMED_REP = 9;
 var REPSOURCES = {
 	GIVEN: 0,
 	PREMIUM: 1,
-	REFERRAL: 2
+	REFERRAL: 2,
+	BOUNTY: 3
 };
 
 function PlayerDatabase (database) {
