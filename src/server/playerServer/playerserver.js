@@ -96,7 +96,7 @@ var server = http.createServer(function (req, res) {
 		playerDatabase.getProfileData(id, function (err, data) {
 			res.end(JSON.stringify({
 				error: err,
-				profile: profile
+				profile: data
 			}));
 		});
 		return;
