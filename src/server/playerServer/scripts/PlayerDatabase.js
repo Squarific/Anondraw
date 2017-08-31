@@ -73,7 +73,7 @@ PlayerDatabase.prototype.setBio = function setBio (id, bio, callback) {
 };
 
 PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callback) {
-	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage FROM users WHERE id = ?", [userid], function (err, rows) {
+	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COUNT(*) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
 		if (err) {
 			console.log("GETPROFILEDATA DB ERROR", err, userid);
 			callback("Database error, couldn't get profile.");
