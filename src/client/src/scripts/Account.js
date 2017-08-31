@@ -52,24 +52,6 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 	}
 */
 Account.prototype.getProfileData = function getProfileData (id, callback) {
-	callback(null,{profile: {
-		id: 1,
-		last_username: "Squarific",
-		bio: "Some bio \n lol testing \n\n Wow so cool",
-		reputation: 20,
-		last_online: "2017-08-31 11:58",
-		registered: "2016-05-24 22:31",
-		headerImage: null,
-		profileImage: null,
-		stories: [
-			{
-				image: "someid",
-				story: "Some story \n lol testing \n\n Wow so cool",
-				last_username: "Squarific"
-			}
-		]
-	}});
-	return;
 	this.request("/getprofiledata", { id: id }, this.parseData.bind(this, callback));
 };
 
