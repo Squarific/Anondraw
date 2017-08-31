@@ -402,6 +402,14 @@
 	margin:0.5em;
 }
 
+.story a {
+	display: inline-block;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
 .storytext .actualtext {
 	text-align:left;
 	max-height:10em;
