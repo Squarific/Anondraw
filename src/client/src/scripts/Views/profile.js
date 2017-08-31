@@ -265,7 +265,8 @@ Anondraw.prototype.createGeneralInfo = function createGeneralInfo (data, contain
 	h3.appendChild(document.createTextNode("Registered"));
 	
 	var registered = bio.appendChild(document.createElement("span"));
-	registered.appendChild(document.createTextNode((new Date(data.registered)).toLocaleString()));
+	if (!data.registered)egistered.appendChild(document.createTextNode("Since the beginning of time"));
+	else registered.appendChild(document.createTextNode((new Date(data.registered)).toLocaleString()));
 };
 
 Anondraw.prototype.createProfileBio = function createProfileBio (data, container) {

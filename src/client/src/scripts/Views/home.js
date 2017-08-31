@@ -68,7 +68,7 @@ Anondraw.prototype.createHome = function createHome () {
 	div.className = "feature-text-container";
 	
 	var h2 = div.appendChild(document.createElement("h2"));
-	h2.appendChild(document.createTextNode("Socialize and share (coming soon)"));
+	h2.appendChild(document.createTextNode("Socialize and share"));
 	
 	var p = div.appendChild(document.createElement("p"));
 	p.className = "feature-text";
@@ -94,16 +94,17 @@ Anondraw.prototype.createHome = function createHome () {
 	div.className = "feature-text-container";
 	
 	var h2 = div.appendChild(document.createElement("h2"));
-	h2.appendChild(document.createTextNode("Portfolio  (coming soon)"));
+	h2.appendChild(document.createTextNode("Portfolio"));
 	
 	var p = div.appendChild(document.createElement("p"));
 	p.className = "feature-text";
 	p.appendChild(document.createTextNode("It was never this easy to create a breathtaking portfolio. You'll be able to show everyone exactly how good of an artist you are. Build it up slowely over time and you'll be amazed at what you can achieve."));
 	
+	var profiles = [1, 15981, 16684, 18070, 17603, 12575, 5866, 87, 14344, 18145, 16973, 7833, 3753, 11290, 18041, 4734, 5036, 17988, 15503, 17966, 12238, 17901, 17940];
 	var tryButton = div.appendChild(document.createElement("a"));
 	tryButton.className = "button trybutton";
 	tryButton.appendChild(document.createTextNode("Check out a random profile"));
-	tryButton.href = "/register";
+	tryButton.href = "/profile/" + profiles[Math.floor(Math.random() * profiles.length)];
 	tryButton.setAttribute("data-navigo", "");
 	
 	return container;
