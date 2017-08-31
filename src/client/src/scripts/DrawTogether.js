@@ -742,6 +742,11 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 				|| Date.now() - parseInt(localStorage.getItem("scuttlers_trailer")) > this.SCUTTLERS_MESSAGE_EVERY) {
 				localStorage.setItem("scuttlers_trailer", Date.now());
 				this.openScuttlersWindow();
+				
+			} else if (!localStorage.getItem("scuttlers_trailer")
+				|| Date.now() - parseInt(localStorage.getItem("scuttlers_date")) > this.SCUTTLERS_MESSAGE_EVERY) {
+				localStorage.setItem("scuttlers_date", Date.now());
+				this.openScuttlersDateWindow();
 			
 			// Mmmm what else can we spam
 			} else if (!localStorage.getItem("bounty_window")
@@ -4565,6 +4570,37 @@ DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
 	var video = content.appendChild(document.createElement("div"));
 	video.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/pE737MO-8YQ" frameborder="0" allowfullscreen></iframe>';
 	
+	var p = content.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("More info: "));
+	
+	var a = p.appendChild(document.createElement("a"));
+	a.href = "https://www.playscuttlers.com";
+	a.alt = "Scuttlers official website";
+	a.appendChild(document.createTextNode("https://www.playscuttlers.com"));
+};
+
+DrawTogether.prototype.openScuttlersDateWindow = function openScuttlersDateWindow () {
+	var scuttlersWindow = this.gui.createWindow({ title: "Scuttlers release announcement"});
+	
+	ga("send", "event", "window", "scuttlersannouncement");
+	
+	var content = scuttlersWindow.appendChild(document.createElement("div"));
+	content.className = "content";
+	
+	var title = content.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Scuttlers release announcment"));
+	
+	var p = content.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("We will be releasing 15 september! Our steam store page is also live:"));
+	
+	var a = p.appendChild(document.createElement("a"));
+	a.href = "https://store.steampowered.com/app/689040/Scuttlers/";
+	a.alt = "steam store page";
+	a.appendChild(document.createTextNode("Steam store page."));
+	
+	var video = content.appendChild(document.createElement("div"));
+	video.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/24KaGZwCB8s" frameborder="0" allowfullscreen></iframe>';
+
 	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("More info: "));
 	

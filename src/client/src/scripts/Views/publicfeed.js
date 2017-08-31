@@ -35,40 +35,46 @@ Anondraw.prototype.createPublicFeedStories = function createPublicFeedStories (c
 		}
 		
 		for (var k = 0; k < data.stories.length; k++) {
-			var story = container.appendChild(document.createElement("div"));
-			story.className = "story";
-			
-			var imageContainer = story.appendChild(document.createElement("div"));
-			imageContainer.className = "imagecontainer";
-			
-			var a = imageContainer.appendChild(document.createElement("a"));
-			a.href = "http://anondraw.com/userimages/" + data.stories[k].image + ".png";
-			a.target = "_blank";
-			
-			var image = a.appendChild(document.createElement("img"));
-			image.src = "http://anondraw.com/userimages/" + data.stories[k].image + ".png";
-			image.alt = data.stories[k].story;
-			image.title = data.stories[k].story;
-			
-			var storytext = story.appendChild(document.createElement("div"));
-			storytext.className = "storytext";
-			
-			if (data.stories[k].story) {
-				var actualtext = storytext.appendChild(document.createElement("div"));
-				actualtext.className = "actualtext";
-				
-				var splitStory = data.stories[k].story.split("\n");
-				for (var i = 0; i < splitStory.length; i++) {
-					actualtext.appendChild(document.createTextNode(splitStory[i] || ""));
-					actualtext.appendChild(document.createElement("br"));
-				}
-			}
-			
-			var credit = storytext.appendChild(document.createElement("div"));
-			credit.className = "credit";
-			credit.appendChild(document.createTextNode("-" + data.stories[k].last_username + " " + (new Date(data.stories[k].created)).toLocaleString()));
+			container.appendChild(this.createPictureStoryDom(data.stories[k]));
 		}
-	});
+	}.bind(this));
+};
+
+Anondraw.prototype.createPictureStoryDom = function createPictureStoryDom (storyData) {
+	var story = document.createElement("div");
+	story.className = "story";
+	
+	var imageContainer = story.appendChild(document.createElement("div"));
+	imageContainer.className = "imagecontainer";
+	
+	var a = imageContainer.appendChild(document.createElement("a"));
+	a.href = "http://anondraw.com/userimages/" + storyData.image + ".png";
+	a.target = "_blank";
+	
+	var image = a.appendChild(document.createElement("img"));
+	image.src = "http://anondraw.com/userimages/" + storyData.image + ".png";
+	image.alt = storyData.story;
+	image.title = storyData.story;
+	
+	var storytext = story.appendChild(document.createElement("div"));
+	storytext.className = "storytext";
+	
+	if (storyData.story) {
+		var actualtext = storytext.appendChild(document.createElement("div"));
+		actualtext.className = "actualtext";
+		
+		var splitStory = storyData.story.split("\n");
+		for (var i = 0; i < splitStory.length; i++) {
+			actualtext.appendChild(document.createTextNode(splitStory[i] || ""));
+			actualtext.appendChild(document.createElement("br"));
+		}
+	}
+	
+	var credit = storytext.appendChild(document.createElement("div"));
+	credit.className = "credit";
+	credit.appendChild(document.createTextNode("-" + storyData.last_username + " " + (new Date(storyData.created)).toLocaleString()));
+	
+	return story;
 };
 
 Anondraw.prototype.createPublicFeedFilters = function createPublicFeedFilters (container, storiesContainer) {

@@ -68,6 +68,40 @@ var server = http.createServer(function (req, res) {
 		"Content-Type": "application/json"
 	});
 	
+	if (parsedUrl.pathname == "/setbio") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var bio = parsedUrl.query.bio;
+
+		if (!user) {
+			res.end(JSON.stringify({ error: "User not logged in!" }));
+			return;
+		}
+		
+		if (bio.length > MAX_STORY_LENGTH) {
+			res.end(JSON.stringify({ error: "Your bio is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  story.length }));
+			return;
+		}
+		
+		playerDatabase.setBio(user.id, bio, function (err) {
+			res.end(JSON.stringify({
+				error: err
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/getprofiledata") {
+		var id = parsedUrl.query.id;
+		playerDatabase.getProfileData(id, function (err, data) {
+			res.end(JSON.stringify({
+				error: err,
+				profile: profile
+			}));
+		});
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/getpicturestories") {
 		playerDatabase.getPictureStories(function (err, stories) {
 			res.end(JSON.stringify({
@@ -82,6 +116,7 @@ var server = http.createServer(function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var story = parsedUrl.query.story;
+		var type = parsedUrl.query.type;
 
 		if (!user) {
 			res.end(JSON.stringify({ error: "User not logged in!" }));
@@ -113,7 +148,7 @@ var server = http.createServer(function (req, res) {
 					return;
 				}
 			
-				playerDatabase.sharePicture(user.id, id, story, function (err) {
+				playerDatabase.sharePicture(user.id, id, story, type, function (err) {
 					res.end(JSON.stringify({ error: err, id: id }));
 				});
 			});

@@ -29,15 +29,70 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
 };
 
+/*
+	Returned data looks like: 
+	{
+		profile: {
+			id: 1,
+			last_username: "Squarific",
+			bio: "Some bio \n lol testing \n\n Wow so cool",
+			reputation: 20,
+			last_online: "2017-08-31 11:58",
+			registered: "2016-05-24 22:31",
+			headerImage: "8vnoasv5brglxc6fzoi6uwf761r7m4jcjsjelga54mgpdarp",
+			profileImage: "epcmqd6fwffvrex2uvozsc5f8thgcfs7t4pxmd8fs9xx1uz1",
+			stories: [
+				{
+					image: "someid",
+					story: "Some story \n lol testing \n\n Wow so cool",
+					last_username: "Squarific"
+				}, ...
+			]
+		}
+	}
+*/
+Account.prototype.getProfileData = function getProfileData (id, callback) {
+	callback(null,{profile: {
+		id: 1,
+		last_username: "Squarific",
+		bio: "Some bio \n lol testing \n\n Wow so cool",
+		reputation: 20,
+		last_online: "2017-08-31 11:58",
+		registered: "2016-05-24 22:31",
+		headerImage: null,
+		profileImage: null,
+		stories: [
+			{
+				image: "someid",
+				story: "Some story \n lol testing \n\n Wow so cool",
+				last_username: "Squarific"
+			}
+		]
+	}});
+	return;
+	this.request("/getprofiledata", { id: id }, this.parseData.bind(this, callback));
+};
+
+Account.prototype.setBio = function setBio (bio, callback) {
+	this.request("/setbio", {
+		uKey: this.uKey,
+		bio: bio
+	},
+	this.parseData.bind(this, callback));
+};
+
 Account.prototype.getPictureStories = function getPictureStories (callback) {
 	this.request("/getpicturestories", {}, this.parseData.bind(this, callback));
 };
 
 // Takes in a base64 image and story, calls back with an id
-Account.prototype.sharePicture = function sharePicture (image, story, callback) {
+// Types: "profile", "header", "story"
+// If type is profile or header, our profile or header will be updated
+Account.prototype.sharePicture = function sharePicture (image, story, type, callback) {
 	this.request("/sharepicture", {
 		uKey: this.uKey,
-		story: story
+		story: story,
+		type: type
 	},
 	image,
 	this.parseData.bind(this, callback));

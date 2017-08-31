@@ -59,8 +59,60 @@ PlayerDatabase.prototype.getName = function getName (id, callback) {
 	});
 };
 
-PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story, callback) {
-	this.database.query("INSERT INTO imageposts (userid, image, story, created) VALUES (?, ?, ?, ?)", [userid, postid, story, new Date()], function (err) {
+PlayerDatabase.prototype.setBio = function setBio (id, bio, callback) {
+	this.database.query("UPDATE users SET bio = ? WHERE id = ?", [bio, id], function (err) {
+		if (err) {
+			console.log("SETBIO DB ERROR", err, id, bio);
+			callback("Database error.");
+			return;
+		}
+		
+		callback(null);
+	});
+};
+
+PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callback) {
+	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage FROM users WHERE id = ?", [userid], function (err, rows) {
+		if (err) {
+			console.log("GETPROFILEDATA DB ERROR", err, userid);
+			callback("Database error, couldn't get profile.");
+			return;
+		}
+		
+		if (!rows || !rows[0]) {
+			callback("Profile not found!");
+			return;
+		}
+		
+		this.database.query("SELECT * FROM imageposts WHERE userid = ? ORDER BY created DESC", [userid], function (err, storyRows) {
+			if (err) {
+				console.log("GETPROFILEDATA DB ERROR", err, userid);
+				callback("Database error, couldn't get profile stories.");
+				return;
+			}
+			
+			storyRows = storyRows || [];
+			rows[0].stories = storyRows[0];
+			callback(null, rows[0]);
+		});
+	});
+};
+
+PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story, type, callback) {
+	var query = "INSERT INTO imageposts (userid, image, story, created) VALUES (?, ?, ?, ?);";
+	var queryargs = [userid, postid, story, new Date()];
+	
+	if (type == "header") {
+		query += "UPDATE users SET headerImage = ? WHERE userid = ?;";
+		queryargs.push(postid);
+		queryargs.push(userid);
+	} else if (type == "profile") {
+		query += "UPDATE users SET profileImage = ? WHERE userid = ?;";
+		queryargs.push(postid);
+		queryargs.push(userid);
+	}
+	
+	this.database.query(query, queryargs, function (err) {
 		if (err) {
 			callback("Couldn't share picture, a database error occured.");
 			console.log("SHAREPICTURE DB ERROR", err, userid, postid, story);

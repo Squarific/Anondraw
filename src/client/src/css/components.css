@@ -7,6 +7,10 @@
 	float:right;
 }
 
+.topbar a.button {
+	margin-bottom:1em;
+}
+
 .topbar .logo {
 	font-size: 2em;
     font-weight: bold;
@@ -355,6 +359,11 @@
 	width: 100%;
 }
 
+.windowContainer {
+	position:absolute;
+	z-index:1000;
+}
+
 .pmwindowcontent {
 	width:315px;
 	height:300px;
@@ -387,8 +396,8 @@
 	display:inline-flex;
 	padding:1em;
 	background:#364350;
-	min-width:17em;
-	min-height:17em;
+	min-width:19em;
+	min-height:19em;
 	vertical-align:top;
 	margin:0.5em;
 }
@@ -412,6 +421,9 @@
 }
 
 .story .imagecontainer {
+	display:flex;
+	justify-content:center;
+	align-items:center;
 	min-width:15em;
 	text-align:center;
 }
@@ -428,7 +440,9 @@
 }
 
 .showstories .storytext {
-	display:block;
+	display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .showstories .story {

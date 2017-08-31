@@ -12,6 +12,10 @@ function Anondraw (container, settings) {
 	this.account.isLoggedIn(function () {});
 	this.messages = new Messages(this.settings.messageServer, this.account);
 	this.privateChats = new PrivateChats(this.pmContainer, this.settings.privateChatServer, this.account, this.messages);
+	
+	var windowContainer = container.appendChild(document.createElement("div"));
+	windowContainer.className = "windowcontainer";
+	this.gui = new Gui(windowContainer);
 
 	this.collabInitDone = false;
 	this.collabContainer;
@@ -33,6 +37,12 @@ Anondraw.prototype.createSideMenu = function createSideMenu () {
 			icon: "paint-brush",
 			text: "Collaboration",
 			href: "/collab",
+			navigo: true
+		},
+		{
+			icon: "user",
+			text: "My profile",
+			href: "/profile",
 			navigo: true
 		},
 		{
@@ -87,7 +97,16 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('send', 'pageview');
 	}.bind(this))
 	.on('/messages*', function () {
-		this.setContent(this.createMessagePage());
+		this.setContent(document.createTextNode("Loading..."));	
+		this.account.checkLogin(function (err, loggedIn) {
+			if (loggedIn) {
+				this.setContent(this.createMessagePage());
+				return;
+			}
+			
+			this.router.navigate("/login");
+		}.bind(this));
+		
 		ga('set', 'page', '/messages');
 		ga('send', 'pageview');
 	}.bind(this))
@@ -97,6 +116,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('send', 'pageview');
 	}.bind(this))
 	.on('/login*', function () {
+		this.setContent(document.createTextNode("Loading..."));	
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
 				ga('set', 'page', '/alreadyLoggedIn');
@@ -111,6 +131,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('send', 'pageview');
 	}.bind(this))
 	.on('/forgot*', function () {
+		this.setContent(document.createTextNode("Loading..."));	
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
 				ga('set', 'page', '/alreadyLoggedIn');
@@ -125,6 +146,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('send', 'pageview');
 	}.bind(this))
 	.on('/reset*', function () {
+		this.setContent(document.createTextNode("Loading..."));	
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
 				ga('set', 'page', '/alreadyLoggedIn');
@@ -139,6 +161,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('send', 'pageview');
 	}.bind(this))
 	.on('/register*', function () {
+		this.setContent(document.createTextNode("Loading..."));	
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
 				ga('set', 'page', '/alreadyLoggedIn');
@@ -172,6 +195,25 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('set', 'page', '/gallery');
 		ga('send', 'pageview');
 	}.bind(this))
+	.on('/profile/:id', function (params) {
+		this.setContent(this.createProfilePage(params.id));
+		ga('set', 'page', '/profile');
+		ga('send', 'pageview');
+	}.bind(this))
+	.on('/profile*', function () {
+		this.setContent(document.createTextNode("Loading..."));	
+		this.account.checkLogin(function (err, loggedIn) {
+			if (loggedIn) {
+				this.setContent(this.createProfilePage(this.account.id));
+				return;
+			}
+			
+			this.router.navigate("/login");
+		}.bind(this));
+		
+		ga('set', 'page', '/myprofile');
+		ga('send', 'pageview');
+	}.bind(this))
 	.on('/new*', function () {
 		this.router.navigate("/collab");
 		ga('set', 'page', '/new');
@@ -192,7 +234,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 	}.bind(this))
 	.notFound(function (query) {
 		console.log(query);
-		this.setContent(document.createTextNode("This page does not seem to exist. Did you type it wrong? If not, contact info@anondraw.com"));		
+		this.setContent(document.createTextNode("This page does not seem to exist. Did you type it wrong? If not, contact info@anondraw.com"));
 		ga('set', 'page', '/notfound');
 		ga('send', 'pageview');
 	}.bind(this));

@@ -24,7 +24,8 @@
 	width:15em;
 }
 
-.menu a.menuItem:first-child {
+.menu a.menuItem:first-child,
+.menu a.menuItem:nth-child(4) {
 	margin-bottom:1em;
 }
 
