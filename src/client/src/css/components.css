@@ -405,6 +405,7 @@
 .story a {
 	display: inline-block;
     text-decoration: none;
+	color:white;
     font-weight: bold;
     margin-left: 1em;
     margin-right: 1em;
