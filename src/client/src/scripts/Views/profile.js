@@ -120,6 +120,9 @@ Anondraw.prototype.createProfileBioInput = function createProfileBioInput (data,
 				status.classList.add("error");
 			} else {
 				status.appendChild(document.createTextNode("Bio updated!"));
+				// Force the page to refresh
+				this.router.navigate("/home");
+				this.router.navigate("/profile");
 			}
 		});
 	}.bind(this));

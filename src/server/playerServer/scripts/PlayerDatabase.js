@@ -104,11 +104,11 @@ PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, s
 	var queryargs = [userid, postid, story, new Date()];
 	
 	if (type == "header") {
-		query += "UPDATE users SET headerImage = ? WHERE userid = ?;";
+		query += "UPDATE users SET headerImage = ? WHERE id = ?;";
 		queryargs.push(postid);
 		queryargs.push(userid);
 	} else if (type == "profile") {
-		query += "UPDATE users SET profileImage = ? WHERE userid = ?;";
+		query += "UPDATE users SET profileImage = ? WHERE id = ?;";
 		queryargs.push(postid);
 		queryargs.push(userid);
 	}
