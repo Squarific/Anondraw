@@ -125,7 +125,7 @@ PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, s
 };
 
 PlayerDatabase.prototype.getPictureStories = function getPictureStories (callback) {
-	this.database.query("SELECT last_username, image, story, created FROM imageposts JOIN users ON imageposts.userid = users.id ORDER BY created DESC LIMIT 50", function (err, rows) {
+	this.database.query("SELECT userid, last_username, image, story, created FROM imageposts JOIN users ON imageposts.userid = users.id ORDER BY created DESC LIMIT 50", function (err, rows) {
 		if (err) {
 			callback("Database error #GP1");
 			console.log("GETPICTURESSTORIES DB ERR", err);

@@ -70,9 +70,12 @@ Anondraw.prototype.createPictureStoryDom = function createPictureStoryDom (story
 		}
 	}
 	
-	var credit = storytext.appendChild(document.createElement("div"));
+	var credit = storytext.appendChild(document.createElement("a"));
+	credit.href = "profile/" + storyData.userid;
 	credit.className = "credit";
 	credit.appendChild(document.createTextNode("-" + storyData.last_username + " " + (new Date(storyData.created)).toLocaleString()));
+	credit.setAttribute("data-navigo", "");
+	this.router.updatePageLinks();
 	
 	return story;
 };
