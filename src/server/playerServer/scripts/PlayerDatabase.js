@@ -96,7 +96,7 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 			rows[0].stories = storyRows[0];
 			callback(null, rows[0]);
 		});
-	});
+	}.bind(this));
 };
 
 PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story, type, callback) {
