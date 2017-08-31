@@ -284,6 +284,7 @@ Anondraw.prototype.createProfileFeed = function createProfileFeed (data, contain
 	feed.className = "feed showstories";
 	
 	for (var k = 0; k < data.stories.length; k++) {
+		data.stories[k].last_username = data.last_username;
 		feed.appendChild(this.createPictureStoryDom(data.stories[k]));
 	}
 };
