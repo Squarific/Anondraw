@@ -124,7 +124,7 @@ Anondraw.prototype.createProfileBioInput = function createProfileBioInput (data,
 				this.router.navigate("/home");
 				this.router.navigate("/profile");
 			}
-		});
+		}.bind(this));
 	}.bind(this));
 };
 
