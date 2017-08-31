@@ -93,7 +93,7 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 			}
 			
 			storyRows = storyRows || [];
-			rows[0].stories = storyRows[0];
+			rows[0].stories = storyRows;
 			callback(null, rows[0]);
 		});
 	}.bind(this));
