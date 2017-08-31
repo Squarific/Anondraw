@@ -23,6 +23,7 @@ Anondraw.prototype.createProfile = function createProfile (userid, content) {
 			return;
 		}
 		
+		data.profile.id = userid;
 		this.createProfileWithData(data.profile, content);
 	}.bind(this));
 };
