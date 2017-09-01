@@ -276,6 +276,8 @@ Anondraw.prototype.createProfileBio = function createProfileBio (data, container
 	var h2 = bio.appendChild(document.createElement("h2"));
 	h2.appendChild(document.createTextNode("Bio"));
 	
+	if (!data.bio) return;
+	
 	var splitBio = data.bio.split("\n");
 	for (var k = 0; k < splitBio.length; k++) {
 		bio.appendChild(document.createTextNode(splitBio[k]));
