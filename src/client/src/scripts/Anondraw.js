@@ -204,7 +204,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 		this.setContent(document.createTextNode("Loading..."));	
 		this.account.checkLogin(function (err, loggedIn) {
 			if (loggedIn) {
-				this.setContent(this.createProfilePage(this.account.id));
+				this.router.navigate('/profile/' + this.account.id);
 				return;
 			}
 			

@@ -71,6 +71,7 @@ Account.prototype.getPictureStories = function getPictureStories (callback) {
 // Types: "profile", "header", "story"
 // If type is profile or header, our profile or header will be updated
 Account.prototype.sharePicture = function sharePicture (image, story, type, callback) {
+	if (typeof type == "function") callback = type;
 	this.request("/sharepicture", {
 		uKey: this.uKey,
 		story: story,

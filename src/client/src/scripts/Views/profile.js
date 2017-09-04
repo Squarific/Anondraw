@@ -121,7 +121,7 @@ Anondraw.prototype.createProfileBioInput = function createProfileBioInput (data,
 			} else {
 				status.appendChild(document.createTextNode("Bio updated!"));
 				// Force the page to refresh
-				this.router.navigate("/home");
+				this.router.navigate("/404");
 				this.router.navigate("/profile");
 			}
 		}.bind(this));
@@ -169,7 +169,7 @@ Anondraw.prototype.createProfilePictureInput = function createProfilePictureInpu
 				status.appendChild(document.createTextNode("Profile picture updated!"));
 				
 				// Force the page to refresh
-				this.router.navigate("/home");
+				this.router.navigate("/404");
 				this.router.navigate("/profile");
 			}.bind(this));
 		}.bind(this));
@@ -215,7 +215,7 @@ Anondraw.prototype.createProfileHeaderInput = function createProfileHeaderInput 
 				status.appendChild(document.createTextNode("Header image updated!"));
 				
 				// Force the page to refresh
-				this.router.navigate("/home");
+				this.router.navigate("/404");
 				this.router.navigate("/profile");
 			}.bind(this));
 		}.bind(this));
