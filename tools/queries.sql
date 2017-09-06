@@ -65,3 +65,6 @@ FROM (
 ) as groupedrep
 GROUP BY repcount;
  
+-- Registered users per day
+SELECT DATE(register_datetime), COUNT(*) FROM users GROUP BY DATE(register_datetime) ORDER BY DATE(register_datetime);
+
