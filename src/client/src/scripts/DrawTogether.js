@@ -114,8 +114,8 @@ DrawTogether.prototype.IGNORE_INK_REP = 50;
 
 // After how much time should we remind moderators of their duty?
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
-DrawTogether.prototype.SCUTTLERS_MESSAGE_EVERY = 7 * 24 * 60 * 60 * 1000;
-DrawTogether.prototype.SUPPORT_MESSAGE_EVERY = 24 * 60 * 60 * 1000;
+DrawTogether.prototype.SCUTTLERS_MESSAGE_EVERY = 6 * 24 * 60 * 60 * 1000;
+DrawTogether.prototype.SUPPORT_MESSAGE_EVERY = 5 * 24 * 60 * 60 * 1000;
 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
@@ -712,10 +712,10 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
 			
-			this.chat.addMessage("Check out my upcoming game scuttlers", "https://www.youtube.com/watch?v=pE737MO-8YQ");
+			this.chat.addMessage("Scuttlers is released!", "https://store.steampowered.com/app/689040/Scuttlers/");
 			
 			if (room + number == "main") {
-				this.chat.addMessage("We are working on a tshirt design.  More info: -850056,469261");
+				//this.chat.addMessage("We are working on a tshirt design.  More info: -850056,469261");
 			}
 			
 			if(this.account.uKey)
@@ -738,21 +738,16 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 				this.openNewFeatureWindow();
 			
 			// Ha lets just self promote scuttlers then
-			} else if (!localStorage.getItem("scuttlers_trailer")
-				|| Date.now() - parseInt(localStorage.getItem("scuttlers_trailer")) > this.SCUTTLERS_MESSAGE_EVERY) {
-				localStorage.setItem("scuttlers_trailer", Date.now());
-				this.openScuttlersWindow();
-				
-			} else if (!localStorage.getItem("scuttlers_trailer")
-				|| Date.now() - parseInt(localStorage.getItem("scuttlers_date")) > this.SCUTTLERS_MESSAGE_EVERY) {
-				localStorage.setItem("scuttlers_date", Date.now());
-				this.openScuttlersDateWindow();
+			} else if (!localStorage.getItem("scuttlers_released")
+				|| Date.now() - parseInt(localStorage.getItem("scuttlers_released")) > this.SCUTTLERS_MESSAGE_EVERY) {
+				localStorage.setItem("scuttlers_released", Date.now());
+				this.createScuttlersOverlay();
 			
 			// Mmmm what else can we spam
 			} else if (!localStorage.getItem("bounty_window")
 				|| Date.now() - parseInt(localStorage.getItem("bounty_window")) > this.SUPPORT_MESSAGE_EVERY) {
-				this.openBountyWindow();
 				localStorage.setItem("bounty_window", Date.now());
+				this.openBountyWindow();
 			}
 
 			this.removeLoading();
@@ -4385,8 +4380,34 @@ DrawTogether.prototype.toggleFollow = function toggleFollow () {
 	}
 };
 
+DrawTogether.prototype.createScuttlersOverlay = function createScuttlersOverlay () {
+	var shareWindow = this.container.appendChild(document.createElement("div"));
+	shareWindow.className = "drawtogether-sharewindow";
+	shareWindow.style.display = "block";
+
+	var h1 = shareWindow.appendChild(document.createElement("h1"));
+	h1.appendChild(document.createTextNode("Scuttlers has been released!"));
+	
+	var preview = shareWindow.appendChild(document.createElement("div"));
+	preview.style.margin = "3em";
+	preview.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/pE737MO-8YQ" frameborder="0" allowfullscreen></iframe>';
+
+	var close = shareWindow.appendChild(document.createElement("a"));
+	close.appendChild(document.createTextNode("Bring me to steam"));
+	close.className = "drawtogether-button drawtogether-close-button";
+	close.href = "http://store.steampowered.com/app/689040/Scuttlers/";
+	close.target = "_blank";
+	
+	var close = shareWindow.appendChild(document.createElement("div"));
+	close.appendChild(document.createTextNode("No thanks"));
+	close.className = "drawtogether-button drawtogether-close-button";
+	close.addEventListener("click", function () {
+		shareWindow.parentNode.removeChild(shareWindow);
+	});
+};
+
 DrawTogether.prototype.createShareWindow = function createShareWindow () {
-	shareWindow = this.container.appendChild(document.createElement("div"));
+	var shareWindow = this.container.appendChild(document.createElement("div"));
 	shareWindow.className = "drawtogether-sharewindow";
 	this.shareWindow = shareWindow;
 
