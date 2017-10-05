@@ -452,6 +452,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 
 	this.network.on("paths", function (paths) {
 		for (var id in paths) {
+			paths[id].color = tinycolor(paths[id].color);
 			self.paint.addPath(id, paths[id]);
 		}
 	});
