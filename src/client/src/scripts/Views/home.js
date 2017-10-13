@@ -98,7 +98,7 @@ Anondraw.prototype.createHome = function createHome () {
 	
 	var p = div.appendChild(document.createElement("p"));
 	p.className = "feature-text";
-	p.appendChild(document.createTextNode("It was never this easy to create a breathtaking portfolio. You'll be able to show everyone exactly how good of an artist you are. Build it up slowely over time and you'll be amazed at what you can achieve."));
+	p.appendChild(document.createTextNode("It was never this easy to create a breathtaking portfolio. You'll be able to show everyone exactly how good of an artist you are. Build it up slowly over time and you'll be amazed at what you can achieve."));
 	
 	var profiles = [1, 15981, 16684, 18070, 17603, 12575, 5866, 87, 14344, 18145, 16973, 7833, 3753, 11290, 18041, 4734, 5036, 17988, 15503, 17966, 12238, 17901, 17940];
 	var tryButton = div.appendChild(document.createElement("a"));
