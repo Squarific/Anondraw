@@ -21,6 +21,7 @@ var BIG_BRUSH_MIN_REP = 5;
 var MEMBER_MIN_REP = 15;
 var UPVOTE_MIN_REP = 7;                  // Has to be changed in the playerserver too
 var SHARE_IP_MIN_REP = MEMBER_MIN_REP;
+var SPAWN_MIN_REP = 25;
 
 var REGION_MIN_REP = 30;
 var MODERATE_REGION_MIN_REP = 100;
@@ -251,8 +252,150 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 	return p;
 };
 
+// One spawn is 3840 wide and 2160 high
+// The base spawn is [311111, 338360], this is the center of the first spawn
+// The base time is 1508155169891
+
+// Every two weeks, the spawn moves 3840 right
+// There is a 10000 pixel border around all spawns which is the spawn area
+// The first 260 spawns (10 years) are considered spawn area
+
+//  var minX = 311111 - 10000 - (3840 / 2);
+//  var minY = 338360 - 10000 - (2160 / 2);
+//  var maxX = 311111 + 10000 + (3840 / 2) + 260 * 3840;
+//  var maxY = 338360 + 10000 + (2160 / 2);
+
+Protocol.prototype.isInsideSpawnArea = function isInsideSpawnArea (satObject) {
+	var minX = 299191;
+	var minY = 327280;
+	var maxX = 1321431;
+	var maxY = 349440;
+	
+	var satBox = new SAT.Polygon(new SAT.Vector(), [
+		new SAT.Vector(minX, minY),
+		new SAT.Vector(maxX, minY),
+		new SAT.Vector(maxX, maxY),
+		new SAT.Vector(minX, maxY),
+	]);
+	
+	if (satObjects[k].r) {
+		return SAT.testPolygonCircle(satBox, satObject);
+	} else {
+		return SAT.testPolygonPolygon(satBox, satObject);
+	}
+};
+
+//  var minX = 311111 - (3840 / 2);
+//  var minY = 338360 - (2160 / 2);
+//  var maxX = 311111 + (3840 / 2) + (weeks - 1) * 3840;
+//  var maxY = 338360 + (2160 / 2);
+
+Protocol.prototype.isInsideOldSpawn = function isInsideOldSpawn (satObject) {
+	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
+	if (weeks == 0) weeks = 1;
+	
+	var minX = 309191;
+	var minY = 337280;
+	var maxX = minX + (weeks - 1) * 3840;
+	var maxY = 339440;
+	
+	var satBox = new SAT.Polygon(new SAT.Vector(), [
+		new SAT.Vector(minX, minY),
+		new SAT.Vector(maxX, minY),
+		new SAT.Vector(maxX, maxY),
+		new SAT.Vector(minX, maxY),
+	]);
+	
+	if (satObjects[k].r) {
+		return SAT.testPolygonCircle(satBox, satObject);
+	} else {
+		return SAT.testPolygonPolygon(satBox, satObject);
+	}
+};
+
+Protocol.prototype.isInsideNextSpawn = function isInsideOldSpawn (satObject) {
+	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
+	
+	var minX = 309191 + weeks * 3840;
+	var minY = 337280;
+	var maxX = 1321431;
+	var maxY = 339440;
+	
+	var satBox = new SAT.Polygon(new SAT.Vector(), [
+		new SAT.Vector(minX, minY),
+		new SAT.Vector(maxX, minY),
+		new SAT.Vector(maxX, maxY),
+		new SAT.Vector(minX, maxY),
+	]);
+	
+	if (satObjects[k].r) {
+		return SAT.testPolygonCircle(satBox, satObject);
+	} else {
+		return SAT.testPolygonPolygon(satBox, satObject);
+	}
+};
+
+Protocol.prototype.isInsideCurrentSpawn = function isInsideCurrentSpawn (satObject) {
+	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
+	
+	var minX = 309191 + (weeks - 1) * 3840;
+	var minY = 337280;
+	var maxX = minX + 3840;
+	var maxY = 339440;
+	
+	var satBox = new SAT.Polygon(new SAT.Vector(), [
+		new SAT.Vector(minX, minY),
+		new SAT.Vector(maxX, minY),
+		new SAT.Vector(maxX, maxY),
+		new SAT.Vector(minX, maxY),
+	]);
+	
+	if (satObjects[k].r) {
+		return SAT.testPolygonCircle(satBox, satObject);
+	} else {
+		return SAT.testPolygonPolygon(satBox, satObject);
+	}
+};
+
+Protocol.prototype.isInSpawnRegion = function isInSpawnRegion (satObjects) {
+	var spawnInfo = {
+		inSpawnArea: false,			// Should become true if at least one object is inside spawn area
+		oldSpawn: false,			// Should become true if at least one object is inside the old spawn
+		currentSpawn: false			// Should only be true if all objects are inside the current spawn
+		inNextSpawn: false          // Should become true if at least one object is inside the next spawn
+	};
+
+	for (var k = 0; k < satObjects.length; k++) {
+		spawnInfo.inSpawnArea = spawnInfo.inSpawnArea || this.isInsideSpawnArea(satObjects[k]);
+		spawnInfo.oldSpawn = spawnInfo.oldSpawn || this.isInsideOldSpawn(satObjects[k]);
+		if (k == 0 || spawnInfo.currentSpawn) spawnInfo.currentSpawn = this.isInsideCurrentSpawn(satObjects[k]);
+		spawnInfo.inNextSpawn = spawnInfo.inNextSpawn || this.isInsideNextSpawn(satObjects[k]);
+	}
+	
+	return spawnInfo;
+};
+
+/*
+	Returns {
+		isAllowed: bool,
+		minRepAllowed: Number,
+		regionid: NUMBER,
+		ownerid: NUMBER,
+		name: NUMBER,
+		inSpawnArea: BOOL,		// Close to spawn
+		oldSpawn: BOOL,			// In an old spawn
+		currentSpawn: BOOL		// In the current spawn
+	}
+*/
 Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (reputation, user, satObjects, room) {
 	if (!this.protectedRegions[room]) return {isAllowed: true};
+	
+	if (room.indexOf("main") == 0) {
+		var spawnInfo = this.isInSpawnRegion(satObjects);
+		if (spawnInfo.inSpawnArea) {
+			return spawnInfo;
+		}
+	}
 
 	for (var k = 0; k < satObjects.length; k++) {
 		var searchRegion = this.getRegionSearchFromSat(satObjects[k]);
@@ -895,6 +1038,28 @@ Protocol.prototype.bindIO = function bindIO () {
 				);
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
+			
+			if (regionData.inSpawnArea) {
+				if (regionData.oldSpawn) {
+					protocol.informClient(socket, "This spawn has been saved and will remain like this for all eternity, go right for the new spawn.");
+					callback(regionData);
+					return;
+				} else if (regionData.currentSpawn) {
+					if ((!socket.reputation || socket.reputation < SPAWN_MIN_REP)) {
+						protocol.informClient(socket, "The spawn area requires at least " + SPAWN_MIN_REP + " reputation to draw in it. Use the random jump button to find an empty spot!");
+						callback(regionData);
+						return;
+					}
+				} else if (regionData.inNextSpawn) {
+					protocol.informClient(socket, "This area will become the spawn area in the future.");
+					callback(regionData);
+					return;
+				} else {
+					protocol.informClient(socket, "Too close to the spawns, use the random jump button to find an empty spot.");
+					callback(regionData);
+					return;
+				}
+			}
 
 			if (!regionData.isAllowed) {
 				protocol.informClient(socket, "This region is protected!");

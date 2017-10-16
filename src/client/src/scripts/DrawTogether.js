@@ -673,6 +673,18 @@ DrawTogether.prototype.displayTip = function displayTip () {
 	this.chat.addMessage(tips[Math.floor(Math.random() * tips.length)]);
 };
 
+// Get the current spawn point for a given room
+DrawTogether.prototype.getSpawn = function getSpawn (room) {
+	if (room.indexOf("main") !== 0) return [0, 0];
+	
+	var base = [311111, 338360];
+	var baseTime = 1508155169891;
+	var weeks = Math.floor((Date.now() - baseTime) / (2 * 7 * 24 * 60 * 60 * 1000));
+	var width = 3840;
+	
+	return [base[0] + weeks * width, base[1]];
+};
+
 // Try to change the room
 // We will change it to the first parameter, if thta doesn't work we will go to
 // room + number where number starts at 1 and raises with 1 for every full room
@@ -708,7 +720,8 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.setRoom(room + number);
 
 			this.paint.clear();
-			this.handleGoto(x || 0, y || 0);
+			var spawn = this.getSpawn(room + number);
+			this.handleGotoAndCenter(x || spawn[0], y || spawn[1]);
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
@@ -3259,14 +3272,13 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 
 	var inkContainer = infoContainer.appendChild(document.createElement("div"));
 	inkContainer.className = "drawtogether-ink-container";
-	inkContainer.setAttribute("data-intro", "Here you can see how much ink you have left. Drawing uses ink and once you hit 0 you can no longer draw.");
+	inkContainer.setAttribute("data-intro", "You can only draw if you have ink. You will slowly get more ink. Creating an account gives you more ink.");
 
 	this.inkDom = inkContainer.appendChild(document.createElement("div"));
 	this.inkDom.className = "drawtogether-ink";
 
 	this.playerListDom = infoContainer.appendChild(document.createElement("div"));
 	this.playerListDom.className = "drawtogether-info-playerlist";
-	this.playerListDom.setAttribute("data-intro", "Here is a list of people currently in the room. If you want to watch them you can click their name. The eye icon can be used as a stalker mode.");
 
 	var snapper = new Snap({
 		element: infoContainer,
@@ -4915,12 +4927,10 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	var p = container.appendChild(document.createElement("p"));
 	if (!this.account.uKey) {
 		html = "You should first login!";
-	} else if (this.memberlevel == 1) {
-		html = "Thank you for supporting us!";
 	} else {
-		var html = 'You are paying for the account: ' + this.account.mail + ' <br/><br/>';
+		var html = 'You are paying for the account: ' + this.account.mail + ' <br/>Want to gift one? Just send an email to info@anondraw.com<br/><br/>';
 
-		    html += 'This takes up to 1 day to confirm. If it takes longer contact premium@squarific.com <br/><br/>';
+		    html += 'This takes up to 1 day to confirm. If it takes longer contact info@anondraw.com <br/><br/>';
 		 
 		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">';
 	    	html +=	'<input type="hidden" name="cmd" value="_s-xclick">';
@@ -4951,9 +4961,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 };
 
 DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
-	var welcomeWindow = this.gui.createWindow({ title: "Welcome!", onclose: function () {
-		this.userSettings.setBoolean("Show welcome", false, true);
-	}.bind(this)});
+	var welcomeWindow = this.gui.createWindow({ title: "Welcome!" });
 	welcomeWindow.classList.add("welcome-window");
 
 	var container = welcomeWindow.appendChild(document.createElement("div"))
@@ -4997,19 +5005,9 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 		}.bind(this))
 		.oncomplete(function () {
 			ga("send", "event", "tutorial", "complete");
-			this.openWelcomeWindow();
+			this.userSettings.setBoolean("Show welcome", false, true);
 		}.bind(this))
 		.start();
-	}.bind(this));
-
-	var close = container.appendChild(document.createElement("div"));
-	close.appendChild(document.createTextNode("Close welcome window"))
-	close.className = "drawtogether-button drawtogether-close-button";
-	close.addEventListener("click", function () {
-		if (welcomeWindow.parentNode)
-			welcomeWindow.parentNode.removeChild(welcomeWindow);
-
-		this.userSettings.setBoolean("Show welcome", false, true);
 	}.bind(this));
 };
 
@@ -5261,20 +5259,14 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		value: "",
 		text: "Home",
 		title: "Go to the home screen",
-		action: this.openModeSelector.bind(this),
-		data: {
-			intro: "Use this to return to the FAQ and mode selection."
-		}
+		action: this.openModeSelector.bind(this)
 	}, {
 		name: "toggle-view",
 		type: "button",
 		value: "",
 		text: "Auto Camera",
 		title: "Toggle the camera to follow where people are drawing.",
-		action: this.toggleFollow.bind(this),
-		data: {
-			intro: "This button toggles auto view, in auto view mode the camera will switch between everyone who is drawing."
-		}
+		action: this.toggleFollow.bind(this)
 	}, {
 		name: "name",
 		type: "text",
@@ -5289,10 +5281,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "room-button",
 		type: "button",
 		text: "Room",
-		action: this.openRoomWindow.bind(this),
-		data: {
-			intro: "Click here if you want to change the room."
-		}
+		action: this.openRoomWindow.bind(this)
 	}, {
 		name: "share-button",
 		type: "button",
@@ -5302,10 +5291,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "settings",
 		type: "button",
 		text: "Settings",
-		action: this.openSettingsWindow.bind(this),
-		data: {
-			intro: "In this window you can mute the chat, hide tips and open the advanced settings window where you can rotate and mirror the canvas."
-		}
+		action: this.openSettingsWindow.bind(this)
 	}];
 
 	if (location.toString().indexOf("kongregate") == -1) {
@@ -5313,10 +5299,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 			name: "account",
 			type: "button",
 			text: "Account",
-			action: this.openAccountWindow.bind(this),
-			data: {
-				intro: "Creating an account gives you the option to earn reputation. Reputation gives certain benefits like bigger brushes, drawing while zoomed out, member room access, banning, ..."
-			}
+			action: this.openAccountWindow.bind(this)
 		});
 	}
 
@@ -5324,10 +5307,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "discord",
 		type: "button",
 		text: "Discord chat",
-		action: this.openDiscordWindow.bind(this),
-		data: {
-			intro: "We also have a voice chat using discord!"
-		}
+		action: this.openDiscordWindow.bind(this)
 	});
 
 	return buttonList;
