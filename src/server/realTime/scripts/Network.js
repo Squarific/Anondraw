@@ -316,7 +316,7 @@ Protocol.prototype.isInsideOldSpawn = function isInsideOldSpawn (satObject) {
 Protocol.prototype.isInsideNextSpawn = function isInsideOldSpawn (satObject) {
 	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
 	
-	var minX = 309191 + weeks * 3840;
+	var minX = 309191 + (weeks + 1) * 3840;
 	var minY = 337280;
 	var maxX = 1321431;
 	var maxY = 339440;
@@ -338,7 +338,7 @@ Protocol.prototype.isInsideNextSpawn = function isInsideOldSpawn (satObject) {
 Protocol.prototype.isInsideCurrentSpawn = function isInsideCurrentSpawn (satObject) {
 	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
 	
-	var minX = 309191 + (weeks - 1) * 3840;
+	var minX = 309191 + weeks * 3840;
 	var minY = 337280;
 	var maxX = minX + 3840;
 	var maxY = 339440;
@@ -361,14 +361,14 @@ Protocol.prototype.isInSpawnRegion = function isInSpawnRegion (satObjects) {
 	var spawnInfo = {
 		inSpawnArea: false,			// Should become true if at least one object is inside spawn area
 		oldSpawn: false,			// Should become true if at least one object is inside the old spawn
-		currentSpawn: false,			// Should only be true if all objects are inside the current spawn
+		currentSpawn: false,		// Should only be true if all objects are inside the current spawn
 		inNextSpawn: false          // Should become true if at least one object is inside the next spawn
 	};
 
 	for (var k = 0; k < satObjects.length; k++) {
 		spawnInfo.inSpawnArea = spawnInfo.inSpawnArea || this.isInsideSpawnArea(satObjects[k]);
 		spawnInfo.oldSpawn = spawnInfo.oldSpawn || this.isInsideOldSpawn(satObjects[k]);
-		if (k == 0 || spawnInfo.currentSpawn) spawnInfo.currentSpawn = this.isInsideCurrentSpawn(satObjects[k]);
+		spawnInfo.currentSpawn = (k == 0 || spawnInfo.currentSpawn) && this.isInsideCurrentSpawn(satObjects[k]);
 		spawnInfo.inNextSpawn = spawnInfo.inNextSpawn || this.isInsideNextSpawn(satObjects[k]);
 	}
 	
@@ -393,7 +393,6 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 	if (room.indexOf("main") == 0) {
 		var spawnInfo = this.isInSpawnRegion(satObjects);
 		if (spawnInfo.inSpawnArea) {
-			console.log(spawnInfo);
 			return spawnInfo;
 		}
 	}
