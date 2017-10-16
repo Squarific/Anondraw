@@ -1039,7 +1039,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				);
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
-			console.log("Region data", regionData);
+			
 			if (regionData.inSpawnArea) {
 				if (regionData.oldSpawn) {
 					protocol.informClient(socket, "This spawn has been saved and will remain like this for all eternity, go right for the new spawn.");
@@ -1161,7 +1161,27 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
 
-			if (!regionData.isAllowed) {
+			if (regionData.inSpawnArea) {
+				if (regionData.oldSpawn) {
+					protocol.informClient(socket, "This spawn has been saved and will remain like this for all eternity, go right for the new spawn.");
+					callback(regionData);
+					return;
+				} else if (regionData.currentSpawn) {
+					if ((!socket.reputation || socket.reputation < SPAWN_MIN_REP)) {
+						protocol.informClient(socket, "The spawn area requires at least " + SPAWN_MIN_REP + " reputation to draw in it. Use the random jump button to find an empty spot!");
+						callback(regionData);
+						return;
+					}
+				} else if (regionData.inNextSpawn) {
+					protocol.informClient(socket, "This area will become the spawn area in the future.");
+					callback(regionData);
+					return;
+				} else {
+					protocol.informClient(socket, "Too close to the spawns, use the random jump button to find an empty spot.");
+					callback(regionData);
+					return;
+				}
+			} else if (!regionData.isAllowed) {
 				protocol.informClient(socket, "This region is protected!");
 				callback(regionData);
 				return;
