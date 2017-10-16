@@ -393,6 +393,7 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 	if (room.indexOf("main") == 0) {
 		var spawnInfo = this.isInSpawnRegion(satObjects);
 		if (spawnInfo.inSpawnArea) {
+			console.log(spawnInfo);
 			return spawnInfo;
 		}
 	}
@@ -1038,7 +1039,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				);
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
-			
+			console.log("Region data", regionData);
 			if (regionData.inSpawnArea) {
 				if (regionData.oldSpawn) {
 					protocol.informClient(socket, "This spawn has been saved and will remain like this for all eternity, go right for the new spawn.");
