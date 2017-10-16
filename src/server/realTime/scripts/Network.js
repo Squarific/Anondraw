@@ -292,11 +292,11 @@ Protocol.prototype.isInsideSpawnArea = function isInsideSpawnArea (satObject) {
 
 Protocol.prototype.isInsideOldSpawn = function isInsideOldSpawn (satObject) {
 	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
-	if (weeks == 0) weeks = 1;
+	if (weeks == 0) return false;
 	
 	var minX = 309191;
 	var minY = 337280;
-	var maxX = minX + (weeks - 1) * 3840;
+	var maxX = minX + weeks * 3840;
 	var maxY = 339440;
 	
 	var satBox = new SAT.Polygon(new SAT.Vector(), [
@@ -1131,7 +1131,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					protocol.informClient(socket, "You don't have permission for this room. Ask the owner to grant it to you.");
 					socket.lastNoUserPermissionWarning = Date.now();
 				}
-				callback();
+				callback(false);
 				return;
 			}
 
@@ -1141,7 +1141,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			if (protocol.gameRooms[socket.room] && protocol.gameRooms[socket.room].currentPlayer !== socket) {
-				callback();
+				callback(false);
 				protocol.informClient(socket, "Not your turn!");
 				return;
 			}
@@ -1150,7 +1150,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.firstPathPoint = point;
 			} else {
 				if (protocol.utils.distance(point[0], point[1], socket.firstPathPoint[0], socket.firstPathPoint[1]) > MAX_DISTANCE_FROM_LINE_START) {
-					callback();
+					callback(false);
 					protocol.informClient(socket, "PATH TOO FAR FROM STARTPOINT");
 					return;
 				}
@@ -1202,7 +1202,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			
 			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * (socket.reputation || 1)) {
 				protocol.informClient(socket, "Something went wrong. (#PPTF)");
-				callback();
+				callback(false);
 				return;
 			}
 
