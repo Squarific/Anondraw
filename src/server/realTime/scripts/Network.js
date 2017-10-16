@@ -361,7 +361,7 @@ Protocol.prototype.isInSpawnRegion = function isInSpawnRegion (satObjects) {
 	var spawnInfo = {
 		inSpawnArea: false,			// Should become true if at least one object is inside spawn area
 		oldSpawn: false,			// Should become true if at least one object is inside the old spawn
-		currentSpawn: false			// Should only be true if all objects are inside the current spawn
+		currentSpawn: false,			// Should only be true if all objects are inside the current spawn
 		inNextSpawn: false          // Should become true if at least one object is inside the next spawn
 	};
 
