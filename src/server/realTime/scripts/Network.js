@@ -278,7 +278,7 @@ Protocol.prototype.isInsideSpawnArea = function isInsideSpawnArea (satObject) {
 		new SAT.Vector(minX, maxY),
 	]);
 	
-	if (satObjects[k].r) {
+	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
 		return SAT.testPolygonPolygon(satBox, satObject);
@@ -306,7 +306,7 @@ Protocol.prototype.isInsideOldSpawn = function isInsideOldSpawn (satObject) {
 		new SAT.Vector(minX, maxY),
 	]);
 	
-	if (satObjects[k].r) {
+	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
 		return SAT.testPolygonPolygon(satBox, satObject);
@@ -328,7 +328,7 @@ Protocol.prototype.isInsideNextSpawn = function isInsideOldSpawn (satObject) {
 		new SAT.Vector(minX, maxY),
 	]);
 	
-	if (satObjects[k].r) {
+	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
 		return SAT.testPolygonPolygon(satBox, satObject);
@@ -350,7 +350,7 @@ Protocol.prototype.isInsideCurrentSpawn = function isInsideCurrentSpawn (satObje
 		new SAT.Vector(minX, maxY),
 	]);
 	
-	if (satObjects[k].r) {
+	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
 		return SAT.testPolygonPolygon(satBox, satObject);
