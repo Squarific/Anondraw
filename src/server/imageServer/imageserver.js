@@ -100,10 +100,21 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 		}
 		
 		if (parsedUrl.pathname == "/tiles") {
+			var room = parsedUrl.query.room;
+			
 			res.writeHead(200, {
 				"Access-Control-Allow-Origin": "*",
 				"Content-Type": "application/json"
 			});
+			
+			if (!room_regex.test(room)) {
+				res.writeHead(200, {
+					"Access-Control-Allow-Origin": "*",
+					"Content-Type": "image/png"
+				});
+				res.end(transparentBytes);
+				return;
+			}
 			
 			fs.readdir("./images/" + room, function (err, items) {
 				if (err) {
