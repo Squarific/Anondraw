@@ -108,11 +108,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 			});
 			
 			if (!room_regex.test(room)) {
-				res.writeHead(200, {
-					"Access-Control-Allow-Origin": "*",
-					"Content-Type": "image/png"
-				});
-				res.end(transparentBytes);
+				res.end(JSON.stringify({ err: "The room should only contain lowercase alphanumeric characters and _" }));
 				return;
 			}
 			
