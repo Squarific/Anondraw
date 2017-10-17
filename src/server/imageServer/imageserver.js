@@ -98,6 +98,33 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 			});
 			return;
 		}
+		
+		if (parsedUrl.pathname == "/tiles") {
+			res.writeHead(200, {
+				"Access-Control-Allow-Origin": "*",
+				"Content-Type": "application/json"
+			});
+			
+			fs.readdir("./images/" + room, function (err, items) {
+				if (err) {
+					console.log("Readdir failed on room", room, err);
+					res.end(JSON.stringify({ err: "Could not load tiles." }));
+					return;
+				}
+				
+				var tiles = [];
+				for (var k = 0; k < items.length; k++) {
+					tiles.push(items[k].replace(".png", ""));
+				}
+				
+				res.end(JSON.stringify({
+					err: null,
+					tiles: tiles
+				}));
+			});
+			
+			return;
+		}
 
 		if (parsedUrl.pathname == "/drawings") {
 			res.writeHead(200, {
