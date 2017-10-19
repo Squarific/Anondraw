@@ -113,7 +113,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 			}
 			
 			fs.readdir("./images/" + room, function (err, items) {
-				if (err.code == "ENOENT") {
+				if (err && err.code == "ENOENT") {
 					res.end(JSON.stringify({
 						err: null,
 						tiles: []
