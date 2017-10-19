@@ -18,6 +18,17 @@
 	background: rgba(0, 0, 0, 0.1);
 }
 
+.roomTileCanvas canvas {
+	width:500px;
+	height:300px;
+	background-image: url(images/transparent.png);
+    background-size: 20px;
+}
+
+.roomTileCanvas .status {
+	margin-bottom: 1em;
+}
+
 .exportwindow img {
   max-width:12em;
   max-height:12em;
@@ -56,7 +67,7 @@
 
 .gui-window {
   position: fixed;
-  left: 50px;
+  left: 100px;
   top: 150px;
   z-index: 150;
   background: #ddd;

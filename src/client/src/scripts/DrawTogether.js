@@ -1572,7 +1572,6 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		}
 	}.bind(this));
 
-
 	var regionsButtonImage = regionsButton.appendChild(document.createElement("img"));
 	regionsButtonImage.src = "images/icons/pregion.png";
 	regionsButtonImage.alt = "Open Regions Menu";
@@ -1593,24 +1592,39 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	animationsButton.addEventListener("click", this.toggleAnimationManager.bind(this));
 
 	var animationButtonImage = animationsButton.appendChild(document.createElement("img"));
-	animationButtonImage.src = "images/icons/animations.png";
+	animationButtonImage.src = "images/icons/frames.png";
 	animationButtonImage.alt = "Open Animation Manager";
 	animationButtonImage.title = "Open Animation Manager";
 	
 	this.createAnimationManager();
-	/*
-	// Frames button
-	var framesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
-	framesButton.className = "control-button frames-button";
-	framesButton.addEventListener("click", this.toggleFramesManager.bind(this));
-
-	var framesButtonImage = framesButton.appendChild(document.createElement("img"));
-	framesButtonImage.src = "images/icons/frames.png";
-	framesButtonImage.alt = "Open Frames Manager";
-	framesButtonImage.title = "Open Frames Manager";
 	
-	this.createFramesManager();
-	*/
+	var mapButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	mapButton.className = "control-button tilesmap-button";
+	mapButton.addEventListener("click", this.openTilesMap.bind(this));
+
+	var mapButtonImage = mapButton.appendChild(document.createElement("img"));
+	mapButtonImage.src = "images/icons/map.png";
+	mapButtonImage.alt = "Open the tile map";
+	mapButtonImage.title = "Open the tile map";
+};
+
+DrawTogether.prototype.openTilesMap = function openTilesMap () {
+	var tileWindow = this.gui.createWindow({ title: "TileMap for room " + this.current_room });
+	
+	var content = tileWindow.appendChild(document.createElement("div"));
+	content.classList.add("content");
+	
+	var canvas = new RoomTileCanvas(this.settings.imageServer, this.current_room, this.favList);
+	var mapCanvas = content.appendChild(canvas.container);
+	canvas.resize();
+	canvas.addEventListener("click", function (event) {
+		this.handleGotoAndCenter(event.position[0], event.position[1]);
+	}.bind(this));
+	
+	canvas.tiledCanvas.goto(
+		this.paint.public.leftTopX / this.paint.public.settings.chunkSize * canvas.settings.tileSize,
+		this.paint.public.leftTopY / this.paint.public.settings.chunkSize * canvas.settings.tileSize
+	);
 };
 
 DrawTogether.prototype.createFramesManager = function createFramesManager () {
