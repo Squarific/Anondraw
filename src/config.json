@@ -1,7 +1,7 @@
 {
     "service": {
         "image": {
-            "host": "direct.anondraw.com",
+            "host": "beta.anondraw.com",
             "port": 5552,
             "password": {
                 "draw":"draw password"
