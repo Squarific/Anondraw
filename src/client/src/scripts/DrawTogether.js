@@ -1614,7 +1614,7 @@ DrawTogether.prototype.openTilesMap = function openTilesMap () {
 	var content = tileWindow.appendChild(document.createElement("div"));
 	content.classList.add("content");
 	
-	var canvas = new RoomTileCanvas(this.settings.imageServer, this.current_room, this.favList);
+	var canvas = new RoomTileCanvas(this.favList);
 	var mapCanvas = content.appendChild(canvas.container);
 	canvas.resize();
 	canvas.addEventListener("click", function (event) {
@@ -1625,6 +1625,17 @@ DrawTogether.prototype.openTilesMap = function openTilesMap () {
 		this.paint.public.leftTopX / this.paint.public.settings.chunkSize * canvas.settings.tileSize,
 		this.paint.public.leftTopY / this.paint.public.settings.chunkSize * canvas.settings.tileSize
 	);
+	
+	this.tiles = this.tiles || {};
+	if (this.tiles[this.current_room]) {
+		canvas.useTiles(this.tiles[this.current_room]);
+	} else {
+		var room = this.current_room;
+		canvas.requestData(this.settings.imageServer, room);
+		canvas.callbacks.push(function () {
+			this.tiles[room] = canvas.tiles;
+		}.bind(this));
+	}
 };
 
 DrawTogether.prototype.createFramesManager = function createFramesManager () {

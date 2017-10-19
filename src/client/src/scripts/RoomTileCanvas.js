@@ -3,9 +3,11 @@
 		'click': {
 			position: [Number, Number] //[x, y] in real world coords
 		}
+	
+	Call this.requestData(server, room); to start or this.useTiles();
 */
 
-function RoomTileCanvas (server, room, favList, settings) {
+function RoomTileCanvas (favList, settings) {
 	this.container = document.createElement("div");
 	
 	this.container.classList.add("roomTileCanvas");
@@ -37,8 +39,6 @@ function RoomTileCanvas (server, room, favList, settings) {
 	document.addEventListener("touchmove", this.drag.bind(this));
 	document.addEventListener("touchend", this.stopDrag.bind(this));
 	document.addEventListener("wheel", this.wheel.bind(this));
-	
-	this.requestData(server, room);
 }
 
 RoomTileCanvas.prototype.drawFavList = function drawFavList () {
@@ -274,6 +274,13 @@ RoomTileCanvas.prototype.requestData = function requestData (server, room) {
 
 	req.open("GET", url);
 	req.send();
+};
+
+RoomTileCanvas.prototype.useTiles (tiles) {
+	this.displayError("Drag to move, click to teleport, scrollwheel to zoom.");
+	this.tiles = tiles;
+	this.drawFavList();
+	this.start();
 };
 
 /**
