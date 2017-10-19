@@ -276,7 +276,7 @@ RoomTileCanvas.prototype.requestData = function requestData (server, room) {
 	req.send();
 };
 
-RoomTileCanvas.prototype.useTiles (tiles) {
+RoomTileCanvas.prototype.useTiles = function useTiles (tiles) {
 	this.displayError("Drag to move, click to teleport, scrollwheel to zoom.");
 	this.tiles = tiles;
 	this.drawFavList();
