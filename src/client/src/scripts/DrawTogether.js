@@ -1525,6 +1525,19 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.changeTool("grab");
 	
+	//Spawn button 
+	var spawnButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	spawnButton.className = "control-button spawn-button";
+	
+	var spawnButtonImage = spawnButton.appendChild(document.createElement("img"));
+	spawnButtonImage.src = "images/icons/home.png";
+	spawnButtonImage.alt = "Goto spawn";
+	spawnButtonImage.title = "Goto spawn";
+	spawnButton.addEventListener("click", function () {
+		var spawn = this.getSpawn(this.current_room);
+		this.handleGotoAndCenter(spawn[0], spawn[1]);
+	}.bind(this));
+	
 	//Favorites button 
 	var favoritesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	favoritesButton.className = "control-button favorites-button";

@@ -70,7 +70,9 @@ RoomTileCanvas.prototype.drawFavList = function drawFavList () {
 RoomTileCanvas.prototype.wheel = function wheel (event) {
 	if (event.target === this.tiledCanvas.canvas) {
 		// I'm assuming deltaY is 100 or -100
-		this.tiledCanvas.relativeZoom(1 - (event.deltaY / 1000));
+		var coords = this.getCoords(event, this.tiledCanvas.canvas);
+		this.tiledCanvas.relativeZoom(1 - (event.deltaY / 1000), coords[0], coords[1]);
+		if (this.tiledCanvas.zoom < 0.1) this.tiledCanvas.absoluteZoom(0.1, coords[0], coords[1]);
 	}
 };
 
