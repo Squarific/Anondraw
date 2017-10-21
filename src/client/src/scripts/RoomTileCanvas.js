@@ -82,6 +82,7 @@ RoomTileCanvas.prototype.startDrag = function startDrage (event) {
 	var coords = this.getCoords(event, this.tiledCanvas.canvas);
 	
 	this.startCoords = coords;
+	this.moved = false;
 };
 
 RoomTileCanvas.prototype.drag = function drag (event) {
@@ -89,13 +90,17 @@ RoomTileCanvas.prototype.drag = function drag (event) {
 	event.preventDefault();
 	var coords = this.getCoords(event, this.tiledCanvas.canvas);
 	
-	this.tiledCanvas.goto(
-		this.tiledCanvas.leftTopX + ((this.startCoords[0] - coords[0]) / this.tiledCanvas.zoom),
-		this.tiledCanvas.leftTopY + ((this.startCoords[1] - coords[1]) / this.tiledCanvas.zoom)
-	);
+	if (this.startCoords[0] - coords[0] > 0 ||
+	    this.startCoords[1] - coords[1] > 0) {
 	
-	this.startCoords = coords;
-	this.moved = true;
+		this.tiledCanvas.goto(
+			this.tiledCanvas.leftTopX + ((this.startCoords[0] - coords[0]) / this.tiledCanvas.zoom),
+			this.tiledCanvas.leftTopY + ((this.startCoords[1] - coords[1]) / this.tiledCanvas.zoom)
+		);
+		
+		this.startCoords = coords;
+		this.moved = true;
+	}
 };
 
 RoomTileCanvas.prototype.stopDrag = function stopDrag (event) {	
@@ -110,7 +115,7 @@ RoomTileCanvas.prototype.stopDrag = function stopDrag (event) {
 		});
 	}
 	delete this.startCoords;
-	delete this.moved;
+	this.moved = false;
 };
 
 RoomTileCanvas.prototype.getCoords = function getCoords (event, forceTarget) {
