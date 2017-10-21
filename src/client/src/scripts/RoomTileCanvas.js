@@ -90,8 +90,8 @@ RoomTileCanvas.prototype.drag = function drag (event) {
 	event.preventDefault();
 	var coords = this.getCoords(event, this.tiledCanvas.canvas);
 	
-	if (this.startCoords[0] - coords[0] > 0 ||
-	    this.startCoords[1] - coords[1] > 0) {
+	if (this.startCoords[0] - coords[0] !== 0 ||
+	    this.startCoords[1] - coords[1] !== 0) {
 	
 		this.tiledCanvas.goto(
 			this.tiledCanvas.leftTopX + ((this.startCoords[0] - coords[0]) / this.tiledCanvas.zoom),
