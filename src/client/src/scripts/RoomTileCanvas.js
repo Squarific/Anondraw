@@ -203,7 +203,7 @@ RoomTileCanvas.prototype.requestChunk = function requestChunk (x, y, callback) {
 	canvas.height = this.tiledCanvas.settings.chunkSize;
 	
 	var ctx = canvas.getContext("2d");
-	ctx.fillStyle = this.settings.tileColor;
+	
 	
 	var minX = Math.floor(x * this.tiledCanvas.settings.chunkSize / this.settings.tileSize);
 	var minY = Math.floor(y * this.tiledCanvas.settings.chunkSize / this.settings.tileSize);
@@ -223,7 +223,13 @@ RoomTileCanvas.prototype.requestChunk = function requestChunk (x, y, callback) {
 		}
 	}
 	
+	ctx.fillStyle = this.settings.tileColor;
 	ctx.fill();
+	
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = "black";
+	ctx.stroke();
+	
 	callback(canvas);
 };
 
