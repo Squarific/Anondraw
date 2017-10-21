@@ -850,7 +850,7 @@ input.paint-texttool {
   }
 }
 
-@media (max-width: 1175px) {
+@media (max-width: 750px) {
   .furjbqy {
     display:none;
   }
@@ -865,29 +865,70 @@ input.paint-texttool {
     bottom: auto; 
     overflow-x:hidden;
   }
+  
+ .fillParent {
+	 overflow:auto;
+ }
 
   .control-container .sp-replacer {
     margin:0 !important;
+	min-width:100%;
+	right:initial;
   }
+  
+	.collab-container.collab-container {
+		display: flex;
+		left:initial;
+		right:initial;
+		bottom:initial;
+		top:initial;
+		flex-direction: row;
+		height:100%;
+		background:#323e4a;
+	}
+  
+	.drawtogether-chat-container,
+	.drawtogether-info-container,
+	.drawtogether-paint-container,
+	.drawtogether-control-container {
+		position:relative;
+		left:initial;
+		right:initial;
+		bottom:0;
+		top:1em;
+		width:95vw;
+		width:calc(100vw - 5em);
+		height: calc(100vh - 1em) !important;
+	}
+	
+	.drawtogether-chat-container {
+		order:2;
+		height: calc(70vh - 1em) !important;
+		position: relative;
+		top: calc(30vh - -1em);
+	}
+	
+	.drawtogether-info-container {
+		order:2;
+	}
 
-  .drawtogether-info-container,
-  .drawtogether-chat-container {
-    z-index:125;
-    width:300px;
-    right:-275px;
-    -webkit-transition-duration: 0.1s;
-    -moz-transition-duration: 0.1s;
-    transition-duration: 0.1s;
-  }
+	.drawtogether-paint-container {
+		overflow:initial;
+		order:1;
+	}
 
-  .drawtogether-paint-container {
-    position:absolute;
-    width:auto;
-    height:100%;
-    top:0;
-    left:25px;
-    right:25px;
-  }
+	.drawtogether-control-container {
+		order:0;
+	}
+	
+	.mouse-coords.mouse-coords {
+		left:initial !important;
+		top:0;
+		right: calc(4em - 100vw) !important;
+		width: calc(100vw - 4em) !important;
+		z-index: 100;
+		height:30vh
+	}
 
   .control-container {
     border-radius:0 !important;
@@ -903,55 +944,44 @@ input.paint-texttool {
   }
 
   .drawtogether-control-container {
-    width:300px;
-    left:-275px;
     height: auto;
     background:white;
-    position:absolute;
-    top:0;
-    bottom:0;
     padding:0;
-    z-index:200;
     overflow-y:auto;
+	box-shadow: initial;
+	width:50vw;
+  }
+  
+  .drawtogether-control-container .control-text-input {
+      margin: .3rem .5em;
   }
 
   .drawtogether-chat-container,
   .drawtogether-info-container,
   .drawtogether-control-container {
     overflow-y: auto;
-    -webkit-transition-property: top, bottom;
-    transition-property: top, bottom;
-    -webkit-transition-duration: .1s, .1s;
-    transition-duration: .1s, .1s;
-    -webkit-transition-timing-function: linear, linear;
-    transition-timing-function: linear, linear;
-    -webkit-overflow-scrolling: touch;
   }
 
+  .drawtogether-control-container .control-text-input {
+	  margin: 0.1em;
+	  width:100%;
+	  width:calc(100% - 0.2em);
+  }
+  
   .drawtogether-control-container .control-button {
     display:block;
-    margin:0;
     padding:1em;
     border:none;
     height:initial;
     line-height:initial;
-    margin:0;
+    margin:0.1em;
     border-radius:0;
-    margin-bottom:0.1em;
-    width:90%;
   }
 
   .messagecontainer {
     margin-bottom: 3rem; }
-
-  .drawtogether-sharewindow {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: none; } 
 }
+
 .addthis_sharing_toolbox {
   float:right;
   margin:.3rem .5em 0;

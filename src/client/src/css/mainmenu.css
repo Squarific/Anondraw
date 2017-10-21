@@ -5,6 +5,7 @@
 	height:100%;
 	width:5em; /* Keep in sync with content-container */
 	overflow:hidden;
+	overflow-y:auto;
     text-shadow: -2px 2px 4px #111921;
 	z-index:400;
 }

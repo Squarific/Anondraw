@@ -1198,7 +1198,6 @@ DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (playe
 DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player " + (player.currentPlayer ? "currentplayer" : "");
-	playerDom.setAttribute("data-snap-ignore", "true");
 
 	playerDom.addEventListener("click", function (playerid, event) {
 		this.moveQueue.length = 0;
@@ -1361,16 +1360,6 @@ DrawTogether.prototype.createChat = function createChat () {
 	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings, this.emotesHash);
 	this.chatContainer = chatContainer;
 	this.chat.addMessage("Welcome to anondraw, the free interactive group drawing app.");
-
-	var snapper = new Snap({
-		element: chatContainer,
-		disable: "left",
-		minPosition: -275,
-		maxPosition: 0,
-		slideIntent: 40,
-		minDragDistance: 30,
-		tapToClose: false
-	});
 };
 
 DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
@@ -3317,16 +3306,6 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 
 	this.playerListDom = infoContainer.appendChild(document.createElement("div"));
 	this.playerListDom.className = "drawtogether-info-playerlist";
-
-	var snapper = new Snap({
-		element: infoContainer,
-		disable: "left",
-		minPosition: -275,
-		maxPosition: 0,
-		slideIntent: 40,
-		minDragDistance: 30,
-		tapToClose: false
-	});
 };
 
 DrawTogether.prototype.createGameInformation = function createGameInformation () {
@@ -4283,18 +4262,6 @@ DrawTogether.prototype.createControls = function createControls () {
 
 	var sharediv = controlContainer.appendChild(document.createElement("div"));
 	sharediv.className = "addthis_sharing_toolbox";
-
-	for (var name in this.controls.byName) {
-		this.controls.byName[name].input.setAttribute("data-snap-ignore", "true");
-	}
-
-	var snapper = new Snap({
-		element: controlContainer,
-		disable: "right",
-		minPosition: 0,
-		maxPosition: 275,
-		slideIntent: 40
-	});
 };
 
 DrawTogether.prototype.formLogin = function formLogin () {
