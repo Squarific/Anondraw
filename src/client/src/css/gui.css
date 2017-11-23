@@ -130,8 +130,32 @@
   max-height: calc(100vh - 7em - 100px);
 }
 
+.premiumwindow {
+	max-width:120em;
+}
+
+.premiumwindow .label {
+	display:inline-block;
+	min-width:6em;
+}
+
+.premiumwindow img {
+	height: 2em;
+    margin-right: 1em;
+	vertical-align: middle;
+}
+
+.premiumwindow li {
+	margin:0.2em;
+}
+
 .gui-window ol {
-  list-style-type:square;
+	list-style-type:square;
+}
+
+.premiumwindow ol {
+  list-style-type:none;
+  column-count: 3;
 }
 
 .gui-prompt-container {

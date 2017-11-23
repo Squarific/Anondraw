@@ -116,6 +116,7 @@ DrawTogether.prototype.IGNORE_INK_REP = 50;
 DrawTogether.prototype.MODERATORWELCOMEWINDOWOPENAFTER = 2 * 7 * 24 * 60 * 60 * 1000;
 DrawTogether.prototype.SCUTTLERS_MESSAGE_EVERY = 6 * 24 * 60 * 60 * 1000;
 DrawTogether.prototype.SUPPORT_MESSAGE_EVERY = 5 * 24 * 60 * 60 * 1000;
+DrawTogether.prototype.PREMIUM_WINDOW_EVERY = 2 * 7 * 24 * 60 * 60 * 1000;
 
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
@@ -585,6 +586,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	this.network.on("setmemberlevel", function (level) {
 		self.memberlevel = level;
 		console.log("We have memberlevel ", level);
+		localStorage.setItem("wasPremium", true);
 
 		if (self.memberlevel > 0 && !localStorage.getItem("buyreported")) {
 			goog_report_buy();
@@ -741,27 +743,22 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			// If we are new show the welcome window
 			if (this.userSettings.getBoolean("Show welcome")) {
 				this.openWelcomeWindow();
-			
-			// Lets check out the new sharing
-			} else if (!localStorage.getItem("new share")) {
-				localStorage.setItem("new share", true)
-				this.openExplainShareWindow();
 
 			// We are not new, check if we already saw all the awesome new features
 			} else if (parseInt(localStorage.getItem("newfeaturewindowversion")) !== this.CLIENT_VERSION) {
 				this.openNewFeatureWindow();
+			
+			// Premium window it is
+			} else if (!localStorage.getItem("wasPremium") && (!localStorage.getItem("premium_window")
+				|| Date.now() - parseInt(localStorage.getItem("premium_window")) > this.PREMIUM_WINDOW_EVERY)) {
+				localStorage.setItem("premium_window", Date.now());
+				this.openPremiumBuyWindow();
 			
 			// Ha lets just self promote scuttlers then
 			} else if (!localStorage.getItem("scuttlers_released")
 				|| Date.now() - parseInt(localStorage.getItem("scuttlers_released")) > this.SCUTTLERS_MESSAGE_EVERY) {
 				localStorage.setItem("scuttlers_released", Date.now());
 				this.createScuttlersOverlay();
-			
-			// Mmmm what else can we spam
-			} else if (!localStorage.getItem("bounty_window")
-				|| Date.now() - parseInt(localStorage.getItem("bounty_window")) > this.SUPPORT_MESSAGE_EVERY) {
-				localStorage.setItem("bounty_window", Date.now());
-				this.openBountyWindow();
 			}
 
 			this.removeLoading();
@@ -4901,43 +4898,55 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 
 DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	var premiumBuyWindow = this.gui.createWindow({ title: "Premium" });
-	
+	premiumBuyWindow.classList.add("premiumwindow");
 
 	var container = premiumBuyWindow.appendChild(document.createElement("div"))
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("Getting premium."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Anondraw runs on very expensive unicorn juice, for that we need your help!"));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Going premium costs 20 euro which will forever grant you extra features. It will also help us build new and better tools."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Current features:"));
-
+	title.appendChild(document.createTextNode("Support us: getting premium"));
+	
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Support icon", "Rainbow colored name", "20 reputation", "Private regions", "Save more than five favorites at once", "Add your own custom emote(subject to approval)"];
+	var features = [
+		{ icon: "star", feature: "Icon and rainbow name" },
+		{ icon: "emote", feature: "Your own custom emote" },
+		{ icon: "reputation", feature: "Get 20 reputations" },
+		{ icon: "give", feature: "Give reputation to anyone *" },
+		{ icon: "discover", feature: "Jump to a random drawing *" },
+		{ icon: "region", feature: "Unlimited regions" },
+		{ icon: "locations", feature: "Unlimited locations" },
+		{ icon: "map", feature: "Access to a minimap" },
+		{ icon: "ink", feature: "No ink usage" },
+		{ icon: "advanced", feature: "Rotate and mirror the canvas *" },
+		{ icon: "pressure", feature: "Pressure support*" },
+		{ icon: "redo", feature: "Redo feature *" },
+		{ icon: "import", feature: "Import tool *" },
+		{ icon: "copy", feature: "Copy paste *" },
+		{ icon: "layers", feature: "Layers *" },
+		{ icon: "brush", feature: "Custom brush *" }
+	];
+	
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
-		li.appendChild(document.createTextNode(features[k]));
+		var img = li.appendChild(document.createElement("img"));
+		img.src = "images/icons/premium/" + features[k].icon + ".png";
+		li.appendChild(document.createTextNode(features[k].feature));
 	}
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Have any premium feature ideas? Let us know!"));
+	
+	container.appendChild(document.createTextNode("* Coming soon"));
 
 	var p = container.appendChild(document.createElement("p"));
 	if (!this.account.uKey) {
 		html = "You should first login!";
 	} else {
-		var html = 'You are paying for the account: ' + this.account.mail + ' <br/>Want to gift one? Just send an email to info@anondraw.com<br/><br/>';
+		var html = '<span class="label">Account:</span> <strong>' + this.account.mail + '</strong><br/>';
 
-		    html += 'This takes up to 1 day to confirm. If it takes longer contact info@anondraw.com <br/><br/>';
+		html += '<span class="label">Price:</span> <strong>20 euro</strong><br/>';
+		html += '<span class="label">Duration:</span> <strong>Forever</strong><br/><br/>';
+		html += 'Usually confirmed withing 12 hours. Taking longer? Contact premium@anondraw.com <br/><br/>';
 		 
-		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">';
+		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="display:inline-block; margin-right:20%;">';
 	    	html +=	'<input type="hidden" name="cmd" value="_s-xclick">';
 	    	html += '<input type="hidden" name="hosted_button_id" value="RU7EGGG6RH4AG">';
 	    	html += '<table style="display:none;">';
@@ -4946,11 +4955,9 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	    	html += '<input type="image" style="margin-top:0.5em;" src="https://www.paypalobjects.com/en_US/BE/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">';
 	    	html += '<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">';
 	    html += '</form>';
-
-	    html += '<br/>';
 	    html += '<a class="coinbase-button" data-code="8be6985bf22cfd01ca0877cb6fb97249" data-button-style="custom_small" href="https://www.coinbase.com/checkouts/8be6985bf22cfd01ca0877cb6fb97249">Pay With Bitcoin</a>';
 
-	    html += '<br/>';
+	    html += '<br/><br/><br/>';
 	    html += 'Or via bank transfer: IBAN: BE59 0014 7710 8926<br/>';
 	    html += 'Be sure to include your username/email!<br/>';
 	    html += 'This might take a few days to clear, if you mail to premium@anondraw.com we will clear you faster.';
@@ -4966,7 +4973,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 };
 
 DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
-	var welcomeWindow = this.gui.createWindow({ title: "Welcome!" });
+	var welcomeWindow = this.gui.createWindow({ title: "Welcome!", close: false });
 	welcomeWindow.classList.add("welcome-window");
 
 	var container = welcomeWindow.appendChild(document.createElement("div"))
@@ -5278,10 +5285,10 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Username",
 		value: localStorage.getItem("drawtogether-name") || "",
 		title: "Change your name",
-		action: this.changeNameDelayed.bind(this),
+		action: this.changeNameDelayed.bind(this)/*,
 		data: {
 			intro: "This is your current guest name. Change this to something you like!"
-		}
+		}*/
 	}, {
 		name: "room-button",
 		type: "button",
@@ -5307,6 +5314,13 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 			action: this.openAccountWindow.bind(this)
 		});
 	}
+	
+	buttonList.push({
+		name: "premium",
+		type: "button",
+		text: "Premium",
+		action: this.openPremiumBuyWindow.bind(this)
+	});
 
 	buttonList.push({
 		name: "discord",
