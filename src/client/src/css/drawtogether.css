@@ -689,7 +689,7 @@ input.paint-texttool {
  */
 .drawtogether-control-container {
   height: 3rem;
-  overflow: hidden;
+  overflow: auto;
   box-shadow: 0 0 .5em #000; }
   .drawtogether-control-container .control-button,
   .drawtogether-control-container .control-text-input {
@@ -1025,17 +1025,17 @@ input.paint-texttool {
 
 .fav-move-button {
 	display: inline-block;
-	min-width: 0px;
+	min-width: 6em;
 }
 
 .fav-delete-button {
 	display: inline-block;
-	min-width: 0px;
+	min-width: 2em;
 }
 
 .fav-pencil-button {
 	display: inline-block;
-	min-width: 0px;
+	min-width: 2em;
 }
 
 .fav-coor-button {
@@ -1055,6 +1055,7 @@ input.paint-texttool {
 .favorite-container {
   position:relative;
   margin-top:0.1em;
+  display:flex;
 }
 
 .fav-rename-container {
