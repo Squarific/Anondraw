@@ -69,6 +69,11 @@ Anondraw.prototype.createSideMenu = function createSideMenu () {
 			href: "javascript:MyOtziv.mo_show_box(); ga('send', 'event', 'feedback', 'open');;"
 		},
 		{
+			icon: "github",
+			text: "Github",
+			href: "javascript:window.open('https://github.com/Squarific/anondraw');ga('send', 'event', 'githubmain', 'open');;",
+		},
+		{
 			icon: "power-off",
 			text: "Logout",
 			href: "/logout",

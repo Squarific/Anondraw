@@ -699,7 +699,8 @@ input.paint-texttool {
     border-radius: .2em; }
 
     .drawtogether-control-container .control-text-input {
-      width:9em;
+      width:18em;
+	  width:32ch;
     }
 
 .control-button {

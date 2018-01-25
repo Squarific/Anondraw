@@ -3583,6 +3583,10 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		advancedOptions.hide();
 	}.bind(this));
 	
+	advancedOptions.addButton("Toggle auto camera", function () {
+		this.toggleFollow()
+	}.bind(this));
+	
 	advancedOptions.addButton("Close (a)", function () {
 		advancedOptions.hide();
 	});
@@ -4256,6 +4260,7 @@ DrawTogether.prototype.createControls = function createControls () {
 	var controlContainer = this.container.appendChild(document.createElement("div"));
 	controlContainer.className = "drawtogether-control-container";
 	this.controls = new Controls(controlContainer, this.createControlArray());
+	this.controls.byName.name.input.maxLength = 32;
 
 	var sharediv = controlContainer.appendChild(document.createElement("div"));
 	sharediv.className = "addthis_sharing_toolbox";
@@ -4587,6 +4592,11 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 
 	var container = discordWindow.appendChild(document.createElement("div"));
 	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
+};
+
+DrawTogether.prototype.openGithub = function openGithub () {
+	window.open("https://github.com/Squarific/anondraw");
+	ga('send', 'event', 'githubcollab', 'open');
 };
 
 DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
@@ -5266,20 +5276,6 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 DrawTogether.prototype.createControlArray = function createControlArray () {
 	var buttonList = [{
-		name: "home-button",
-		type: "button",
-		value: "",
-		text: "Home",
-		title: "Go to the home screen",
-		action: this.openModeSelector.bind(this)
-	}, {
-		name: "toggle-view",
-		type: "button",
-		value: "",
-		text: "Auto Camera",
-		title: "Toggle the camera to follow where people are drawing.",
-		action: this.toggleFollow.bind(this)
-	}, {
 		name: "name",
 		type: "text",
 		text: "Username",
@@ -5289,16 +5285,18 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		data: {
 			intro: "This is your current guest name. Change this to something you like!"
 		}*/
+	},{
+		name: "home-button",
+		type: "button",
+		value: "",
+		text: "Modes",
+		title: "Go to the mode selector",
+		action: this.openModeSelector.bind(this)
 	}, {
 		name: "room-button",
 		type: "button",
-		text: "Room",
+		text: "Rooms",
 		action: this.openRoomWindow.bind(this)
-	}, {
-		name: "share-button",
-		type: "button",
-		text: "Share",
-		action: this.openExplainShareWindow.bind(this),
 	}, {
 		name: "settings",
 		type: "button",
@@ -5327,6 +5325,13 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Discord chat",
 		action: this.openDiscordWindow.bind(this)
+	});
+	
+	buttonList.push({
+		name: "github",
+		type: "button",
+		text: "Github",
+		action: this.openGithub.bind(this)
 	});
 
 	return buttonList;
