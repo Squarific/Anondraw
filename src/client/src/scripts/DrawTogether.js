@@ -2593,6 +2593,10 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		this.moveScreenToPosition([x,y],0);
 	
 	}.bind(this));	
+	
+	var regionPencilButton = regionContainer.appendChild(document.createElement("div"));
+	favoritePencilButton.className = "coords-button reg-pencil-button";
+	regionPencilButton.textContent = "✎";
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
 	regionEditPermissionsButton.className = "coords-button reg-editpermissions-button";
