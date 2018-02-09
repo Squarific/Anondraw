@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS regions (
     PRIMARY KEY (id),
     owner INT UNSIGNED,
     minRepAllowed INT UNSIGNED,
+	name VARCHAR(255),
     minX BIGINT,
     minY BIGINT,
     maxX BIGINT,
@@ -91,6 +92,7 @@ CREATE TABLE IF NOT EXISTS regions (
     INDEX (room),
     INDEX (owner, maxX, minX, maxY, minY, room)
 );
+ALTER TABLE regions ADD COLUMN name VARCHAR(255);
 
 CREATE TABLE IF NOT EXISTS regions_permissions (
     regionId INT UNSIGNED,

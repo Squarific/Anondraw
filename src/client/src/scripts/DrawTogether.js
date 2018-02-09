@@ -2391,7 +2391,7 @@ DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFa
 		element.dataset.owner = newOwner;
 	
 	var coordinateButton = element.getElementsByClassName("fav-coor-button")[0];
-	var inputRename = element.getElementsByClassName("fav-rename-input")[0];
+	var inputRename = element.getElementsByClassName("rename-input")[0];
 	if ( (newName || element.dataset.name) === ""){
 		inputRename.value = "";
 		coordinateButton.textContent = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
@@ -2512,10 +2512,10 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoritePencilButton.textContent = "✎";
 	
 	var favoriteRenameContainer = favoriteContainer.appendChild(document.createElement("div"));
-	favoriteRenameContainer.className = "fav-rename-container";
+	favoriteRenameContainer.className = "rename-container";
 	
 	var favoriteRenameInput = favoriteRenameContainer.appendChild(document.createElement("input"));
-	favoriteRenameInput.className = "fav-rename-input";
+	favoriteRenameInput.className = "rename-input";
 	favoriteRenameInput.type = "text";
 	favoriteRenameInput.placeholder = "Rename"
 	
@@ -2542,7 +2542,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 			favoriteRenameContainer.style.visibility = "";
 			favoriteRenameContainer.style.opacity = 0;
 			var element = e.srcElement || e.target;
-			var associatedInputBox = element.parentNode.getElementsByClassName("fav-rename-input")[0];
+			var associatedInputBox = element.parentNode.getElementsByClassName("rename-input")[0];
 			var newName = associatedInputBox.value;
 			var curFavContainer = favoriteContainer;
 			clearTimeout(_favoriteRenameDelayTimeout);
@@ -2569,7 +2569,7 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteContainer.appendChild(this.createFavoriteDeleteButton());
 };
 
-DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owner, permissions, minX, minY, maxX, maxY, index) {
+DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owner, name, permissions, minX, minY, maxX, maxY, index) {
 	var regionContainer = this.regionsContainer.appendChild(document.createElement("div"));
 	regionContainer.className = "region-container";
 	regionContainer.dataset.minX = minX;
@@ -2577,6 +2577,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionContainer.dataset.maxX = maxX;
 	regionContainer.dataset.maxY = maxY;
 	regionContainer.dataset.owner = owner;
+	regionContainer.dataset.name = name;
 	regionContainer.dataset.index = index;
 
 	var regionPositionButton = regionContainer.appendChild(document.createElement("div"));
@@ -2593,6 +2594,66 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		this.moveScreenToPosition([x,y],0);
 	
 	}.bind(this));	
+	
+	var regionRenameContainer = regionContainer.appendChild(document.createElement("div"));
+	regionRenameContainer.className = "rename-container";
+	
+	var regionRenameInput = regionRenameContainer.appendChild(document.createElement("input"));
+	regionRenameInput.className = "rename-input";
+	regionRenameInput.type = "text";
+	regionRenameInput.placeholder = "Rename"
+	
+	var regionPencilButton = regionContainer.appendChild(document.createElement("div"));
+	regionPencilButton.className = "coords-button reg-pencil-button";
+	regionPencilButton.textContent = "✎";
+	
+	if(name.length > 0){ 
+		regionPositionButton.textContent = name;
+		regionPositionButton.title = minX + ", " + minY;
+		regionRenameInput.value = name;
+	} else {
+		regionPositionButton.textContent = minX + ", " + minY;
+	}
+	
+	var _regionRenameDelayTimeout;
+	regionRenameInput.addEventListener("input", function (e) {
+		var element = e.srcElement || e.target;
+		if(_regionRenameDelayTimeout !== undefined)
+			clearTimeout(_regionRenameDelayTimeout);
+		_regionRenameDelayTimeout = setTimeout(function () {
+			var newName = element.value;
+			var curRegContainer = regionContainer;
+			var index = curRegContainer.dataset.index;
+			var regionId = this.myRegions[index].regionId;
+
+			regionRenameContainer.style.visibility = "";
+			regionRenameContainer.style.opacity = 0;
+			
+			this.setNameOfProtectedRegion(newName, regionId, curRegContainer);
+		}.bind(this), 2500);
+	}.bind(this));
+	
+	regionPencilButton.addEventListener("click", function (e) {
+		if (regionRenameContainer.style.visibility == "visible") {
+			regionRenameContainer.style.visibility = "";
+			regionRenameContainer.style.opacity = 0;
+			var element = e.srcElement || e.target;
+			var associatedInputBox = element.parentNode.getElementsByClassName("rename-input")[0];
+			var newName = associatedInputBox.value;
+			var curRegContainer = regionContainer;
+			var regionId = this.myRegions[index].regionId;
+			
+			clearTimeout(_regionRenameDelayTimeout);
+			this.setNameOfProtectedRegion(newName, regionId, curRegContainer);
+		} else {
+			regionRenameContainer.style.visibility = "visible";
+			regionRenameContainer.style.opacity = 1;
+			regionRenameInput.focus();
+			regionRenameInput.select();
+			regionRenameInput.setSelectionRange(0, regionRenameInput.value.length);
+		}
+		
+	}.bind(this));
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
 	regionEditPermissionsButton.className = "coords-button reg-editpermissions-button";
@@ -2685,7 +2746,7 @@ DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
 	this.displayRegionTutorial(this.myRegions.length === 0);
 
 	for(var k = this.myRegions.length - 1; k >= 0; k--) {
-		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
+		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['name'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
 	}
 
 };
@@ -3020,6 +3081,27 @@ DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, r
 		}
 		setTimeout(function(){
 			this.getMyProtectedRegions(callback);
+		}.bind(this), 1000);
+
+		this.chat.addMessage("Regions", result.success);
+	}.bind(this));
+};
+
+DrawTogether.prototype.setNameOfProtectedRegion = function (newName, regionId, curRegContainer) {
+	this.network.socket.emit("setnameofprotectedregion", newName, regionId, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Set minimum rep", "Error: " + err);
+			return;
+		}
+		curRegContainer.dataset.name = newName;
+		
+		var coordinateButton = curRegContainer.getElementsByClassName("reg-position-button")[0];
+		var inputRename = curRegContainer.getElementsByClassName("rename-input")[0];
+		inputRename.value = newName;
+		coordinateButton.textContent = newName;
+		
+		setTimeout(function(){
+			this.getMyProtectedRegions();
 		}.bind(this), 1000);
 
 		this.chat.addMessage("Regions", result.success);

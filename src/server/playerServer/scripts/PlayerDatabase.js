@@ -585,7 +585,7 @@ PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion 
 };
 
 PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
-	this.database.query("SELECT regions.id, owner, minX, minY, maxX, maxY, minRepAllowed, users.last_username FROM regions inner join users on users.id = regions.owner WHERE room = ? ORDER BY id;",
+	this.database.query("SELECT regions.id, name, owner, minX, minY, maxX, maxY, minRepAllowed, users.last_username FROM regions inner join users on users.id = regions.owner WHERE room = ? ORDER BY id;",
 	[room], function (err, rows, fields) {
 		if (err) {
 			callback("Database error. Please contact an admin. (GETPREGION)");
@@ -629,6 +629,21 @@ PlayerDatabase.prototype.getProtectedRegionsAndPermissions = function getProtect
 		}.bind(this));
 	}.bind(this));
 
+};
+
+PlayerDatabase.prototype.setNameOfProtectedRegion = function setNameOfProtectedRegion (userid, room, name, regionId, callback){
+	this.database.query("UPDATE regions SET name = ? WHERE room = ? AND owner = ? AND id = ?",
+		[name, room, userid, regionId],
+		function (err, rows){
+			if (err) {
+				callback("Database error. Please contact an admin. (setNameOfProtectedRegion)");
+				console.log("Set region name database error", err);
+				return;
+			}
+
+			callback(null);
+		}.bind(this)
+	);
 };
 
 PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
