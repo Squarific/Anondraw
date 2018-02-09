@@ -2641,6 +2641,8 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 			var associatedInputBox = element.parentNode.getElementsByClassName("rename-input")[0];
 			var newName = associatedInputBox.value;
 			var curRegContainer = regionContainer;
+			var regionId = this.myRegions[index].regionId;
+			
 			clearTimeout(_regionRenameDelayTimeout);
 			this.setNameOfProtectedRegion(newName, regionId, curRegContainer);
 		} else {
@@ -3086,15 +3088,15 @@ DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, r
 };
 
 DrawTogether.prototype.setNameOfProtectedRegion = function (newName, regionId, curRegContainer) {
-	this.network.socket.emit("setnameofprotectedregion", repAmount, regionId, function (err, result) {
+	this.network.socket.emit("setnameofprotectedregion", newName, regionId, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Set minimum rep", "Error: " + err);
 			return;
 		}
 		curRegContainer.dataset.name = newName;
 		
-		var coordinateButton = element.getElementsByClassName("fav-coor-button")[0];
-		var inputRename = element.getElementsByClassName("rename-input")[0];
+		var coordinateButton = curRegContainer.getElementsByClassName("reg-position-button")[0];
+		var inputRename = curRegContainer.getElementsByClassName("rename-input")[0];
 		inputRename.value = newName;
 		coordinateButton.textContent = newName;
 		
