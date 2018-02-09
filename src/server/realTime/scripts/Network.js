@@ -1546,12 +1546,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (!socket.room) {
 				callback("No Room");
 				return;
-			}
-			if (!name || !name.length) { 
-				callback("No region name sent");
-				return;
-			}
-			
+			}			
 
 			protocol.players.request('setnameofprotectedregion', {
 				uKey: socket.uKey,
