@@ -2609,10 +2609,10 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	
 	if(name.length > 0){ 
 		regionPositionButton.textContent = name;
-		regionPositionButton.title = x + "," + y;
+		regionPositionButton.title = minX + ", " + minY;
 		regionRenameInput.value = name;
 	} else {
-		regionPositionButton.textContent = x + "," + y;
+		regionPositionButton.textContent = minX + ", " + minY;
 	}
 	
 	var _regionRenameDelayTimeout;
@@ -2622,14 +2622,14 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 			clearTimeout(_regionRenameDelayTimeout);
 		_regionRenameDelayTimeout = setTimeout(function () {
 			var newName = element.value;
-			var curRegContainer = favoriteContainer;
-			var x = curRegContainer.dataset.x;
-			var y = curRegContainer.dataset.y;
+			var curRegContainer = regionContainer;
+			var index = curRegContainer.dataset.index;
+			var regionId = this.myRegions[index].regionId;
 
 			regionRenameContainer.style.visibility = "";
 			regionRenameContainer.style.opacity = 0;
-			console.log(newName);
-			//this.renameFavorite(x, y, newName, curRegContainer);
+			
+			this.setNameOfProtectedRegion(newName, regionId, curRegContainer);
 		}.bind(this), 2500);
 	}.bind(this));
 	
@@ -2642,8 +2642,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 			var newName = associatedInputBox.value;
 			var curRegContainer = regionContainer;
 			clearTimeout(_regionRenameDelayTimeout);
-			console.log(newName)
-			//this.renameFavorite(x, y, newName, curRegContainer);
+			this.setNameOfProtectedRegion(newName, regionId, curRegContainer);
 		} else {
 			regionRenameContainer.style.visibility = "visible";
 			regionRenameContainer.style.opacity = 1;
@@ -3080,6 +3079,27 @@ DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, r
 		}
 		setTimeout(function(){
 			this.getMyProtectedRegions(callback);
+		}.bind(this), 1000);
+
+		this.chat.addMessage("Regions", result.success);
+	}.bind(this));
+};
+
+DrawTogether.prototype.setNameOfProtectedRegion = function (newName, regionId, curRegContainer) {
+	this.network.socket.emit("setnameofprotectedregion", repAmount, regionId, function (err, result) {
+		if (err) {
+			this.chat.addMessage("Set minimum rep", "Error: " + err);
+			return;
+		}
+		curRegContainer.dataset.name = newName;
+		
+		var coordinateButton = element.getElementsByClassName("fav-coor-button")[0];
+		var inputRename = element.getElementsByClassName("rename-input")[0];
+		inputRename.value = newName;
+		coordinateButton.textContent = newName;
+		
+		setTimeout(function(){
+			this.getMyProtectedRegions();
 		}.bind(this), 1000);
 
 		this.chat.addMessage("Regions", result.success);

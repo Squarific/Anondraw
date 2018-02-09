@@ -631,6 +631,21 @@ PlayerDatabase.prototype.getProtectedRegionsAndPermissions = function getProtect
 
 };
 
+PlayerDatabase.prototype.setNameOfProtectedRegion = function setNameOfProtectedRegion (userid, room, name, regionId, callback){
+	this.database.query("UPDATE regions SET name = ? WHERE room = ? AND owner = ? AND id = ?",
+		[name, room, userid, regionId],
+		function (err, rows){
+			if (err) {
+				callback("Database error. Please contact an admin. (setNameOfProtectedRegion)");
+				console.log("Set region name database error", err);
+				return;
+			}
+
+			callback(null);
+		}.bind(this)
+	);
+};
+
 PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
 	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
 		if (rows.length === 0) {

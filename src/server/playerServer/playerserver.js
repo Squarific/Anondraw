@@ -1029,6 +1029,38 @@ var server = http.createServer(function (req, res) {
 
 		return;
 	}
+	
+	if (parsedUrl.pathname == "/setnameofprotectedregion") {
+		var uKey = parsedUrl.query.uKey;
+		var room = parsedUrl.query.room;
+		var name = parsedUrl.query.name;
+		
+		var regionId = parsedUrl.query.regionId;
+
+		var user = sessions.getUser("uKey", uKey);
+
+		if (!user) {
+			res.end(JSON.stringify({
+				error: "No user found with that uKey!"
+			}));
+			return;
+		}
+
+		playerDatabase.setNameOfProtectedRegion(user.id, room, name, regionId, function (err) {
+			if (err) {
+				console.log(err);
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+			
+			res.end(JSON.stringify({
+				success: 'Renamed Region'
+			}));
+		});
+		return;
+	}
 
 	if (parsedUrl.pathname == "/adduserstomyprotectedregion") {
 		var uKey = parsedUrl.query.uKey;
