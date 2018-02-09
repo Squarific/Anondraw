@@ -240,6 +240,7 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 			p.push({ 
 				regionId: protectedRegionsArr[i].id,
 				owner: protectedRegionsArr[i].owner, 
+				name: protectedRegionsArr[i].name || "";
 				permissions: protectedRegionsArr[i].permissions || [],
 				minX: protectedRegionsArr[i].minX,
 				minY: protectedRegionsArr[i].minY,

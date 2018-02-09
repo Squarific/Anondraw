@@ -1059,21 +1059,21 @@ input.paint-texttool {
   display:flex;
 }
 
-.fav-rename-container {
+.rename-container {
 	position: absolute;
-  left:0;
-  top:0;
-  visibility: hidden;
-  opacity: 0;
+	left:0;
+	top:0;
+	visibility: hidden;
+	opacity: 0;
 	transition: opacity 0.2s, visibility 0.2s;
 }
 
-.fav-rename-input { 
+.rename-input { 
 	display: block;
-  min-width:18em;
+	min-width:18em;
 	margin: 0 !important;
 	padding: 0.2em !important;
-  border: solid 0.1em goldenrod;
+	border: solid 0.1em goldenrod;
 	text-align: center !important;
 	float: right;
 }
