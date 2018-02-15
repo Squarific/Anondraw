@@ -240,6 +240,7 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 			p.push({ 
 				regionId: protectedRegionsArr[i].id,
 				owner: protectedRegionsArr[i].owner, 
+				name: protectedRegionsArr[i].name || "",
 				permissions: protectedRegionsArr[i].permissions || [],
 				minX: protectedRegionsArr[i].minX,
 				minY: protectedRegionsArr[i].minY,
@@ -1535,6 +1536,27 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			callback(null, usersProtectedRegions);
+		});
+		
+		socket.on("setnameofprotectedregion", function (name, regionId, callback) {
+			if (!socket.userid) {
+				callback("No User");
+				return;
+			}
+			if (!socket.room) {
+				callback("No Room");
+				return;
+			}			
+
+			protocol.players.request('setnameofprotectedregion', {
+				uKey: socket.uKey,
+				room: socket.room,
+				name: name,
+				regionId: regionId
+			}, function (err, data) {
+				protocol.updateProtectedRegions(socket.room);
+				callback(err, data);
+			});
 		});
 
 		socket.on("adduserstomyprotectedregion", function (userIdArr, regionId, callback) {
