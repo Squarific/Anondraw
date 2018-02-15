@@ -2286,7 +2286,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 
 			if(typeof success.isAllowed !== 'undefined'){
 				this.createPermissionChatMessageWithTimeout(success);
-				this.outlineProtectedRegion(success);
+				this.outlineProtectedRegion(success, true);
 				
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
@@ -4832,9 +4832,9 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
-DrawTogether.prototype.outlineProtectedRegion = function outlineProtectedRegion (region) {
+DrawTogether.prototype.outlineProtectedRegion = function outlineProtectedRegion (region, ignoreTimeout) {
 	//Visible protected areas.
-	if(typeof this.outlineRegionTimeout !== "undefined"){
+	if(typeof this.outlineRegionTimeout !== "undefined" && !ignoreTimeout){
 		clearTimeout(this.outlineRegionTimeout);
 	}
 	var startTime = Date.now();
