@@ -39,9 +39,19 @@ let config = _.merge(
 	}
 );
 
+var lastBuild = Date.now();
+if (process.argv[2] == "repeat") {
+	fs.watch("src", { recursive: true }, function () {
+		// Don't build too often, changes often happen multiple times
+		// with a lot of text editors even with a single save
+		if (Date.now() - lastBuild > 5000) build();
+	});
+}
+
 build();
 
 function build() {
+	lastBuild = Date.now();
 	new minify({
 		type: "gcc",
 		fileIn: "src/scripts/**/*.js",
