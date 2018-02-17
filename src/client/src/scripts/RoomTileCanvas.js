@@ -184,7 +184,7 @@ RoomTileCanvas.prototype.resize = function resize () {
 
 RoomTileCanvas.prototype.drawTiles = function drawTiles (tiles) {
 	for (var k = 0; k < tiles.length; k++) {
-		var coords = tiles[k].split(":");
+		var coords = tiles[k].split("_");
 		this.drawTile(parseInt(coords[0]), parseInt(coords[1]));
 	}
 	
