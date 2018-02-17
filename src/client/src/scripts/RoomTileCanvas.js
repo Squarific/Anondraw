@@ -242,7 +242,7 @@ RoomTileCanvas.prototype.decodeTiles = function decodeTiles (tiles) {
 	var object = {};
 
 	for (var k = 0; k < tiles.length; k++) {
-		var coords = tiles[k].split(":");
+		var coords = tiles[k].split("_");
 		coords[0] = parseInt(coords[0]);
 		coords[1] = parseInt(coords[1]);
 		object[coords[0]] = object[coords[0]] || {};
