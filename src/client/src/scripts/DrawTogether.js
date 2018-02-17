@@ -2286,6 +2286,8 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 
 			if(typeof success.isAllowed !== 'undefined'){
 				this.createPermissionChatMessageWithTimeout(success);
+				this.outlineProtectedRegion(success, true);
+				
 			}
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
@@ -2594,6 +2596,18 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		this.moveScreenToPosition([x,y],0);
 	
 	}.bind(this));	
+	
+	
+	regionPositionButton.addEventListener("mouseover", function (e) {
+		var region = {
+			minX: minX,
+			minY: minY,
+			maxX: maxX,
+			maxY: maxY
+		};
+		this.outlineProtectedRegion(region);
+	
+	}.bind(this));
 	
 	var regionRenameContainer = regionContainer.appendChild(document.createElement("div"));
 	regionRenameContainer.className = "rename-container";
@@ -4816,6 +4830,30 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.href = "http://www.anondraw.com/?ref=" + this.account.id;
 	link.alt = "Your referral link";
 	link.title = "Your referral link";
+};
+
+DrawTogether.prototype.outlineProtectedRegion = function outlineProtectedRegion (region, ignoreTimeout) {
+	//Visible protected areas.
+	if(typeof this.outlineRegionTimeout !== "undefined" && !ignoreTimeout){
+		clearTimeout(this.outlineRegionTimeout);
+	}
+	var startTime = Date.now();
+	var loop = function loop(){
+		if(Date.now() < startTime + 2000 ){
+			var width = region.maxX - region.minX;
+			var height = region.maxY - region.minY;
+			var lefttop = [region.minX, region.minY]
+			
+			anondraw.collab.paint.previewGrid(lefttop, 1, width, height, 0);
+			this.outlineRegionTimeout = setTimeout(loop.bind(this), 10);
+		}
+		else
+		{
+			anondraw.collab.paint.previewGrid([0,0],0,0,0,0);
+		}
+	};
+	loop.apply(this);
+	
 };
 
 DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGridPreview(generationSettings, from, to) {

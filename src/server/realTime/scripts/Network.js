@@ -421,11 +421,31 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
+					return {
+						isAllowed: false,
+						minRepAllowed:relevantRegions[i].minRepAllowed,
+						regionid: relevantRegions[i].id,
+						ownerid: relevantRegions[i].owner,
+						name: relevantRegions[i].last_username,
+						minX: relevantRegions[i].minX,
+						minY: relevantRegions[i].minY,
+						maxX: relevantRegions[i].maxX,
+						maxY: relevantRegions[i].maxY
+						};
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
+					return {
+						isAllowed: false,
+						minRepAllowed:relevantRegions[i].minRepAllowed,
+						regionid: relevantRegions[i].id,
+						ownerid: relevantRegions[i].owner,
+						name: relevantRegions[i].last_username,
+						minX: relevantRegions[i].minX,
+						minY: relevantRegions[i].minY,
+						maxX: relevantRegions[i].maxX,
+						maxY: relevantRegions[i].maxY
+						};
 				}
 			}
 		}
