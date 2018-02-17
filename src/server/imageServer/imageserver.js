@@ -23,7 +23,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 		var tiledCanvas = new TiledCanvas();
 
 		tiledCanvas.requestUserChunk = function (x, y, callback) {
-			fs.readFile("./images/" + room + "/" + x + ":" + y + ".png", function (err, imgBytes) {
+			fs.readFile("./images/" + room + "/" + x + "_" + y + ".png", function (err, imgBytes) {
 				if (err) {
 					if (err.code !== "ENOENT") {
 						throw "Image load error: " + err;
@@ -65,7 +65,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 				return;
 			}
 
-			fs.readFile("./images/" + room + "/" + x + ":" + y + ".png", function (err, data) {
+			fs.readFile("./images/" + room + "/" + x + "_" + y + ".png", function (err, data) {
 				if (err && err.code === "ENOENT") {
 					res.writeHead(200, {
 						"Access-Control-Allow-Origin": "*",
@@ -211,7 +211,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 								return;
 							}
 
-							fs.writeFile("./images/" + room + "/" + x + ":" + y + ".png", bytes, function (err) {
+							fs.writeFile("./images/" + room + "/" + x + "_" + y + ".png", bytes, function (err) {
 								if (err) {
 									console.log("[DRAW][ERROR] Save image error", err);
 									callback();
