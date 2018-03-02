@@ -3184,6 +3184,7 @@ DrawTogether.prototype.enterTheContest = function (from, to) {
 		form.classList.add("disabled");
 		var team = [];
 		for (var k = 0; k < infoInputs.length; k++) {
+			if (!infoInputs[k].name.value && !infoInputs[k].social.value) continue;
 			team.push({name: infoInputs[k].name.value, social: infoInputs[k].social.value});
 		}
 		this.account.enterContest(imageBase64, team, function (err) {
