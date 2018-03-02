@@ -13,9 +13,40 @@ Anondraw.prototype.createContestFeed = function createContestFeed () {
 
 Anondraw.prototype.view.contest = {};
 
+Anondraw.prototype.view.contest.createTutorial = function createTutorial () {
+	var steps = [{
+		image: "tool.png",
+		text: "Use the select tool."
+	}, {
+		image: "select.png",
+		text: "Select drawing."
+	}, {
+		image: "options.png",
+		text: "Click 'Enter the contest'"
+	}, {
+		image: "details.png",
+		text: "Enter your teams details."
+	}];
+	
+	var div = document.createElement("div");
+	div.className = "contest-tutorial";
+
+	for (var k = 0; k < steps.length; k++) {
+		var p = div.appendChild(document.createElement("p"));
+		p.className = "feature-text";
+	
+		var img = p.appendChild(document.createElement("img"));
+		img.src = "images/contesttutorial/" + steps[k].image;
+
+		p.appendChild(document.createTextNode(steps[k].text));
+	}
+	
+	return div;
+};
+
 Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 	var feature = document.createElement("div");
-	feature.className = "feature-container";
+	feature.className = "feature-container contest-info";
 	
 	var div = feature.appendChild(document.createElement("div"));
 	div.className = "feature-text-container";
@@ -31,6 +62,16 @@ Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 	p.className = "feature-text";
 	p.appendChild(document.createTextNode("All registered users will be able to vote, except on their own drawing, weighted with their reputation. A week later the winner will be announced."));	
 	
+	var h2 = div.appendChild(document.createElement("h2"));
+	h2.appendChild(document.createTextNode("How to enter"));
+	
+	div.appendChild(this.createTutorial());
+	
+	var h2 = div.appendChild(document.createElement("h2"));
+	h2.appendChild(document.createTextNode("Current theme"));
+	
+	div.appendChild(document.createElement("br"));
+
 	var p = div.appendChild(document.createElement("p"));
 	p.className = "feature-text";
 	p.appendChild(document.createTextNode("This month's theme is: "));

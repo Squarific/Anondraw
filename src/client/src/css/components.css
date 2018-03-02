@@ -101,6 +101,31 @@
 	color:#ced4d8;
 }
 
+.contest-info.contest-info.contest-info {
+    flex-direction: column;
+}
+
+.contest-info img {
+	display:block;
+	margin:auto;
+	margin-bottom:1em;
+	max-height:5em;
+}
+
+.contest-tutorial .feature-text.feature-text {
+	padding: 1em;
+	padding-top: 2em;
+    padding-bottom: 2em;
+    background: #323e4a;
+    min-width: 25%;
+    text-align: center;
+}
+
+.contest-tutorial {
+	display:flex;
+	flex-wrap:wrap;
+    justify-content: space-between;
+}
 
 @media (max-width:750px) {
 	.feature-container {
