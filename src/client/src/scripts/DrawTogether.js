@@ -3197,8 +3197,13 @@ DrawTogether.prototype.enterTheContest = function (from, to) {
 			}
 			
 			status.classList.remove("error");
-			textarea.parentNode.removeChild(textarea);
+			
+			for (var k = 0; k < infoInputs.length; k++) {
+				infoInputs[k].name.parentNode.removeChild(infoInputs[k].name);
+				infoInputs[k].social.parentNode.removeChild(infoInputs[k].social);
+			}
 			button.parentNode.removeChild(button);
+
 			status.appendChild(document.createTextNode("Your entry has been registered!"));
 		});
 	}.bind(this));
