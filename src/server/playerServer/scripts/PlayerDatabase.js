@@ -100,8 +100,8 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 };
 
 PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, team, callback) {
-	var query = "INSERT INTO teams (submittime, image) VALUES (?, ?)";
-	var queryArgs = [new Date(), imageid];
+	var query = "INSERT INTO teams (submittime, image, owner) VALUES (?, ?, ?)";
+	var queryArgs = [new Date(), imageid, userid];
 	
 	this.database.query(query, queryArgs, function (err, result) {
 		if (err) {
