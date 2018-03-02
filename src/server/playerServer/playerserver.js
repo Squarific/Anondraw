@@ -124,7 +124,7 @@ var server = http.createServer(function (req, res) {
 		}
 		
 		if (!names || !names.length) {
-			res.end(JSON.stringify({ error: "No names or socials provided." }));
+			res.end(JSON.stringify({ error: "No names provided." }));
 			return;
 		}
 		
