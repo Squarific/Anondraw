@@ -378,7 +378,7 @@ Account.prototype.request = function request (path, options, body, callback) {
 
 	// Add options to the string, uri encoded
 	for (var k in options) {
-		optionString += this.encodeURIComponent(k, options[k]);
+		optionString += this.encodeURIValue(k, options[k]);
 	}
 
 	// Remove trailing &
@@ -401,7 +401,7 @@ Account.prototype.request = function request (path, options, body, callback) {
 };
 
 // Returns "key=value&" or for arrays "key=value1&key=value2&"
-Account.prototype.encodeURIComponent = function encodeURIComponent (key, value) {
+Account.prototype.encodeURIValue = function encodeURIValue (key, value) {
 	if (value && value.length) {
 		var returnString = "";
 		for (var k = 0; k < value.length; k++)
