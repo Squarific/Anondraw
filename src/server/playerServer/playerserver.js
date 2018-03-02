@@ -123,6 +123,11 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 		
+		if (!names || !names.length || !socials || !socials.length) {
+			res.end(JSON.stringify({ error: "No names or socials provided." }));
+			return;
+		}
+		
 		var team = [];
 		for (var k = 0; k < names.length; k++) {
 			team.push({ name: names[k], social: socials[k]});
