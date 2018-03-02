@@ -402,7 +402,7 @@ Account.prototype.request = function request (path, options, body, callback) {
 
 // Returns "key=value&" or for arrays "key=value1&key=value2&"
 Account.prototype.encodeURIComponent = function encodeURIComponent (key, value) {
-	if (value.length) {
+	if (value && value.length) {
 		var returnString = "";
 		for (var k = 0; k < value.length; k++)
 			returnString += encodeURIComponent(key) + "=" + encodeURIComponent(value[k]) + "&";
