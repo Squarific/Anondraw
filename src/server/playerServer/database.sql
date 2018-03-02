@@ -18,6 +18,7 @@ CREATE TABLE teams (
 	id INT UNSIGNED AUTO_INCREMENT,
 	submittime DATETIME,
 	image VARCHAR(128),
+	PRIMARY KEY(id),
 	INDEX(image),
 	INDEX(submittime, image)
 );
