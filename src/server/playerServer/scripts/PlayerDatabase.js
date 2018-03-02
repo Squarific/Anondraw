@@ -117,7 +117,7 @@ PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, 
 			members.push([teamId, team.name, team.social]);
 		
 		var query = "INSERT INTO members (teamid, name, social) VALUES ?";
-		this.database.query(query, members, function (err, result) {
+		this.database.query(query, [members], function (err, result) {
 			if (err) {
 				callback("Couldn't save members, a database error occured.");
 				console.log("SAVE MEMBER DB ERROR", err, userid, imageid, team);
