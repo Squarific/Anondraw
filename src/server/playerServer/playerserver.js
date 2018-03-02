@@ -112,6 +112,57 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 	
+	if (parsedUrl.pathname == "/entercontest") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var names = parsedUrl.query.names;
+		var socials = parsedUrl.query.socials;
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "User not logged in!" }));
+			return;
+		}
+		
+		var team = [];
+		for (var k = 0; k < names.length; k++) {
+			team.push({ name: names[k], social: socials[k]});
+		}
+		
+		var body = [];
+		req.on('data', function (chunk) {
+			body.push(chunk);
+		}).on('end', function () {
+			body = Buffer.concat(body).toString();
+			
+			if (body.length > 15 * MB) {
+				res.end(JSON.stringify({ error: "Image is too large!" }));
+				return;
+			}
+			
+			var postId = randomString(48);
+			var data = body.replace(/^data:image\/\w+;base64,/, "");
+			fs.writeFile("images/" + postId + ".png", data, 'base64', function (err) {
+				if (err) {
+					res.end(JSON.stringify({ error: "Could not save image." }));
+					console.log(err);
+					return;
+				}
+			
+				playerDatabase.enterContest(user.id, postId, team, function (err) {
+					res.end(JSON.stringify({
+						error: err
+					}));
+				});
+			});
+			
+		}).on('error', function (err) {
+			console.error(err);
+			res.end(JSON.stringify({ error: "Something went wrong." }));
+		});
+		
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/sharepicture") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
@@ -134,7 +185,7 @@ var server = http.createServer(function (req, res) {
 		}).on('end', function () {
 			body = Buffer.concat(body).toString();
 			
-			if (body.length > 3 * MB) {
+			if (body.length > 10 * MB) {
 				res.end(JSON.stringify({ error: "Image is too large!" }));
 				return;
 			}

@@ -25,6 +25,8 @@ function Anondraw (container, settings) {
 	this.createRouter();
 }
 
+Anondraw.prototype.view = {};
+
 Anondraw.prototype.createSideMenu = function createSideMenu () {
 	this.sideMenu = new SideMenu([
 		{
@@ -72,6 +74,12 @@ Anondraw.prototype.createSideMenu = function createSideMenu () {
 			icon: "github",
 			text: "Github",
 			href: "javascript:window.open('https://github.com/Squarific/anondraw');ga('send', 'event', 'githubmain', 'open');;",
+		},
+		{
+			icon: "trophy",
+			text: "Contest",
+			href: "/contest",
+			navigo: true
 		},
 		{
 			icon: "power-off",
@@ -222,6 +230,11 @@ Anondraw.prototype.createRouter = function createRouter () {
 	.on('/new*', function () {
 		this.router.navigate("/collab");
 		ga('set', 'page', '/new');
+		ga('send', 'pageview');
+	}.bind(this))
+	.on('/contest*', function () {
+		this.setContent(this.createContestFeed());
+		ga('set', 'page', '/contest');
 		ga('send', 'pageview');
 	}.bind(this))
 	.on(function () {

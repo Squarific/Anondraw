@@ -67,6 +67,21 @@ Account.prototype.getPictureStories = function getPictureStories (callback) {
 	this.request("/getpicturestories", {}, this.parseData.bind(this, callback));
 };
 
+Account.prototype.enterContest = function enterContest (image, team, callback) {
+	var names = [], socials = [];
+
+	for (var k = 0; k < team.length; k++) {
+		names.push(team[k]);
+		socials.push(team[k]);
+	}
+
+	this.request("/entercontest", {
+		uKey: this.uKey,
+		names: names,
+		socials: socials
+	}, image, this.parseData.bind(this, callback));
+};
+
 // Takes in a base64 image and story, calls back with an id
 // Types: "profile", "header", "story"
 // If type is profile or header, our profile or header will be updated
@@ -76,9 +91,7 @@ Account.prototype.sharePicture = function sharePicture (image, story, type, call
 		uKey: this.uKey,
 		story: story,
 		type: type
-	},
-	image,
-	this.parseData.bind(this, callback));
+	}, image, this.parseData.bind(this, callback));
 };
 
 Account.prototype.setCoordFavorite = function (newX, newY, x, y, name, room, callback) {
@@ -365,12 +378,11 @@ Account.prototype.request = function request (path, options, body, callback) {
 
 	// Add options to the string, uri encoded
 	for (var k in options) {
-		optionString += encodeURIComponent(k) + "=" + encodeURIComponent(options[k]) + "&";
+		optionString += this.encodeURIComponent(k, options[k]);
 	}
 
 	// Remove trailing &
 	optionString = optionString.slice(0, optionString.length - 1);
-
 
 	req.addEventListener("readystatechange", function (event) {
 		if (req.readyState == 4) {
@@ -386,6 +398,18 @@ Account.prototype.request = function request (path, options, body, callback) {
 
 	req.open(body ? "POST" : "GET", this.server + path + optionString);
 	req.send(body);
+};
+
+// Returns "key=value&" or for arrays "key=value1&key=value2&"
+Account.prototype.encodeURIComponent = function encodeURIComponent (key, value) {
+	if (value.length) {
+		var returnString = "";
+		for (var k = 0; k < value.length; k++)
+			returnString += encodeURIComponent(key) + "=" + encodeURIComponent(value[k]) + "&";
+		return returnString;
+	} else {
+		return encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
+	}
 };
 
 // Parses the server returned data as a JSON object

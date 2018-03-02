@@ -10,12 +10,52 @@
   max-width:30%;
 }
 
+.gui-window.contestwindow {
+	max-width: 53em;
+}
+
 .exportwindow .content {
 	display:flex;
 }
 
 .exportwindow .imagecontainer {
 	background: rgba(0, 0, 0, 0.1);
+}
+
+.contestwindow .imagecontainer {
+	text-align:center;
+}
+
+.contestwindow img {
+  max-width:12em;
+  max-height:12em;
+  background-image:url(images/transparent.png);
+  margin:0.5em;
+}
+
+.contestwindow .form {
+	text-align:center;
+	position:relative;
+	margin:0.5em;
+}
+
+.contestwindow input {
+	padding:0.5em;
+	margin:0.5em;
+	width:12em;
+}
+
+.contestwindow input:nth-child(odd) {
+	width:28em;
+}
+
+.contestwindow .status {
+	padding: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.contestwindow .status.error {
+	color:white;
 }
 
 .roomTileCanvas canvas {

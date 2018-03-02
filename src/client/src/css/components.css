@@ -464,6 +464,89 @@
 	margin-right:1em;
 }
 
+
+.winners-container {
+	width:100%;
+	text-align:center;
+}
+
+.winners-container .podium {
+	display:flex;
+	width:100%;
+	margin-top:2em;
+}
+
+.podium .team {
+	width:100%;
+}
+
+.team:nth-child(1) {
+	order:2;
+}
+
+.team:nth-child(2) {
+	order:1;
+}
+
+.team:nth-child(3) {
+	order:3;
+}
+
+.team img {
+	max-width:80%;
+	height:15em;
+}
+
+.team img.second {
+	margin-top:30px;
+}
+
+.team img.third {
+	margin-top:50px;
+}
+
+.podium .piece {
+	width:100%;
+	line-height:100%;
+	vertical-align:middle;
+	padding-bottom:40px;
+	font-size:30px;
+	background:#252d35;
+	margin-top:20px;
+}
+
+.podium .piece.first {
+	padding-top:50px;
+	font-size:80px;
+	color:#96944a;
+}
+
+.podium .piece.second {
+	padding-top:50px;
+	font-size:50px;
+	color:#999ba2;
+}
+
+.podium .piece.third {
+	padding-top:50px;
+	font-size:30px;
+	color:#b37141;
+}
+
+
+.team .name {
+	display:inline-block;
+	padding:1em;
+	width:100%;
+}
+
+.team .member {
+	display:inline-block;
+	font-style:italic;
+	padding-right: 0.3em;
+	color:white;
+}
+
 @media (max-width:750px) {
 	.card {
 		width:100%;

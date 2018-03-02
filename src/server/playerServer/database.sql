@@ -14,6 +14,20 @@ ALTER TABLE users ADD COLUMN register_datetime DATETIME;
 ALTER TABLE users ADD COLUMN headerImage VARCHAR(128);
 ALTER TABLE users ADD COLUMN profileImage VARCHAR(128);
 
+CREATE TABLE teams (
+	id INT UNSIGNED AUTO_INCREMENT,
+	submittime DATETIME,
+	image VARCHAR(128),
+	INDEX(image),
+	INDEX(submittime, image)
+);
+
+CREATE TABLE members (
+	teamid INT UNSIGNED,
+	name VARCHAR(32),
+	social VARCHAR(128)
+);
+
 CREATE TABLE IF NOT EXISTS forgotkeys (
 	email VARCHAR(255),
 	ip VARCHAR(48),

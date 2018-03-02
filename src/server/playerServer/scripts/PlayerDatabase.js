@@ -99,6 +99,36 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 	}.bind(this));
 };
 
+PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, team, callback) {
+	var query = "INSERT INTO teams (submittime, image) VALUES (?, ?)";
+	var queryArgs = [new Date(), imageid];
+	
+	this.database.query(query, queryArgs, function (err, result) {
+		if (err) {
+			callback("Couldn't save team, a database error occured.");
+			console.log("SAVE TEAM DB ERROR", err, userid, imageid, team);
+			return;
+		}
+			
+		var teamId = result.insertId;
+		
+		var members = [];
+		for (var k = 0; k < team.length; k++)
+			members.push([teamId, team.name, team.social]);
+		
+		var query = "INSERT INTO members (teamid, name, social) VALUES ?";
+		this.database.query(query, members, function (err, result) {
+			if (err) {
+				callback("Couldn't save members, a database error occured.");
+				console.log("SAVE MEMBER DB ERROR", err, userid, imageid, team);
+				return;
+			}
+			
+			callback(null);
+		});
+	}.bind(this));
+};
+
 PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story, type, callback) {
 	var query = "INSERT INTO imageposts (userid, image, story, created) VALUES (?, ?, ?, ?);";
 	var queryargs = [userid, postid, story, new Date()];

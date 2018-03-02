@@ -2329,6 +2329,10 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			icon: "images/icons/selectwindow/frames.png"
 		},
 		{
+			text: "Enter the contest",
+			icon: "images/icons/selectwindow/contest.png"
+		},
+		{
 			text: "Cancel",
 			icon: "images/icons/selectwindow/cancel.png"
 		},
@@ -2341,7 +2345,8 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			"Create protected region": this.createProtectedRegion.bind(this),
 			"Inspect tool": this.whoDrewInThisArea.bind(this),
 			"Show video frames": this.showVideoFrames.bind(this),
-			"Create grid": this.createGridInSelection.bind(this)
+			"Create grid": this.createGridInSelection.bind(this),
+			"Enter the contest": this.enterTheContest.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
@@ -3133,6 +3138,69 @@ DrawTogether.prototype.setMinimumRepInProtectedRegion = function (repAmount, reg
 		}.bind(this), 1000);
 
 		this.chat.addMessage("Regions", result.success);
+	}.bind(this));
+};
+
+DrawTogether.prototype.enterTheContest = function (from, to) {
+	var img = document.createElement("img");
+	var imageBase64 = this.paint.exportImage(from, to);
+	img.src = imageBase64;
+	img.alt = "Exported image";
+	
+	ga("send", "event", "openwindow", "enterTheContest");
+	
+	var exportwindow = this.gui.createWindow({ title: "Enter the monthly contest" });
+	exportwindow.classList.add("contestwindow");
+	
+	var content = exportwindow.appendChild(document.createElement("div"));
+	content.className = "content";
+	
+	var imageContainer = content.appendChild(document.createElement("div"));
+	imageContainer.className = "imagecontainer";
+	imageContainer.appendChild(img);
+	
+	var form = content.appendChild(document.createElement("div"));
+	form.classList.add("form");
+	
+	var status = form.appendChild(document.createElement("div"));
+	status.classList.add("status");
+	
+	var infoInputs = [];
+	for (var k = 0; k < 5; k++) {
+		var memberInput = form.appendChild(document.createElement("input"));
+		memberInput.placeholder = "Member " + (k + 1);
+		
+		var socialInput = form.appendChild(document.createElement("input"));
+		socialInput.placeholder = "Twitch/FB/profile";
+		
+		infoInputs.push({name: memberInput, social: socialInput});
+	}
+	
+	var button = form.appendChild(document.createElement("div"));
+	button.classList = "drawtogether-button share-to-feed";
+	button.appendChild(document.createTextNode("Enter"));
+	
+	button.addEventListener("click", function () {
+		form.classList.add("disabled");
+		var team = [];
+		for (var k = 0; k < infoInputs.length; k++) {
+			team.push({name: infoInputs.name.value, social: infoInputs.social.value});
+		}
+		this.account.enterContest(imageBase64, team, function (err) {
+			form.classList.remove("disabled");
+			while (status.firstChild) status.removeChild(status.firstChild);
+			
+			if (err) {
+				status.appendChild(document.createTextNode(err));
+				status.classList.add("error");
+				return;
+			}
+			
+			status.classList.remove("error");
+			textarea.parentNode.removeChild(textarea);
+			button.parentNode.removeChild(button);
+			status.appendChild(document.createTextNode("Your entry has been registered!"));
+		});
 	}.bind(this));
 };
 
