@@ -123,7 +123,7 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 		
-		if (!names || !names.length || !socials || !socials.length) {
+		if (!names || !names.length) {
 			res.end(JSON.stringify({ error: "No names or socials provided." }));
 			return;
 		}
