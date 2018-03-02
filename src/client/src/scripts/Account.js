@@ -71,8 +71,8 @@ Account.prototype.enterContest = function enterContest (image, team, callback) {
 	var names = [], socials = [];
 
 	for (var k = 0; k < team.length; k++) {
-		names.push(team[k]);
-		socials.push(team[k]);
+		names.push(team[k].name);
+		socials.push(team[k].social);
 	}
 
 	this.request("/entercontest", {
