@@ -236,9 +236,7 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 };
 
 DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
-	this.lastPathPoint = undefined;
 	this.paint.goto(x, y);
-	this.lastPathPoint = undefined;
 };
 
 DrawTogether.prototype.handleGotoAndCenter = function handleGotoAndCenter (x, y) {
@@ -1483,11 +1481,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// start path
 		this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size);
 		this.lastPathSize = event.props.size;
+		this.lastPathPoint = undefined;
 	}.bind(this));
 
 	this.paint.addEventListener("enduserpath", function (event) {
 		this.network.socket.emit("ep", function (id, success) {
 			event.removePath(success, id);
+			this.lastPathPoint = undefined;
 		});
 	}.bind(this));
 
