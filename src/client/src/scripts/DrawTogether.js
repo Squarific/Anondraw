@@ -5205,7 +5205,7 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 			welcomeWindow.parentNode.removeChild(welcomeWindow);
 
 		introJs()
-		.setOptions({ 'tooltipPosition': 'auto', 'showProgress': true })
+		.setOptions({ 'tooltipPosition': 'auto', 'showProgress': true, 'hideNext': true, 'exitOnOverlayClick': false, 'exitOnEsc': false})
 		.onchange(function () {
 			ga("send", "event", "tutorial", "next");
 		})
