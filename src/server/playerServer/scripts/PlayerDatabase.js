@@ -114,7 +114,7 @@ PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, 
 		
 		var members = [];
 		for (var k = 0; k < team.length; k++)
-			members.push([teamId, team.name, team.social]);
+			members.push([teamId, team[k].name, team[k].social]);
 		
 		var query = "INSERT INTO members (teamid, name, social) VALUES ?";
 		this.database.query(query, [members], function (err, result) {
