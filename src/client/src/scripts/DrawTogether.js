@@ -19,6 +19,7 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.myRegions = [];
 	this.myAnimations = this.getAnimationsFromCookie();
 	this.ink = 0;
+	this.nextTip = 0;
 	this.previousInk = Infinity;
 
 	this.MAX_REP_TO_DISPLAY = 300; // if a pregion's minRepAllowed is higher than this. don't mention it to user.
@@ -651,7 +652,7 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 DrawTogether.prototype.displayTip = function displayTip () {
 	if (!this.userSettings.getBoolean("Show tips")) return;
 
-	var tips = [
+	/*var tips = [
 		"Did you know you can use shortcuts? Press C to toggle the color selection!",
 		"Tip: use B to switch to the brush tool. (Others: [l]ine, [c]olor, [p]icker, [g]rab, ...)",
 		"Tip: You get ink faster if you register an account and get reputation!",
@@ -668,9 +669,26 @@ DrawTogether.prototype.displayTip = function displayTip () {
 		"Try some shortcuts: C, L, B, P, G",
 		"If you click on someones name you will jump to their last draw position!",
 		"Pressing the eye next to someones name will make your screen follow the player."
+	];*/
+	
+	var tips = [
+		"We are doing a demographics survey: https://goo.gl/forms/gPdnRs4jbkaQmKcF2",
+		"We organize a contest, check it out in the left menu.",
+		"Hold alt for color picking",
+		"Try some shortcuts: C, L, B, P, G",
+		"Need more ink? Create an account.",
+		"If you type nyan with a capital, a cat will appear.",
+		"There are a few commands, try typing /me or /help",
+		"If you write kappa with a capital you will get the twitch emote.",
+		"Use transparency to get nicer effects.",
+		"The ▲ next to peoples name is the upvote button.",
+		"Did you know you can ban people once you have 50+ rep?",
+		"Got feedback? There is a button at the left where you can leave it!",
+		"If you click on someones name you will jump to their last draw position!",
+		"Pressing the eye next to someones name will make your screen follow the player."
 	];
 
-	this.chat.addMessage(tips[Math.floor(Math.random() * tips.length)]);
+	this.chat.addMessage(tips[this.nextTip++ % tips.length]);
 };
 
 // Get the current spawn point for a given room
