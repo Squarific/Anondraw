@@ -121,7 +121,7 @@ DrawTogether.prototype.PREMIUM_WINDOW_EVERY = 2 * 7 * 24 * 60 * 60 * 1000;
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 11;
+DrawTogether.prototype.CLIENT_VERSION = 13;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -5261,7 +5261,7 @@ DrawTogether.prototype.openFeedbackWindow = function openFeedbackWindow () {
 
 DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	localStorage.setItem("newfeaturewindowversion", this.CLIENT_VERSION);
-	var featureWindow = this.gui.createWindow({ title: "New features!"});
+	var featureWindow = this.gui.createWindow({ title: "What is new?"});
 
 	featureWindow.classList.add("feature-window");
 
@@ -5269,25 +5269,31 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("Performance: chunk unloading"));
+	title.appendChild(document.createTextNode("Contest and survey"));
 	
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("There is now a maximum amount of chunks that can be loaded to increase performance and combat out of memory errors. We also fixed a bug causing unloaded chunks to never load again."));
+	p.appendChild(document.createTextNode("Want to be challenged? From now on, every month, we are organizing a contest. Find out more on the contest page."));
+		
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("We also want to get to know you, so it's survey time. Everything is anonymous."));
+	
+	var survey = container.appendChild(document.createElement("a"));
+	survey.href = "https://goo.gl/forms/3qDGhjnAmkekMLw43";
+	survey.appendChild(document.createTextNode("The survey link."));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Recent new features:"));
+	p.appendChild(document.createTextNode("Patches:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
-	var features = ["Maximum amount of loaded chunks for performance",
-					"See the previous frames in animations (Select tool -> show frames)",
-					"Grid creating tool (Select tool or advanced options)",
-					"Export videos/gifs (Select tool -> Export video)",
-	                "Referral program (earn more rep) (Account -> Referral)",
-	                "50R+ and premium users no longer use ink",
-	                "Added Chat Filter (Settings -> Chat filter options)",
-	                "Inspect tool to catch griefers (Select tool -> Inspect)",
-	                "BUGFIX: Windows no longer go out of the browser window"];
+	var features = [
+		"Monthly contest",
+		"Survey",
+		"Moved servers, server performance should be better",
+		"Region names",
+		"Top menu reorganized, github button added",
+		"BUGFIX: When not allowed to draw, ink would get stuck in certain cases."
+	];
 
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));

@@ -121,6 +121,10 @@
     text-align: center;
 }
 
+.contest-tutorial .feature-text.feature-text:hover {
+    background: black;
+}
+
 .contest-tutorial {
 	display:flex;
 	flex-wrap:wrap;
