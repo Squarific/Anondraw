@@ -5366,7 +5366,7 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 	title.appendChild(document.createTextNode("Griefing"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Griefing is not allowed. Do not (try to) destroy drawings that other people made. Do not censor drawings. Do not impose your morals on other peoples drawing. Ask before helping. If noone is around and there are no cloud rules, you may assume that you can improve a drawing. Judgement will be made on a case by case basis."));	
+	p.appendChild(document.createTextNode("Griefing is not allowed. Do not (try to) destroy drawings that other people made. Do not censor drawings. Do not impose your morals on other peoples drawing. Ask before helping. If no one is around and there are no cloud rules, you may assume that you can improve a drawing. Judgement will be made on a case by case basis."));	
 	
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("What is allowed?"));
@@ -5390,7 +5390,7 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 	p.appendChild(document.createTextNode("To delete a drawing that is breaking the rules. The cloudowner has to leave a message next to the drawing with 'will be removed on DATE' where the given date is at least a week from now."));
 	
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("The only exception is when both the owner and the drawer are online, in that case, they should talk with eachother. This policy is there to give the drawer time to move over or screenshot his work."));
+	p.appendChild(document.createTextNode("The only exception is when both the owner and the drawer are online, in that case, they should talk with eachother. This policy is there to give the drawer time to move over or screenshot their work."));
 	
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("After the period has elapsed, the owner can remove the offending drawing. When in doubt, send an email to info@anondraw.com or ask squarific on discord. When a dispute arrises, it is advised to first ask an admin. Not doing so might be considered a bad faith action later, resulting in a decision against you."));
