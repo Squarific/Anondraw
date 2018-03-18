@@ -598,24 +598,22 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 		self.reputation = rep;
 		console.log("Our reputation is ", rep);
 
-		if (self.reputation >= self.KICKBAN_MIN_REP) {
-			var lastOpen = localStorage.getItem('moderatorwelcomewindowlastopen');
-			if (lastOpen) {
-				lastOpen = parseInt(lastOpen);
-				var remindTime = lastOpen + self.MODERATORWELCOMEWINDOWOPENAFTER;
-				if (remindTime < Date.now()) {
-					self.openModeratorWelcomeWindow();
-				}
-			} else {
+		var lastOpen = localStorage.getItem('moderatorwelcomewindowlastopen');
+		if (lastOpen) {
+			lastOpen = parseInt(lastOpen);
+			var remindTime = lastOpen + self.MODERATORWELCOMEWINDOWOPENAFTER;
+			if (remindTime < Date.now()) {
 				self.openModeratorWelcomeWindow();
 			}
-			
-			var moderatorGuidelines = document.createElement("div");
-			moderatorGuidelines.appendChild(document.createTextNode("You are a moderator! Click here for guidelines"));
-			moderatorGuidelines.addEventListener("click", self.openModeratorWelcomeWindow.bind(self));
-			moderatorGuidelines.style.cursor = "pointer";
-			self.chat.addElementAsMessage(moderatorGuidelines);
+		} else {
+			self.openModeratorWelcomeWindow();
 		}
+
+		var moderatorGuidelines = document.createElement("div");
+		moderatorGuidelines.appendChild(document.createTextNode("Click here for the rules."));
+		moderatorGuidelines.addEventListener("click", self.openModeratorWelcomeWindow.bind(self));
+		moderatorGuidelines.style.cursor = "pointer";
+		self.chat.addElementAsMessage(moderatorGuidelines);
 	});
 
 	this.network.on("setink", function (ink) {
@@ -5211,7 +5209,7 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 		"If you do not feel comfortable with that, you should not join the public rooms."));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("License: You give us the non-exclusive, transferable right to display and modify all the content you create using this website. In the public rooms, aka the rooms that do not start with private_ you also give everyone the Creative Commons share alike license for non commercial use."));
+	p.appendChild(document.createTextNode("License: You give us the non-exclusive, transferable right to display and modify all the content you create using this website. You also give everyone the Creative Commons share alike license for non commercial use."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Lastly we like to create, not destroy. Griefing will result in a ban of up to 10 years."));
@@ -5342,55 +5340,85 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcomeWindow () {
 	localStorage.setItem('moderatorwelcomewindowlastopen', Date.now());
-	var moderatorWindow = this.gui.createWindow({ title: "You are a moderator!"});
+	var moderatorWindow = this.gui.createWindow({ title: "Rules and guidelines"});
 
 	moderatorWindow.classList.add("moderator-window");
 
 	var container = moderatorWindow.appendChild(document.createElement("div"))
 	container.className = "content";
-
+	
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("You got more than " + this.KICKBAN_MIN_REP + " rep!"));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode(
-		"That means you can now kick and ban people in all rooms. "+
-		"That gives you a lot of power, and with great power comes great responsibilty."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("To help you with that we will give you some tips!"));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("A good moderator diffuses situations. Try to remain calm and have a thick skin."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Always assume good faith." +
-		"That means that if someone says or does something you have to assume they did not do it to be annoying." +
-		"It also means that you have to assume that if they do something that is not allowed you should assume they did it on accident."));
-
-	var title = container.appendChild(document.createElement("h3"));
-	title.appendChild(document.createTextNode("Ban times"));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("If someone blatantly griefs, feel free to ban them for over a week."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("If someone is spamming or being annoying, a 5 minute timeout should suffice."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("If they come back after the timeout and repeat it, you can ban for longer periods."));
-
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("If someone drew something that you might consider grief but might be a mistake, ask them to undo it."));
-
+	title.appendChild(document.createTextNode("Rules and guidelines"));
+	
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("Questions"));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("If you have a question, feel free to mail info@anondraw.com or ask squarifc on discord."));
 
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("License"));
+
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("This is also the place you should direct users with questions you don't know the answer to."));
+	p.appendChild(document.createTextNode("You give us the non-exclusive, transferable right to display and modify all the content you create using this website. You also give everyone the Creative Commons share alike license for non commercial use. This is needed so everyone is free to collaborate without having to worry about copyright."));
+	
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("Griefing"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Griefing is not allowed. Do not (try to) destroy drawings that other people made. Do not censor drawings. Do not impose your morals on other peoples drawing. Ask before helping. If noone is around and there are no cloud rules, you may assume that you can improve a drawing. Judgement will be made on a case by case basis."));	
+	
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("What is allowed?"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("There are no content restrictions other than those imposed by the law. Do not share or create anything that would be illegal inside Belgium."));	
+
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("Clouds"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("All users are allowed to claim space as their own cloud. The way to do this is by drawing a background in one color."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("When encountering a background that is colored, i.e. not transparent, you have to assume its a cloud with rules."));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Every cloudowner is allowed to enforce their rules. To do so, they FIRST have to clearly indicate what the rules are somewhere on the cloud. Rules can only be enforced if they were there before the drawing. Altough users ought to assume a cloud is governed by rules, marking it in multiple spaces on the cloud is advised in order for there to be less incidents."));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("To delete a drawing that is breaking the rules. The cloudowner has to leave a message next to the drawing with 'will be removed on DATE' where the given date is at least a week from now."));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("The only exception is when both the owner and the drawer are online, in that case, they should talk with eachother. This policy is there to give the drawer time to move over or screenshot his work."));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("After the period has elapsed, the owner can remove the offending drawing. When in doubt, send an email to info@anondraw.com or ask squarific on discord. When a dispute arrises, it is advised to first ask an admin. Not doing so might be considered a bad faith action later, resulting in a decision against you."));
+	
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("Moderators"));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Users, but especially moderators, should assume good faith. They ought to remain calm and have thick skin. Do not use given powers lightly. Give the benefit of the doubt and give yourself a higher standard than what you demand of others."));
+
+	var title = container.appendChild(document.createElement("h3"));
+	title.appendChild(document.createTextNode("Ban times"));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("When in doubt, start with a short time period of less than a week and contact info@anondraw.com or squarific on discord."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Try to keep proof. Chat messages are logged, and so is your screen at the time you ban (a before and after is saved). If more proof is needed, send it to banproof@anondraw.com."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone is being annoying, you ought to first use the mute function. This should normally suffice. The only exceptions are when users go around it."));
+	
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("First talk, in a friendly manner, with the person you want to ban and ask them to undo. A kick of less than a minute is allowed if you fear they won't or it will be too late. Be careful of collatoral damage though."));
+
+	var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("If someone blatantly griefs and does not listen, you may ban for longer time periods. Be sure to include a good description in the reason field."));
+
 };
 
 
