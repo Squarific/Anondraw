@@ -591,7 +591,7 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	if(overrideOwner && PROTECTED_REGIONS_IDS.indexOf(userid) !== -1){
+	if(overrideOwner && PROTECTED_REGIONS_IDS.indexOf(userid) == -1){
 		callback("Sorry this is an admin only feature.");
 		return;
 	}
