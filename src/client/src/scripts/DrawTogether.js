@@ -3189,7 +3189,7 @@ DrawTogether.prototype.enterTheContest = function (from, to) {
 		memberInput.placeholder = "Member " + (k + 1);
 		
 		var socialInput = form.appendChild(document.createElement("input"));
-		socialInput.placeholder = "Twitch/FB/profile";
+		socialInput.placeholder = "Twitch/FB/profile url";
 		
 		infoInputs.push({name: memberInput, social: socialInput});
 	}

@@ -88,11 +88,18 @@ Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 
 	div.appendChild(document.createElement("br"));
 	
-	var tryButton = div.appendChild(document.createElement("a"));
-	tryButton.className = "button trybutton";
-	tryButton.appendChild(document.createTextNode("Go to the collab tool to participate"));
-	tryButton.href = "/collab";
-	tryButton.setAttribute("data-navigo", "");
+	var joinButton = div.appendChild(document.createElement("a"));
+	joinButton.className = "button trybutton";
+	joinButton.appendChild(document.createTextNode("Go to the collab tool to participate"));
+	joinButton.href = "/collab";
+	joinButton.setAttribute("data-navigo", "");
+	
+	var voteButton = div.appendChild(document.createElement("a"));
+	voteButton.className = "button secondary";
+	voteButton.appendChild(document.createTextNode("Vote for this months entries"));
+	voteButton.href = "/vote";
+	voteButton.setAttribute("data-navigo", "");
+	
 	
 	return feature;
 };

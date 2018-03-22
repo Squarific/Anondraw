@@ -55,6 +55,21 @@ Account.prototype.getProfileData = function getProfileData (id, callback) {
 	this.request("/getprofiledata", { id: id }, this.parseData.bind(this, callback));
 };
 
+Account.prototype.getContestEntries = function getContestEntries (callback) {
+	this.request("/getContestEntries", {
+		uKey: this.uKey
+	},
+	this.parseData.bind(this, callback));
+};
+
+Account.prototype.vote = function vote (image, callback) {
+	this.request("/vote", {
+		uKey: this.uKey,
+		image: image
+	},
+	this.parseData.bind(this, callback));
+};
+
 Account.prototype.setBio = function setBio (bio, callback) {
 	this.request("/setbio", {
 		uKey: this.uKey,

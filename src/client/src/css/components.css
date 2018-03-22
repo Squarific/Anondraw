@@ -57,6 +57,14 @@
 	background:#c399f3;
 }
 
+.secondary {
+	background:#6c987d;
+}
+
+.secondary:hover {
+	background:#89b59a;
+}
+
 .signup {
 	background:#6c987d;
 	position: relative;
@@ -236,16 +244,17 @@
 	font-weight:bold;
 }
 
-.accountform .status {
+.status {
 	display:block;
 	background:#6b3232;
+	color:white;
 	padding:1.5em;
 	width:100%;
 	margin-bottom:2em;
 	text-align:center;
 }
 
-.accountform .status:empty {
+.status:empty {
 	display:none;
 }
 
@@ -431,6 +440,20 @@
 	margin:0.5em;
 }
 
+.entries {
+	padding:2em;
+}
+
+.entry {
+	flex-direction:column;
+	position:relative;
+}
+
+.vote {
+	margin-left:1em;
+	margin-right:1em;
+}
+
 .story a {
 	display: inline-block;
     text-decoration: none;
@@ -464,6 +487,10 @@
 	align-items:center;
 	min-width:15em;
 	text-align:center;
+}
+
+.entry .imagecontainer {
+	min-height:16em;
 }
 
 .story .credit {

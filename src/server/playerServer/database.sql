@@ -30,6 +30,15 @@ CREATE TABLE members (
 	social VARCHAR(128)
 );
 
+CREATE TABLE votes (
+	userid INT UNSIGNED,
+	votetime DATETIME,
+	weight INT,
+	image VARCHAR(128)
+	INDEX(userid, image),
+	INDEX(image)
+);
+
 CREATE TABLE IF NOT EXISTS forgotkeys (
 	email VARCHAR(255),
 	ip VARCHAR(48),

@@ -72,6 +72,18 @@ PlayerDatabase.prototype.setBio = function setBio (id, bio, callback) {
 	});
 };
 
+PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid, callback) {
+	this.database.query("SELECT image FROM teams WHERE MONTH(submittime) = MONTH(CURRENT_DATE()) AND YEAR(submittime) = YEAR(CURRENT_DATE()) AND NOT EXISTS (SELECT 1 FROM votes WHERE userid = ? AND votes.image = teams.image)", [userid], function (err, rows) {
+		if (err) {
+			console.log("GETCONTESTENTRIES DB ERROR", err, userid);
+			callback("Could not get entries. Please contact support.");
+			return;
+		}
+		
+		callback(null, rows);
+	});
+};
+
 PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callback) {
 	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COUNT(*) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
 		if (err) {
