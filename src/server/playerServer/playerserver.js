@@ -100,10 +100,10 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 		
-		if (new Date.getDate() <= 21) {
+		if (new Date().getDate() <= 21) {
 			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
 			return;
-		} else if (new Date.getDate() > 27) {
+		} else if (new Date().getDate() > 27) {
 			res.end(JSON.stringify({ error: "A new theme will be announced the first of next month. The 21nd of next month you will be able to vote again. For now, check out the winners!" }));
 			return;
 		}
@@ -127,10 +127,10 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 		
-		if (new Date.getDate() <= 21) {
+		if (new Date().getDate() <= 21) {
 			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
 			return;
-		} else if (new Date.getDate() > 27) {
+		} else if (new Date().getDate() > 27) {
 			res.end(JSON.stringify({ error: "A new theme will be announced the first of next month. The 21nd of next month you will be able to vote again. For now, check out the winners!" }));
 			return;
 		}
