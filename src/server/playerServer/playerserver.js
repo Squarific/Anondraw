@@ -180,6 +180,15 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 		
+		// If only one name or social is provided it will get parsed as a string instead of an array
+		if (!Array.isArray(names)) {
+			names = [names];
+		}
+		
+		if (!Array.isArray(socials)) {
+			socials = [socials];
+		}
+		
 		var team = [];
 		for (var k = 0; k < names.length; k++) {
 			team.push({ name: names[k], social: socials[k]});
