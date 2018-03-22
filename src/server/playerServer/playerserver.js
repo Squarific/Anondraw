@@ -180,6 +180,11 @@ var server = http.createServer(function (req, res) {
 			return;
 		}
 		
+		if (new Date().getDate() > 21) {
+			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
+			return;
+		}
+		
 		// If only one name or social is provided it will get parsed as a string instead of an array
 		if (!Array.isArray(names)) {
 			names = [names];
