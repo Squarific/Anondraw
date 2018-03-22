@@ -34,9 +34,10 @@ CREATE TABLE votes (
 	userid INT UNSIGNED,
 	votetime DATETIME,
 	weight INT,
-	image VARCHAR(128)
+	image VARCHAR(128),
 	INDEX(userid, image),
-	INDEX(image)
+	INDEX(image),
+	UNIQUE KEY onevote (userid, image)
 );
 
 CREATE TABLE IF NOT EXISTS forgotkeys (

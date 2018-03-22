@@ -84,6 +84,20 @@ PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid,
 	});
 };
 
+// Don't allow two votes
+// Weight with reputation
+PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
+	this.database.query("INSERT INTO votes VALUES SELECT ?, ?, (SELECT count(*) FROM users INNER JOIN reputations AS r ON users.id = r.to_id WHERE users.id = 1 GROUP BY users.id), ? FROM ", [userid, new Date(), imageid], function (err) {
+		if (err) {
+			console.log("VOTE DB ERROR", err, userid, imageid);
+			callback("Voting failed, did you vote for this image already?");
+			return;
+		}
+		
+		callback(null);
+	});
+};
+
 PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callback) {
 	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COUNT(*) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
 		if (err) {

@@ -117,6 +117,32 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 	
+	if (parsedUrl.pathname == "/vote") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var imageId = parsedUrl.query.image;
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
+			return;
+		}
+		
+		if (new Date.getDate() <= 21) {
+			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
+			return;
+		} else if (new Date.getDate() > 27) {
+			res.end(JSON.stringify({ error: "A new theme will be announced the first of next month. The 21nd of next month you will be able to vote again. For now, check out the winners!" }));
+			return;
+		}
+		
+		playerDatabase.vote(user.id, imageId, function (err) {
+			res.end(JSON.stringify({
+				error: err
+			}));
+		});
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/getprofiledata") {
 		var id = parsedUrl.query.id;
 		playerDatabase.getProfileData(id, function (err, data) {
