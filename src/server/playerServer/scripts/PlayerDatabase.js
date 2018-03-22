@@ -87,7 +87,7 @@ PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid,
 // Don't allow two votes
 // Weight with reputation
 PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
-	this.database.query("INSERT INTO votes VALUES SELECT ?, ?, (SELECT count(*) FROM users INNER JOIN reputations AS r ON users.id = r.to_id WHERE users.id = 1 GROUP BY users.id), ?", [userid, new Date(), imageid], function (err) {
+	this.database.query("INSERT INTO votes VALUES (SELECT ?, ?, (SELECT count(*) FROM users INNER JOIN reputations AS r ON users.id = r.to_id WHERE users.id = ? GROUP BY users.id), ?)", [userid, new Date(), userid, imageid], function (err) {
 		if (err) {
 			console.log("VOTE DB ERROR", err, userid, imageid);
 			callback("Voting failed, did you vote for this image already?");

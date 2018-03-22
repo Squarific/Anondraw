@@ -181,7 +181,7 @@ var server = http.createServer(function (req, res) {
 		}
 		
 		if (new Date().getDate() > 21) {
-			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
+			res.end(JSON.stringify({ error: "You can enter again the first of next month!" }));
 			return;
 		}
 		
