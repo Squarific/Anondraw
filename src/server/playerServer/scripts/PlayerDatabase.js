@@ -3,9 +3,9 @@ var SHA256 = require("crypto-js/sha256");
 // Hardcoded list of ids of the people allowed to give unlimited reputation
 // Will be removed once the title system is in place
 var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028, 2659]; // Filip, Lukas, Nyrrti, Corro, Sonny, intOrFloat
+var PROTECTED_REGIONS_IDS = [1, 27, 2659];
 var UPVOTE_MIN_REP = 7;
 var DEFAULT_MIN_REGION_REP = 2000000000;
-var MODERATE_REGIONS_MIN_REP = 100;
 var REFERRAL_CONFIRMED_REP = 9;
 
 var REPSOURCES = {
@@ -603,25 +603,21 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	this.database.query("select count(*) as reputation from reputations where to_id = ?", [userid], function(err, rows) {
+	if(overrideOwner && PROTECTED_REGIONS_IDS.indexOf(userid) == -1){
+		callback("Sorry this is an admin only feature.");
+		return;
+	}
+
+	this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
 		if(err){
-			callback(err)
+			callback(err);
+			console.log("Delete protected region database error", err);
 			return;
 		}
-		if(overrideOwner && (rows[0].reputation < MODERATE_REGIONS_MIN_REP)){
-			callback("You must have at least" + MODERATE_REGIONS_MIN_REP + "R to remove someone elses region");
-			return;
-		}
-		this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
-			if(err){
-				callback(err);
-				console.log("Delete protected region database error", err);
-				return;
-			}
-			this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
-				callback(err);
-				console.log("Delete protected region permissions database error", err);
-			}.bind(this));
+
+		this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
+			callback(err);
+			console.log("Delete protected region permissions database error", err);
 		}.bind(this));
 	}.bind(this));
 };
