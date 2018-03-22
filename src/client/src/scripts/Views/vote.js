@@ -19,7 +19,7 @@ Anondraw.prototype.createVotePage = function createVotePage () {
 /*
 	Needs to be bound to anondraw before calling
 */
-Anondraw.prototype.view.createContestEntries = function createContestEntries (container, err, entries) {
+Anondraw.prototype.view.createContestEntries = function createContestEntries (container, err, data) {
 	while (container.firstChild) container.removeChild(container.firstChild);
 	
 	var info = container.appendChild(document.createElement("div"));
@@ -36,8 +36,8 @@ Anondraw.prototype.view.createContestEntries = function createContestEntries (co
 	var entriesDom = container.appendChild(document.createElement("div"));
 	entriesDom.classList.add("entries");
 	
-	for (var k = 0; k < entries.length; k++) {
-		entriesDom.appendChild(this.view.createEntry.call(this, entries[k]));
+	for (var k = 0; k < data.entries.length; k++) {
+		entriesDom.appendChild(this.view.createEntry.call(this, data.entries[k]));
 	}
 };
 
