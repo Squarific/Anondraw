@@ -1112,7 +1112,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 
 		removeRegionButton.appendChild(document.createTextNode("Delete their region?"));
 
-		removeRegionButton.addEventListener("click", this.removeProtectedRegion.bind(this, messageFromServer.regionid, false));
+		removeRegionButton.addEventListener("click", this.removeProtectedRegion.bind(this, messageFromServer.regionid, false, true));
 
 		PermissionDom.appendChild(removeRegionButton);
 	}
@@ -3050,10 +3050,10 @@ DrawTogether.prototype.resetProtectedRegions = function () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.removeProtectedRegion = function (regionId, element) {
+DrawTogether.prototype.removeProtectedRegion = function (regionId, element, override) {
 	this.permissionWindowVisibilityDom(false);
 
-	this.network.socket.emit("removeprotectedregion", regionId, function (err, result) {
+	this.network.socket.emit("removeprotectedregion", regionId, override, function (err, result) {
 		if (err) {
 			this.chat.addMessage("Regions", "Reset Error: " + err);
 			return;

@@ -1520,16 +1520,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
-		socket.on("removeprotectedregion", function (regionId, callback) {
+		socket.on("removeprotectedregion", function (regionId, overrideOwner, callback) {
 			if (typeof callback !== 'function') return;
 
 			if (isNaN(regionId)) {
 				callback("Region id is undefined.")
 				return;
-			}
-			var overrideOwner = false;
-			if (socket.reputation > MODERATE_REGION_MIN_REP){
-				overrideOwner = true;
 			}
 
 			protocol.players.request('removeprotectedregion', {
