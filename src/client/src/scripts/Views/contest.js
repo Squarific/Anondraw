@@ -106,34 +106,31 @@ Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 
 Anondraw.prototype.winners = [
 	{
-		title: "March 2018 Winners (Placeholder/Example)",
+		title: "March 2018 Winners",
 		teams: [
 			{
-				name: "Meme team",
+				name: "",
 				members: [
-					{ name: "A member"},
-					{ name: "Anondraw", href: "https://www.twitch.com/anondraw"},
-					{ name: "Someone"}
+					{ name: "Coferosa"},
+					{ name: "Cherry Bear"},
+					{ name: "cat meow"}
 				],
-				image: "2ysi1gvut5590xu5jjle8o8wi4juo5gu64jchbdnymim223j"
+				image: "v1z17x6cfhnykjetnqv82jrisnmrls1xu80g1249wtpaqqlj"
 			},
 			{
-				name: "Dream team",
+				name: "",
 				members: [
-					{ name: "Beauty"},
-					{ name: "Beast"},
+					{ name: "electric int"},
+					{ name: "killjoy"}
 				],
-				image: "k8d55r3tmampou546lkrkrbjj7uau2jpggtwh2ll2gxwsjkm"
+				image: "lvq0l3qll00ybpfucdx9hr5ad8f4vi4lcovqt2pz841e4orx"
 			},
 			{
-				name: "The thirds",
+				name: "",
 				members: [
-					{ name: "McQueen"},
-					{ name: "Mickey Mouse", href: "https://www.twitch.com/anondraw"},
-					{ name: "Rick", href: "https://www.anondraw.com"},
-					{ name: "Morty"},
+					{ name: "Shred", href: "https://www.instagram.com/sirshredder/"}
 				],
-				image: "fqgccopc5vb0uxjldpbtd004iganaqbd6t70gym3hrnavuhz"
+				image: "xa449ptolxpem5d82zng57vnx6gwvot37s6vl8nq951eypt2"
 			}
 		]
 	}
