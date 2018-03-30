@@ -670,7 +670,7 @@ DrawTogether.prototype.displayTip = function displayTip () {
 	];*/
 	
 	var tips = [
-		"We are doing a demographics survey: https://goo.gl/forms/gPdnRs4jbkaQmKcF2",
+		"The results of the survey are in!: https://medium.com/@alemaaltevinden/anondraw-survey-results-2018-b01b48ca8614",
 		"We organize a contest, check it out in the left menu.",
 		"Hold alt for color picking",
 		"Try some shortcuts: C, L, B, P, G",
