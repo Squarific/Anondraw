@@ -77,14 +77,14 @@ Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 	p.appendChild(document.createTextNode("This month's theme is: "));
 	
 	var strong = p.appendChild(document.createElement("strong"));
-	strong.appendChild(document.createTextNode("space"));
+	strong.appendChild(document.createTextNode("minecraft"));
 	
 	p.appendChild(document.createElement("br"));
 	
 	p.appendChild(document.createTextNode("Submission period ends: "));
 
 	var strong = p.appendChild(document.createElement("strong"));
-	strong.appendChild(document.createTextNode("March 21, 2018"));
+	strong.appendChild(document.createTextNode("April 21, 2018"));
 
 	div.appendChild(document.createElement("br"));
 	
