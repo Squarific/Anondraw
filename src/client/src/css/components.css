@@ -129,8 +129,8 @@
     text-align: center;
 }
 
-.contest-tutorial .feature-text.feature-text:hover {
-    background: black;
+.contest-tutorial .feature-text.feature-text:nth-child(even) {
+    background: #394856;
 }
 
 .contest-tutorial {
@@ -463,6 +463,13 @@
     margin-right: 1em;
 }
 
+.entry a {
+	display: initial;
+	text-decoration:initial;
+	font-weight:initial;
+	margin: initial;
+}
+
 .storytext .actualtext {
 	text-align:left;
 	max-height:10em;
@@ -524,6 +531,11 @@
 .winners-container {
 	width:100%;
 	text-align:center;
+}
+
+.winners-container .button {
+	margin-top:2em;
+	min-width:50%;
 }
 
 .winners-container .podium {

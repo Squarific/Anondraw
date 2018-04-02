@@ -242,6 +242,11 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('set', 'page', '/vote');
 		ga('send', 'pageview');
 	}.bind(this))
+	.on('/allentries/:month/:year', function (params) {
+		this.setContent(this.createAllEntriesPage(params));
+		ga('set', 'page', '/allentries');
+		ga('send', 'pageview');
+	}.bind(this))
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */
 		if (location.hash && location.hash.indexOf("pw_adbox") == -1) {

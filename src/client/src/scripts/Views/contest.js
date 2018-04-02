@@ -107,6 +107,8 @@ Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 Anondraw.prototype.winners = [
 	{
 		title: "March 2018 Winners",
+		month: 3,
+		year: 2018,
 		teams: [
 			{
 				name: "",
@@ -149,6 +151,13 @@ Anondraw.prototype.view.contest.createWinners = function contestCreateWinners (w
 	h2.appendChild(document.createTextNode(winners.title));
 	
 	div.appendChild(this.createPodium(winners.teams));
+	
+	var allButton = div.appendChild(document.createElement("a"));
+	allButton.className = "button secondary";
+	var months = ["January", "February", "March", "April", "May", "June", "July", "Augustus", "September", "October", "November", "December"];
+	allButton.appendChild(document.createTextNode("See all entries for " + months[winners.month - 1] + " " + winners.year));
+	allButton.href = "/allentries/" + winners.month + "/" + winners.year;
+	allButton.setAttribute("data-navigo", "");
 	
 	return feature;
 };

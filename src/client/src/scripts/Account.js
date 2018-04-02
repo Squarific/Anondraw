@@ -62,6 +62,15 @@ Account.prototype.getContestEntries = function getContestEntries (callback) {
 	this.parseData.bind(this, callback));
 };
 
+Account.prototype.getAllEntries = function getAllEntries (params, callback) {
+	console.log(params, callback)
+	this.request("/getFullEntries", {
+		month: params.month,
+		year: params.year
+	},
+	this.parseData.bind(this, callback));
+};
+
 Account.prototype.vote = function vote (image, callback) {
 	this.request("/vote", {
 		uKey: this.uKey,
