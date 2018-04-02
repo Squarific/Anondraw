@@ -94,14 +94,16 @@ PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, 
 		
 		rows = rows || [];
 		var teams = [];
-
 		
 		// This code expects members to be sorted by score and then by image
+		// We loop trough all the members
 		for (var k = 0; k < rows.length; k++) {
 
+			// If the current last team is the one we are in, just push ourselves into the member list
 			if (teams[teams.length - 1] && teams[teams.length - 1].image == rows[k].image) {
-				teams.members.push({ name: rows[k].name, social: rows[k].social});
+				teams[teams.length - 1].members.push({ name: rows[k].name, social: rows[k].social});
 
+			// Otherwise we create a new team, with us as only member
 			} else {
 				teams.push({
 					image: rows[k].image,
