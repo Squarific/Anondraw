@@ -91,6 +91,19 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 	
+	if (parsedUrl.pathname == "/getFullEntries") {
+		var month = parsedUrl.query.month;
+		var year = parsedUrl.query.year;
+		
+		playerDatabase.getFullEntries(month, year, function (err, data) {
+			res.end(JSON.stringify({
+				error: err,
+				entries: data
+			}));
+		});
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/getContestEntries") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);

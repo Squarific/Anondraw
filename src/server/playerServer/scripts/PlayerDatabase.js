@@ -84,6 +84,36 @@ PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid,
 	});
 };
 
+PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, callback) {
+	this.database.query("SELECT image, name, social FROM teams JOIN members ON teams.id = members.teamid WHERE MONTH(submittime) = ? AND YEAR(submittime) = ? ORDER BY (SELECT SUM(weight) FROM votes WHERE votes.image = teams.image), image DESC", [month, year], function (err, rows) {
+		if (err) {
+			console.log("GETFULLENTRIES DB ERROR", err, month, year);
+			callback("Could not get entries. Please contact support.");
+			return;
+		}
+		
+		rows = rows || [];
+		var teams = [];
+
+		
+		// This code expects members to be sorted by score and then by image
+		for (var k = 0; k < rows.length; k++) {
+
+			if (teams[teams.length - 1] && teams[teams.length - 1].image == rows[k].image) {
+				teams.members.push({ name: rows[k].name, social: rows[k].social});
+
+			} else {
+				teams.push({
+					image: rows[k].image,
+					members: [{name: rows[k].name, social: rows[k].social}]
+				});
+			}
+		}
+
+		callback(null, teams);
+	});
+};
+
 // Don't allow two votes
 // Weight with reputation
 PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
