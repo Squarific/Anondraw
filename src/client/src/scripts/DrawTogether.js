@@ -286,9 +286,10 @@ DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
 		var viewDeductionDelta = Date.now() - this.lastViewDeduction;
 		
 		for (var k = 0; k < this.playerList.length; k++) {
-			this.playerList[k].id == this._followingPlayer;
-			this.playerList[k].viewScore -= viewDeductionDelta;
-			break;
+			if (this.playerList[k].id == this._followingPlayer) {
+				this.playerList[k].viewScore -= viewDeductionDelta;
+				break;
+			}
 		}
 
 		this.lastViewDeduction += viewDeductionDelta;
