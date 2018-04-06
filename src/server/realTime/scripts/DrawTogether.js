@@ -103,7 +103,7 @@ DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all
 		stop = this.drawings[room].sendLength;
 	}
 
-	for (k = this.drawings[room].length - 1; k >= stop; k--) {
+	for (var k = this.drawings[room].length - 1; k >= stop; k--) {
 		if (this.drawings[room][k].id == socketid || this.drawings[room][k].socketid == socketid) {
 			this.drawings[room].splice(k, 1);
 
