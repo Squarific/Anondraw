@@ -37,8 +37,8 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].ignoreCache ) &&
 		( new Date() - (this.drawings[room].last_send_to_img_server || 0) > WAIT_BEFORE_SYNC_RETRY ) &&
 	    !this.drawings[room].sending &&
-	    !room.indexOf("game_") == 0 &&
-	    !room.indexOf("private_game_") == 0) {
+	    room.indexOf("game_") !== 0 &&
+	    room.indexOf("private_game_") !== 0) {
 
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
