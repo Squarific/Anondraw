@@ -3304,8 +3304,7 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	else
 		endY = Math.max(from[1], to[1]);
 	
-	endY[0] = Math.ceil(endY[0]);
-	endY[1] = Math.ceil(endY[1]);
+	endY = Math.ceil(endY);
 	
 	var exportFuncs = {
 			boolean: "getBoolean",
