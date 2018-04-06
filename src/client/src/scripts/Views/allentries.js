@@ -39,7 +39,7 @@ Anondraw.prototype.view.allentries.createContestEntries = function createContest
 	var entriesDom = container.appendChild(document.createElement("div"));
 	entriesDom.classList.add("entries");
 	
-	for (var k = data.entries.length - 1; k > 0; k--) {
+	for (var k = data.entries.length - 1; k >= 0; k--) {
 		entriesDom.appendChild(this.view.allentries.createEntry.call(this, data.entries[k]));
 	}
 };
