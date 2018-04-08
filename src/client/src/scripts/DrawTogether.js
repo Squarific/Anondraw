@@ -286,9 +286,10 @@ DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
 		var viewDeductionDelta = Date.now() - this.lastViewDeduction;
 		
 		for (var k = 0; k < this.playerList.length; k++) {
-			this.playerList[k].id == this._followingPlayer;
-			this.playerList[k].viewScore -= viewDeductionDelta;
-			break;
+			if (this.playerList[k].id == this._followingPlayer) {
+				this.playerList[k].viewScore -= viewDeductionDelta;
+				break;
+			}
 		}
 
 		this.lastViewDeduction += viewDeductionDelta;
@@ -3303,8 +3304,7 @@ DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop
 	else
 		endY = Math.max(from[1], to[1]);
 	
-	endY[0] = Math.ceil(endY[0]);
-	endY[1] = Math.ceil(endY[1]);
+	endY = Math.ceil(endY);
 	
 	var exportFuncs = {
 			boolean: "getBoolean",

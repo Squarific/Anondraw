@@ -79,7 +79,7 @@ var server = http.createServer(function (req, res) {
 		}
 		
 		if (bio.length > MAX_STORY_LENGTH) {
-			res.end(JSON.stringify({ error: "Your bio is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  story.length }));
+			res.end(JSON.stringify({ error: "Your bio is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  bio.length }));
 			return;
 		}
 		
