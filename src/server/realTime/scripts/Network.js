@@ -1221,7 +1221,9 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 			
-			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * (socket.reputation || 1)) {
+			// Yeah we need to take into account negative rep for the special snowflakes that are willing to pay for it
+			var rep = socket.reputation < 0 ? 100 : (socket.reputation || 1);
+			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * rep) {
 				protocol.informClient(socket, "Something went wrong. (#PPTF)");
 				callback(false);
 				return;
