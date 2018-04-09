@@ -72,6 +72,8 @@ CREATE TABLE IF NOT EXISTS reputations (
     id INT UNSIGNED AUTO_INCREMENT,
     from_id INT UNSIGNED,
     to_id INT UNSIGNED,
+	source INT UNSIGNED DEFAULT 0,
+	weight INT DEFAULT 1,
     PRIMARY KEY (id),
     INDEX(to_id, from_id)
     INDEX(from_id, to_id)
@@ -86,9 +88,6 @@ CREATE TABLE imageposts (
 	INDEX (userid, created),
 	INDEX (created)
 );
-
---For the possible source values, see PlayerDatabase.js
-ALTER TABLE reputations ADD COLUMN source INT UNSIGNED DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS ipbans (
     ip VARCHAR(48),

@@ -338,7 +338,7 @@ PlayerDatabase.prototype.register = function register (email, pass, referral, ca
 };
 
 PlayerDatabase.prototype.getReputation = function getReputation (userid, callback) {
-	this.database.query("SELECT COUNT(*) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
+	this.database.query("SELECT SUM(weight) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
 		if (err) {
 			callback("Database error (#1) while getting reputation.");
 			console.log("[GETREPUTATION] Database error: ", err);

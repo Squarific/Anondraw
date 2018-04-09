@@ -5155,6 +5155,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	}
 	
 	container.appendChild(document.createTextNode("* Coming soon"));
+	container.appendChild(document.createTextNode("Super secret crazy people offers: if you pay 50 euro, you get to pick your rep, if you pay 100 euro you get to give unlimited rep. (Fair use applies, you can't break things, limit the abuse ;) )"));
 
 	var p = container.appendChild(document.createElement("p"));
 	if (!this.account.uKey) {
