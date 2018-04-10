@@ -10,7 +10,6 @@ var options = {
 
 var https = require("https");
 var urlParser = require("url");
-var getIp = require('external-ip')();
 var JOIN_CODE = config.service.loadbalancer.password.join;
 var statuscode = config.service.loadbalancer.password.status;
 var room_regex = /^[a-z0-9_]+$/i;
@@ -59,17 +58,6 @@ var server = https.createServer(options, function (req, res) {
 		if (!url) {
 			res.end('{"error": "No url provided"}');
 			return;
-		}
-
-		if (url.indexOf("localhost") !== -1) {
-			getIp(function (err, ip) {
-				if (err) throw err;
-				url = url.replace("localhost", ip);
-				var id = servers.add(url);
-		                res.end('{"success": "Registered", "id": "' + id + '"}');
-		                console.log("[REGISTERED]", id, url)
-			});
-			return
 		}
 
 		var id = servers.add(url);
