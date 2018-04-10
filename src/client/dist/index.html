@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html style="padding:0; margin:0; height:100%;">
+	<head>
+		<base href="/" />
+		<!-- 
+			This is the anondraw draw online source code
+			It allows you to draw with friends in group
+			Readable version: https://github.com/Squarific/anondraw/
+		-->
+		<link rel="stylesheet" href="anondraw.min.css?v=46325aa">
+		<title>AnonDraw - Draw online on an infinite paint canvas</title>
+
+		<meta name="viewport" content="width=device-width">
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+		
+		<meta property="fb:admins" content="100000842878520" />
+		<meta name="description" content="Draw online and collaborate with strangers or draw with friends in a public or private room. In our paint pad you can draw interactivly in group.">
+		<link rel="shortcut icon" href="favicon.ico?v=46325aa">
+		
+		<link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700" rel="stylesheet">
+
+		<meta property="og:image" content="https://www.anondraw.com/images/promotional/logo-modern.png?v=46325aa" />
+
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-30802449-5', 'auto');
+		  ga('send', 'pageview');
+
+		</script>
+	</head>
+	<body style="position:relative; padding:0; margin:0; min-height: 100%;">
+		<img src="https://www.anondraw.com/images/promotional/logo-modern.png?v=46325aa" alt="Anon Draw" style="display:none;">
+		<div id="fullscreen" style="position:absolute; left:0; right:0; top:0; bottom:0; background:white;"></div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+		<script src="anondraw.min.js?v=46325aa"></script>
+		<script type="text/javascript">
+		
+			function pw_load(){
+		      var d=document;var s=d.createElement('script');
+			  var src = '//www.projectwonderful.com/pwa.js';
+			  var scripts = d.querySelectorAll('script[src$="' + src + '"]');
+			  for (var k = 0; k < scripts.length; k++) {scripts[k].parentNode.removeChild(scripts[k])}
+		      var x=d.getElementsByTagName('script')[0];
+		      s.type='text/javascript';s.async=true;
+		      s.src=src;
+		      x.parentNode.insertBefore(s,x);
+		    }
+			  
+			function getParameterByName(name, url) {
+			    if (!url) {
+			      url = window.location.href;
+			    }
+			    name = name.replace(/[\[\]]/g, "\\$&");
+			    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+				results = regex.exec(url);
+			    if (!results) return null;
+			    if (!results[2]) return '';
+			    return decodeURIComponent(results[2].replace(/\+/g, " "));
+			}
+			
+			if (getParameterByName("ref")) {
+				localStorage.setItem("drawtogether-referrer", getParameterByName("ref"));
+			}
+			
+			var emotesHash = { 
+				"4Head":"images/emotes/4Head.png", 
+				"ANDY":"images/emotes/ANDY.gif", 
+				"ANELE":"images/emotes/ANELE.png", 
+				"ArgieB8":"images/emotes/ArgieB8.png", 
+				"ArsonNoSexy":"images/emotes/ArsonNoSexy.png", 
+				"AsianGlow":"images/emotes/AsianGlow.png", 
+				"AthenaPMS":"images/emotes/AthenaPMS.png", 
+				"BabyRage":"images/emotes/BabyRage.png", 
+				"BatChest":"images/emotes/BatChest.png", 
+				"BCouch":"images/emotes/BCouch.png", 
+				"BCWarrior":"images/emotes/BCWarrior.png", 
+				"BibleThump":"images/emotes/BibleThump.png", 
+				"BigBrother":"images/emotes/BigBrother.png", 
+				"BionicBunion":"images/emotes/BionicBunion.png", 
+				"BlargNaut":"images/emotes/BlargNaut.png", 
+				"bleedPurple":"images/emotes/bleedPurple.png", 
+				"BloodTrail":"images/emotes/BloodTrail.png", 
+				"BORT":"images/emotes/BORT.png", 
+				"BrainSlug":"images/emotes/BrainSlug.png", 
+				"BrokeBack":"images/emotes/BrokeBack.png", 
+				"BuddhaBar":"images/emotes/BuddhaBar.png", 
+				"CAB":"images/emotes/CAB.png", 
+				"CasualLama":"images/emotes/CasualLama.png", 
+				"CasualLamaOriginal":"images/emotes/CasualLamaOriginal.png", 
+				"cmonBruh":"images/emotes/cmonBruh.png", 
+				"CoolCat":"images/emotes/CoolCat.png", 
+				"CorgiDerp":"images/emotes/CorgiDerp.png", 
+				"CougarHunt":"images/emotes/CougarHunt.png", 
+				"DAESuppy":"images/emotes/DAESuppy.png", 
+				"DansGame":"images/emotes/DansGame.png", 
+				"DatSheffy":"images/emotes/DatSheffy.png", 
+				"DBstyle":"images/emotes/DBstyle.png", 
+				"deExcite":"images/emotes/deExcite.png", 
+				"deIlluminati":"images/emotes/deIlluminati.png", 
+				"DendiFace":"images/emotes/DendiFace.png", 
+				"DIAPERJAKE":"images/emotes/DIAPERJAKE.png", 
+				"DIAPERJAKE2":"images/emotes/DIAPERJAKE2.png", 
+				"DISGUSTING":"images/emotes/DISGUSTING.png", 
+				"DogFace":"images/emotes/DogFace.png", 
+				"DOOMGuy":"images/emotes/DOOMGuy.png", 
+				"duDudu":"images/emotes/duDudu.png", 
+				"EagleEye":"images/emotes/EagleEye.png", 
+				"EleGiggle":"images/emotes/EleGiggle.png", 
+				"EvilFetus":"images/emotes/EvilFetus.png", 
+				"FailFish":"images/emotes/FailFish.png", 
+				"FILLDIAPER":"images/emotes/FILLDIAPER.gif", 
+				"FPSMarksman":"images/emotes/FPSMarksman.png", 
+				"FrankerZ":"images/emotes/FrankerZ.png", 
+				"FreakinStinkin":"images/emotes/FreakinStinkin.png", 
+				"FUCKYOU":"images/emotes/FUCKYOU.gif", 
+				"FUNgineer":"images/emotes/FUNgineer.png", 
+				"FunRun":"images/emotes/FunRun.png", 
+				"FuzzyOtterOO":"images/emotes/FuzzyOtterOO.png", 
+				"GingerPower":"images/emotes/GingerPower.png", 
+				"GrammarKing":"images/emotes/GrammarKing.png", 
+				"HANA":"images/emotes/HANA.png", 
+				"HassaanChop":"images/emotes/HassaanChop.png", 
+				"HassanChop":"images/emotes/HassanChop.png", 
+				"HeyGuys":"images/emotes/HeyGuys.png", 
+				"HotPokket":"images/emotes/HotPokket.png", 
+				"HumbleLife":"images/emotes/HumbleLife.png", 
+				"ihaterat":"images/emotes/ihaterat.gif", 
+				"ItsBoshyTime":"images/emotes/ItsBoshyTime.png", 
+				"Jebaited":"images/emotes/Jebaited.png", 
+				"JKanStyle":"images/emotes/JKanStyle.png", 
+				"JonCarnage":"images/emotes/JonCarnage.png", 
+				"KAPOW":"images/emotes/KAPOW.png", 
+				"Kappa":"images/emotes/Kappa.png", 
+				"KappaClaus":"images/emotes/KappaClaus.png", 
+				"KappaPride":"images/emotes/KappaPride.png", 
+				"KappaRoss":"images/emotes/KappaRoss.png", 
+				"KappaWealth":"images/emotes/KappaWealth.png", 
+				"Keepo":"images/emotes/Keepo.png", 
+				"KevinTurtle":"images/emotes/KevinTurtle.png", 
+				"Kippa":"images/emotes/Kippa.png", 
+				"KoalaSQUISHY":"images/emotes/KoalaSQUISHY.gif", 
+				"KrakenWulf":"images/emotes/KrakenWulf.gif", 
+				"Kreygasm":"images/emotes/Kreygasm.png", 
+				"LemmeSmash":"images/emotes/LemmeSmash.png", 
+				"Mau5":"images/emotes/Mau5.png", 
+				"mcaT":"images/emotes/mcaT.png", 
+				"MEAT":"images/emotes/MEAT.png", 
+				"MEATHEART":"images/emotes/MEATHEART.png", 
+				"MikeHogu":"images/emotes/MikeHogu.png", 
+				"MILK.":"images/emotes/MILK.jpeg", 
+				"MingLee":"images/emotes/MingLee.png", 
+				"MrDestructoid":"images/emotes/MrDestructoid.png", 
+				"MVGame":"images/emotes/MVGame.png", 
+				"NinjaTroll":"images/emotes/NinjaTroll.png", 
+				"NoNoSpot":"images/emotes/NoNoSpot.png", 
+				"NotATK":"images/emotes/NotATK.png", 
+				"NotLikeThis":"images/emotes/NotLikeThis.png", 
+				"Nyan":"images/emotes/Nyan.png", 
+				"OhMyDog":"images/emotes/OhMyDog.png", 
+				"OMGScoots":"images/emotes/OMGScoots.png", 
+				"OneHand":"images/emotes/OneHand.png", 
+				"OpieOP":"images/emotes/OpieOP.png", 
+				"OptimizePrime":"images/emotes/OptimizePrime.png", 
+				"OSfrog":"images/emotes/OSfrog.png", 
+				"OSkomodo":"images/emotes/OSkomodo.png", 
+				"OSsloth":"images/emotes/OSsloth.png", 
+				"panicBasket":"images/emotes/panicBasket.png", 
+				"PanicVis":"images/emotes/PanicVis.png", 
+				"PartyTime":"images/emotes/PartyTime.png", 
+				"PazPazowitz":"images/emotes/PazPazowitz.png", 
+				"PeoplesChamp":"images/emotes/PeoplesChamp.png", 
+				"PermaSmug":"images/emotes/PermaSmug.png", 
+				"PeteZaroll":"images/emotes/PeteZaroll.png", 
+				"PeteZarollTie":"images/emotes/PeteZarollTie.png", 
+				"PicoMause":"images/emotes/PicoMause.png", 
+				"PipeHype":"images/emotes/PipeHype.png", 
+				"PISCES":"images/emotes/PISCES.png", 
+				"PJSalt":"images/emotes/PJSalt.png", 
+				"PMSTwin":"images/emotes/PMSTwin.png", 
+				"PogChamp":"images/emotes/PogChamp.png", 
+				"Poooound":"images/emotes/Poooound.png", 
+				"PraiseIt":"images/emotes/PraiseIt.png", 
+				"PRChase":"images/emotes/PRChase.png", 
+				"PunchTrees":"images/emotes/PunchTrees.png", 
+				"PuppeyFace":"images/emotes/PuppeyFace.png", 
+				"RaccAttack":"images/emotes/RaccAttack.png", 
+				"RalpherZ":"images/emotes/RalpherZ.png", 
+				"RAT":"images/emotes/RAT.gif", 
+				"RedCoat":"images/emotes/RedCoat.png", 
+				"ResidentSleeper":"images/emotes/ResidentSleeper.png", 
+				"riPepperonis":"images/emotes/riPepperonis.png", 
+				"RitzMitz":"images/emotes/RitzMitz.png", 
+				"RuleFive":"images/emotes/RuleFive.png", 
+				"sadrat":"images/emotes/sadrat.gif", 
+				"SeemsGood":"images/emotes/SeemsGood.png", 
+				"ShadyLulu":"images/emotes/ShadyLulu.png", 
+				"ShazBotstix":"images/emotes/ShazBotstix.png", 
+				"ShibeZ":"images/emotes/ShibeZ.png", 
+				"SHRED":"images/emotes/SHRED.png", 
+				"SINFUL":"images/emotes/SINFUL.png", 
+				"SMOrc":"images/emotes/SMOrc.png", 
+				"SMSkull":"images/emotes/SMSkull.png", 
+				"SoBayed":"images/emotes/SoBayed.png", 
+				"SoonerLater":"images/emotes/SoonerLater.png", 
+				"SriHead":"images/emotes/SriHead.png", 
+				"SSSsss":"images/emotes/SSSsss.png", 
+				"StoneLightning":"images/emotes/StoneLightning.png", 
+				"StrawBeary":"images/emotes/StrawBeary.png", 
+				"SuperVinlin":"images/emotes/SuperVinlin.png", 
+				"Swagnet":"images/emotes/Swagnet.gif", 
+				"SwiftRage":"images/emotes/SwiftRage.png", 
+				"TerriLSD":"images/emotes/TerriLSD.gif", 
+				"TF2John":"images/emotes/TF2John.png", 
+				"TheRinger":"images/emotes/TheRinger.png", 
+				"TheTarFu":"images/emotes/TheTarFu.png", 
+				"TheThing":"images/emotes/TheThing.png", 
+				"THOTDETECTED":"images/emotes/THOTDETECTED.png", 
+				"ThunBeast":"images/emotes/ThunBeast.png", 
+				"TinyFace":"images/emotes/TinyFace.png", 
+				"TooSpicy":"images/emotes/TooSpicy.png", 
+				"TriHard":"images/emotes/TriHard.png", 
+				"TTours":"images/emotes/TTours.png", 
+				"twitchRaid":"images/emotes/twitchRaid.png", 
+				"UleetBackup":"images/emotes/UleetBackup.png", 
+				"UncleNox":"images/emotes/UncleNox.png", 
+				"UnSane":"images/emotes/UnSane.png", 
+				"VaultBoy":"images/emotes/VaultBoy.png", 
+				"VoHiYo":"images/emotes/VoHiYo.png", 
+				"Void1":"images/emotes/Void1.jpg", 
+				"Void2":"images/emotes/Void2.jpg", 
+				"Volcania":"images/emotes/Volcania.png", 
+				"WholeWheat":"images/emotes/WholeWheat.png", 
+				"WillDraw4Rep":"images/emotes/WillDraw4Rep.png", 
+				"WinWaker":"images/emotes/WinWaker.png", 
+				"WTRuck":"images/emotes/WTRuck.png", 
+				"WutFace":"images/emotes/WutFace.png", 
+				"YelloSTABBY":"images/emotes/YelloSTABBY.gif", 
+				"YelloVulp":"images/emotes/YelloVulp.png", 
+				"YouWHY":"images/emotes/YouWHY.png"
+			};
+			
+			var collabSettings = {
+				loadbalancer: "https://direct.anondraw.com:3552",
+				imageServer: "https://direct.anondraw.com:5552",
+				accountServer: "https://direct.anondraw.com:4552",
+				messageServer: "https://direct.anondraw.com:4552",
+				privateChatServer: "https://direct.anondraw.com:2552",
+				emotesHash: emotesHash
+			};
+			
+			var anondraw = new Anondraw(document.getElementById("fullscreen"), collabSettings);
+		</script>
+		<!-- Go to www.addthis.com/dashboard to customize your tools -->
+		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-53c4fbf2311fe8f1" async="async"></script>
+		<script type="text/javascript">
+			reformal_wdg_domain    = "anondraw";
+			reformal_wdg_mode    = 0;
+			reformal_wdg_title   = "Anondraw";
+			reformal_wdg_ltitle  = "Feedback";
+			reformal_wdg_lfont   = "";
+			reformal_wdg_lsize   = "";
+			reformal_wdg_color   = "#45678a";
+			reformal_wdg_bcolor  = "#516683";
+			reformal_wdg_tcolor  = "#FFFFFF";
+			reformal_wdg_align   = "left";
+			reformal_wdg_waction = 0;
+			reformal_wdg_vcolor  = "#9FCE54";
+			reformal_wdg_cmline  = "#E0E0E0";
+			reformal_wdg_glcolor  = "#105895";
+			reformal_wdg_tbcolor  = "#FFFFFF";
+			 
+			reformal_wdg_bimage = "bea4c2c8eb82d05891ddd71584881b56.png";
+		</script>
+		<style type="text/css">.furjbqy {display:none !important;}</style>
+		<script type="text/javascript" language="JavaScript" src="https://idea.informer.com/tab6.js?domain=anondraw">
+		</script>
+		<!-- Google Code for Register Conversion Page
+		In your html page, add the snippet and call
+		goog_report_conversion when someone clicks on the
+		chosen link or button. -->
+		<script type="text/javascript">
+		  /* <![CDATA[ */
+		  goog_snippet_register_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "bCA4CICTj2cQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  goog_snippet_join_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "lIFsCNzQomcQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  goog_snippet_buy_vars = function() {
+		    var w = window;
+		    w.google_conversion_id = 1035018725;
+		    w.google_conversion_label = "99KuCPC3nmcQ5cPE7QM";
+		    w.google_remarketing_only = false;
+		  }
+		  // DO NOT CHANGE THE CODE BELOW.
+		  goog_report_register = function(url) {
+		    goog_snippet_register_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+			    window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		  goog_report_join = function(url) {
+		    goog_snippet_join_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+		    	 window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		  goog_report_buy = function(url) {
+		    goog_snippet_buy_vars();
+		    window.google_conversion_format = "3";
+		    var opt = new Object();
+		    opt.onload_callback = function() {
+			  if (typeof(url) != 'undefined') {
+			    window.location = url;
+			  }
+			}
+			var conv_handler = window['google_trackConversion'];
+			if (typeof(conv_handler) == 'function') {
+			  conv_handler(opt);
+			}
+		  }
+		/* ]]> */
+		</script>
+		<script type="text/javascript"
+		  src="//www.googleadservices.com/pagead/conversion_async.js">
+		</script>
+
+		<noscript>
+		<!-- Project Wonderful Ad Box Loader -->
+		<script type="text/javascript">
+		   (function(){function pw_load(){
+		      if(arguments.callee.z)return;else arguments.callee.z=true;
+		      var d=document;var s=d.createElement('script');
+		      var x=d.getElementsByTagName('script')[0];
+		      s.type='text/javascript';s.async=true;
+		      s.src='//www.projectwonderful.com/pwa.js';
+		      x.parentNode.insertBefore(s,x);}
+		   if (window.attachEvent){
+		    window.attachEvent('DOMContentLoaded',pw_load);
+		    window.attachEvent('onload',pw_load);}
+		   else{
+		    window.addEventListener('DOMContentLoaded',pw_load,false);
+		    window.addEventListener('load',pw_load,false);}})();
+		</script>
+		
+		</noscript>
+		<!-- End Project Wonderful Ad Box Loader -->
+
+		<div style="display:none;">
+			<!-- Project Wonderful Ad Box Code -->
+			<div id="pw_adbox_78949_1_0"></div>
+			<script type="text/javascript"></script>
+			<noscript><map name="admap78949" id="admap78949"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=78949&type=1" shape="rect" coords="0,0,468,60" title="" alt="" target="_blank" /></map>
+			<table cellpadding="0" cellspacing="0" style="width:468px;border-style:none;background-color:#3A5774;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=78949&type=1" style="width:468px;height:60px;border-style:none;" usemap="#admap78949" alt="" /></td></tr><tr><td style="background-color:#3A5774;" colspan="1"><center><a style="font-size:10px;color:#ffffff;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=78949&type=1" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table>
+			</noscript>
+			<!-- End Project Wonderful Ad Box Code -->
+			
+			<!-- Project Wonderful Ad Box Code -->
+			<div id="pw_adbox_80229_5_0"></div>
+			<script type="text/javascript"></script>
+			<noscript><map name="admap80229" id="admap80229"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=80229&type=5" shape="rect" coords="0,0,728,90" title="" alt="" target="_blank" rel="noopener noreferrer" /></map>
+			<table cellpadding="0" cellspacing="0" style="width:728px;border-style:none;background-color:#ffffff;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=80229&type=5" style="width:728px;height:90px;border-style:none;" usemap="#admap80229" alt="" /></td></tr><tr><td style="background-color:#ffffff;" colspan="1"><center><a style="font-size:10px;color:#0000ff;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=80229&type=5" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table>
+			</noscript>
+			<!-- End Project Wonderful Ad Box Code -->
+		</div>
+	</body>
+</html>
