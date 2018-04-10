@@ -671,7 +671,6 @@ DrawTogether.prototype.displayTip = function displayTip () {
 	];*/
 	
 	var tips = [
-		"The results of the survey are in!: https://medium.com/@alemaaltevinden/anondraw-survey-results-2018-b01b48ca8614",
 		"We organize a contest, check it out in the left menu.",
 		"Hold alt for color picking",
 		"Try some shortcuts: C, L, B, P, G",
@@ -5289,17 +5288,10 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("Contest and survey"));
+	title.appendChild(document.createTextNode("Contest"));
 	
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Want to be challenged? From now on, every month, we are organizing a contest. Find out more on the contest page."));
-		
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("We also want to get to know you, so it's survey time. Everything is anonymous."));
-	
-	var survey = container.appendChild(document.createElement("a"));
-	survey.href = "https://goo.gl/forms/3qDGhjnAmkekMLw43";
-	survey.appendChild(document.createTextNode("The survey link."));
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Patches:"));
