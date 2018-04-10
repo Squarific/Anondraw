@@ -1,7 +1,13 @@
 var config = require("../../common/config.js");
 var getIp = require('external-ip')();
-var http = require('http');
+var https = require('https');
 var urlParse = require("url");
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
 
 function Register (server, key, io, port, listenServer) {
 	this.server = server;
@@ -59,7 +65,7 @@ function Register (server, key, io, port, listenServer) {
 }
 
 Register.prototype.isOurs = function isOurs (room, callback) {
-	var req = http.request({
+	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
@@ -85,7 +91,7 @@ Register.prototype.isOurs = function isOurs (room, callback) {
 };
 
 Register.prototype.register = function register () {
-	var req = http.request({
+	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
@@ -140,7 +146,7 @@ Register.prototype.updatePlayerCount = function updatePlayerCount () {
 		rooms[socket.room] = this.getUserListCount(socket.room);
 	}
 
-	var req = http.request({
+	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",

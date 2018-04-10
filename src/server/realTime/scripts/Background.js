@@ -1,5 +1,5 @@
 var config = require("../../common/config.js");
-var http = require("http");
+var https = require("https");
 
 function Background (server, httpListenServer, drawcode) {
 	this.server = server;
@@ -8,7 +8,7 @@ function Background (server, httpListenServer, drawcode) {
 }
 
 Background.prototype.sendDrawings = function (room, drawings, callback) {
-	var req = http.request({
+	var req = https.request({
 		hostname: this.server,
 		port: config.service.image.port,
 		method: "POST",

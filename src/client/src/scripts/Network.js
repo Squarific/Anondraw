@@ -140,7 +140,7 @@ Network.prototype.getServerFromRoom = function getServerFromRoom (room, specific
 
 // If we are not connected to the given server, change our socket
 Network.prototype.changeServer = function changeServer (server, callback) {
-	if (server.indexOf("http://") == -1) server = "http://" + server;
+	if (server.indexOf("https://") == -1) server = "https://" + server;
 
 	// If the current socket is to the right server, just callback
 	if (this.socket && this.socket.io.uri == server) {
