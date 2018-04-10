@@ -1,7 +1,13 @@
 var config = require("../../common/config.js");
-var getIp = require('external-ip')();
-var http = require('http');
+var https = require('https');
 var urlParse = require("url");
+var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
 
 function Register (server, key, io, port, listenServer) {
 	this.server = server;
@@ -13,19 +19,8 @@ function Register (server, key, io, port, listenServer) {
 
 	this.updateInterval;
 
-	if (server == "localhost") {
-		this.ip = "localhost";
-		this.register();
-	} else {
-		getIp(function (err, ip) {
-			if (err) throw err;
-			
-			ip = ip.replace(/(^\w+:|^)\/\//, '');
-			console.log("[STARTUP] Our ip is ", ip);
-			this.ip = ip;
-			this.register();
-		}.bind(this));
-	}
+	this.ip = config.service.realtime.host;
+	this.register();
 
 	this.listenServer.addListener("request", function (req, res) {
 		var parsedUrl = urlParse.parse(req.url, true);
@@ -59,11 +54,12 @@ function Register (server, key, io, port, listenServer) {
 }
 
 Register.prototype.isOurs = function isOurs (room, callback) {
-	var req = http.request({
+	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
-		path: "/isourroom?room=" + encodeURIComponent(room) + "&id=" + encodeURIComponent(this.id)
+		path: "/isourroom?room=" + encodeURIComponent(room) + "&id=" + encodeURIComponent(this.id),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);
@@ -85,11 +81,12 @@ Register.prototype.isOurs = function isOurs (room, callback) {
 };
 
 Register.prototype.register = function register () {
-	var req = http.request({
+	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
-		path: "/register?key=" + encodeURIComponent(this.key) + "&url=" + encodeURIComponent(this.ip + ":" + this.port)
+		path: "/register?key=" + encodeURIComponent(this.key) + "&url=" + encodeURIComponent(this.ip + ":" + this.port),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);
@@ -140,11 +137,12 @@ Register.prototype.updatePlayerCount = function updatePlayerCount () {
 		rooms[socket.room] = this.getUserListCount(socket.room);
 	}
 
-	var req = http.request({
+	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
-		path: "/update?id=" + encodeURIComponent(this.id) + "&rooms=" + JSON.stringify(rooms)
+		path: "/update?id=" + encodeURIComponent(this.id) + "&rooms=" + JSON.stringify(rooms),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);

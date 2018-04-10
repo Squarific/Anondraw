@@ -134,9 +134,9 @@ DrawTogether.prototype.defaultSettings = {
 	room: "main",                          // Room to join at startup
 	leftTopX: 0,
 	leftTopY: 0,
-	loadbalancer: "http://direct.anondraw.com:3552",
-	accountServer: "http://direct.anondraw.com:4552",
-	imageServer: "http://direct.anondraw.com:5552"
+	loadbalancer: "https://direct.anondraw.com:3552",
+	accountServer: "https://direct.anondraw.com:4552",
+	imageServer: "https://direct.anondraw.com:5552"
 };
 
 DrawTogether.prototype.defaultUserSettings = [{
@@ -741,7 +741,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.handleGotoAndCenter(x || spawn[0], y || spawn[1]);
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
-			this.chat.addMessage("Invite people", "http://www.anondraw.com/#" + room + number);
+			this.chat.addMessage("Invite people", "https://www.anondraw.com/#" + room + number);
 			
 			this.chat.addMessage("Scuttlers is released!", "https://store.steampowered.com/app/689040/Scuttlers/");
 			
@@ -803,7 +803,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.paint.clear();
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
-			this.chat.addMessage("Invite friends:", "http://www.anondraw.com/#" + room);
+			this.chat.addMessage("Invite friends:", "https://www.anondraw.com/#" + room);
 			
 			this.chat.addMessage("Check out my upcoming game scuttlers", "https://www.youtube.com/watch?v=pE737MO-8YQ");
 			
@@ -4916,8 +4916,8 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	p.appendChild(document.createTextNode("Your link is: "));
 
 	var link = p.appendChild(document.createElement("a"));
-	link.appendChild(document.createTextNode("http://www.anondraw.com/?ref=" + this.account.id));
-	link.href = "http://www.anondraw.com/?ref=" + this.account.id;
+	link.appendChild(document.createTextNode("https://www.anondraw.com/?ref=" + this.account.id));
+	link.href = "https://www.anondraw.com/?ref=" + this.account.id;
 	link.alt = "Your referral link";
 	link.title = "Your referral link";
 };

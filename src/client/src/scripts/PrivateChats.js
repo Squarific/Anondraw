@@ -43,12 +43,10 @@ PrivateChats.prototype.bindSocketListeners = function bindSocketListeners () {
 		if (Notification.permission !== "granted")
 			Notification.requestPermission();
 		else {
-			if (document[this.hidden]) {
-				var notification = new Notification("PM: ", {
-					icon: 'http://www.anondraw.com/favicon.ico',
-					body: message,
-				});
-			}
+			var notification = new Notification("PM: ", {
+				icon: 'https://www.anondraw.com/favicon.ico',
+				body: message,
+			});
 		}
 	}.bind(this));
 	

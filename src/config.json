@@ -35,6 +35,7 @@
             "port": 2552
         }
     },
+    "permfolder": "/etc/letsencrypt/live/direct.anondraw.com",
     "mysql": {
         "host":     "localhost",
         "database": "anondraw",
@@ -45,6 +46,6 @@
         "key": "mailgunkey",
         "domain": "mg.anondraw.com",
         "sender": "forgot@anondraw.com",
-        "forgotlink": "http://www.anondraw.com"
+        "forgotlink": "https://www.anondraw.com"
     }
 }

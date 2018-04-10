@@ -2,10 +2,16 @@ require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 var emailTemplate = require("./emailTemplate.js");
 
-var http = require("http");
+var https = require("https");
 var mysql = require("mysql");
 var mailgun = require('mailgun-send');
 var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
 
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
@@ -57,7 +63,7 @@ function randomString (length) {
 	return string;
 }
 
-var server = http.createServer(function (req, res) {
+var server = https.createServer(options, function (req, res) {
 	var url = require("url");
 	var parsedUrl = url.parse(req.url, true);
 	
@@ -1353,7 +1359,7 @@ var server = http.createServer(function (req, res) {
 	res.end('{"error": "Unknown command"}');
 }.bind(this)).listen(config.service.player.port);
 
-var app = http.createServer(handler);
+var app = https.createServer(options, handler);
 var io = require('socket.io')(app);
 var fs = require('fs');
 
