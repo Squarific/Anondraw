@@ -1,5 +1,6 @@
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
+var fs = require('fs');
 
 var options = {
   key: fs.readFileSync(config.permfolder + '/privkey.pem'),

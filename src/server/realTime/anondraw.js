@@ -2,6 +2,7 @@ Error.stackTraceLimit = Infinity;
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 var https = require('https');
+var fs = require('fs');
 
 var options = {
   key: fs.readFileSync(config.permfolder + '/privkey.pem'),
