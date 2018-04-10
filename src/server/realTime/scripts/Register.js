@@ -2,6 +2,7 @@ var config = require("../../common/config.js");
 var getIp = require('external-ip')();
 var https = require('https');
 var urlParse = require("url");
+var fs = require('fs');
 
 var options = {
   key: fs.readFileSync(config.permfolder + '/privkey.pem'),
