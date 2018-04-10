@@ -12,7 +12,8 @@ Background.prototype.sendDrawings = function (room, drawings, callback) {
 		hostname: this.server,
 		port: config.service.image.port,
 		method: "POST",
-		path: "/drawings?drawcode=" + encodeURIComponent(this.drawcode) + "&room=" + encodeURIComponent(room)
+		path: "/drawings?drawcode=" + encodeURIComponent(this.drawcode) + "&room=" + encodeURIComponent(room),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);

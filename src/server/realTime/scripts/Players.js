@@ -65,7 +65,8 @@ Players.prototype.request = function request (method, urlArguments, callback) {
 		hostname: this.server,
 		port: config.service.player.port,
 		method: "GET",
-		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments)
+		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		var data = "";
 		res.on("data", function (chunk) {

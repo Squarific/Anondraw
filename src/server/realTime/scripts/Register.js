@@ -70,7 +70,8 @@ Register.prototype.isOurs = function isOurs (room, callback) {
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
-		path: "/isourroom?room=" + encodeURIComponent(room) + "&id=" + encodeURIComponent(this.id)
+		path: "/isourroom?room=" + encodeURIComponent(room) + "&id=" + encodeURIComponent(this.id),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);
@@ -96,7 +97,8 @@ Register.prototype.register = function register () {
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
-		path: "/register?key=" + encodeURIComponent(this.key) + "&url=" + encodeURIComponent(this.ip + ":" + this.port)
+		path: "/register?key=" + encodeURIComponent(this.key) + "&url=" + encodeURIComponent(this.ip + ":" + this.port),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);
@@ -151,7 +153,8 @@ Register.prototype.updatePlayerCount = function updatePlayerCount () {
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
 		method: "GET",
-		path: "/update?id=" + encodeURIComponent(this.id) + "&rooms=" + JSON.stringify(rooms)
+		path: "/update?id=" + encodeURIComponent(this.id) + "&rooms=" + JSON.stringify(rooms),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);

@@ -1,4 +1,4 @@
-var http = require("http");
+var https = require("https");
 var url = require('url');
 var TIMEOUT = 140 * 1000;
 var MAX_GAME_MEMBERS = 8;
@@ -138,11 +138,12 @@ Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer (server, ro
 	if (server.url.indexOf("http") == -1) server.url = "http://" + server.url;
 	var parsedUrl = url.parse(server.url);
 
-	var req = http.request({
+	var req = https.request({
 		hostname: parsedUrl.hostname,
 		port: parsedUrl.port,
 		method: "GET",
-		path: "/closeroom?room=" + encodeURIComponent(room) + "&code=" + encodeURIComponent(this.code)
+		path: "/closeroom?room=" + encodeURIComponent(room) + "&code=" + encodeURIComponent(this.code),
+		rejectUnauthorized: this.server.indexOf('localhost') !== 0
 	}, function (res) {
 		res.on("data", function (chunk) {
 			try {
