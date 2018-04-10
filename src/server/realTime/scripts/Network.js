@@ -654,7 +654,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						return;
 					}
 					//shadowban this ass.
-					console.log("Shadow Banned:", socket.name, socket.ip);
+					console.log("Shadow Banned:", socket.name, socket.ip, oldIp);
 					shadowbanned.push(socket.ip);
 					return;
 				}
