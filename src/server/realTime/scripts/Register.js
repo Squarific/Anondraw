@@ -1,5 +1,4 @@
 var config = require("../../common/config.js");
-var getIp = require('external-ip')();
 var https = require('https');
 var urlParse = require("url");
 var fs = require('fs');
@@ -20,19 +19,8 @@ function Register (server, key, io, port, listenServer) {
 
 	this.updateInterval;
 
-	if (server == "localhost") {
-		this.ip = "localhost";
-		this.register();
-	} else {
-		getIp(function (err, ip) {
-			if (err) throw err;
-			
-			ip = ip.replace(/(^\w+:|^)\/\//, '');
-			console.log("[STARTUP] Our ip is ", ip);
-			this.ip = ip;
-			this.register();
-		}.bind(this));
-	}
+	this.ip = config.service.realtime.host;
+	this.register();
 
 	this.listenServer.addListener("request", function (req, res) {
 		var parsedUrl = urlParse.parse(req.url, true);
