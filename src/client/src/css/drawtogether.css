@@ -837,6 +837,40 @@ input.paint-texttool {
   display:none;
 }
 
+.drawtogether-paint-container.fullscreen {
+	position:fixed;
+	left:0;
+	top:0;
+	right:0;
+	bottom:0;
+	width:100%;
+	z-index:500;
+}
+
+.popout-button {
+	position:absolute;
+	right:0;
+	top:0;
+	width:2em;
+	cursor:pointer;
+	border-bottom-left-radius:10%;
+	transition-duration:0.2s
+}
+
+.popout-button:hover {
+	background: #23344580;
+}
+
+.drawtogether-paint-container.fullscreen .popout-button {
+	transition-duration:1s;
+	transform: rotate(180deg);
+}
+
+.drawtogether-paint-container.fullscreen .mouse-coords,
+.drawtogether-paint-container.fullscreen .control-container {
+	display:none;
+}
+
 @media (max-width: 1550px) {
   .adcontainer.drawtogether-question {
     zoom: 0.5;

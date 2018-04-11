@@ -131,7 +131,7 @@ PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
 };
 
 PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callback) {
-	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COUNT(*) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
+	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COALESCE(SUM(weight),0) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
 		if (err) {
 			console.log("GETPROFILEDATA DB ERROR", err, userid);
 			callback("Database error, couldn't get profile.");
@@ -338,7 +338,7 @@ PlayerDatabase.prototype.register = function register (email, pass, referral, ca
 };
 
 PlayerDatabase.prototype.getReputation = function getReputation (userid, callback) {
-	this.database.query("SELECT SUM(weight) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
+	this.database.query("SELECT COALESCE(SUM(weight),0) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
 		if (err) {
 			callback("Database error (#1) while getting reputation.");
 			console.log("[GETREPUTATION] Database error: ", err);
@@ -351,7 +351,7 @@ PlayerDatabase.prototype.getReputation = function getReputation (userid, callbac
 			return;
 		}
 
-		callback(null, rows[0].reputation);
+		callback(null, rows[0].reputation || 0);
 	});
 };
 
@@ -368,7 +368,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 			return;
 		}
 
-		this.database.query("SELECT COUNT(*) as fromcount FROM reputations WHERE to_id = ?", [fromId], function (err, rows1) {
+		this.database.query("SELECT COALESCE(SUM(weight),0) as fromcount FROM reputations WHERE to_id = ?", [fromId], function (err, rows1) {
 			if (err) {
 				callback("Database error (#3) trying to give reputation.");
 				console.log("[GIVEREPUTATION] Database error while getting fromcount: ", err);
@@ -380,7 +380,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 				return;
 			}
 
-			this.database.query("SELECT COUNT(*) as tocount FROM reputations WHERE to_id = ?", [toId], function (err, rows2) {
+			this.database.query("SELECT COALESCE(SUM(weight),0) as tocount FROM reputations WHERE to_id = ?", [toId], function (err, rows2) {
 				if (rows2[0].tocount >= rows1[0].fromcount) {
 					callback("You can only give reputation to people that have less than you.");
 					return;
