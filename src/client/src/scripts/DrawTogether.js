@@ -1621,6 +1621,18 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	mapButtonImage.src = "images/icons/map.png";
 	mapButtonImage.alt = "Open the tile map";
 	mapButtonImage.title = "Open the tile map";
+	
+	var popout = this.paint.container.appendChild(document.createElement("img"));
+	popout.className = "popout-button";
+	popout.src = "images/icons/popout.png";
+	popout.alt = "Popout";
+	popout.title = "Popout";
+	popout.addEventListener('click', this.toggleFullscreen.bind(this));
+};
+
+DrawTogether.prototype.toggleFullscreen = function toggleFullscreen () {
+	this.paint.container.classList.toggle("fullscreen");
+	this.paint.resize();
 };
 
 DrawTogether.prototype.openTilesMap = function openTilesMap () {
