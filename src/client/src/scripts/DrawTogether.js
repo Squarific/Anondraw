@@ -1633,6 +1633,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 DrawTogether.prototype.toggleFullscreen = function toggleFullscreen () {
 	this.paint.container.classList.toggle("fullscreen");
 	this.paint.resize();
+	ga("send", "event", "fullscreen", "toggle");
 };
 
 DrawTogether.prototype.openTilesMap = function openTilesMap () {

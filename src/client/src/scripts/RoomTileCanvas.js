@@ -12,7 +12,7 @@ function RoomTileCanvas (favList, settings) {
 	
 	this.container.classList.add("roomTileCanvas");
 	this.errorDiv = this.container.appendChild(document.createElement("div"));
-	this.errorDiv.classList.add("status");
+	this.errorDiv.classList.add("status no-error");
 	this.errorDiv.appendChild(document.createTextNode("Loading..."));
 	
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
