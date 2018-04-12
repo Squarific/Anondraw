@@ -267,7 +267,7 @@ DrawTogether.prototype.updateClickableAreas = function updateClickableAreas () {
 DrawTogether.prototype.clickClickableArea = function clickClickableArea (index) {
 	var coords = this.clickableAreas[index].url.split(",");
 	if (coords.length == 2 && parseInt(coords[0]) == parseInt(coords[0]) && parseInt(coords[1]) == parseInt(coords[1])) {
-		this.paint.goto(parseInt(coords[0]), parseInt(coords[1]));
+		this.handleGotoAndCenter(parseInt(coords[0]), parseInt(coords[1]));
 	} else {
 		this.gui.prompt("You are about to go to " + this.clickableAreas[index].url + ". Are you sure you want to do that?", ["Yeah I'm brave", "Nah that sounds dangerous"], function (answer) {
 			if (answer == "Yeah I'm brave") window.open(this.clickableAreas[index].url);
@@ -1002,9 +1002,13 @@ DrawTogether.prototype.setName = function setName (name) {
 DrawTogether.prototype.setRoom = function setRoom (room) {
 	this.current_room = room;
 	this.roomInput.value = room;
+	
+	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+	                  this.paint.public.canvas.height / this.paint.public.zoom];
+	
 	location.hash = room + "," +
-	                this.paint.public.leftTopX.toFixed() + "," +
-	                this.paint.public.leftTopY.toFixed();
+	                (this.paint.public.leftTopX.toFixed() + screenSize[0] / 2) + "," +
+	                (this.paint.public.leftTopY.toFixed() + screenSize[1] / 2);
 };
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
@@ -1587,9 +1591,12 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint.addEventListener("select", this.handlePaintSelection.bind(this));
 
 	function setHash () {
+		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+	                  this.paint.public.canvas.height / this.paint.public.zoom];
+		
 		location.hash = this.current_room + "," +
-		                this.paint.public.leftTopX.toFixed() + "," +
-		                this.paint.public.leftTopY.toFixed();
+		                (this.paint.public.leftTopX.toFixed() + screenSize[0] / 2) + "," +
+		                (this.paint.public.leftTopY.toFixed() + screenSize[1] / 2);
 	}
 
 	var hashTimeout;
