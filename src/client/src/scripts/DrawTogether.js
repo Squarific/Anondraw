@@ -17,6 +17,7 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.moveQueue = [];
 	this.favList = [];
 	this.myRegions = [];
+	this.clickableAreas = [];
 	this.myAnimations = this.getAnimationsFromCookie();
 	this.ink = 0;
 	this.nextTip = 0;
@@ -723,7 +724,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 	}.bind(this), 2000);
 	
 	number = number || "";
-	this.network.loadRoom(room + number, specific, override, function (err, drawings) {
+	this.network.loadRoom(room + number, specific, override, function (err, drawings, clickableAreas) {
 		this.changingRoom = false;
 		if (err && err.indexOf("Too many users") !== -1) {
 			this.chat.addMessage("Room '" + room + number + "' is full! Trying " + room + ((number || 0) + 1));
@@ -743,10 +744,6 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.chat.addMessage("Invite people", "https://www.anondraw.com/#" + room + number);
 			
 			this.chat.addMessage("Scuttlers is released!", "https://store.steampowered.com/app/689040/Scuttlers/");
-			
-			if (room + number == "main") {
-				//this.chat.addMessage("We are working on a tshirt design.  More info: -850056,469261");
-			}
 			
 			if(this.account.uKey)
 			{
@@ -775,6 +772,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 				this.createScuttlersOverlay();
 			}
 
+			this.clickableAreas = clickableAreas;
 			this.removeLoading();
 		}
 	}.bind(this));
@@ -1150,6 +1148,35 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 	return PermissionDom;
 };
 
+DrawTogether.prototype.createRegionProtectedWindow = function createRegionProtectedWindow () {
+	if (this.regionProtectedWindowTimeout && Date.now() - this.regionProtectedWindowTimeout < 15000) return;
+	this.regionProtectedWindowTimeout = Date.now();
+
+	if (this.reputation && this.reputation > 10) return
+
+	var protectedWindow = this.gui.createWindow({
+		title: "Permission denied"
+	});
+	
+	var content = protectedWindow.appendChild(document.createElement("div"));
+	content.classList.add("content");
+	
+	var title = content.appendChild(document.createElement("h2"));
+	title.appendChild(document.createTextNode("Sorry, but you can't draw here."));
+	
+	var p = content.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("To prevent grief, this region has been protected. We can find you an empty spot though. There you can draw and build up reputation."));
+	
+	var button = content.appendChild(document.createElement("div"));
+	button.classList = "drawtogether-button";
+	button.appendChild(document.createTextNode("Go to a random location"));
+	button.addEventListener("click", function () {
+		var maxCoords = this.paint.MAX_RANDOM_COORDS;
+		this.paint.goto(Math.random() * maxCoords * 2 - maxCoords, Math.random() * maxCoords * 2 - maxCoords);
+		protectedWindow.parentNode.removeChild(protectedWindow);
+	}.bind(this));
+};
+
 DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (player, appendedText) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
@@ -1483,6 +1510,10 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		this.sendDrawing(event.drawing, function (success) {
 			if(typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed){
 				this.createPermissionChatMessageWithTimeout(success);
+				this.createRegionProtectedWindow();
+			}
+			else if (typeof success.inSpawnArea !== 'undefined') {
+				this.createRegionProtectedWindow();
 			}
 
 			event.removeDrawing();
@@ -2316,8 +2347,11 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 			if(typeof success.isAllowed !== 'undefined'){
 				this.createPermissionChatMessageWithTimeout(success);
 				this.outlineProtectedRegion(success, true);
-				
+				this.createRegionProtectedWindow();
+			} else if (typeof success.inSpawnArea !== 'undefined') {
+				this.createRegionProtectedWindow();
 			}
+			
 			if(typeof timeOut !== 'undefined' && timeOut){
 				var curr_time = Date.now();
 				if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
