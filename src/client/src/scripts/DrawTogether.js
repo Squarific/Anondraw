@@ -267,7 +267,7 @@ DrawTogether.prototype.updateClickableAreas = function updateClickableAreas () {
 DrawTogether.prototype.clickClickableArea = function clickClickableArea (index) {
 	var coords = this.clickableAreas[index].url.split(",");
 	if (coords.length == 2 && parseInt(coords[0]) == parseInt(coords[0]) && parseInt(coords[1]) == parseInt(coords[1])) {
-		this.paint.goto(coords[0], coords[1]);
+		this.paint.goto(parseInt(coords[0]), parseInt(coords[1]));
 	} else {
 		this.gui.prompt("You are about to go to " + this.clickableAreas[index].url + ". Are you sure you want to do that?", ["Yeah I'm brave", "Nah that sounds dangerous"], function (answer) {
 			if (answer == "Yeah I'm brave") window.open(this.clickableAreas[index].url);
