@@ -143,7 +143,7 @@ PlayerDatabase.prototype.createClickableArea = function createClickableArea (use
 		
 		this.database.query("INSERT INTO clickableares (owner, x, y, width, height, url, room) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, x, y, width, height, url, room], function (err) {
 			if (err) {
-				console.log("CREATECLICKABLEAREA DB ERROR", userid, position, size, url, room);
+				console.log("CREATECLICKABLEAREA DB ERROR", userid, x, y, width, height, url, room);
 				callback("Could not create clickable area because of a database issue. Please contact an admin.");
 				return;
 			}
