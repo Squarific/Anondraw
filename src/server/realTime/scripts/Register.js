@@ -46,6 +46,11 @@ function Register (server, key, io, port, listenServer) {
 				if (this.io.nsps['/'].connected[id])
 					this.io.nsps['/'].connected[id].disconnect();
 			}
+			
+			// Clear the room
+			delete this.protocol.protectedRegions[room];
+			delete this.protocol.clickableAreas[room];
+			delete this.protocol.gameRooms[room];
 	
 			res.end('{"success": "Disconnected all clients in room ' + room + '"}');
 			return;

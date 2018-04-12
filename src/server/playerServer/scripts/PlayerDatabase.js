@@ -116,6 +116,43 @@ PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, 
 	});
 };
 
+PlayerDatabase.prototype.getClickableAreas = function getClickableAreas (room, callback) {
+	this.database.query("SELECT * FROM clickableareas WHERE room = ?", [room], function (err, rows) {
+		if (err) {
+			console.log("GETCLICKABLEAREAS DB ERROR", err);
+			callback("Could not get clickable areas; DB error");
+			return;
+		}
+		
+		callback(null, rows);
+	});
+};
+
+PlayerDatabase.prototype.createClickableArea = function createClickableArea (userid, room, x, y, width, height, url, callback) {
+	this.database.query("select count(*) as amountOfAreas from clickableareas left join premium on userid=owner where owner = ? AND userid is null AND room = ?", [userid, room], function (err, rows) {
+		if (err) {
+			console.log("Createclickablearea db error on countcheck", room, userid);
+			callback("Could not create clickable area");
+			return;
+		}
+		
+		if (rows[0].amountOfAreas > 0) {
+			callback("Having more than one clickable area is premium only.");
+			return;
+		}
+		
+		this.database.query("INSERT INTO clickableares (owner, x, y, width, height, url, room) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, x, y, width, height, url, room], function (err) {
+			if (err) {
+				console.log("CREATECLICKABLEAREA DB ERROR", userid, position, size, url, room);
+				callback("Could not create clickable area because of a database issue. Please contact an admin.");
+				return;
+			}
+			
+			callback(null);
+		});
+	});
+};
+
 // Don't allow two votes
 // Weight with reputation
 PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
@@ -594,6 +631,12 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 	this.database.query("select count(*) as amountOfRegions from regions left join premium on userid=owner where owner = ? AND userid is null AND room = ?",
 		[userid, room],
 		function (err, rows) {
+			if (err) {
+				console.log("Add protected region amountcheck database error", userid, from, to, room);
+				callback("Could not create protected region, database error. Please contact an admin.");
+				return;
+			}
+			
 			if (rows[0].amountOfRegions > 0) { // amountOfRegions always equals 0 when user is premium
 				callback("Having more than one region is premium only!");
 				return;

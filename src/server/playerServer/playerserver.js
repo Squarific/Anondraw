@@ -97,6 +97,47 @@ var server = https.createServer(options, function (req, res) {
 		return;
 	}
 	
+	if (parsedUrl.pathname == "/getclickableareas") {
+		var room = parsedUrl.query.room;
+		
+		playerDatabase.getClickableAreas(room, function (err, data) {
+			res.end(JSON.stringify({
+				error: err,
+				areas: data
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/createclickablearea") {
+		var room = parsedUrl.query.room;
+		var x = parsedUrl.query.x;
+		var y = parsedUrl.query.y;
+		var width = parsedUrl.query.width;
+		var height = parsedUrl.query.height;
+		var url = parsedUrl.query.url;
+		
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "You need to be logged in to create a clickable area" }));
+			return;
+		}
+		
+		if (width > 500 || height > 500) {
+			res.end(JSON.stringify({ error: "That is a bit big don't you think?" }));
+			return;
+		}
+		
+		playerDatabase.createClickableArea(user.id, room, x, y, width, height, url, function (err) {
+			res.end(JSON.stringify({
+				error: err
+			}));
+		});
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/getFullEntries") {
 		var month = parsedUrl.query.month;
 		var year = parsedUrl.query.year;

@@ -226,6 +226,7 @@
   margin: .4em;
   margin-bottom: .8em;
   font-size:1.2em;
+  max-width:30em;
 }
 
 .gui-prompt-content input {

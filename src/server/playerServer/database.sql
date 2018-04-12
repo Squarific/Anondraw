@@ -79,6 +79,19 @@ CREATE TABLE IF NOT EXISTS reputations (
     INDEX(from_id, to_id)
 );
 
+CREATE TABLE IF NOT EXISTS clickableareas (
+	id INT UNSIGNED AUTO_INCREMENT,
+	owner INT UNSIGNED,
+	x BIGINT,
+	y BIGINT,
+	width INT,
+	height INT,
+	url VARCHAR(255),
+	room VARCHAR(255),
+	PRIMARY KEY(id),
+	INDEX(room)
+);
+
 CREATE TABLE imageposts (
 	userid INT UNSIGNED,
 	image VARCHAR(128),

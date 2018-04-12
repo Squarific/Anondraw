@@ -87,6 +87,7 @@ function Protocol (io, drawtogether, imgur, players, register, saveAndShutdown) 
 	this.players = players;
 	this.register = register;
 	this.protectedRegions = {};
+	this.clickableAreas = {};
 	this.bindIO();
 	this.saveAndShutdown = saveAndShutdown;
 
@@ -101,11 +102,26 @@ function Protocol (io, drawtogether, imgur, players, register, saveAndShutdown) 
 	setInterval(this.clearLeftTick.bind(this, 180 * 1000));
 }
 
+Protocol.prototype.updateClickableAreas = function updateClickableAreas (room) {
+	this.players.request("getclickableareas", {
+		room: room
+	}, function (err, data) {
+		if (err) {
+			console.log("Could not get clickable areas");
+			return;
+		}
+		
+		this.clickableAreas[room] = data.areas;
+		this.io.to(room).emit("clickableareas", data.areas);
+	});
+};
+
 Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (room) {
 	this.players.request('getProtectedRegionsAndPermissions', {
 		room: room
 	}, function (err, data) {
 		if (err) {
+			// We throw because this is a severe error, we don't want to compromise the drawings
 			throw "Can't get protected regions for room " + room + " Err:" + JSON.stringify(err);
 		}
 		var permissions = data.permissions;
@@ -1314,6 +1330,10 @@ Protocol.prototype.bindIO = function bindIO () {
 					if (!protocol.protectedRegions[room]) {
 						protocol.updateProtectedRegions(room);
 					}
+					
+					// Update the rooms clickable areas
+					if (!protocol.clickableAreas[room])
+						protocol.updateClickableAreas(room);
 
 					// Join this room
 					socket.join(room);
@@ -1336,7 +1356,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					protocol.drawTogether.getDrawings(room, function (err, drawings) {
-						callback(null, drawings);
+						callback(null, drawings, protocol.clickableAreas[room]);
 						protocol.drawTogether.getPaths(room, function (err, paths) {
 							socket.emit("paths", paths);
 						});
@@ -1654,6 +1674,25 @@ Protocol.prototype.bindIO = function bindIO () {
 			}, function (err, data) {
 				protocol.updateProtectedRegions(socket.room);
 				callback(err, data);
+			});
+		});
+		
+		socket.on("createclickablearea", function (pos, size, url, callback) {
+			console.log("Creating clickable area", socket.uKey, socket.name, pos, size, url);
+			
+			var room = socket.room;
+			
+			protocol.players.request('createclickablearea', {
+				uKey: socket.uKey,
+				room: room,
+				x: position[0],
+				y: position[1],
+				width: size[0],
+				height: size[1],
+				url: url
+			}, function (err) {
+				protocol.updateClickableAreas(room);
+				callback(err);
 			});
 		});
 

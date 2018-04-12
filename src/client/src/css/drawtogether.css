@@ -837,6 +837,23 @@ input.paint-texttool {
   display:none;
 }
 
+.clickableareas-container {
+	position:absolute;
+	left:0;
+	top:0;
+}
+
+.clickableArea {
+	position:absolute;
+	cursor:pointer;
+	transition:background 0.3s;
+}
+
+
+.clickableArea:hover {
+	background:#00000059;
+}
+
 .drawtogether-paint-container.fullscreen {
 	position:fixed;
 	left:0;
@@ -854,15 +871,14 @@ input.paint-texttool {
 	width:2em;
 	cursor:pointer;
 	border-bottom-left-radius:10%;
-	transition-duration:0.2s
+	transition:transform 1s, background:0.2s;
 }
 
 .popout-button:hover {
-	background: #23344580;
+	background: #23344560;
 }
 
 .drawtogether-paint-container.fullscreen .popout-button {
-	transition-duration:1s;
 	transform: rotate(180deg);
 }
 

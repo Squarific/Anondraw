@@ -17,7 +17,7 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.moveQueue = [];
 	this.favList = [];
 	this.myRegions = [];
-	this.clickableAreas = [];
+	this.clickableAreas = []; // [{ id, owner: id, url: "url or x,y", x: INT, y: INT, width: INT, height: INT, room: STRING, element: <HTML Element> }]
 	this.myAnimations = this.getAnimationsFromCookie();
 	this.ink = 0;
 	this.nextTip = 0;
@@ -235,6 +235,44 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 
 	// Recall the drawloop
 	requestAnimationFrame(this.drawLoop.bind(this));
+};
+
+DrawTogether.prototype.paintMoved = function paintMoved (event) {
+	this.updateClickableAreas(event);
+};
+
+DrawTogether.prototype.setupClickableAreas = function () {
+	while (this.clickableAreasContainer.firstChild)
+		this.clickableAreasContainer.removeChild(this.clickableAreasContainer.firstChild);
+	
+	for (var k = 0; k < this.clickableAreas.length; k++) {
+		this.clickableAreas[k].element = document.createElement("div")
+		this.clickableAreasContainer.appendChild(this.clickableAreas[k].element);
+		this.clickableAreas[k].element.className = "clickableArea";
+		this.clickableAreas[k].element.addEventListener("click", this.clickClickableArea.bind(this, k));
+	}
+	
+	this.updateClickableAreas();
+};
+
+DrawTogether.prototype.updateClickableAreas = function updateClickableAreas () {
+	for (var k = 0; k < this.clickableAreas.length; k++) {
+		this.clickableAreas[k].element.style.left = (this.clickableAreas[k].x - this.paint.public.leftTopX) * this.paint.public.zoom + "px";
+		this.clickableAreas[k].element.style.top = (this.clickableAreas[k].y - this.paint.public.leftTopY) * this.paint.public.zoom + "px";
+		this.clickableAreas[k].element.style.width = this.clickableAreas[k].width * this.paint.public.zoom + "px";
+		this.clickableAreas[k].element.style.height = this.clickableAreas[k].height * this.paint.public.zoom + "px";
+	}
+};
+
+DrawTogether.prototype.clickClickableArea = function clickClickableArea (index) {
+	var coords = this.clickableAreas[index].url.split(",");
+	if (coords.length == 2 && parseInt(coords[0]) == parseInt(coords[0]) && parseInt(coords[1]) == parseInt(coords[1])) {
+		this.paint.goto(coords[0], coords[1]);
+	} else {
+		this.gui.prompt("You are about to go to " + this.clickableAreas[index].url + ". Are you sure you want to do that?", ["Yeah I'm brave", "Nah that sounds dangerous"], function (answer) {
+			if (answer == "Yeah I'm brave") window.open(this.clickableAreas[index].url);
+		});
+	}
 };
 
 DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
@@ -457,6 +495,11 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 			paths[id].color = tinycolor(paths[id].color);
 			self.paint.addPath(id, paths[id]);
 		}
+	});
+	
+	this.network.on("clickableareas", function (areas) {
+		self.clickableAreas = areas;
+		self.setupClickableAreas();
 	});
 
 	// Player(list) events
@@ -772,7 +815,8 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 				this.createScuttlersOverlay();
 			}
 
-			this.clickableAreas = clickableAreas;
+			this.clickableAreas = clickableAreas || [];
+			this.setupClickableAreas();
 			this.removeLoading();
 		}
 	}.bind(this));
@@ -1555,6 +1599,14 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		clearTimeout(hashTimeout);
 		hashTimeout = setTimeout(boundSetHash, 100);
 	});
+	
+	this.paint.addEventListener("move", this.paintMoved.bind(this));
+	
+	// Insert the clicableareascontainer right after the last canvas
+	// Noob trap: lastcanvas is actually the second last canvas
+	this.clickableAreasContainer = document.createElement("div");
+	this.clickableAreasContainer.className = "clickableareas-container";
+	this.paint.lastCanvas.parentNode.insertBefore(this.clickableAreasContainer, this.paint.lastCanvas.nextSibling.nextSibling);
 
 	this.paint.changeTool("grab");
 	
@@ -2380,6 +2432,10 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			icon: "images/icons/selectwindow/region.png"
 		},
 		{
+			text: "Create clickable area",
+			icon: "images/icons/selectwindow/clickable.png"
+		},
+		{
 			text: "Inspect tool",
 			icon: "images/icons/selectwindow/inspect.png"
 		},
@@ -2409,11 +2465,32 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			"Inspect tool": this.whoDrewInThisArea.bind(this),
 			"Show video frames": this.showVideoFrames.bind(this),
 			"Create grid": this.createGridInSelection.bind(this),
-			"Enter the contest": this.enterTheContest.bind(this)
+			"Enter the contest": this.enterTheContest.bind(this),
+			"Create clickable area": this.createClickableArea.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
 	}.bind(this));
+};
+
+DrawTogether.prototype.createClickableArea = function createClickableArea (from, to) {
+	this.gui.prompt("Where should this area take you? You can either fill in an url or you can enter a coord in the form x,y. For example: 51234,69874", function (url) {
+		var pos = [
+			Math.min(from[0], to[0]),
+			Math.min(from[1], to[1])
+		];
+		
+		var size = [
+			Math.max(from[0], to[0]) - pos[0],
+			Math.max(from[1], to[1]) - pos[0]
+		];
+		
+		this.network.socket.emit("createclickablearea", from, size, url, function (err, data) {
+			if (err) {
+				this.gui.prompt(err, ["Ok"]);
+			}
+		}.bind(this));
+	});
 };
 
 DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
