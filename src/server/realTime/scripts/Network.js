@@ -1685,8 +1685,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			protocol.players.request('createclickablearea', {
 				uKey: socket.uKey,
 				room: room,
-				x: position[0],
-				y: position[1],
+				x: pos[0],
+				y: pos[1],
 				width: size[0],
 				height: size[1],
 				url: url
