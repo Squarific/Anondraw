@@ -150,7 +150,7 @@ PlayerDatabase.prototype.createClickableArea = function createClickableArea (use
 			
 			callback(null);
 		});
-	});
+	}.bind(this));
 };
 
 // Don't allow two votes
