@@ -113,7 +113,7 @@ Protocol.prototype.updateClickableAreas = function updateClickableAreas (room) {
 		
 		this.clickableAreas[room] = data.areas;
 		this.io.to(room).emit("clickableareas", data.areas);
-	});
+	}.bind(this));
 };
 
 Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (room) {
