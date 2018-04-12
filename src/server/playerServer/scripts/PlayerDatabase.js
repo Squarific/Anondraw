@@ -119,7 +119,7 @@ PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, 
 PlayerDatabase.prototype.getClickableAreas = function getClickableAreas (room, callback) {
 	this.database.query("SELECT * FROM clickableareas WHERE room = ?", [room], function (err, rows) {
 		if (err) {
-			console.log("GETCLICKABLEAREAS DB ERROR", err);
+			console.log("GETCLICKABLEAREAS DB ERROR", err, room);
 			callback("Could not get clickable areas; DB error");
 			return;
 		}
@@ -131,7 +131,7 @@ PlayerDatabase.prototype.getClickableAreas = function getClickableAreas (room, c
 PlayerDatabase.prototype.createClickableArea = function createClickableArea (userid, room, x, y, width, height, url, callback) {
 	this.database.query("select count(*) as amountOfAreas from clickableareas left join premium on userid=owner where owner = ? AND userid is null AND room = ?", [userid, room], function (err, rows) {
 		if (err) {
-			console.log("Createclickablearea db error on countcheck", room, userid);
+			console.log("Createclickablearea db error on countcheck", err, room, userid);
 			callback("Could not create clickable area");
 			return;
 		}
@@ -143,7 +143,7 @@ PlayerDatabase.prototype.createClickableArea = function createClickableArea (use
 		
 		this.database.query("INSERT INTO clickableares (owner, x, y, width, height, url, room) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, x, y, width, height, url, room], function (err) {
 			if (err) {
-				console.log("CREATECLICKABLEAREA DB ERROR", userid, x, y, width, height, url, room);
+				console.log("CREATECLICKABLEAREA DB ERROR", err, userid, x, y, width, height, url, room);
 				callback("Could not create clickable area because of a database issue. Please contact an admin.");
 				return;
 			}
