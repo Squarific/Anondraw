@@ -89,7 +89,8 @@ CREATE TABLE IF NOT EXISTS clickableareas (
 	url VARCHAR(255),
 	room VARCHAR(255),
 	PRIMARY KEY(id),
-	INDEX(room)
+	INDEX(room),
+	INDEX(owner, room)
 );
 
 CREATE TABLE imageposts (

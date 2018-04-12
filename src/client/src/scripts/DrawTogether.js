@@ -2490,7 +2490,7 @@ DrawTogether.prototype.createClickableArea = function createClickableArea (from,
 				this.gui.prompt(err, ["Ok"]);
 			}
 		}.bind(this));
-	});
+	}.bind(this));
 };
 
 DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
