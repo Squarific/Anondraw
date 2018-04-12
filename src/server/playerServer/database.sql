@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS reputations (
     from_id INT UNSIGNED,
     to_id INT UNSIGNED,
 	source INT UNSIGNED DEFAULT 0,
-	weight INT DEFAULT 1,
+	weight DECIMAL(5, 2) DEFAULT 1,
     PRIMARY KEY (id),
     INDEX(to_id, from_id)
     INDEX(from_id, to_id)
