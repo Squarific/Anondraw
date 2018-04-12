@@ -2482,7 +2482,7 @@ DrawTogether.prototype.createClickableArea = function createClickableArea (from,
 		
 		var size = [
 			Math.max(from[0], to[0]) - pos[0],
-			Math.max(from[1], to[1]) - pos[0]
+			Math.max(from[1], to[1]) - pos[1]
 		];
 		
 		this.network.socket.emit("createclickablearea", from, size, url, function (err, data) {
