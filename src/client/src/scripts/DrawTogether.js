@@ -271,7 +271,7 @@ DrawTogether.prototype.clickClickableArea = function clickClickableArea (index) 
 	} else {
 		this.gui.prompt("You are about to go to " + this.clickableAreas[index].url + ". Are you sure you want to do that?", ["Yeah I'm brave", "Nah that sounds dangerous"], function (answer) {
 			if (answer == "Yeah I'm brave") window.open(this.clickableAreas[index].url);
-		});
+		}.bind(this));
 	}
 };
 
