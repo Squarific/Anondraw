@@ -27,6 +27,10 @@ input.paint-texttool {
   color:white;
 }
 
+.hide {
+	display:none;
+}
+
 .premium {
   font-weight:800;
   background-image: -webkit-gradient(linear,left top,right top,color-stop(0,#FFD0D0),color-stop(0.15,#FFCFFF),color-stop(0.3,#D0D0FF),color-stop(0.45,#A9FFFF),color-stop(0.6,#95FF95),color-stop(0.75,#A1FFA1),color-stop(0.9,#FFFF9C),color-stop(1,#FFA4A4));
@@ -541,6 +545,10 @@ input.paint-texttool {
   background:#374E65;
 }
 
+.activated {
+	 background:#789170 !important;
+}
+
 .drawtogether-player-name {
   padding:.4em;
 }
@@ -832,6 +840,10 @@ input.paint-texttool {
 
   .control-button:hover {
     background-color: #233445; }
+	
+	.clickablearea-button:hover {
+		background-color: #456789;
+	}
 
 .drawtogether-display-on-small {
   display:none;

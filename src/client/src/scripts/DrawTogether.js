@@ -103,6 +103,8 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 			this.advancedOptions.toggleVisibility();
 		}
 	}.bind(this));
+	
+	window.addEventListener("popstate", this.gotoHash.bind(this));
 
 	setInterval(this.displayTip.bind(this), 5 * 60 * 1000);
 	setTimeout(this.autoMoveScreen.bind(this), 0);
@@ -123,7 +125,7 @@ DrawTogether.prototype.PREMIUM_WINDOW_EVERY = 2 * 7 * 24 * 60 * 60 * 1000;
 // Currently only client side enforced
 DrawTogether.prototype.BIG_BRUSH_MIN_REP = 5;
 DrawTogether.prototype.ZOOMED_OUT_MIN_REP = 2;
-DrawTogether.prototype.CLIENT_VERSION = 13;
+DrawTogether.prototype.CLIENT_VERSION = 14;
 
 // How many miliseconds does the server have to confirm our drawing
 DrawTogether.prototype.SOCKET_TIMEOUT = 10 * 1000;
@@ -286,6 +288,24 @@ DrawTogether.prototype.handleGotoAndCenter = function handleGotoAndCenter (x, y)
 	var targetPosEnd = [x - screenSize[0] / 2,
 	                    y - screenSize[1] / 2];
 	this.handleGoto(targetPosEnd[0], targetPosEnd[1]);
+};
+
+DrawTogether.prototype.gotoHash = function gotoHash () {
+	var urlInfo = location.hash.substr(1, location.hash.length).split(",");
+
+	var room = urlInfo[0];
+	var x = parseInt(urlInfo[1]);
+	var y = parseInt(urlInfo[2]);
+	
+	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
+	                  this.paint.public.canvas.height / this.paint.public.zoom];
+	
+	if (room !== this.current_room) {
+		this.changeRoom(room, undefined, x, y, true);
+	} else if ((this.paint.public.leftTopX + screenSize[0] / 2).toFixed() !== x.toFixed() ||
+	           (this.paint.public.leftTopY + screenSize[1] / 2).toFixed() !== y.toFixed()) {
+		this.handleGotoAndCenter(x, y);
+	}
 };
 
 DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
@@ -1007,8 +1027,8 @@ DrawTogether.prototype.setRoom = function setRoom (room) {
 	                  this.paint.public.canvas.height / this.paint.public.zoom];
 	
 	location.hash = room + "," +
-	                (this.paint.public.leftTopX.toFixed() + screenSize[0] / 2) + "," +
-	                (this.paint.public.leftTopY.toFixed() + screenSize[1] / 2);
+	                (this.paint.public.leftTopX + screenSize[0] / 2).toFixed() + "," +
+	                (this.paint.public.leftTopY + screenSize[1] / 2).toFixed();
 };
 
 DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
@@ -1595,8 +1615,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	                  this.paint.public.canvas.height / this.paint.public.zoom];
 		
 		location.hash = this.current_room + "," +
-		                (this.paint.public.leftTopX.toFixed() + screenSize[0] / 2) + "," +
-		                (this.paint.public.leftTopY.toFixed() + screenSize[1] / 2);
+		                (this.paint.public.leftTopX + screenSize[0] / 2).toFixed() + "," +
+		                (this.paint.public.leftTopY + screenSize[1] / 2).toFixed();
 	}
 
 	var hashTimeout;
@@ -1712,12 +1732,26 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	mapButtonImage.alt = "Open the tile map";
 	mapButtonImage.title = "Open the tile map";
 	
+	this.clickableAreaButton = this.paint.coordDiv.appendChild(document.createElement("div"));
+	this.clickableAreaButton.className = "control-button clickablearea-button activated";
+	this.clickableAreaButton.addEventListener("click", this.toggleClickableArea.bind(this));
+
+	var clickableAreaButtonImage = this.clickableAreaButton.appendChild(document.createElement("img"));
+	clickableAreaButtonImage.src = "images/icons/clickable.png";
+	clickableAreaButtonImage.alt = "Toggle the clickable areas";
+	clickableAreaButtonImage.title = "Toggle the clickable areas";
+	
 	var popout = this.paint.container.appendChild(document.createElement("img"));
 	popout.className = "popout-button";
 	popout.src = "images/icons/popout.png";
 	popout.alt = "Popout";
 	popout.title = "Popout";
 	popout.addEventListener('click', this.toggleFullscreen.bind(this));
+};
+
+DrawTogether.prototype.toggleClickableArea = function toggleClickableArea () {
+	var hidden = this.clickableAreasContainer.classList.toggle("hide");
+	this.clickableAreaButton.classList.toggle("activated", !hidden);
 };
 
 DrawTogether.prototype.toggleFullscreen = function toggleFullscreen () {
@@ -5411,7 +5445,7 @@ DrawTogether.prototype.openFeedbackWindow = function openFeedbackWindow () {
 
 DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	localStorage.setItem("newfeaturewindowversion", this.CLIENT_VERSION);
-	var featureWindow = this.gui.createWindow({ title: "What is new?"});
+	var featureWindow = this.gui.createWindow({ title: "Some new shiny features!"});
 
 	featureWindow.classList.add("feature-window");
 
@@ -5419,23 +5453,23 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	container.className = "content";
 
 	var title = container.appendChild(document.createElement("h2"));
-	title.appendChild(document.createTextNode("Contest"));
+	title.appendChild(document.createTextNode("Interactivity and special snowflakes"));
 	
-	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Want to be challenged? From now on, every month, we are organizing a contest. Find out more on the contest page."));
+	/*var p = container.appendChild(document.createElement("p"));
+	p.appendChild(document.createTextNode("Ps. don't forget the contest that goes on every month!"));*/
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Patches:"));
+	p.appendChild(document.createTextNode("New things:"));
 
 	var ol = container.appendChild(document.createElement("ol"));
 
 	var features = [
-		"Monthly contest",
-		"Survey",
-		"Moved servers, server performance should be better",
-		"Region names",
-		"Top menu reorganized, github button added",
-		"BUGFIX: When not allowed to draw, ink would get stuck in certain cases."
+		"Clickable regions: time to make some buttons",
+		"Negative and decimal rep are now supported",
+		"Pressing the back button takes you back",
+		"We now use https, super secure!!!",
+		"Monthly contest (srsly participate, its worth it)",
+		"New users now get a nice window telling them they can't draw in the spawn with a button to go to a random spot."
 	];
 
 	for (var k = 0; k < features.length; k++) {
