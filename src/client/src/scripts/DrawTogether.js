@@ -1580,7 +1580,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 				this.createPermissionChatMessageWithTimeout(success);
 				this.createRegionProtectedWindow();
 			}
-			else if (typeof success.inSpawnArea !== 'undefined') {
+			else if (typeof success !== 'undefined' && typeof success.inSpawnArea !== 'undefined') {
 				this.createRegionProtectedWindow();
 			}
 
