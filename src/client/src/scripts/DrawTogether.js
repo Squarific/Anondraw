@@ -2515,22 +2515,35 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 };
 
 DrawTogether.prototype.createClickableArea = function createClickableArea (from, to) {
-	this.gui.prompt("Where should this area take you? You can either fill in an url or you can enter a coord in the form x,y. For example: 51234,69874", function (url) {
-		var pos = [
-			Math.min(from[0], to[0]),
-			Math.min(from[1], to[1])
-		];
+	this.gui.prompt("Where should this area take you?", ["A website", "A location on the canvas", "Cancel"], function (type) {
+		if (type == "Cancel") return;
+		var question = "Enter the coords (for example: 500,600)";
+		if (type == "A website") question = "Enter the url, start with http(s)://";
 		
-		var size = [
-			Math.max(from[0], to[0]) - pos[0],
-			Math.max(from[1], to[1]) - pos[1]
-		];
-		
-		this.network.socket.emit("createclickablearea", from, size, url, function (err, data) {
-			if (err) {
-				this.gui.prompt(err, ["Ok"]);
+		this.gui.prompt(question, ["freepick", "Cancel"], function (url) {
+			if (type == "Cancel") return;
+			
+			if (!url) {
+				this.gui.prompt("You need or provide a url or a location", ["Ok"]);
+				return;
 			}
-		}.bind(this));
+			
+			var pos = [
+				Math.min(from[0], to[0]),
+				Math.min(from[1], to[1])
+			];
+			
+			var size = [
+				Math.max(from[0], to[0]) - pos[0],
+				Math.max(from[1], to[1]) - pos[1]
+			];
+			
+			this.network.socket.emit("createclickablearea", from, size, url, function (err, data) {
+				if (err) {
+					this.gui.prompt(err, ["Ok"]);
+				}
+			}.bind(this));
+		}.bind(this));		
 	}.bind(this));
 };
 

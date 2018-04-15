@@ -844,6 +844,18 @@ input.paint-texttool {
 	.clickablearea-button:hover {
 		background-color: #456789;
 	}
+	
+.control-button.clickablearea-button {
+    margin-left: 0.3em;
+}
+
+.control-button.favorites-button {
+    margin-left: 0.3em;
+}
+
+.control-button.tilesmap-button {
+    margin-left: 0.3em;
+}
 
 .drawtogether-display-on-small {
   display:none;
