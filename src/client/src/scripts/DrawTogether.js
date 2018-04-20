@@ -815,7 +815,8 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			}
 			
 			// If we are new show the welcome window
-			if (this.userSettings.getBoolean("Show welcome")) {
+			// Currently disabled
+			if (this.userSettings.getBoolean("Show welcome") && false) {
 				this.openWelcomeWindow();
 
 			// We are not new, check if we already saw all the awesome new features
