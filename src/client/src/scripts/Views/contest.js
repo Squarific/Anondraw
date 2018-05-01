@@ -77,14 +77,14 @@ Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 	p.appendChild(document.createTextNode("This month's theme is: "));
 	
 	var strong = p.appendChild(document.createElement("strong"));
-	strong.appendChild(document.createTextNode("minecraft"));
+	strong.appendChild(document.createTextNode("medieval"));
 	
 	p.appendChild(document.createElement("br"));
 	
 	p.appendChild(document.createTextNode("Submission period ends: "));
 
 	var strong = p.appendChild(document.createElement("strong"));
-	strong.appendChild(document.createTextNode("April 21, 2018"));
+	strong.appendChild(document.createTextNode("May 21, 2018"));
 
 	div.appendChild(document.createElement("br"));
 	
@@ -105,6 +105,37 @@ Anondraw.prototype.view.contest.createInfo = function createContestInfo () {
 };
 
 Anondraw.prototype.winners = [
+	{
+		title: "April 2018 Winners",
+		month: 4,
+		year: 2018,
+		teams: [
+			{
+				name: "",
+				members: [
+					{ name: "PauPau", href: "http://www.anondraw.com/profile/25956"},
+					{ name: "Zurg"}
+				],
+				image: "mt55j92aru800znj85q2ap926s1yduoov9k3qn8pe8i18yi8"
+			},
+			{
+				name: "",
+				members: [
+					{ name: "marmar"},
+					{ name: "JT Hornsby"},
+					{ name: "Terri"}
+				],
+				image: "jrnknfcy8bayk0sz73ssf33mecvhcl3pf35t6leiiezvmgwl"
+			},
+			{
+				name: "",
+				members: [
+					{ name: "IceWallow__Come", href: "https://www.instagram.com/sirshredder/"}
+				],
+				image: "xticuerlpzy6c5df2h6qzgrpsxp3ecmthk0d0b0hii2bn7xb"
+			}
+		]
+	},
 	{
 		title: "March 2018 Winners",
 		month: 3,

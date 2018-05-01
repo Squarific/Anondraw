@@ -1739,8 +1739,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	var clickableAreaButtonImage = this.clickableAreaButton.appendChild(document.createElement("img"));
 	clickableAreaButtonImage.src = "images/icons/clickable.png";
-	clickableAreaButtonImage.alt = "Toggle the clickable areas";
-	clickableAreaButtonImage.title = "Toggle the clickable areas";
+	clickableAreaButtonImage.alt = "Toggle the canvas buttons";
+	clickableAreaButtonImage.title = "Toggle the canvas buttons";
 	
 	var popout = this.paint.container.appendChild(document.createElement("img"));
 	popout.className = "popout-button";
@@ -2508,7 +2508,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			"Show video frames": this.showVideoFrames.bind(this),
 			"Create grid": this.createGridInSelection.bind(this),
 			"Enter the contest": this.enterTheContest.bind(this),
-			"Create clickable area": this.createClickableArea.bind(this)
+			"Create button": this.createClickableArea.bind(this)
 		};
 
 		handlers[answer](event.from, event.to);
@@ -2516,13 +2516,13 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 };
 
 DrawTogether.prototype.createClickableArea = function createClickableArea (from, to) {
-	this.gui.prompt("Where should this area take you?", ["A website", "A location on the canvas", "Cancel"], function (type) {
+	this.gui.prompt("Where should this button take you?", ["A website", "A location on the canvas", "Cancel"], function (type) {
 		if (type == "Cancel") return;
 		var question = "Enter the coords (for example: 500,600)";
 		if (type == "A website") question = "Enter the url, start with http(s)://";
 		
 		this.gui.prompt(question, ["freepick", "Cancel"], function (url) {
-			if (type == "Cancel") return;
+			if (url == "Cancel") return;
 			
 			if (!url) {
 				this.gui.prompt("You need or provide a url or a location", ["Ok"]);
@@ -5314,9 +5314,10 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 		{ icon: "discover", feature: "Jump to a random drawing *" },
 		{ icon: "region", feature: "Unlimited regions" },
 		{ icon: "locations", feature: "Unlimited locations" },
+		{ icon: "locations", feature: "Unlimited buttons" },
 		{ icon: "map", feature: "Access to a minimap" },
 		{ icon: "ink", feature: "No ink usage" },
-		{ icon: "advanced", feature: "Rotate and mirror the canvas *" },
+		{ icon: "advanced", feature: "Rotate and mirror the canvas" },
 		{ icon: "pressure", feature: "Pressure support*" },
 		{ icon: "redo", feature: "Redo feature *" },
 		{ icon: "import", feature: "Import tool *" },

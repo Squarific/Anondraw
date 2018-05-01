@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS clickableareas (
 	height INT,
 	url VARCHAR(255),
 	room VARCHAR(255),
+	name VARCHAR(255),
 	PRIMARY KEY(id),
 	INDEX(room),
 	INDEX(owner, room)
