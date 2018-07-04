@@ -1,3 +1,14 @@
+@media (max-width: 750px) {
+  .menuItem {
+    display: block !important;
+    width: inherit !important;
+  }
+  .menu {
+    width: 3em !important;
+  }
+}
+
+
 .menu {
 	font-family: 'Noto Sans', sans-serif;
 	position:relative;
