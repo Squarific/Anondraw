@@ -930,6 +930,7 @@ DrawTogether.prototype.changeNameDelayed = function () {
 };
 
 DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
+	var isCatMeow = this.account.id === 3196;
 	// Update the playerlist to reflect the current local list
 	while (this.playerListDom.firstChild)
 		this.playerListDom.removeChild(this.playerListDom.firstChild)
@@ -939,6 +940,7 @@ DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
 	plTitle.className = "drawtogether-pl-title";
 
 	for (var k = 0; k < this.playerList.length; k++) {
+		if(isCatMeow && this.playerList[k].userid === 2518) continue;
 		this.playerListDom.appendChild(this.createPlayerDom(this.playerList[k]));
 	}
 };
