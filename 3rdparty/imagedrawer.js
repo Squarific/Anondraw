@@ -49,11 +49,12 @@
         anondraw.collab.paint.endUserPath()
     }
 
+    /*
     function putPixel(x, y) {
         curDown();
         curPoint(x, y);
         curUp();
-    }
+    }*/
 
     function changeColor(r, g, b) {
 
@@ -65,6 +66,7 @@
 
         anondraw.collab.paint._changeColor(tinycolor(rgb).setAlpha(globalA));
 
+        /*
         function rgbToHex(r, g, b) {
 
             return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
@@ -73,7 +75,7 @@
                 var hex = c.toString(16);
                 return hex.length == 1 ? "0" + hex : hex;
             }
-        }
+        }*/
     }
     window.drawImage = drawImage;
 
