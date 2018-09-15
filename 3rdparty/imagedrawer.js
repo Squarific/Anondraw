@@ -1,33 +1,33 @@
 (function() {
-    //вот что нужно чтобы поставить один пиксель.Перед этим нужно как - то поменять цвет
-    var setZeroTimeout = function(t) {
-        if (t.postMessage) {
-            var e = [],
-                s = "asc0tmot",
-                a = function(t) {
-                    e.push(t), postMessage(s, "*")
-                },
-                n = function(a) {
-                    if (a.source == t && a.data == s) {
-                        if (a.stopPropagation && a.stopPropagation(), e.length) try {
-                            e.shift()()
-                        } catch (t) {
-                            setTimeout((n = t, function() {
-                                throw n.stack || n
-                            }), 0)
+    /*
+        var setZeroTimeout = function(t) {
+            if (t.postMessage) {
+                var e = [],
+                    s = "asc0tmot",
+                    a = function(t) {
+                        e.push(t), postMessage(s, "*")
+                    },
+                    n = function(a) {
+                        if (a.source == t && a.data == s) {
+                            if (a.stopPropagation && a.stopPropagation(), e.length) try {
+                                e.shift()()
+                            } catch (t) {
+                                setTimeout((n = t, function() {
+                                    throw n.stack || n
+                                }), 0)
+                            }
+                            e.length && postMessage(s, "*")
                         }
-                        e.length && postMessage(s, "*")
-                    }
-                    var n
-                };
-            if (t.addEventListener) return addEventListener("message", n, !0), a;
-            if (t.attachEvent) return attachEvent("onmessage", n), a
-        }
-        return setTimeout
-    }(window);
-
+                        var n
+                    };
+                if (t.addEventListener) return addEventListener("message", n, !0), a;
+                if (t.attachEvent) return attachEvent("onmessage", n), a
+            }
+            return setTimeout
+        }(window);
+    */
     const globalA = 1,
-        DRAW_DELAY = 0;
+        DRAW_DELAY = false;
 
     var cursorDown = false;
 
@@ -37,7 +37,7 @@
     }
 
     function curPoint(x, y) {
-    	if(!anondraw.collab.paint.localUserPaths.length) curDown();
+        if (!anondraw.collab.paint.localUserPaths.length) curDown();
         x += 0.5;
         y += 0.5;
         anondraw.collab.paint.addUserPathPoint([x, y]);
@@ -109,7 +109,7 @@
                 if (ip[3] < 127) {
                     if (++j % 1000 === 0) {
                         return setTimeout(function() {
-                             drawPixel(j)
+                            drawPixel(j)
                         }, 100);
                     } else {
                         return drawPixel(j)
@@ -132,15 +132,20 @@
                     curDown();
                     curPoint(x + _x, y + _y);
                 }
-
-                if (j >= wid * hei) return;
-                j++
-                if (j % 100 === 0) {
+                if (!DRAW_DELAY) {
+                    if (j >= wid * hei) return;
+                    j++
+                    if (j % 100 === 0) {
+                        setTimeout(function() {
+                            drawPixel(j)
+                        }, 50); // this is for network safety
+                    } else {
+                        drawPixel(j)
+                    }
+                } else {
                     setTimeout(function() {
                         drawPixel(j)
-                    }, 50);
-                } else {
-                    drawPixel(j)
+                    }, DRAW_DELAY);
                 }
             }
             drawPixel(0);
