@@ -134,9 +134,9 @@
                     curDown();
                     curPoint(x + _x, y + _y);
                 }
+                if (j >= wid * hei) return;
+                j++
                 if (!DRAW_DELAY) {
-                    if (j >= wid * hei) return;
-                    j++
                     if (j % 100 === 0) {
                         setTimeout(function() {
                             drawPixel(j)
