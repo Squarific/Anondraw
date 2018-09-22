@@ -2476,7 +2476,7 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 			icon: "images/icons/selectwindow/region.png"
 		},
 		{
-			text: "Create clickable area",
+			text: "Create button",
 			icon: "images/icons/selectwindow/clickable.png"
 		},
 		{
