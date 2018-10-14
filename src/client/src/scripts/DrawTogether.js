@@ -108,6 +108,24 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 
 	setInterval(this.displayTip.bind(this), 5 * 60 * 1000);
 	setTimeout(this.autoMoveScreen.bind(this), 0);
+	
+	
+	setInterval(function () {
+		if (!this.memberlevel) {
+			// Amazon ad code
+			var div = document.createElement("div");
+			var ad = div.appendChild(document.createElement("div"));
+			ad.id = "amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d";
+			
+			var script = div.appendChild(document.createElement("script"));
+			script.src = "//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US&adInstanceId=123acff2-6857-4569-a250-fd703f6a941d";
+			this.chat.addElementAsMessage(div);
+			
+			setTimeout(function () {
+				ad.id = "";
+			}, 1000);
+		}
+	}.bind(this), 10 * 60 * 1000);
 }
 
 // Hardcoded values who should probably be refactored to the server
@@ -806,10 +824,23 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "https://www.anondraw.com/#" + room + number);
 			
-			this.chat.addMessage("Scuttlers is released!", "https://store.steampowered.com/app/689040/Scuttlers/");
 			
-			if(this.account.uKey)
-			{
+			setTimeout(function () {
+				if (!this.memberlevel) {
+					// Amazon ad code
+					var div = document.createElement("div");
+					var ad = div.appendChild(document.createElement("div"));
+					ad.id = "amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d";
+					var script = div.appendChild(document.createElement("script"));
+					script.src = "//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US&adInstanceId=123acff2-6857-4569-a250-fd703f6a941d";
+					this.chat.addElementAsMessage(div);
+					setTimeout(function () {
+						ad.id = "";
+					}, 1000);
+				}
+			}.bind(this), 15000);
+			
+			if(this.account.uKey) {
 				this.getFavorites();
 				this.getMyProtectedRegions();
 			}
@@ -4864,95 +4895,6 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.populateRedditDrawings = function populateRedditDrawings () {
-	var req = new XMLHttpRequest();
-	req.addEventListener("readystatechange", function (event) {
-		if (req.readyState == 4 && req.status == 200) {
-			var posts = JSON.parse(req.responseText).data.children;
-
-			//this.redditDrawings.appendChild(this.createThumbLink("http://nyrrti.tumblr.com/", "Nyrrtis tumblr", "http://40.media.tumblr.com/fafb08a2535fa9e32cd54d5add9321d0/tumblr_o3w1sm1NYg1tyibijo1_1280.png"));
-			//this.redditDrawings.appendChild(this.createThumbLink("http://dojaboys.tumblr.com/", "Dojaboys (alien) tumblr", "http://40.media.tumblr.com/222bcca3dcd8d86ba27d02a9e8cba560/tumblr_o3zfyfHJfj1u8vwn5o1_1280.png"));
-			var div = document.createElement("div");
-			div.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/cCmyqvTJzqQ" frameborder="0" allowfullscreen></iframe>';
-			this.redditDrawings.appendChild(div);
-
-			for (var k = 0; k < posts.length; k++) {
-				//if (posts[k].data.thumbnail == "self" || posts[k].data.thumbnail == "default" || posts[k].data.thumbnail == "nsfw") continue;
-				this.redditDrawings.appendChild(this.createRedditPost(posts[k].data));
-			}
-		}
-	}.bind(this));
-	req.open("GET", "https://www.reddit.com/r/anondraw/.json");
-	req.send();
-	
-	var title = this.redditDrawings.appendChild(document.createElement("a"));
-	title.appendChild(document.createTextNode("Reddit gallery (/r/anondraw)"))
-	title.href = "http://www.reddit.com/r/anondraw";
-	title.className = "drawtogether-redditdrawings-title";
-
-	//this.redditDrawings.appendChild(this.createRedditPostAd());
-};
-
-DrawTogether.prototype.createRedditPostAd = function createRedditPostAd () {
-	var ad = '<!-- Project Wonderful Ad Box Code -->' +
-	'<div id="pw_adbox_78948_4_0"></div>' +
-	'<script type="text/javascript"></script>' +
-	'<noscript><map name="admap78948" id="admap78948"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=78948&type=4" shape="rect" coords="0,0,125,125" title="" alt="" target="_blank" /></map>' +
-	'<table cellpadding="0" cellspacing="0" style="width:125px;border-style:none;background-color:#ffffff;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=78948&type=4" style="width:125px;height:125px;border-style:none;" usemap="#admap78948" alt="" /></td></tr><tr><td style="background-color:#ffffff;" colspan="1"><center><a style="font-size:10px;color:#0000ff;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=78948&type=4" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table>' +
-	'</noscript>' +
-	'<!-- End Project Wonderful Ad Box Code -->';
-
-	var adContainer = document.createElement("div");
-	adContainer.className = "adcontainer drawtogether-redditpost";
-	adContainer.innerHTML = ad;
-	return adContainer;
-};
-
-DrawTogether.prototype.createThumbLink = function createThumbLink (url, text, imageurl) {
-	var container = document.createElement("a");
-	container.href = url;
-	container.target = "_blank";
-	container.className = "drawtogether-redditpost";
-
-	var title = container.appendChild(document.createElement("span"));
-	title.className = "drawtogether-redditpost-title";
-	title.appendChild(document.createTextNode(text));
-
-	var thumb = container.appendChild(document.createElement("img"))
-	thumb.className = "drawtogether-redditpost-thumb";
-	thumb.src = imageurl;
-
-	return container;
-};
-
-DrawTogether.prototype.createRedditPost = function createRedditPost (data) {
-	var container = document.createElement("a");
-	container.href = "http://www.reddit.com" + data.permalink;
-	container.target = "_blank";
-	container.className = "drawtogether-redditpost";
-
-	var title = container.appendChild(document.createElement("span"));
-	title.className = "drawtogether-redditpost-title";
-	title.appendChild(document.createTextNode(data.title));
-
-	if (data.thumbnail !== "self" && data.thumbnail !== "default" && data.thumbnail !== "nsfw") {
-		var thumb = container.appendChild(document.createElement("img"))
-		thumb.className = "drawtogether-redditpost-thumb";
-		thumb.src = data.thumbnail;
-	} else {
-		if (data.thumbnail == "nsfw") {
-			var thumb = container.appendChild(document.createElement("img"))
-			thumb.className = "drawtogether-redditpost-thumb";
-			thumb.src = data.url;
-		} else {
-			var filler = container.appendChild(document.createElement("div"));
-			filler.className = "drawtogether-redditpost-thumbfiller";
-		}
-	}
-
-	return container;
-};
-
 DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 	var discordWindow = this.gui.createWindow({ title: "Voice chat: Discord"});
 
@@ -5606,15 +5548,6 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 	var adContainer = faq.appendChild(document.createElement("div"));
 	adContainer.className = "adcontainer drawtogether-question";
-
-	var ad = '<!-- Project Wonderful Ad Box Code -->' +
-	         '<div style="text-align:center;"><div style="display:inline-block;" id="pw_adbox_78949_1_0"></div></div>' +
-	         '<script type="text/javascript"></script>' +
-	         '<noscript><div style="text-align:center;"><div style="display:inline-block;"><map name="admap78949" id="admap78949"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=78949&type=1" shape="rect" coords="0,0,468,60" title="" alt="" target="_blank" /></map>' +
-	         '<table cellpadding="0" cellspacing="0" style="width:468px;border-style:none;background-color:#3A5774;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=78949&type=1" style="width:468px;height:60px;border-style:none;" usemap="#admap78949" alt="" /></td></tr><tr><td style="background-color:#3A5774;" colspan="1"><center><a style="font-size:10px;color:#ffffff;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=78949&type=1" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table></div></div>' +
-	         '</noscript>' +
-	         '<!-- End Project Wonderful Ad Box Code -->';
-	adContainer.innerHTML = ad;
 
 	var questions = [{
 		question: "What is anondraw?",

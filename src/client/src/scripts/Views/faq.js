@@ -83,6 +83,26 @@ Anondraw.prototype.createFaqPage = function createFaqPage () {
 			var answerLine = qText.appendChild(document.createElement("div"));
 			answerLine.innerHTML = answerLines[k];
 		}
+		
+		if (qKey == 1 && !this.memberlevel) {
+			var adContainer = faq.appendChild(document.createElement("div"));
+			adContainer.className = "question-container";
+	
+			var ad = adContainer.appendChild(document.createElement("div"));
+			ad.id = "amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d";
+			
+			var script = adContainer.appendChild(document.createElement("script"));
+			script.src = "//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US&adInstanceId=123acff2-6857-4569-a250-fd703f6a941d";
+			script.onload = function () {
+				setTimeout(function () {
+					adContainer.className = "adcontainer";
+				}, 500);
+				
+				setTimeout(function () {
+					ad.id = "";
+				}, 1000);
+			};
+		}
 	}
 	
 	return container;

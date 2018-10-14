@@ -109,6 +109,12 @@
 	color:#ced4d8;
 }
 
+.adcontainer {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
 .contest-info.contest-info.contest-info {
     flex-direction: column;
 }

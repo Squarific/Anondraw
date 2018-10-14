@@ -249,7 +249,7 @@ Anondraw.prototype.createRouter = function createRouter () {
 	}.bind(this))
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */
-		if (location.hash && location.hash.indexOf("pw_adbox") == -1) {
+		if (location.hash) {
 			location = location.origin + "/collab" + location.hash;
 			return;
 		}
@@ -304,5 +304,4 @@ Anondraw.prototype.setContent = function setContent (domNode) {
 	
 	this.sideMenu.content.appendChild(domNode);
 	this.router.updatePageLinks();
-	pw_load ? pw_load() : "";
 };
