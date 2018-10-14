@@ -134,7 +134,7 @@ DrawTogether.prototype.addPathPoint = function addPathPoint (room, id, point) {
 	return true;
 };
 
-DrawTogether.prototype.finalizePath = function finalizePath (room, id, callback) {
+DrawTogether.prototype.finalizePath = function finalizePath (userid, ip, room, id, callback) {
 	callback = callback || function () {};
 
 	if (!this.paths[room] || !this.paths[room][id]) {

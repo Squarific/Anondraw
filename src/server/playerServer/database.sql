@@ -172,3 +172,13 @@ CREATE TABLE IF NOT EXISTS messages (
 	INDEX(toId),
 	INDEX(send)
 );
+
+CREATE TABLE IF NOT EXISTS drawhistory (
+	userid INT UNSIGNED,
+	ip VARCHAR(48),
+	room VARCHAR(255),
+	chunkX BIGINT,
+	chunkY BIGINT,
+	drawtime DATETIME,
+	INDEX(room, chunkX, chunkY, drawtime)
+);

@@ -30,7 +30,7 @@ var Players = require("./scripts/Players.js");
 var players = new Players(config.service.player.host);
 
 var Background = require("./scripts/Background.js");
-var background = new Background(config.service.image.host, undefined, config.service.image.password.draw);
+var background = new Background(config.service.image.host, config.service.player.host, undefined, config.service.image.password.draw);
 
 // Drawtogether library
 var DrawTogether = require("./scripts/DrawTogether.js");

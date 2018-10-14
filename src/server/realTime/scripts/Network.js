@@ -1117,6 +1117,8 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			drawing.socketid = socket.id;
+			drawing.userid = socket.userid;
+			drawing.ip = socket.ip;
 			protocol.drawTogether.addDrawing(socket.room, drawing, function () {
 				protocol.sendDrawing(socket.room, socket.id, drawing);
 				callback();
@@ -1126,7 +1128,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		// Startpath, endpath and pathpoint handlers
 		socket.on("sp", function (color, size) {
 			if (size > MAX_SIZE || size < 0) return;
-			protocol.drawTogether.addPath(socket.room, socket.id, {socketid: socket.id, type: "path", color: color, size: size});
+			protocol.drawTogether.addPath(socket.room, socket.id, {userid: socket.userid, ip: socket.ip, socketid: socket.id, type: "path", color: color, size: size});
 			socket.lastPathSize = size;
 			delete socket.lastPathPoint;
 			delete socket.firstPathPoint;
