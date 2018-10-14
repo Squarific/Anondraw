@@ -5258,7 +5258,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 		{ icon: "discover", feature: "Jump to a random drawing *" },
 		{ icon: "region", feature: "Unlimited regions" },
 		{ icon: "locations", feature: "Unlimited locations" },
-		{ icon: "locations", feature: "Unlimited buttons" },
+		{ icon: "buttons", feature: "Unlimited buttons" },
 		{ icon: "map", feature: "Access to a minimap" },
 		{ icon: "ink", feature: "No ink usage" },
 		{ icon: "advanced", feature: "Rotate and mirror the canvas" },
@@ -5267,7 +5267,8 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 		{ icon: "import", feature: "Import tool *" },
 		{ icon: "copy", feature: "Copy paste *" },
 		{ icon: "layers", feature: "Layers *" },
-		{ icon: "brush", feature: "Custom brush *" }
+		{ icon: "brush", feature: "Custom brush *" },
+		{ icon: "noads", feature: "No more ads" }
 	];
 	
 	for (var k = 0; k < features.length; k++) {
@@ -5279,9 +5280,13 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 	
 	container.appendChild(document.createTextNode("* Coming soon"));
 	container.appendChild(document.createElement("br"));
-	container.appendChild(document.createTextNode("Super secret crazy people offers: if you pay 50 euro, you get to pick your rep, if you pay 100 euro you get to give unlimited rep."));
 	container.appendChild(document.createElement("br"));
-	container.appendChild(document.createTextNode("(Fair use applies, you can't break things, limit the abuse ;) )"));
+	
+	var span = container.appendChild(document.createElement('span'));
+	span.style.fontStyle = 'italic';
+	span.appendChild(document.createTextNode("For the low price of 100 euro you get to give unlimited reputation."));
+	span.appendChild(document.createElement("br"));
+	span.appendChild(document.createTextNode("Fair use applies, you can't break things, limit the abuse ;)"));
 
 	var p = container.appendChild(document.createElement("p"));
 	if (!this.account.uKey) {
@@ -5291,7 +5296,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 		html += '<span class="label">Price:</span> <strong>20 euro</strong><br/>';
 		html += '<span class="label">Duration:</span> <strong>Forever</strong><br/><br/>';
-		html += 'Usually confirmed withing 12 hours. Taking longer? Contact premium@anondraw.com <br/><br/>';
+		html += 'Usually confirmed within 12 hours. Taking longer? Contact premium@anondraw.com <br/><br/>';
 		 
 		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="display:inline-block; margin-right:20%;">';
 	    	html +=	'<input type="hidden" name="cmd" value="_s-xclick">';

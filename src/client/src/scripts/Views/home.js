@@ -52,11 +52,11 @@ Anondraw.prototype.createHome = function createHome () {
 	script.onload = function () {
 		setTimeout(function () {
 			adContainer.className = "adcontainer";
-		}, 500);
+		}, 950);
 		
 		setTimeout(function () {
 			ad.id = "";
-		}, 1000);
+		}, 1250);
 	};
 	
 	/*
