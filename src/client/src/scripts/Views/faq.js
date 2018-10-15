@@ -85,6 +85,10 @@ Anondraw.prototype.createFaqPage = function createFaqPage () {
 		}
 		
 		if (qKey == 1 && !this.memberlevel) {
+			// Fix for the ad that sometimes appears randomly
+			var prevAd = document.getElementById("amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d");
+			prevAd.parentNode.removeChild()
+			
 			var adContainer = faq.appendChild(document.createElement("div"));
 			adContainer.className = "question-container";
 	

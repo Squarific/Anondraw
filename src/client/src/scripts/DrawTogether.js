@@ -112,6 +112,10 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	
 	setInterval(function () {
 		if (!this.memberlevel) {
+			// Fix for the ad that sometimes appears randomly
+			var prevAd = document.getElementById("amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d");
+			prevAd.parentNode.removeChild()
+			
 			// Amazon ad code
 			var div = document.createElement("div");
 			var ad = div.appendChild(document.createElement("div"));
@@ -121,6 +125,7 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 			script.src = "//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US&adInstanceId=123acff2-6857-4569-a250-fd703f6a941d";
 			this.chat.addElementAsMessage(div);
 			
+			// Fix for adding multiple ads with the same id
 			setTimeout(function () {
 				ad.id = "";
 			}, 1000);
@@ -827,6 +832,9 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			
 			setTimeout(function () {
 				if (!this.memberlevel) {
+					// Fix for the ad that sometimes appears randomly
+					var prevAd = document.getElementById("amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d");
+					prevAd.parentNode.removeChild()
 					// Amazon ad code
 					var div = document.createElement("div");
 					var ad = div.appendChild(document.createElement("div"));
@@ -5268,7 +5276,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 		{ icon: "copy", feature: "Copy paste *" },
 		{ icon: "layers", feature: "Layers *" },
 		{ icon: "brush", feature: "Custom brush *" },
-		{ icon: "noads", feature: "No more ads" }
+		{ icon: "noads", feature: "No more random ads" }
 	];
 	
 	for (var k = 0; k < features.length; k++) {

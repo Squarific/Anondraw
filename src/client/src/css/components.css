@@ -1,3 +1,10 @@
+/*
+	Fix for the ad that appears some times
+*/
+body > div#amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d {
+    display: none;
+}
+
 .topbar {
 	background:#364350;
 	font-family: 'Noto Sans', sans-serif;
