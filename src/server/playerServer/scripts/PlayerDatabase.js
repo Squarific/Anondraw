@@ -2,7 +2,7 @@ var SHA256 = require("crypto-js/sha256");
 
 // Hardcoded list of ids of the people allowed to give unlimited reputation
 // Will be removed once the title system is in place
-var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028, 2659]; // Filip, Lukas, Nyrrti, Corro, Sonny, intOrFloat
+var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028, 2659, 5866]; // Filip, Lukas, Nyrrti, Corro, Sonny, intOrFloat
 var PROTECTED_REGIONS_IDS = [1, 27, 2659];
 var UPVOTE_MIN_REP = 7;
 var DEFAULT_MIN_REGION_REP = 2000000000;
