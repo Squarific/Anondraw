@@ -14,6 +14,32 @@ ALTER TABLE users ADD COLUMN register_datetime DATETIME;
 ALTER TABLE users ADD COLUMN headerImage VARCHAR(128);
 ALTER TABLE users ADD COLUMN profileImage VARCHAR(128);
 
+CREATE TABLE teams (
+	id INT UNSIGNED AUTO_INCREMENT,
+	submittime DATETIME,
+	image VARCHAR(128),
+	owner INT UNSIGNED,
+	PRIMARY KEY(id),
+	INDEX(image),
+	INDEX(submittime, image)
+);
+
+CREATE TABLE members (
+	teamid INT UNSIGNED,
+	name VARCHAR(32),
+	social VARCHAR(128)
+);
+
+CREATE TABLE votes (
+	userid INT UNSIGNED,
+	votetime DATETIME,
+	weight INT,
+	image VARCHAR(128),
+	INDEX(userid, image),
+	INDEX(image),
+	UNIQUE KEY onevote (userid, image)
+);
+
 CREATE TABLE IF NOT EXISTS forgotkeys (
 	email VARCHAR(255),
 	ip VARCHAR(48),
@@ -46,9 +72,26 @@ CREATE TABLE IF NOT EXISTS reputations (
     id INT UNSIGNED AUTO_INCREMENT,
     from_id INT UNSIGNED,
     to_id INT UNSIGNED,
+	source INT UNSIGNED DEFAULT 0,
+	weight DECIMAL(5, 2) DEFAULT 1,
     PRIMARY KEY (id),
     INDEX(to_id, from_id)
     INDEX(from_id, to_id)
+);
+
+CREATE TABLE IF NOT EXISTS clickableareas (
+	id INT UNSIGNED AUTO_INCREMENT,
+	owner INT UNSIGNED,
+	x BIGINT,
+	y BIGINT,
+	width INT,
+	height INT,
+	url VARCHAR(255),
+	room VARCHAR(255),
+	name VARCHAR(255),
+	PRIMARY KEY(id),
+	INDEX(room),
+	INDEX(owner, room)
 );
 
 CREATE TABLE imageposts (
@@ -60,9 +103,6 @@ CREATE TABLE imageposts (
 	INDEX (userid, created),
 	INDEX (created)
 );
-
---For the possible source values, see PlayerDatabase.js
-ALTER TABLE reputations ADD COLUMN source INT UNSIGNED DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS ipbans (
     ip VARCHAR(48),

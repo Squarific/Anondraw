@@ -1,12 +1,19 @@
 Error.stackTraceLimit = Infinity;
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
-var http = require("http");
+var https = require('https');
+var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
 
 var port = process.argv[2];
 if (!port) throw "No port provided!";
 
-var server = http.createServer();
+var server = https.createServer(options);
 server.listen(port);
 
 // Socket library
@@ -63,6 +70,13 @@ function roomSavedCallbackSync(rooms, attempts, err) {
 	
 }
 
+function warnAboutShutdown () {
+	io.emit("chatmessage", {
+		user: "SERVER",
+		message: "SERVER IS RESTARTING IN 1 MINUTE"
+	});
+}
+
 function saveAndShutdown () {
 	console.log("SAVING AND SHUTTING DOWN");
 	var rooms = Object.keys(drawTogether.drawings);
@@ -99,5 +113,7 @@ function saveAndShutdown () {
 // Shut down, send drawings and stop all connections
 process.on("SIGTERM", saveAndShutdown);
 
+var restartTime = 4 * 60 * 60 * 1000 + Math.floor(Math.random() * 3 * 60 * 60 * 1000);
 // Restart the server every so often
-setTimeout(saveAndShutdown, 4 * 60 * 60 * 1000 + Math.floor(Math.random() * 3 * 60 * 60 * 1000));
+setTimeout(saveAndShutdown, restartTime);
+setTimeout(warnAboutShutdown, restartTime - 60 * 1000);

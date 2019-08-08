@@ -12,7 +12,7 @@ function RoomTileCanvas (favList, settings) {
 	
 	this.container.classList.add("roomTileCanvas");
 	this.errorDiv = this.container.appendChild(document.createElement("div"));
-	this.errorDiv.classList.add("status");
+	this.errorDiv.className = "status no-error";
 	this.errorDiv.appendChild(document.createTextNode("Loading..."));
 	
 	this.settings = this.utils.merge(this.utils.copy(settings), this.defaultSettings);
@@ -184,7 +184,7 @@ RoomTileCanvas.prototype.resize = function resize () {
 
 RoomTileCanvas.prototype.drawTiles = function drawTiles (tiles) {
 	for (var k = 0; k < tiles.length; k++) {
-		var coords = tiles[k].split(":");
+		var coords = tiles[k].split("_");
 		this.drawTile(parseInt(coords[0]), parseInt(coords[1]));
 	}
 	
@@ -242,7 +242,7 @@ RoomTileCanvas.prototype.decodeTiles = function decodeTiles (tiles) {
 	var object = {};
 
 	for (var k = 0; k < tiles.length; k++) {
-		var coords = tiles[k].split(":");
+		var coords = tiles[k].split("_");
 		coords[0] = parseInt(coords[0]);
 		coords[1] = parseInt(coords[1]);
 		object[coords[0]] = object[coords[0]] || {};

@@ -87,6 +87,7 @@ function Protocol (io, drawtogether, imgur, players, register, saveAndShutdown) 
 	this.players = players;
 	this.register = register;
 	this.protectedRegions = {};
+	this.clickableAreas = {};
 	this.bindIO();
 	this.saveAndShutdown = saveAndShutdown;
 
@@ -101,11 +102,26 @@ function Protocol (io, drawtogether, imgur, players, register, saveAndShutdown) 
 	setInterval(this.clearLeftTick.bind(this, 180 * 1000));
 }
 
+Protocol.prototype.updateClickableAreas = function updateClickableAreas (room) {
+	this.players.request("getclickableareas", {
+		room: room
+	}, function (err, data) {
+		if (err) {
+			console.log("Could not get clickable areas");
+			return;
+		}
+		
+		this.clickableAreas[room] = data.areas;
+		this.io.to(room).emit("clickableareas", data.areas);
+	}.bind(this));
+};
+
 Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (room) {
 	this.players.request('getProtectedRegionsAndPermissions', {
 		room: room
 	}, function (err, data) {
 		if (err) {
+			// We throw because this is a severe error, we don't want to compromise the drawings
 			throw "Can't get protected regions for room " + room + " Err:" + JSON.stringify(err);
 		}
 		var permissions = data.permissions;
@@ -421,11 +437,31 @@ Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (r
 
 			if (satObjects[k].r) {
 				if (SAT.testPolygonCircle(relevantRegions[i].satBox, satObjects[k])) {
-					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
+					return {
+						isAllowed: false,
+						minRepAllowed:relevantRegions[i].minRepAllowed,
+						regionid: relevantRegions[i].id,
+						ownerid: relevantRegions[i].owner,
+						name: relevantRegions[i].last_username,
+						minX: relevantRegions[i].minX,
+						minY: relevantRegions[i].minY,
+						maxX: relevantRegions[i].maxX,
+						maxY: relevantRegions[i].maxY
+						};
 				}
 			} else {
 				if (SAT.testPolygonPolygon(relevantRegions[i].satBox, satObjects[k])) {
-					return {isAllowed: false, minRepAllowed:relevantRegions[i].minRepAllowed, regionid: relevantRegions[i].id, ownerid: relevantRegions[i].owner, name: relevantRegions[i].last_username};
+					return {
+						isAllowed: false,
+						minRepAllowed:relevantRegions[i].minRepAllowed,
+						regionid: relevantRegions[i].id,
+						ownerid: relevantRegions[i].owner,
+						name: relevantRegions[i].last_username,
+						minX: relevantRegions[i].minX,
+						minY: relevantRegions[i].minY,
+						maxX: relevantRegions[i].maxX,
+						maxY: relevantRegions[i].maxY
+						};
 				}
 			}
 		}
@@ -634,7 +670,7 @@ Protocol.prototype.bindIO = function bindIO () {
 						return;
 					}
 					//shadowban this ass.
-					console.log("Shadow Banned:", socket.name, socket.ip);
+					console.log("Shadow Banned:", socket.name, socket.ip, oldIp);
 					shadowbanned.push(socket.ip);
 					return;
 				}
@@ -1201,7 +1237,9 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.ink -= usage;
 			}
 			
-			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * (socket.reputation || 1)) {
+			// Yeah we need to take into account negative rep for the special snowflakes that are willing to pay for it
+			var rep = socket.reputation < 0 ? 100 : (socket.reputation || 1);
+			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * rep) {
 				protocol.informClient(socket, "Something went wrong. (#PPTF)");
 				callback(false);
 				return;
@@ -1292,6 +1330,10 @@ Protocol.prototype.bindIO = function bindIO () {
 					if (!protocol.protectedRegions[room]) {
 						protocol.updateProtectedRegions(room);
 					}
+					
+					// Update the rooms clickable areas
+					if (!protocol.clickableAreas[room])
+						protocol.updateClickableAreas(room);
 
 					// Join this room
 					socket.join(room);
@@ -1314,7 +1356,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					}
 
 					protocol.drawTogether.getDrawings(room, function (err, drawings) {
-						callback(null, drawings);
+						callback(null, drawings, protocol.clickableAreas[room]);
 						protocol.drawTogether.getPaths(room, function (err, paths) {
 							socket.emit("paths", paths);
 						});
@@ -1365,10 +1407,6 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (socket.reputation < (targetSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE) {
 				callback({error: "You need to have at least " + REQUIRED_REP_DIFFERENCE + " more reputation than the person you are trying to kickban."});
 				console.error("[KICKBAN][ERROR] " + socket.name + " (rep: " + socket.reputation + ") tried to ban " + targetSocket.name + " (rep: " + targetSocket.reputation + ") rep difference " + (socket.reputation - targetSocket.reputation) + " required " + REQUIRED_REP_DIFFERENCE);
-				return;
-			}
-			if ([2518].indexOf(socket.userid) > -1) {
-				callback({error: "You're not allowed to ban anymore."});
 				return;
 			}
 
@@ -1500,16 +1538,12 @@ Protocol.prototype.bindIO = function bindIO () {
 			});
 		});
 
-		socket.on("removeprotectedregion", function (regionId, callback) {
+		socket.on("removeprotectedregion", function (regionId, overrideOwner, callback) {
 			if (typeof callback !== 'function') return;
 
 			if (isNaN(regionId)) {
 				callback("Region id is undefined.")
 				return;
-			}
-			var overrideOwner = false;
-			if (socket.reputation > MODERATE_REGION_MIN_REP){
-				overrideOwner = true;
 			}
 
 			protocol.players.request('removeprotectedregion', {
@@ -1636,6 +1670,25 @@ Protocol.prototype.bindIO = function bindIO () {
 			}, function (err, data) {
 				protocol.updateProtectedRegions(socket.room);
 				callback(err, data);
+			});
+		});
+		
+		socket.on("createclickablearea", function (pos, size, url, callback) {
+			console.log("Creating clickable area", socket.uKey, socket.name, pos, size, url);
+			
+			var room = socket.room;
+			
+			protocol.players.request('createclickablearea', {
+				uKey: socket.uKey,
+				room: room,
+				x: pos[0],
+				y: pos[1],
+				width: size[0],
+				height: size[1],
+				url: url
+			}, function (err) {
+				protocol.updateClickableAreas(room);
+				callback(err);
 			});
 		});
 

@@ -1,12 +1,18 @@
 require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 
-var http = require("http");
+var https = require("https");
 var drawcode = config.service.image.password.draw;
 
 var Canvas = require("canvas");
 var TiledCanvas = require("./scripts/TiledCanvas.js");
 var fs = require('graceful-fs');
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
 
 var mkdirp = require('mkdirp');
 
@@ -23,7 +29,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 		var tiledCanvas = new TiledCanvas();
 
 		tiledCanvas.requestUserChunk = function (x, y, callback) {
-			fs.readFile("./images/" + room + "/" + x + ":" + y + ".png", function (err, imgBytes) {
+			fs.readFile("./images/" + room + "/" + x + "_" + y + ".png", function (err, imgBytes) {
 				if (err) {
 					if (err.code !== "ENOENT") {
 						throw "Image load error: " + err;
@@ -47,7 +53,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 		return tiledCanvas;
 	}
 
-	var server = http.createServer(function (req, res) {
+	var server = https.createServer(options, function (req, res) {
 		var url = require("url");
 		var parsedUrl = url.parse(req.url, true);
 
@@ -65,7 +71,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 				return;
 			}
 
-			fs.readFile("./images/" + room + "/" + x + ":" + y + ".png", function (err, data) {
+			fs.readFile("./images/" + room + "/" + x + "_" + y + ".png", function (err, data) {
 				if (err && err.code === "ENOENT") {
 					res.writeHead(200, {
 						"Access-Control-Allow-Origin": "*",
@@ -211,7 +217,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 								return;
 							}
 
-							fs.writeFile("./images/" + room + "/" + x + ":" + y + ".png", bytes, function (err) {
+							fs.writeFile("./images/" + room + "/" + x + "_" + y + ".png", bytes, function (err) {
 								if (err) {
 									console.log("[DRAW][ERROR] Save image error", err);
 									callback();

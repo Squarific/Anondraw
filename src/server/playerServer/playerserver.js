@@ -2,10 +2,16 @@ require("../common/nice_console_log.js");
 var config = require("../common/config.js");
 var emailTemplate = require("./emailTemplate.js");
 
-var http = require("http");
+var https = require("https");
 var mysql = require("mysql");
 var mailgun = require('mailgun-send');
 var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
 
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
@@ -57,7 +63,7 @@ function randomString (length) {
 	return string;
 }
 
-var server = http.createServer(function (req, res) {
+var server = https.createServer(options, function (req, res) {
 	var url = require("url");
 	var parsedUrl = url.parse(req.url, true);
 	
@@ -79,11 +85,117 @@ var server = http.createServer(function (req, res) {
 		}
 		
 		if (bio.length > MAX_STORY_LENGTH) {
-			res.end(JSON.stringify({ error: "Your bio is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  story.length }));
+			res.end(JSON.stringify({ error: "Your bio is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  bio.length }));
 			return;
 		}
 		
 		playerDatabase.setBio(user.id, bio, function (err) {
+			res.end(JSON.stringify({
+				error: err
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/getclickableareas") {
+		var room = parsedUrl.query.room;
+		
+		playerDatabase.getClickableAreas(room, function (err, data) {
+			res.end(JSON.stringify({
+				error: err,
+				areas: data
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/createclickablearea") {
+		var room = parsedUrl.query.room;
+		var x = parsedUrl.query.x;
+		var y = parsedUrl.query.y;
+		var width = parsedUrl.query.width;
+		var height = parsedUrl.query.height;
+		var url = parsedUrl.query.url;
+		
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "You need to be logged in to create a clickable area" }));
+			return;
+		}
+		
+		if (width > 500 || height > 500) {
+			res.end(JSON.stringify({ error: "That is a bit big don't you think?" }));
+			return;
+		}
+		
+		playerDatabase.createClickableArea(user.id, room, x, y, width, height, url, function (err) {
+			res.end(JSON.stringify({
+				error: err
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/getFullEntries") {
+		var month = parsedUrl.query.month;
+		var year = parsedUrl.query.year;
+		
+		playerDatabase.getFullEntries(month, year, function (err, data) {
+			res.end(JSON.stringify({
+				error: err,
+				entries: data
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/getContestEntries") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
+			return;
+		}
+		
+		if (new Date().getDate() <= 21) {
+			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
+			return;
+		} else if (new Date().getDate() > 27) {
+			res.end(JSON.stringify({ error: "A new theme will be announced the first of next month. The 21nd of next month you will be able to vote again. For now, check out the winners!" }));
+			return;
+		}
+		
+		playerDatabase.getContestEntries(user.id, function (err, data) {
+			res.end(JSON.stringify({
+				error: err,
+				entries: data
+			}));
+		});
+		return;
+	}
+	
+	if (parsedUrl.pathname == "/vote") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var imageId = parsedUrl.query.image;
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
+			return;
+		}
+		
+		if (new Date().getDate() <= 21) {
+			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
+			return;
+		} else if (new Date().getDate() > 27) {
+			res.end(JSON.stringify({ error: "A new theme will be announced the first of next month. The 21nd of next month you will be able to vote again. For now, check out the winners!" }));
+			return;
+		}
+		
+		playerDatabase.vote(user.id, imageId, function (err) {
 			res.end(JSON.stringify({
 				error: err
 			}));
@@ -112,6 +224,76 @@ var server = http.createServer(function (req, res) {
 		return;
 	}
 	
+	if (parsedUrl.pathname == "/entercontest") {
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		var names = parsedUrl.query.names;
+		var socials = parsedUrl.query.socials;
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "User not logged in!" }));
+			return;
+		}
+		
+		if (!names || !names.length) {
+			res.end(JSON.stringify({ error: "No names provided." }));
+			return;
+		}
+		
+		if (new Date().getDate() > 21) {
+			res.end(JSON.stringify({ error: "You can enter again the first of next month!" }));
+			return;
+		}
+		
+		// If only one name or social is provided it will get parsed as a string instead of an array
+		if (!Array.isArray(names)) {
+			names = [names];
+		}
+		
+		if (!Array.isArray(socials)) {
+			socials = [socials];
+		}
+		
+		var team = [];
+		for (var k = 0; k < names.length; k++) {
+			team.push({ name: names[k], social: socials[k]});
+		}
+		
+		var body = [];
+		req.on('data', function (chunk) {
+			body.push(chunk);
+		}).on('end', function () {
+			body = Buffer.concat(body).toString();
+			
+			if (body.length > 15 * MB) {
+				res.end(JSON.stringify({ error: "Image is too large!" }));
+				return;
+			}
+			
+			var postId = randomString(48);
+			var data = body.replace(/^data:image\/\w+;base64,/, "");
+			fs.writeFile("images/" + postId + ".png", data, 'base64', function (err) {
+				if (err) {
+					res.end(JSON.stringify({ error: "Could not save image." }));
+					console.log(err);
+					return;
+				}
+			
+				playerDatabase.enterContest(user.id, postId, team, function (err) {
+					res.end(JSON.stringify({
+						error: err
+					}));
+				});
+			});
+			
+		}).on('error', function (err) {
+			console.error(err);
+			res.end(JSON.stringify({ error: "Something went wrong." }));
+		});
+		
+		return;
+	}
+	
 	if (parsedUrl.pathname == "/sharepicture") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
@@ -134,7 +316,7 @@ var server = http.createServer(function (req, res) {
 		}).on('end', function () {
 			body = Buffer.concat(body).toString();
 			
-			if (body.length > 3 * MB) {
+			if (body.length > 10 * MB) {
 				res.end(JSON.stringify({ error: "Image is too large!" }));
 				return;
 			}
@@ -1218,7 +1400,7 @@ var server = http.createServer(function (req, res) {
 	res.end('{"error": "Unknown command"}');
 }.bind(this)).listen(config.service.player.port);
 
-var app = http.createServer(handler);
+var app = https.createServer(options, handler);
 var io = require('socket.io')(app);
 var fs = require('fs');
 

@@ -6,11 +6,10 @@
   "main": "anondraw.js",
   "dependencies": {
     "canvas": "*",
-    "external-ip": "^0.2.3",
     "imgur": ">=0.1.7",
     "rbush": "^2.0.1",
     "sat": "^0.5.0",
-    "socket.io": "1.4.6"
+    "socket.io": "^2.0.4"
   },
   "devDependencies": {},
   "scripts": {

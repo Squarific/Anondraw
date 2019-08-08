@@ -1,3 +1,10 @@
+/*
+	Fix for the ad that appears some times
+*/
+body > div#amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d {
+    display: none;
+}
+
 .topbar {
 	background:#364350;
 	font-family: 'Noto Sans', sans-serif;
@@ -57,6 +64,14 @@
 	background:#c399f3;
 }
 
+.secondary {
+	background:#6c987d;
+}
+
+.secondary:hover {
+	background:#89b59a;
+}
+
 .signup {
 	background:#6c987d;
 	position: relative;
@@ -101,6 +116,41 @@
 	color:#ced4d8;
 }
 
+.adcontainer {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.contest-info.contest-info.contest-info {
+    flex-direction: column;
+}
+
+.contest-info img {
+	display:block;
+	margin:auto;
+	margin-bottom:1em;
+	max-height:5em;
+}
+
+.contest-tutorial .feature-text.feature-text {
+	padding: 1em;
+	padding-top: 2em;
+    padding-bottom: 2em;
+    background: #323e4a;
+    min-width: 25%;
+    text-align: center;
+}
+
+.contest-tutorial .feature-text.feature-text:nth-child(even) {
+    background: #394856;
+}
+
+.contest-tutorial {
+	display:flex;
+	flex-wrap:wrap;
+    justify-content: space-between;
+}
 
 @media (max-width:750px) {
 	.feature-container {
@@ -207,16 +257,17 @@
 	font-weight:bold;
 }
 
-.accountform .status {
+.status {
 	display:block;
 	background:#6b3232;
+	color:white;
 	padding:1.5em;
 	width:100%;
 	margin-bottom:2em;
 	text-align:center;
 }
 
-.accountform .status:empty {
+.status:empty {
 	display:none;
 }
 
@@ -402,6 +453,20 @@
 	margin:0.5em;
 }
 
+.entries {
+	padding:2em;
+}
+
+.entry {
+	flex-direction:column;
+	position:relative;
+}
+
+.vote {
+	margin-left:1em;
+	margin-right:1em;
+}
+
 .story a {
 	display: inline-block;
     text-decoration: none;
@@ -409,6 +474,13 @@
     font-weight: bold;
     margin-left: 1em;
     margin-right: 1em;
+}
+
+.entry a {
+	display: initial;
+	text-decoration:initial;
+	font-weight:initial;
+	margin: initial;
 }
 
 .storytext .actualtext {
@@ -437,6 +509,10 @@
 	text-align:center;
 }
 
+.entry .imagecontainer {
+	min-height:16em;
+}
+
 .story .credit {
 	margin-top: 0.5em;
 	font-style: italic;
@@ -462,6 +538,94 @@
 
 .showstories .imagecontainer {
 	margin-right:1em;
+}
+
+
+.winners-container {
+	width:100%;
+	text-align:center;
+}
+
+.winners-container .button {
+	margin-top:2em;
+	min-width:50%;
+}
+
+.winners-container .podium {
+	display:flex;
+	width:100%;
+	margin-top:2em;
+}
+
+.podium .team {
+	width:100%;
+}
+
+.team:nth-child(1) {
+	order:2;
+}
+
+.team:nth-child(2) {
+	order:1;
+}
+
+.team:nth-child(3) {
+	order:3;
+}
+
+.team img {
+	max-width:80%;
+	height:15em;
+}
+
+.team img.second {
+	margin-top:30px;
+}
+
+.team img.third {
+	margin-top:50px;
+}
+
+.podium .piece {
+	width:100%;
+	line-height:100%;
+	vertical-align:middle;
+	padding-bottom:40px;
+	font-size:30px;
+	background:#252d35;
+	margin-top:20px;
+}
+
+.podium .piece.first {
+	padding-top:50px;
+	font-size:80px;
+	color:#96944a;
+}
+
+.podium .piece.second {
+	padding-top:50px;
+	font-size:50px;
+	color:#999ba2;
+}
+
+.podium .piece.third {
+	padding-top:50px;
+	font-size:30px;
+	color:#b37141;
+}
+
+
+.team .name {
+	display:inline-block;
+	padding:1em;
+	width:100%;
+}
+
+.team .member {
+	display:inline-block;
+	font-style:italic;
+	padding-right: 0.3em;
+	color:white;
 }
 
 @media (max-width:750px) {

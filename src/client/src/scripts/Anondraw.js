@@ -25,6 +25,8 @@ function Anondraw (container, settings) {
 	this.createRouter();
 }
 
+Anondraw.prototype.view = {};
+
 Anondraw.prototype.createSideMenu = function createSideMenu () {
 	this.sideMenu = new SideMenu([
 		{
@@ -63,15 +65,21 @@ Anondraw.prototype.createSideMenu = function createSideMenu () {
 			href: "/faq",
 			navigo: true
 		},
-		{
+		/*{
 			icon: "bullhorn",
 			text: "Feedback",
 			href: "javascript:MyOtziv.mo_show_box(); ga('send', 'event', 'feedback', 'open');;"
-		},
+		},*/
 		{
 			icon: "github",
 			text: "Github",
 			href: "javascript:window.open('https://github.com/Squarific/anondraw');ga('send', 'event', 'githubmain', 'open');;",
+		},
+		{
+			icon: "trophy",
+			text: "Contest",
+			href: "/contest",
+			navigo: true
 		},
 		{
 			icon: "power-off",
@@ -224,9 +232,24 @@ Anondraw.prototype.createRouter = function createRouter () {
 		ga('set', 'page', '/new');
 		ga('send', 'pageview');
 	}.bind(this))
+	.on('/contest*', function () {
+		this.setContent(this.createContestFeed());
+		ga('set', 'page', '/contest');
+		ga('send', 'pageview');
+	}.bind(this))
+	.on('/vote*', function () {
+		this.setContent(this.createVotePage());
+		ga('set', 'page', '/vote');
+		ga('send', 'pageview');
+	}.bind(this))
+	.on('/allentries/:month/:year', function (params) {
+		this.setContent(this.createAllEntriesPage(params));
+		ga('set', 'page', '/allentries');
+		ga('send', 'pageview');
+	}.bind(this))
 	.on(function () {
 		/* If there is a hash, go to the collab app for legacy support */
-		if (location.hash && location.hash.indexOf("pw_adbox") == -1) {
+		if (location.hash) {
 			location = location.origin + "/collab" + location.hash;
 			return;
 		}
@@ -281,5 +304,4 @@ Anondraw.prototype.setContent = function setContent (domNode) {
 	
 	this.sideMenu.content.appendChild(domNode);
 	this.router.updatePageLinks();
-	pw_load ? pw_load() : "";
 };

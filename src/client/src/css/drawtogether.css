@@ -27,6 +27,10 @@ input.paint-texttool {
   color:white;
 }
 
+.hide {
+	display:none;
+}
+
 .premium {
   font-weight:800;
   background-image: -webkit-gradient(linear,left top,right top,color-stop(0,#FFD0D0),color-stop(0.15,#FFCFFF),color-stop(0.3,#D0D0FF),color-stop(0.45,#A9FFFF),color-stop(0.6,#95FF95),color-stop(0.75,#A1FFA1),color-stop(0.9,#FFFF9C),color-stop(1,#FFA4A4));
@@ -541,6 +545,10 @@ input.paint-texttool {
   background:#374E65;
 }
 
+.activated {
+	 background:#789170 !important;
+}
+
 .drawtogether-player-name {
   padding:.4em;
 }
@@ -642,12 +650,13 @@ input.paint-texttool {
   position: absolute;
   left: 0;
   width: calc(100% - 20rem); }
-
+@media (min-width: 1300px) {
 .control-container .control-integer,
 .control-container .control-color-input,
 .control-container .sp-replacer {
   margin-left:1em;
   margin-right:1em;
+}
 }
 
 /**
@@ -832,9 +841,75 @@ input.paint-texttool {
 
   .control-button:hover {
     background-color: #233445; }
+	
+	.clickablearea-button:hover {
+		background-color: #456789;
+	}
+	
+.control-button.clickablearea-button {
+    margin-left: 0.3em;
+}
+
+.control-button.favorites-button {
+    margin-left: 0.3em;
+}
+
+.control-button.tilesmap-button {
+    margin-left: 0.3em;
+}
 
 .drawtogether-display-on-small {
   display:none;
+}
+
+.clickableareas-container {
+	position:absolute;
+	left:0;
+	top:0;
+}
+
+.clickableArea {
+	position:absolute;
+	cursor:pointer;
+	transition:background 0.3s;
+}
+
+
+.clickableArea:hover {
+	background:#00000059;
+}
+
+.drawtogether-paint-container.fullscreen {
+	position:fixed;
+	left:0;
+	top:0;
+	right:0;
+	bottom:0;
+	width:100%;
+	z-index:500;
+}
+
+.popout-button {
+	position:absolute;
+	right:0;
+	top:0;
+	width:2em;
+	cursor:pointer;
+	border-bottom-left-radius:10%;
+	transition:transform 1s, background:0.2s;
+}
+
+.popout-button:hover {
+	background: #23344560;
+}
+
+.drawtogether-paint-container.fullscreen .popout-button {
+	transform: rotate(180deg);
+}
+
+.drawtogether-paint-container.fullscreen .mouse-coords,
+.drawtogether-paint-container.fullscreen .control-container {
+	display:none;
 }
 
 @media (max-width: 1550px) {
@@ -852,6 +927,28 @@ input.paint-texttool {
 }
 
 @media (max-width: 750px) {
+  .drawtogether-paint-container.fullscreen {
+    height: 100% !important;
+  }
+  .drawtogether-selectwindow {
+    justify-content: normal !important;
+  }
+  .content-container {
+    left: 3em !important;
+  }
+  .menuItem {
+    display: block; 
+    width: inherit;
+  }
+  .menu {
+    width: 3em;
+  }
+  .control-integer-input {
+    width: 5em
+  }
+  .control-integer-output {
+    left: 33%
+  }
   .furjbqy {
     display:none;
   }
@@ -872,9 +969,10 @@ input.paint-texttool {
  }
 
   .control-container .sp-replacer {
+    padding:0em;
+    min-width:1em;
     margin:0 !important;
-	min-width:100%;
-	right:initial;
+    right:initial;
   }
   
 	.collab-container.collab-container {
@@ -904,9 +1002,9 @@ input.paint-texttool {
 	
 	.drawtogether-chat-container {
 		order:2;
-		height: calc(70vh - 1em) !important;
+		height: calc(86vh - 1em) !important;
 		position: relative;
-		top: calc(30vh - -1em);
+		top: calc(14vh - -1em);
 	}
 	
 	.drawtogether-info-container {
@@ -928,8 +1026,11 @@ input.paint-texttool {
 		right: calc(4em - 100vw) !important;
 		width: calc(100vw - 4em) !important;
 		z-index: 100;
-		height:30vh
+		height:14vh
 	}
+	.control-button {
+                min-width: initial !important;
+        }
 
   .control-container {
     border-radius:0 !important;
@@ -941,7 +1042,7 @@ input.paint-texttool {
   .control-container .control-integer {
     margin:0;
     border:none;
-    min-width:2em;
+    min-width:1em;
   }
 
   .drawtogether-control-container {
@@ -950,7 +1051,7 @@ input.paint-texttool {
     padding:0;
     overflow-y:auto;
 	box-shadow: initial;
-	width:50vw;
+	width:36vw;
   }
   
   .drawtogether-control-container .control-text-input {

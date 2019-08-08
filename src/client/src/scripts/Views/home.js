@@ -43,16 +43,21 @@ Anondraw.prototype.createHome = function createHome () {
 	*/
 	
 	var adContainer = container.appendChild(document.createElement("div"));
-	adContainer.className = "adcontainer";
-
-	var ad = '<!-- Project Wonderful Ad Box Code -->' +
-	         '<div style="text-align:center;"><div style="display:inline-block;" id="pw_adbox_78949_1_0"></div></div>' +
-	         '<script type="text/javascript"></script>' +
-	         '<noscript><div style="text-align:center;"><div style="display:inline-block;"><map name="admap78949" id="admap78949"><area href="http://www.projectwonderful.com/out_nojs.php?r=0&c=0&id=78949&type=1" shape="rect" coords="0,0,468,60" title="" alt="" target="_blank" /></map>' +
-	         '<table cellpadding="0" cellspacing="0" style="width:468px;border-style:none;background-color:#eef2f5;"><tr><td><img src="http://www.projectwonderful.com/nojs.php?id=78949&type=1" style="width:468px;height:60px;border-style:none;" usemap="#admap78949" alt="" /></td></tr><tr><td style="background-color:#eef2f5;" colspan="1"><center><a style="font-size:10px;color:#364350;text-decoration:none;line-height:1.2;font-weight:bold;font-family:Tahoma, verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="http://www.projectwonderful.com/advertisehere.php?id=78949&type=1" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></table></div></div>' +
-	         '</noscript>' +
-	         '<!-- End Project Wonderful Ad Box Code -->';
-	adContainer.innerHTML = ad;
+	
+	var ad = adContainer.appendChild(document.createElement("div"));
+	ad.id = "amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d";
+	
+	var script = adContainer.appendChild(document.createElement("script"));
+	script.src = "//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US&adInstanceId=123acff2-6857-4569-a250-fd703f6a941d";
+	script.onload = function () {
+		setTimeout(function () {
+			adContainer.className = "adcontainer";
+		}, 950);
+		
+		setTimeout(function () {
+			ad.id = "";
+		}, 1250);
+	};
 	
 	/*
 		Socialize feature
@@ -100,7 +105,7 @@ Anondraw.prototype.createHome = function createHome () {
 	p.className = "feature-text";
 	p.appendChild(document.createTextNode("It was never this easy to create a breathtaking portfolio. You'll be able to show everyone exactly how good of an artist you are. Build it up slowly over time and you'll be amazed at what you can achieve."));
 	
-	var profiles = [1, 15981, 16684, 18070, 17603, 12575, 5866, 87, 14344, 18145, 16973, 7833, 3753, 11290, 18041, 4734, 5036, 17988, 15503, 17966, 12238, 17901, 17940];
+	var profiles = [1, 15981, 16684, 18070, 17603, 12575, 5866, 87, 14344, 18145, 16973, 7833, 3753, 11290, 18041, 4734, 5036, 17988, 15503, 17966, 12238, 17901, 17940, 25918];
 	var tryButton = div.appendChild(document.createElement("a"));
 	tryButton.className = "button trybutton";
 	tryButton.appendChild(document.createTextNode("Check out a random profile"));

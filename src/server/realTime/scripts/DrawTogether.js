@@ -37,8 +37,8 @@ DrawTogether.prototype.addDrawing = function addDrawing (room, drawing, callback
 	    ( this.drawings[room].length > CACHE_IGNORE || this.drawings[room].ignoreCache ) &&
 		( new Date() - (this.drawings[room].last_send_to_img_server || 0) > WAIT_BEFORE_SYNC_RETRY ) &&
 	    !this.drawings[room].sending &&
-	    !room.indexOf("game_") == 0 &&
-	    !room.indexOf("private_game_") == 0) {
+	    room.indexOf("game_") !== 0 &&
+	    room.indexOf("private_game_") !== 0) {
 
 		// Make sure we wait till the server responded
 		this.drawings[room].sending = true;
@@ -103,7 +103,7 @@ DrawTogether.prototype.undoDrawings = function undoDrawings (room, socketid, all
 		stop = this.drawings[room].sendLength;
 	}
 
-	for (k = this.drawings[room].length - 1; k >= stop; k--) {
+	for (var k = this.drawings[room].length - 1; k >= stop; k--) {
 		if (this.drawings[room][k].id == socketid || this.drawings[room][k].socketid == socketid) {
 			this.drawings[room].splice(k, 1);
 

@@ -2,10 +2,10 @@ var SHA256 = require("crypto-js/sha256");
 
 // Hardcoded list of ids of the people allowed to give unlimited reputation
 // Will be removed once the title system is in place
-var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028, 2659]; // Filip, Lukas, Nyrrti, Corro, Sonny, intOrFloat
+var MULTIPLE_REP_GIVE = [1, 27, 87, 1529, 2028, 2659, 5866]; // Filip, Lukas, Nyrrti, Corro, Sonny, intOrFloat
+var PROTECTED_REGIONS_IDS = [1, 27, 2659];
 var UPVOTE_MIN_REP = 7;
 var DEFAULT_MIN_REGION_REP = 2000000000;
-var MODERATE_REGIONS_MIN_REP = 100;
 var REFERRAL_CONFIRMED_REP = 9;
 
 var REPSOURCES = {
@@ -72,8 +72,103 @@ PlayerDatabase.prototype.setBio = function setBio (id, bio, callback) {
 	});
 };
 
+PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid, callback) {
+	this.database.query("SELECT image FROM teams WHERE MONTH(submittime) = MONTH(CURRENT_DATE()) AND YEAR(submittime) = YEAR(CURRENT_DATE()) AND NOT EXISTS (SELECT 1 FROM votes WHERE userid = ? AND votes.image = teams.image)", [userid], function (err, rows) {
+		if (err) {
+			console.log("GETCONTESTENTRIES DB ERROR", err, userid);
+			callback("Could not get entries. Please contact support.");
+			return;
+		}
+		
+		callback(null, rows);
+	});
+};
+
+PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, callback) {
+	this.database.query("SELECT image, name, social FROM teams JOIN members ON teams.id = members.teamid WHERE MONTH(submittime) = ? AND YEAR(submittime) = ? ORDER BY (SELECT SUM(weight) FROM votes WHERE votes.image = teams.image), image DESC", [month, year], function (err, rows) {
+		if (err) {
+			console.log("GETFULLENTRIES DB ERROR", err, month, year);
+			callback("Could not get entries. Please contact support.");
+			return;
+		}
+		
+		rows = rows || [];
+		var teams = [];
+		
+		// This code expects members to be sorted by score and then by image
+		// We loop trough all the members
+		for (var k = 0; k < rows.length; k++) {
+
+			// If the current last team is the one we are in, just push ourselves into the member list
+			if (teams[teams.length - 1] && teams[teams.length - 1].image == rows[k].image) {
+				teams[teams.length - 1].members.push({ name: rows[k].name, social: rows[k].social});
+
+			// Otherwise we create a new team, with us as only member
+			} else {
+				teams.push({
+					image: rows[k].image,
+					members: [{name: rows[k].name, social: rows[k].social}]
+				});
+			}
+		}
+
+		callback(null, teams);
+	});
+};
+
+PlayerDatabase.prototype.getClickableAreas = function getClickableAreas (room, callback) {
+	this.database.query("SELECT * FROM clickableareas WHERE room = ?", [room], function (err, rows) {
+		if (err) {
+			console.log("GETCLICKABLEAREAS DB ERROR", err, room);
+			callback("Could not get clickable areas; DB error");
+			return;
+		}
+		
+		callback(null, rows);
+	});
+};
+
+PlayerDatabase.prototype.createClickableArea = function createClickableArea (userid, room, x, y, width, height, url, callback) {
+	this.database.query("select count(*) as amountOfAreas from clickableareas left join premium on userid=owner where owner = ? AND userid is null AND room = ?", [userid, room], function (err, rows) {
+		if (err) {
+			console.log("Createclickablearea db error on countcheck", err, room, userid);
+			callback("Could not create clickable area");
+			return;
+		}
+		
+		if (rows[0].amountOfAreas > 0) {
+			callback("Having more than one clickable area is premium only.");
+			return;
+		}
+		
+		this.database.query("INSERT INTO clickableareas (owner, x, y, width, height, url, room) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, x, y, width, height, url, room], function (err) {
+			if (err) {
+				console.log("CREATECLICKABLEAREA DB ERROR", err, userid, x, y, width, height, url, room);
+				callback("Could not create clickable area because of a database issue. Please contact an admin.");
+				return;
+			}
+			
+			callback(null);
+		});
+	}.bind(this));
+};
+
+// Don't allow two votes
+// Weight with reputation
+PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
+	this.database.query("INSERT INTO votes (SELECT ?, ?, (SELECT count(*) FROM users INNER JOIN reputations AS r ON users.id = r.to_id WHERE users.id = ? GROUP BY users.id), ?)", [userid, new Date(), userid, imageid], function (err) {
+		if (err) {
+			console.log("VOTE DB ERROR", err, userid, imageid);
+			callback("Voting failed, did you vote for this image already?");
+			return;
+		}
+		
+		callback(null);
+	});
+};
+
 PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callback) {
-	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COUNT(*) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
+	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COALESCE(SUM(weight),0) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
 		if (err) {
 			console.log("GETPROFILEDATA DB ERROR", err, userid);
 			callback("Database error, couldn't get profile.");
@@ -95,6 +190,36 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 			storyRows = storyRows || [];
 			rows[0].stories = storyRows;
 			callback(null, rows[0]);
+		});
+	}.bind(this));
+};
+
+PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, team, callback) {
+	var query = "INSERT INTO teams (submittime, image, owner) VALUES (?, ?, ?)";
+	var queryArgs = [new Date(), imageid, userid];
+	
+	this.database.query(query, queryArgs, function (err, result) {
+		if (err) {
+			callback("Couldn't save team, a database error occured.");
+			console.log("SAVE TEAM DB ERROR", err, userid, imageid, team);
+			return;
+		}
+			
+		var teamId = result.insertId;
+		
+		var members = [];
+		for (var k = 0; k < team.length; k++)
+			members.push([teamId, team[k].name, team[k].social]);
+		
+		var query = "INSERT INTO members (teamid, name, social) VALUES ?";
+		this.database.query(query, [members], function (err, result) {
+			if (err) {
+				callback("Couldn't save members, a database error occured.");
+				console.log("SAVE MEMBER DB ERROR", err, userid, imageid, team);
+				return;
+			}
+			
+			callback(null);
 		});
 	}.bind(this));
 };
@@ -250,7 +375,7 @@ PlayerDatabase.prototype.register = function register (email, pass, referral, ca
 };
 
 PlayerDatabase.prototype.getReputation = function getReputation (userid, callback) {
-	this.database.query("SELECT COUNT(*) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
+	this.database.query("SELECT COALESCE(SUM(weight),0) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
 		if (err) {
 			callback("Database error (#1) while getting reputation.");
 			console.log("[GETREPUTATION] Database error: ", err);
@@ -263,7 +388,7 @@ PlayerDatabase.prototype.getReputation = function getReputation (userid, callbac
 			return;
 		}
 
-		callback(null, rows[0].reputation);
+		callback(null, rows[0].reputation || 0);
 	});
 };
 
@@ -280,7 +405,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 			return;
 		}
 
-		this.database.query("SELECT COUNT(*) as fromcount FROM reputations WHERE to_id = ?", [fromId], function (err, rows1) {
+		this.database.query("SELECT COALESCE(SUM(weight),0) as fromcount FROM reputations WHERE to_id = ?", [fromId], function (err, rows1) {
 			if (err) {
 				callback("Database error (#3) trying to give reputation.");
 				console.log("[GIVEREPUTATION] Database error while getting fromcount: ", err);
@@ -292,7 +417,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 				return;
 			}
 
-			this.database.query("SELECT COUNT(*) as tocount FROM reputations WHERE to_id = ?", [toId], function (err, rows2) {
+			this.database.query("SELECT COALESCE(SUM(weight),0) as tocount FROM reputations WHERE to_id = ?", [toId], function (err, rows2) {
 				if (rows2[0].tocount >= rows1[0].fromcount) {
 					callback("You can only give reputation to people that have less than you.");
 					return;
@@ -506,6 +631,12 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 	this.database.query("select count(*) as amountOfRegions from regions left join premium on userid=owner where owner = ? AND userid is null AND room = ?",
 		[userid, room],
 		function (err, rows) {
+			if (err) {
+				console.log("Add protected region amountcheck database error", userid, from, to, room);
+				callback("Could not create protected region, database error. Please contact an admin.");
+				return;
+			}
+			
 			if (rows[0].amountOfRegions > 0) { // amountOfRegions always equals 0 when user is premium
 				callback("Having more than one region is premium only!");
 				return;
@@ -561,25 +692,21 @@ PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions 
 };
 
 PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	this.database.query("select count(*) as reputation from reputations where to_id = ?", [userid], function(err, rows) {
+	if(overrideOwner && PROTECTED_REGIONS_IDS.indexOf(userid) == -1){
+		callback("Sorry this is an admin only feature.");
+		return;
+	}
+
+	this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
 		if(err){
-			callback(err)
+			callback(err);
+			console.log("Delete protected region database error", err);
 			return;
 		}
-		if(overrideOwner && (rows[0].reputation < MODERATE_REGIONS_MIN_REP)){
-			callback("You must have at least" + MODERATE_REGIONS_MIN_REP + "R to remove someone elses region");
-			return;
-		}
-		this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
-			if(err){
-				callback(err);
-				console.log("Delete protected region database error", err);
-				return;
-			}
-			this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
-				callback(err);
-				console.log("Delete protected region permissions database error", err);
-			}.bind(this));
+
+		this.database.query("delete from regions_permissions where regionId = ?", [regionId], function (err) {
+			callback(err);
+			console.log("Delete protected region permissions database error", err);
 		}.bind(this));
 	}.bind(this));
 };
