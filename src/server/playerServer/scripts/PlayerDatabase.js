@@ -67,7 +67,7 @@ PlayerDatabase.prototype.setBio = function setBio (id, bio, callback) {
 			callback("Database error.");
 			return;
 		}
-
+		
 		callback(null);
 	});
 };
@@ -79,7 +79,7 @@ PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid,
 			callback("Could not get entries. Please contact support.");
 			return;
 		}
-
+		
 		callback(null, rows);
 	});
 };
@@ -91,10 +91,10 @@ PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, 
 			callback("Could not get entries. Please contact support.");
 			return;
 		}
-
+		
 		rows = rows || [];
 		var teams = [];
-
+		
 		// This code expects members to be sorted by score and then by image
 		// We loop trough all the members
 		for (var k = 0; k < rows.length; k++) {
@@ -123,7 +123,7 @@ PlayerDatabase.prototype.getClickableAreas = function getClickableAreas (room, c
 			callback("Could not get clickable areas; DB error");
 			return;
 		}
-
+		
 		callback(null, rows);
 	});
 };
@@ -147,19 +147,19 @@ PlayerDatabase.prototype.createClickableArea = function createClickableArea (use
 			callback("Could not create clickable area");
 			return;
 		}
-
+		
 		if (rows[0].amountOfAreas > 0) {
 			callback("Having more than one clickable area is premium only.");
 			return;
 		}
-
+		
 		this.database.query("INSERT INTO clickableareas (owner, x, y, width, height, url, room) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, x, y, width, height, url, room], function (err) {
 			if (err) {
 				console.log("CREATECLICKABLEAREA DB ERROR", err, userid, x, y, width, height, url, room);
 				callback("Could not create clickable area because of a database issue. Please contact an admin.");
 				return;
 			}
-
+			
 			callback(null);
 		});
 	}.bind(this));
@@ -174,7 +174,7 @@ PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
 			callback("Voting failed, did you vote for this image already?");
 			return;
 		}
-
+		
 		callback(null);
 	});
 };
@@ -186,19 +186,19 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 			callback("Database error, couldn't get profile.");
 			return;
 		}
-
+		
 		if (!rows || !rows[0]) {
 			callback("Profile not found!");
 			return;
 		}
-
+		
 		this.database.query("SELECT * FROM imageposts WHERE userid = ? ORDER BY created DESC", [userid], function (err, storyRows) {
 			if (err) {
 				console.log("GETPROFILEDATA DB ERROR", err, userid);
 				callback("Database error, couldn't get profile stories.");
 				return;
 			}
-
+			
 			storyRows = storyRows || [];
 			rows[0].stories = storyRows;
 			callback(null, rows[0]);
@@ -209,20 +209,20 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, team, callback) {
 	var query = "INSERT INTO teams (submittime, image, owner) VALUES (?, ?, ?)";
 	var queryArgs = [new Date(), imageid, userid];
-
+	
 	this.database.query(query, queryArgs, function (err, result) {
 		if (err) {
 			callback("Couldn't save team, a database error occured.");
 			console.log("SAVE TEAM DB ERROR", err, userid, imageid, team);
 			return;
 		}
-
+			
 		var teamId = result.insertId;
-
+		
 		var members = [];
 		for (var k = 0; k < team.length; k++)
 			members.push([teamId, team[k].name, team[k].social]);
-
+		
 		var query = "INSERT INTO members (teamid, name, social) VALUES ?";
 		this.database.query(query, [members], function (err, result) {
 			if (err) {
@@ -230,7 +230,7 @@ PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, 
 				console.log("SAVE MEMBER DB ERROR", err, userid, imageid, team);
 				return;
 			}
-
+			
 			callback(null);
 		});
 	}.bind(this));
@@ -239,7 +239,7 @@ PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, 
 PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story, type, callback) {
 	var query = "INSERT INTO imageposts (userid, image, story, created) VALUES (?, ?, ?, ?);";
 	var queryargs = [userid, postid, story, new Date()];
-
+	
 	if (type == "header") {
 		query += "UPDATE users SET headerImage = ? WHERE id = ?;";
 		queryargs.push(postid);
@@ -249,14 +249,14 @@ PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, s
 		queryargs.push(postid);
 		queryargs.push(userid);
 	}
-
+	
 	this.database.query(query, queryargs, function (err) {
 		if (err) {
 			callback("Couldn't share picture, a database error occured.");
 			console.log("SHAREPICTURE DB ERROR", err, userid, postid, story);
 			return;
 		}
-
+		
 		callback(null);
 	});
 };
@@ -268,7 +268,7 @@ PlayerDatabase.prototype.getPictureStories = function getPictureStories (callbac
 			console.log("GETPICTURESSTORIES DB ERR", err);
 			return;
 		}
-
+		
 		callback(null, rows);
 	});
 };
@@ -283,7 +283,7 @@ PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
 /*
 	Takes an unencrypted password and a forgotkey code and puts the hash as pass
 	for the user with the given code
-
+	
 	Callback(err, id, email)
 */
 PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
@@ -294,21 +294,21 @@ PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
 			callback("Reset database error #1");
 			return;
 		}
-
+		
 		var rows = results[0];
-
+		
 		if (!rows || rows.length < 1) {
 			callback("Code does not exist or has already been used!");
 			return;
 		}
-
+				
 		this.setPassword(rows[0].id, pass, function (err) {
 			if (err) {
 				console.log("[RESET] DB ERROR 2:", err);
 				callback("Reset database error #2");
 				return;
 			}
-
+			
 			callback(null, rows[0].id, rows[0].email);
 		});
 	}.bind(this));
@@ -441,7 +441,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 					this.checkReferralRep();
 				}.bind(this));
 			}.bind(this));
-		}.bind(this));
+		}.bind(this));		
 	}.bind(this));
 };
 
@@ -471,7 +471,7 @@ PlayerDatabase.prototype.checkReferralRep = function checkReferralRep () {
 	query += "            AND to_id = triggereduser.referral ";
 	query += "            AND source = 2 ";
 	query += "    )";
-
+	
 	this.database.query(query, function (err, result) {
 		if (err) console.log("[CHECKREFERRALREP] DBError", err);
 		console.log(result);
@@ -648,7 +648,7 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 				callback("Could not create protected region, database error. Please contact an admin.");
 				return;
 			}
-
+			
 			if (rows[0].amountOfRegions > 0) { // amountOfRegions always equals 0 when user is premium
 				callback("Having more than one region is premium only!");
 				return;
@@ -819,11 +819,11 @@ PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProt
 					if (err) {
 						console.log("Add Users to protected region database error", err);
 						return;
-					}
+					}									
 				});
 		}
 		callback();
-
+		
 	}.bind(this));
 };
 
@@ -861,11 +861,11 @@ PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersTo
 					if (err) {
 						console.log("Remove Users to protected region database error", err);
 						return;
-					}
+					}									
 				});
 		}
 		callback();
-
+		
 	}.bind(this));
 };
 
@@ -884,7 +884,7 @@ PlayerDatabase.prototype.setMinimunRepInProtectedRegion = function setMinimunRep
 			callback();
 
 		});
-
+		
 	}.bind(this));
 };
 
