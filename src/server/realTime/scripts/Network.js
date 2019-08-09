@@ -110,7 +110,7 @@ Protocol.prototype.updateClickableAreas = function updateClickableAreas (room) {
 			console.log("Could not get clickable areas");
 			return;
 		}
-		
+
 		this.clickableAreas[room] = data.areas;
 		this.io.to(room).emit("clickableareas", data.areas);
 	}.bind(this));
@@ -157,7 +157,7 @@ Protocol.prototype.updateProtectedRegions = function updateProtectedRegions (roo
 					minRegionId = f;
 				}
 			}
-			
+
 			this.protectedRegions[room].insert(data[k]);
 		}
 	}.bind(this));
@@ -253,9 +253,9 @@ Protocol.prototype.getProtectedRegionsOwnedBy = function getProtectedRegionsOwne
 
 	for (var i = protectedRegionsArr.length - 1; i >= 0; i--) {
 		if( protectedRegionsArr[i].owner == user){
-			p.push({ 
+			p.push({
 				regionId: protectedRegionsArr[i].id,
-				owner: protectedRegionsArr[i].owner, 
+				owner: protectedRegionsArr[i].owner,
 				name: protectedRegionsArr[i].name || "",
 				permissions: protectedRegionsArr[i].permissions || [],
 				minX: protectedRegionsArr[i].minX,
@@ -287,14 +287,14 @@ Protocol.prototype.isInsideSpawnArea = function isInsideSpawnArea (satObject) {
 	var minY = 327280;
 	var maxX = 1321431;
 	var maxY = 349440;
-	
+
 	var satBox = new SAT.Polygon(new SAT.Vector(), [
 		new SAT.Vector(minX, minY),
 		new SAT.Vector(maxX, minY),
 		new SAT.Vector(maxX, maxY),
 		new SAT.Vector(minX, maxY),
 	]);
-	
+
 	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
@@ -310,19 +310,19 @@ Protocol.prototype.isInsideSpawnArea = function isInsideSpawnArea (satObject) {
 Protocol.prototype.isInsideOldSpawn = function isInsideOldSpawn (satObject) {
 	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
 	if (weeks == 0) return false;
-	
+
 	var minX = 309191;
 	var minY = 337280;
 	var maxX = minX + weeks * 3840;
 	var maxY = 339440;
-	
+
 	var satBox = new SAT.Polygon(new SAT.Vector(), [
 		new SAT.Vector(minX, minY),
 		new SAT.Vector(maxX, minY),
 		new SAT.Vector(maxX, maxY),
 		new SAT.Vector(minX, maxY),
 	]);
-	
+
 	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
@@ -332,19 +332,19 @@ Protocol.prototype.isInsideOldSpawn = function isInsideOldSpawn (satObject) {
 
 Protocol.prototype.isInsideNextSpawn = function isInsideOldSpawn (satObject) {
 	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
-	
+
 	var minX = 309191 + (weeks + 1) * 3840;
 	var minY = 337280;
 	var maxX = 1321431;
 	var maxY = 339440;
-	
+
 	var satBox = new SAT.Polygon(new SAT.Vector(), [
 		new SAT.Vector(minX, minY),
 		new SAT.Vector(maxX, minY),
 		new SAT.Vector(maxX, maxY),
 		new SAT.Vector(minX, maxY),
 	]);
-	
+
 	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
@@ -354,19 +354,19 @@ Protocol.prototype.isInsideNextSpawn = function isInsideOldSpawn (satObject) {
 
 Protocol.prototype.isInsideCurrentSpawn = function isInsideCurrentSpawn (satObject) {
 	var weeks = Math.floor((Date.now() - 1508155169891) / (2 * 7 * 24 * 60 * 60 * 1000));
-	
+
 	var minX = 309191 + weeks * 3840;
 	var minY = 337280;
 	var maxX = minX + 3840;
 	var maxY = 339440;
-	
+
 	var satBox = new SAT.Polygon(new SAT.Vector(), [
 		new SAT.Vector(minX, minY),
 		new SAT.Vector(maxX, minY),
 		new SAT.Vector(maxX, maxY),
 		new SAT.Vector(minX, maxY),
 	]);
-	
+
 	if (satObject.r) {
 		return SAT.testPolygonCircle(satBox, satObject);
 	} else {
@@ -388,7 +388,7 @@ Protocol.prototype.isInSpawnRegion = function isInSpawnRegion (satObjects) {
 		spawnInfo.currentSpawn = (k == 0 || spawnInfo.currentSpawn) && this.isInsideCurrentSpawn(satObjects[k]);
 		spawnInfo.inNextSpawn = spawnInfo.inNextSpawn || this.isInsideNextSpawn(satObjects[k]);
 	}
-	
+
 	return spawnInfo;
 };
 
@@ -406,7 +406,7 @@ Protocol.prototype.isInSpawnRegion = function isInSpawnRegion (satObjects) {
 */
 Protocol.prototype.isInsideProtectedRegion = function isInsideProtectedRegion (reputation, user, satObjects, room) {
 	if (!this.protectedRegions[room]) return {isAllowed: true};
-	
+
 	if (room.indexOf("main") == 0) {
 		var spawnInfo = this.isInSpawnRegion(satObjects);
 		if (spawnInfo.inSpawnArea) {
@@ -490,7 +490,7 @@ Protocol.prototype.inkTick = function inkTick () {
 				this.informClient(socket, SAME_IP_INK_MESSAGE);
 				socket.lastIpInkMessage = Date.now();
 			}
-			
+
 			// We divide the ink we get by 2 for every shared ip
 			for (var k = 0; k < ips.length; k++)
 				if (ips[k] === socket.ip) divide *= 2;
@@ -613,7 +613,7 @@ Protocol.prototype.bindIO = function bindIO () {
 	this.io.on("connection", function (socket) {
 		socket.ink = 50;
 		socket.emit("setink", socket.ink);
-		
+
 		socket.lastIpInkMessage = Date.now();
 
 		socket.permissions = {}; //{someid: true/false}
@@ -655,7 +655,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		console.log("[CONNECTION] " + socket.ip + " id: " + socket.id);
 
 		socket.on("isMyOldIpBanned", function (oldIp, callback) {
-			if(oldIp === socket.ip){ 
+			if(oldIp === socket.ip){
 				return;
 			}
 			protocol.players.isBanned(oldIp, function (err, data) {
@@ -678,7 +678,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 		socket.on("chatanimation", function (animation) {
 			if (!animation) return;
-			
+
 			if (!socket.room) {
 				socket.emit("chatmessage", {
 					user: "SERVER",
@@ -694,9 +694,9 @@ Protocol.prototype.bindIO = function bindIO () {
 				});
 				return;
 			}
-			
+
 			socket.lastMessage = Date.now();
-			
+
 			protocol.sendAnimationMessage(socket.room ,{
 				user: socket.name,
 				animation: animation,
@@ -775,7 +775,7 @@ Protocol.prototype.bindIO = function bindIO () {
 								message: syncMessage
 							});
 						}.bind(this));
-						
+
 					}
 				} else if (message.indexOf("/shutdown") == 0) {
 					if ([1,27,2659].indexOf(socket.userid) > -1) { // only uber/lukas/float can force send for server restart
@@ -788,7 +788,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					});
 				}
 
-				// If the message started with a '/' don't send it to the other clients 
+				// If the message started with a '/' don't send it to the other clients
 				return;
 			}
 
@@ -814,14 +814,14 @@ Protocol.prototype.bindIO = function bindIO () {
 
 		socket.on("uploadimage", function (base64, toAlbum, callback) {
 			var banAlbum = false;
-			
+
 			if(toAlbum == "main")
 				album = "L3ntm"
 			else if(toAlbum == "ban") {
 				album = "oG8bJ";
 				banAlbum = true;
 			}
-			
+
 			if (!banAlbum && Date.now() - socket.lastImgurUpload < 10000) {
 				callback({ error: "You are uploading too quickly! Wait a few seconds."})
 				return;
@@ -854,13 +854,13 @@ Protocol.prototype.bindIO = function bindIO () {
 				socket.emit("setmemberlevel", socket.memberlevel);
 				return;
 			}
-			
+
 			socket.uKey = uKey;
 			protocol.players.setName(socket.uKey, socket.name);
 
 			protocol.players.getReputationFromUKey(uKey, function (err, data) {
 				if (err) {
-					console.log("GET REP ERROR:", err); 
+					console.log("GET REP ERROR:", err);
 					return;
 				}
 
@@ -951,7 +951,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					user: "SERVER",
 					message: socket.name + " gave " + targetSocket.name + " positive reputation! :D"
 				});
-	
+
 				protocol.players.getReputationFromUKey(targetSocket.uKey, function (err, data) {
 					if (err) {
 						console.error("[VOTE][GETREPUTATION]", err);
@@ -1075,7 +1075,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				);
 
 			var regionData = protocol.isInsideProtectedRegion(socket.reputation, socket.userid, objects, socket.room);
-			
+
 			if (regionData.inSpawnArea) {
 				if (regionData.oldSpawn) {
 					protocol.informClient(socket, "This spawn has been saved and will remain like this for all eternity, go right for the new spawn.");
@@ -1103,7 +1103,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			// If we aren't in a private room, check our ink
-			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0 
+			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0
 				&& socket.reputation < IGNORE_INK_REP && !socket.memberlevel) {
 				var usage = protocol.drawTogether.inkUsageFromDrawing(drawing);
 
@@ -1122,7 +1122,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback();
 			});
 		});
-	
+
 		// Startpath, endpath and pathpoint handlers
 		socket.on("sp", function (color, size) {
 			if (size > MAX_SIZE || size < 0) return;
@@ -1182,7 +1182,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				protocol.informClient(socket, "Not your turn!");
 				return;
 			}
-			
+
 			if (!socket.firstPathPoint) {
 				socket.firstPathPoint = point;
 			} else {
@@ -1224,7 +1224,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			// If we aren't in a private room, check our ink
-			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0 
+			if (socket.room.indexOf("private_") !== 0 && socket.room.indexOf("game_") !== 0
 				&& !(socket.reputation > IGNORE_INK_REP) && !socket.memberlevel) {
 				var usage = protocol.drawTogether.inkUsageFromPath(point, socket.lastPathPoint, socket.lastPathSize);
 
@@ -1236,7 +1236,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 				socket.ink -= usage;
 			}
-			
+
 			// Yeah we need to take into account negative rep for the special snowflakes that are willing to pay for it
 			var rep = socket.reputation < 0 ? 100 : (socket.reputation || 1);
 			if (socket.lastPathPoint && protocol.utils.distance(point[0], point[1], socket.lastPathPoint[0], socket.lastPathPoint[1]) > MAX_DISTANCE_BETWEEN_PATH_POINTS * rep) {
@@ -1284,7 +1284,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				}, function (err, data) {
 					if (err || data.err)
 						console.log("Get permission error", data.err);
-					
+
 					socket.permissions[parseInt(room.slice(5))] =
 						parseInt((data && data.level) || 0);
 
@@ -1330,7 +1330,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					if (!protocol.protectedRegions[room]) {
 						protocol.updateProtectedRegions(room);
 					}
-					
+
 					// Update the rooms clickable areas
 					if (!protocol.clickableAreas[room])
 						protocol.updateClickableAreas(room);
@@ -1411,9 +1411,9 @@ Protocol.prototype.bindIO = function bindIO () {
 			}
 
 			callback({success: "Banning player " + targetSocket.name + " ..."});
-			
+
 			var usersWithSameIp = [];
-			
+
 			if (protocol.io.nsps['/'].adapter.rooms[targetSocket.room]) {
 				var sroom = protocol.io.nsps['/'].adapter.rooms[targetSocket.room].sockets;
 
@@ -1421,7 +1421,7 @@ Protocol.prototype.bindIO = function bindIO () {
 					var tempSocket = protocol.socketFromId(id);
 
 					if (!tempSocket) continue;
-					if(tempSocket.ip === targetSocket.ip && tempSocket.id != targetSocket.id) // dont add target socket yet because it's not always in the room list meaning it might be added twice if it is. 
+					if(tempSocket.ip === targetSocket.ip && tempSocket.id != targetSocket.id) // dont add target socket yet because it's not always in the room list meaning it might be added twice if it is.
 						if (socket.reputation >= (tempSocket.reputation || 0) + REQUIRED_REP_DIFFERENCE)
 							usersWithSameIp.push(tempSocket);
 				}
@@ -1437,14 +1437,14 @@ Protocol.prototype.bindIO = function bindIO () {
 						protocol.informClient(socket, "Error while trying to kickban account: " + err);
 						return;
 					}
-					
+
 					for (var k = 0; k < usersWithSameIp.length; k++) {
 						protocol.informClient(socket, "Banning " + usersWithSameIp[k].name);
 						protocol.informClient(usersWithSameIp[k], "You have been kickbanned for " + options[1] + " minutes. Reason: " + options[3], extraPayload);
 
 						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
 						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
-						
+
 						usersWithSameIp[k].disconnect();
 					}
 				});
@@ -1463,10 +1463,10 @@ Protocol.prototype.bindIO = function bindIO () {
 
 						protocol.drawTogether.undoDrawings(usersWithSameIp[k].room, usersWithSameIp[k].id, true);
 						protocol.io.to(usersWithSameIp[k].room).emit("undodrawings", usersWithSameIp[k].id, true);
-						
+
 						usersWithSameIp[k].disconnect();
 					}
-					
+
 				});
 			}
 		});
@@ -1474,7 +1474,7 @@ Protocol.prototype.bindIO = function bindIO () {
 		socket.on("setpermission", function (socketid, level) {
 			protocol.setPermission(socket, socketId, level);
 		});
-		
+
 		socket.on("createprotectedregion", function (from, to, callback) {
 			if (typeof callback !== 'function') return;
 
@@ -1512,7 +1512,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				}
 			}
 
-			
+
 
 			console.log("[REGIONS] Adding protected region for", socket.name, from, to);
 			protocol.players.request('createprotectedregion', {
@@ -1571,7 +1571,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			callback(null, usersProtectedRegions);
 		});
-		
+
 		socket.on("setnameofprotectedregion", function (name, regionId, callback) {
 			if (!socket.userid) {
 				callback("No User");
@@ -1580,7 +1580,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (!socket.room) {
 				callback("No Room");
 				return;
-			}			
+			}
 
 			protocol.players.request('setnameofprotectedregion', {
 				uKey: socket.uKey,
@@ -1606,7 +1606,7 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback("No Userids sent");
 				return;
 			}
-			
+
 
 			protocol.players.request('adduserstomyprotectedregion', {
 				uKey: socket.uKey,
@@ -1631,7 +1631,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (!userIdArr || !userIdArr.length || userIdArr.length === 0) { // checking if it's an array and also worth sending
 				callback("No Userids sent");
 				return;
-			}			
+			}
 
 			protocol.players.request('removeUsersFromMyProtectedRegion', {
 				uKey: socket.uKey,
@@ -1660,7 +1660,7 @@ Protocol.prototype.bindIO = function bindIO () {
 			if (isNaN(regionId) || regionId < 0) {
 				callback("Invalid rep amount");
 				return;
-			}			
+			}
 
 			protocol.players.request('setminimumrepinprotectedregion', {
 				uKey: socket.uKey,
@@ -1672,12 +1672,44 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback(err, data);
 			});
 		});
-		
+
+		socket.on("deleteclickablearea", function (index, callback) {
+			var room = socket.room;
+
+			if (!socket.uKey) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You are logged in!"
+				});
+				return;
+			}
+			if(index < 0 && index >= protocol.clickableAreas[room].length){
+				return;
+			}
+			if(protocol.clickableAreas[room][index].owner !== socket.userid){
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You are not the owner of that clickable area!"
+				});
+				return;
+			}
+
+			var areaId = protocol.clickableAreas[room][index].id;
+
+			protocol.players.request('deleteClickableArea', {
+				room: room,
+				areaId: areaId,
+			}, function (err) {
+				protocol.updateClickableAreas(room);
+				callback(err);
+			});
+		});
+
 		socket.on("createclickablearea", function (pos, size, url, callback) {
 			console.log("Creating clickable area", socket.uKey, socket.name, pos, size, url);
-			
+
 			var room = socket.room;
-			
+
 			protocol.players.request('createclickablearea', {
 				uKey: socket.uKey,
 				room: room,
