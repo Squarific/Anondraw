@@ -289,8 +289,23 @@ DrawTogether.prototype.updateClickableAreas = function updateClickableAreas () {
 	}
 };
 
-DrawTogether.prototype.clickClickableArea = function clickClickableArea (index) {
+DrawTogether.prototype.clickClickableArea = function clickClickableArea (index, event) {
 	var coords = this.clickableAreas[index].url.split(",");
+
+	if(event.shiftKey){ // Delete
+		var myUserId = this.account.id;
+		var ownerId = this.clickableAreas[index].owner;
+		if(myUserId == ownerId){
+			this.gui.prompt("You are about to delete your button. Are you sure you want to do that?", ["Yes", "No"], function (answer) {
+				if (answer == "Yes") this.deleteClickableArea(index);
+			}.bind(this));
+		}
+		else{
+			this.chat.addMessage("You can only delete buttons you own");
+		}
+		return;
+	}
+
 	if (coords.length == 2 && parseInt(coords[0]) == parseInt(coords[0]) && parseInt(coords[1]) == parseInt(coords[1])) {
 		this.handleGotoAndCenter(parseInt(coords[0]), parseInt(coords[1]));
 	} else {
@@ -298,6 +313,14 @@ DrawTogether.prototype.clickClickableArea = function clickClickableArea (index) 
 			if (answer == "Yeah I'm brave") window.open(this.clickableAreas[index].url);
 		}.bind(this));
 	}
+};
+
+DrawTogether.prototype.deleteClickableArea = function deleteClickableArea (index) {
+	this.network.socket.emit("deleteclickablearea", index, function (err) {
+	  if (err) {
+	    this.gui.prompt(err, ["Ok"]);
+	  }
+	}.bind(this));
 };
 
 DrawTogether.prototype.handleGoto = function handleGoto (x, y) {

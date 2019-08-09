@@ -1672,10 +1672,43 @@ Protocol.prototype.bindIO = function bindIO () {
 				callback(err, data);
 			});
 		});
-		
+
+		socket.on("deleteclickablearea", function (index, callback) {
+			var room = socket.room;
+
+			if (!socket.uKey) {
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You are logged in!"
+				});
+				return;
+			}
+			if(index < 0 && index >= protocol.clickableAreas[room].length){
+				return;
+			}
+			if(protocol.clickableAreas[room][index].owner !== socket.userid){
+				socket.emit("chatmessage", {
+					user: "SERVER",
+					message: "You are not the owner of that clickable area!"
+				});
+				return;
+			}
+
+			var areaId = protocol.clickableAreas[room][index].id;
+
+			protocol.players.request('deleteClickableArea', {
+				room: room,
+				userId: socket.userid,
+				areaId: areaId
+			}, function (err) {
+				protocol.updateClickableAreas(room);
+				callback(err);
+			});
+		});
+
 		socket.on("createclickablearea", function (pos, size, url, callback) {
 			console.log("Creating clickable area", socket.uKey, socket.name, pos, size, url);
-			
+
 			var room = socket.room;
 			
 			protocol.players.request('createclickablearea', {

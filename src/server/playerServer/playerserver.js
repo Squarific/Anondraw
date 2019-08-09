@@ -108,7 +108,19 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
+  if (parsedUrl.pathname == "/deleteClickableArea") {
+    var room = parsedUrl.query.room;
+    var areaId = parsedUrl.query.areaId;
+    var userId = parsedUrl.query.userId;
+    playerDatabase.deleteClickableArea(room, areaId, userId, function (err) {
+      res.end(JSON.stringify({
+        error: err
+      }));
+    });
+    return;
+  }
+
 	if (parsedUrl.pathname == "/createclickablearea") {
 		var room = parsedUrl.query.room;
 		var x = parsedUrl.query.x;
