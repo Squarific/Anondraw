@@ -112,8 +112,15 @@ var server = https.createServer(options, function (req, res) {
   if (parsedUrl.pathname == "/deleteClickableArea") {
     var room = parsedUrl.query.room;
     var areaId = parsedUrl.query.areaId;
-    var userId = parsedUrl.query.userId;
-    playerDatabase.deleteClickableArea(room, areaId, userId, function (err) {
+    var uKey = parsedUrl.query.uKey;
+    var user = sessions.getUser("uKey", uKey);
+		
+		if (!user) {
+      console.log(user)
+			res.end(JSON.stringify({ error: "You need to be logged in to delete a clickable area" }));
+			return;
+		}
+    playerDatabase.deleteClickableArea(room, areaId, user.id, function (err) {
       res.end(JSON.stringify({
         error: err
       }));

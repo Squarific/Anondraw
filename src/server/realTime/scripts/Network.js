@@ -1698,7 +1698,7 @@ Protocol.prototype.bindIO = function bindIO () {
 
 			protocol.players.request('deleteClickableArea', {
 				room: room,
-				userId: socket.userid,
+				uKey: socket.uKey,
 				areaId: areaId
 			}, function (err) {
 				protocol.updateClickableAreas(room);
