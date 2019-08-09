@@ -128,8 +128,8 @@ PlayerDatabase.prototype.getClickableAreas = function getClickableAreas (room, c
 	});
 };
 
-PlayerDatabase.prototype.deleteClickableArea = function deleteClickableArea (room, areaId, callback) {
-	this.database.query("DELETE FROM clickableareas WHERE room = ? AND id = ?", [room, areaId], function (err, rows) {
+PlayerDatabase.prototype.deleteClickableArea = function deleteClickableArea (room, areaId, userId, callback) {
+	this.database.query("DELETE FROM clickableareas WHERE room = ? AND id = ? and owner = ?", [room, areaId, userId], function (err, rows) {
 		if (err) {
 			console.log("GETCLICKABLEAREASDEL DB ERROR", err, room);
 			callback("Could not delete clickable area; DB error");

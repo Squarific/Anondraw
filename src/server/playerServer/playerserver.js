@@ -112,7 +112,8 @@ var server = https.createServer(options, function (req, res) {
   if (parsedUrl.pathname == "/deleteClickableArea") {
     var room = parsedUrl.query.room;
     var areaId = parsedUrl.query.areaId;
-    playerDatabase.deleteClickableArea(room, areaId, function (err) {
+    var userId = parsedUrl.query.userId;
+    playerDatabase.deleteClickableArea(room, areaId, userId, function (err) {
       res.end(JSON.stringify({
         error: err
       }));
