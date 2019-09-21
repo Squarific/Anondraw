@@ -23,8 +23,8 @@ function TiledCanvas (canvas, settings) {
     this.settings = this.normalizeDefaults(settings, this.defaultSettings);
     this.contextQueue = [];
     this.context = this.createContext();
-    this.context.antialias = 'gray';
-    this.context.patternQuality = "fast";
+	this.context.antialias = 'gray';
+	this.context.patternQuality = "fast";
 }
 
 TiledCanvas.prototype.defaultSettings = {
@@ -51,7 +51,7 @@ TiledCanvas.prototype.drawDrawing = function drawDrawing (decodedDrawing, callba
         callback();
         return;
     }
-
+    
     this.drawFunctions[decodedDrawing.type](this.context, decodedDrawing, this, callback);
 };
 
@@ -90,7 +90,7 @@ TiledCanvas.prototype.drawFunctions = {
             tiledCanvas.executeNoRedraw(callback);
         }
     },
-    line: function (context, drawing, tiledCanvas, callback) {
+    line: function (context, drawing, tiledCanvas, callback) {        
         if (typeof drawing.x !== "number" ||
             typeof drawing.y !== "number" ||
             typeof drawing.x1 !== "number" ||
@@ -104,14 +104,14 @@ TiledCanvas.prototype.drawFunctions = {
 
         context.moveTo(drawing.x, drawing.y + FIX_CANVAS_PIXEL_SIZE);
         context.lineTo(drawing.x1, drawing.y1 + FIX_CANVAS_PIXEL_SIZE);
-
+        
         context.strokeStyle = drawing.color.toRgbString();
         context.lineWidth = drawing.size;
 
         context.lineCap = "round";
 
         context.stroke();
-
+        
         if (tiledCanvas) {
             tiledCanvas.drawingRegion(drawing.x, drawing.y, drawing.x1, drawing.y1, drawing.size);
             tiledCanvas.executeNoRedraw(callback);
@@ -127,11 +127,11 @@ TiledCanvas.prototype.drawFunctions = {
             callback();
             return;
         }
-
+        
         var minX = path.points[0][0],
             minY = path.points[0][1],
             maxX = path.points[0][0],
-            maxY = path.points[0][1];
+            maxY = path.points[0][1]; 
 
         // Start on the first point
         ctx.beginPath();
@@ -160,14 +160,7 @@ TiledCanvas.prototype.drawFunctions = {
         ctx.lineWidth = path.size;
 
         ctx.lineJoin = "round";
-        //apply cap type
-        if (path.captype == "square") {
-            ctx.lineCap= "square";
-        } else if (path.captype == "butt"){
-            ctx.lineCap= "butt";
-        } else {
-            ctx.lineCap = "round";
-        }
+        ctx.lineCap = "round";
 
         ctx.stroke();
         tiledCanvas.drawingRegion(minX, minY, maxX, maxY, path.size);
@@ -183,9 +176,9 @@ TiledCanvas.prototype.drawFunctions = {
         ctx.font = drawing.size + "px Verdana, Geneva, sans-serif";
         ctx.fillStyle = drawing.color.toRgbString();
 
-        ctx.fillText(drawing.text, drawing.x, drawing.y);
-
-        var canvas = Canvas.createCanvas();
+        ctx.fillText(drawing.text, drawing.x, drawing.y);        
+        
+        var canvas = new Canvas();
         var hiddenContext = canvas.getContext('2d');
         hiddenContext.font = drawing.size + "pt Verdana, Geneva, sans-serif";
         var textWidth = hiddenContext.measureText(drawing.text).width;
@@ -196,28 +189,28 @@ TiledCanvas.prototype.drawFunctions = {
 };
 
 TiledCanvas.prototype.cloneObject = function (obj) {
-    var clone = {};
-    for (var k in obj) {
-        if (typeof obj[k] === "object" && !(obj[k] instanceof Array)) {
-            clone[k] = this.cloneObject(obj[k]);
-        } else {
-            clone[k] = obj[k]
-        }
-    }
-    return clone;
+	var clone = {};
+	for (var k in obj) {
+		if (typeof obj[k] === "object" && !(obj[k] instanceof Array)) {
+			clone[k] = this.cloneObject(obj[k]);
+		} else {
+			clone[k] = obj[k]
+		}
+	}
+	return clone;
 };
 
 TiledCanvas.prototype.normalizeDefaults = function normalizeDefaults (target, defaults) {
-    target = target || {};
-    var normalized = this.cloneObject(target);
-    for (var k in defaults) {
-        if (typeof defaults[k] === "object" && !(defaults[k] instanceof Array)) {
-            normalized[k] = this.normalizeDefaults(target[k] || {}, defaults[k]);
-        } else {
-            normalized[k] = target[k] || defaults[k];
-        }
-    }
-    return normalized;
+	target = target || {};
+	var normalized = this.cloneObject(target);
+	for (var k in defaults) {
+		if (typeof defaults[k] === "object" && !(defaults[k] instanceof Array)) {
+			normalized[k] = this.normalizeDefaults(target[k] || {}, defaults[k]);
+		} else {
+			normalized[k] = target[k] || defaults[k];
+		}
+	}
+	return normalized;
 };
 
 
@@ -228,7 +221,7 @@ TiledCanvas.prototype.redraw = function redraw (noclear) {
         endChunkX   = Math.ceil((this.leftTopX + this.canvas.width / this.zoom) / this.settings.chunkSize),
         startChunkY = Math.floor(this.leftTopY / this.settings.chunkSize),
         endChunkY   = Math.ceil((this.leftTopY + this.canvas.height / this.zoom) / this.settings.chunkSize);
-
+    
     for (var chunkX = startChunkX; chunkX < endChunkX; chunkX++) {
         for (var chunkY = startChunkY; chunkY < endChunkY; chunkY++) {
             this.drawChunk(chunkX, chunkY);
@@ -306,7 +299,7 @@ TiledCanvas.prototype.clearChunkRow = function clearChunkRow (chunkX) {
 
 TiledCanvas.prototype.clearChunk = function clearChunk (chunkX, chunkY) {
     if (this.chunks[chunkX][chunkY] == "empty") return;
-    this.chunks[chunkX][chunkY].clearRect(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize, this.chunks[chunkX][chunkY].canvas.width, this.chunks[chunkX][chunkY].canvas.height);
+	this.chunks[chunkX][chunkY].clearRect(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize, this.chunks[chunkX][chunkY].canvas.width, this.chunks[chunkX][chunkY].canvas.height);
 };
 
 TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, callback) {
@@ -380,7 +373,7 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queu
     // Executes the current queue on a chunk
     // If queue is set execute that queue instead
     this.chunks[chunkX] = this.chunks[chunkX] || {};
-
+ 
     if (!this.chunks[chunkX][chunkY] || this.chunks[chunkX][chunkY] == "empty") {
         // This chunk has never been painted to before
         // We first have to ask what this chunk looks like
@@ -423,7 +416,7 @@ TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, bord
 };
 
 TiledCanvas.prototype.newCtx = function newCtx (width, height, translateX, translateY) {
-    var canvas = Canvas.createCanvas(width, height);
+    var canvas = new Canvas(width, height);
     var ctx = canvas.getContext('2d');
     ctx.translate(translateX, translateY);
     return ctx;
@@ -431,7 +424,7 @@ TiledCanvas.prototype.newCtx = function newCtx (width, height, translateX, trans
 
 TiledCanvas.prototype.createContext = function createContext () {
     var context = {};
-    var canvas = Canvas.createCanvas();
+    var canvas = new Canvas();
     var ctx = canvas.getContext('2d');
     for (var key in ctx) {
         if (typeof ctx[key] === 'function') {
@@ -479,7 +472,7 @@ TiledCanvas.prototype.save = function save (saveFunction, callback) {
             todo++;
         }
     }
-
+    
     for (var x in this.chunks) {
         for (var y in this.chunks[x]) {
             this.chunks[x][y].canvas.toBuffer(function (x, y, err, data) {
