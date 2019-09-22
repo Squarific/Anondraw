@@ -1659,7 +1659,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("startuserpath", function (event) {
 		// start path
-		this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size);
+        this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size, event.props.captype);
 		this.lastPathSize = event.props.size;
 		this.lastPathPoint = undefined;
 	}.bind(this));
@@ -4005,6 +4005,10 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
     });
 	
 	zoomLevelCallback(this.advancedOptions.getRangeValue("The zoom-in level where it becomes pixelated"));
+
+    advancedOptions.addBoolean("Use block brush", false, function (value) {
+        this.paint.setCaptype(value ? 'square' : 'round' );
+    }.bind(this));
 
 	advancedOptions.addButton("Generate grid", function () {
 		this.openGenerateGridWindow();

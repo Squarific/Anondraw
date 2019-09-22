@@ -1124,14 +1124,14 @@ Protocol.prototype.bindIO = function bindIO () {
 		});
 	
 		// Startpath, endpath and pathpoint handlers
-		socket.on("sp", function (color, size) {
-			if (size > MAX_SIZE || size < 0) return;
-			protocol.drawTogether.addPath(socket.room, socket.id, {socketid: socket.id, type: "path", color: color, size: size});
-			socket.lastPathSize = size;
-			delete socket.lastPathPoint;
-			delete socket.firstPathPoint;
-			socket.broadcast.to(socket.room).emit("sp", {id: socket.id, color: color, size: size});
-		});
+        socket.on("sp", function (color, size, captype) {
+            if (size > MAX_SIZE || size < 0) return;
+            protocol.drawTogether.addPath(socket.room, socket.id, {socketid: socket.id, type: "path", color: color, size: size, captype: captype});
+            socket.lastPathSize = size;
+            delete socket.lastPathPoint;
+            delete socket.firstPathPoint;
+            socket.broadcast.to(socket.room).emit("sp", {id: socket.id, color: color, size: size, captype: captype});
+        });
 
 		socket.on("ep", function (callback) {
 			protocol.drawTogether.finalizePath(socket.room, socket.id, callback.bind(undefined, socket.id));
