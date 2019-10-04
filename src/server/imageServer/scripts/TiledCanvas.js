@@ -160,7 +160,14 @@ TiledCanvas.prototype.drawFunctions = {
         ctx.lineWidth = path.size;
 
         ctx.lineJoin = "round";
-        ctx.lineCap = "round";
+        //apply cap type
+        if (path.captype == "square") {
+            ctx.lineCap= "square";
+        } else if (path.captype == "butt"){
+            ctx.lineCap= "butt";
+        } else {
+            ctx.lineCap = "round";
+        }
 
         ctx.stroke();
         tiledCanvas.drawingRegion(minX, minY, maxX, maxY, path.size);
@@ -176,9 +183,9 @@ TiledCanvas.prototype.drawFunctions = {
         ctx.font = drawing.size + "px Verdana, Geneva, sans-serif";
         ctx.fillStyle = drawing.color.toRgbString();
 
-        ctx.fillText(drawing.text, drawing.x, drawing.y);        
-        
-        var canvas = new Canvas();
+        ctx.fillText(drawing.text, drawing.x, drawing.y);
+
+        var canvas = Canvas.createCanvas();
         var hiddenContext = canvas.getContext('2d');
         hiddenContext.font = drawing.size + "pt Verdana, Geneva, sans-serif";
         var textWidth = hiddenContext.measureText(drawing.text).width;
@@ -416,7 +423,7 @@ TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, bord
 };
 
 TiledCanvas.prototype.newCtx = function newCtx (width, height, translateX, translateY) {
-    var canvas = new Canvas(width, height);
+    var canvas = Canvas.createCanvas(width, height);
     var ctx = canvas.getContext('2d');
     ctx.translate(translateX, translateY);
     return ctx;
@@ -424,7 +431,7 @@ TiledCanvas.prototype.newCtx = function newCtx (width, height, translateX, trans
 
 TiledCanvas.prototype.createContext = function createContext () {
     var context = {};
-    var canvas = new Canvas();
+    var canvas = Canvas.createCanvas();
     var ctx = canvas.getContext('2d');
     for (var key in ctx) {
         if (typeof ctx[key] === 'function') {
