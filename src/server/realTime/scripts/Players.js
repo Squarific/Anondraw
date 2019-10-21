@@ -74,9 +74,7 @@ Players.prototype.request = function request (method, urlArguments, callback) {
 		port: config.service.player.port,
 		method: "GET",
 		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments),
-		key: options.key,
-		cert: options.cert,
-		ca: options.ca
+		rejectUnauthorized: config.insecure
 	}, function (res) {
 		var data = "";
 		res.on("data", function (chunk) {

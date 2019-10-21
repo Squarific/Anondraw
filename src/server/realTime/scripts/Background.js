@@ -20,9 +20,7 @@ Background.prototype.sendDrawings = function (room, drawings, callback) {
 		port: config.service.image.port,
 		method: "POST",
 		path: "/drawings?drawcode=" + encodeURIComponent(this.drawcode) + "&room=" + encodeURIComponent(room),
-		key: options.key,
-		cert: options.cert,
-		ca: options.ca
+		rejectUnauthorized: config.insecure
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);

@@ -152,9 +152,7 @@ Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer (server, ro
 		port: parsedUrl.port,
 		method: "GET",
 		path: "/closeroom?room=" + encodeURIComponent(room) + "&code=" + encodeURIComponent(this.code),
-		key: options.key,
-		cert: options.cert,
-		ca: options.ca
+		rejectUnauthorized: config.insecure
 	}, function (res) {
 		res.on("data", function (chunk) {
 			try {
