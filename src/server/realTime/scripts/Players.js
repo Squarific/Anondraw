@@ -3,6 +3,14 @@ var https = require("https");
 var querystring = require("querystring");
 var kickbancode = config.service.player.password.kickban;
 
+var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
+
 function Players (server) {
 	this.server = server;
 }
@@ -66,7 +74,9 @@ Players.prototype.request = function request (method, urlArguments, callback) {
 		port: config.service.player.port,
 		method: "GET",
 		path: "/" + encodeURIComponent(method) + "?" + querystring.stringify(urlArguments),
-		rejectUnauthorized: this.server.indexOf('localhost') !== 0
+		key: options.key,
+		cert: options.cert,
+		ca: options.ca
 	}, function (res) {
 		var data = "";
 		res.on("data", function (chunk) {
