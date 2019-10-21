@@ -1,5 +1,12 @@
 var config = require("../../common/config.js");
 var https = require("https");
+var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+};
 
 function Background (server, httpListenServer, drawcode) {
 	this.server = server;
@@ -13,7 +20,9 @@ Background.prototype.sendDrawings = function (room, drawings, callback) {
 		port: config.service.image.port,
 		method: "POST",
 		path: "/drawings?drawcode=" + encodeURIComponent(this.drawcode) + "&room=" + encodeURIComponent(room),
-		rejectUnauthorized: this.server.indexOf('localhost') !== 0
+		key: options.key,
+		cert: options.cert,
+		ca: options.ca
 	}, function (res) {
 		res.on("data", function (chunk) {
 			data = JSON.parse(chunk);
