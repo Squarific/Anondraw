@@ -1,0 +1,37 @@
+version: "3.7"
+services:
+  realtime:
+    build:
+      context: ./
+      dockerfile: ./src/server/realTime/Dockerfile
+    restart: always
+  playerserver:
+    build:
+      context: ./
+      dockerfile: ./src/server/playerServer/Dockerfile
+    restart: always
+  loadbalancer:
+    build:
+      context: ./
+      dockerfile: ./src/server/loadBalancer/Dockerfile
+    restart: always
+  imageserver:
+    build:
+      context: ./
+      dockerfile: ./src/server/imageServer/Dockerfile
+    restart: always  
+  database:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: yQ25*IwPYS*7
+      MYSQL_DATABASE: anondraw
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./data/start:/docker-entrypoint-initdb.d
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

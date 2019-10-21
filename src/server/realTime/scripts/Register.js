@@ -109,6 +109,8 @@ Register.prototype.register = function register () {
 	}.bind(this));
 
 	req.on("error", function (e) {
+		console.log(config.insecure);
+		
 		throw e.message;
 	});
 
