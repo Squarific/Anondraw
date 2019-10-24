@@ -62,11 +62,11 @@
 			};
 			
 			var collabSettings = {
-				loadbalancer: "https://{{ service.loadbalancer.host }}:{{ service.loadbalancer.port }}",
-				imageServer: "https://{{ service.image.host }}:{{ service.image.port }}",
-				accountServer: "https://{{ service.player.host }}:{{ service.player.port }}",
-				messageServer: "https://{{ service.player.host }}:{{ service.player.port }}",
-				privateChatServer: "https://{{ service.messages.host }}:{{ service.messages.port }}",
+				loadbalancer: "https://{{ service.loadbalancer.clienthost }}:{{ service.loadbalancer.port }}",
+				imageServer: "https://{{ service.image.clienthost }}:{{ service.image.port }}",
+				accountServer: "https://{{ service.player.clienthost }}:{{ service.player.port }}",
+				messageServer: "https://{{ service.player.clienthost }}:{{ service.player.port }}",
+				privateChatServer: "https://{{ service.messages.clienthost }}:{{ service.messages.port }}",
 				emotesHash: emotesHash
 			};
 			
