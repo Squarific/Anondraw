@@ -1,25 +1,41 @@
 version: "3.7"
 services:
+  client:
+    build:
+      context: ./
+      dockerfile: ./src/client/Dockerfile
+    restart: always
+    ports:
+      - "5000:5000"
   realtime:
     build:
       context: ./
       dockerfile: ./src/server/realTime/Dockerfile
     restart: always
+    ports:
+      - "0.0.0.0:2556:2556"
   playerserver:
     build:
       context: ./
       dockerfile: ./src/server/playerServer/Dockerfile
     restart: always
+    ports:
+      - "0.0.0.0:4552:4552"
+      - "0.0.0.0:2552:2552"
   loadbalancer:
     build:
       context: ./
       dockerfile: ./src/server/loadBalancer/Dockerfile
     restart: always
+    ports:
+      - "0.0.0.0:3552:3552"
   imageserver:
     build:
       context: ./
       dockerfile: ./src/server/imageServer/Dockerfile
-    restart: always  
+    restart: always
+    ports:
+      - "0.0.0.0:5552:5552"
   database:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

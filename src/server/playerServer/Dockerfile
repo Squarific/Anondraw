@@ -33,4 +33,5 @@ WORKDIR /app
 
 # Start server
 CMD node playerserver.js
-EXPOSE 3552
+EXPOSE 4552
+EXPOSE 2552
