@@ -1084,6 +1084,35 @@ var server = https.createServer(options, function (req, res) {
 		return;
 	}
 
+	if (parsedUrl.pathname == "/getallmods") {
+		var uKey = parsedUrl.query.uKey;
+		
+		var user = sessions.getUser("uKey", uKey);
+		if(!user){
+			res.end(JSON.stringify({
+				error: "not logged in"
+			}));
+			return;
+		}
+
+		playerDatabase.getAllMods(function (err, mods) {
+			console.log("hier");
+			
+			if (err) {
+				console.log('Get all mods database error', err);
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			res.end(JSON.stringify(mods));
+		});
+
+
+		return;
+	}
+
 	if (parsedUrl.pathname == "/createprotectedregion") {
 		var from = parsedUrl.query.from || "";
 		from = from.split(',');
@@ -1196,6 +1225,7 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
+	
 
 	if (parsedUrl.pathname == "/getprotectedregions") {
 		var room = parsedUrl.query.room;

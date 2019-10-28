@@ -72,6 +72,18 @@ PlayerDatabase.prototype.setBio = function setBio (id, bio, callback) {
 	});
 };
 
+PlayerDatabase.prototype.getAllMods = function getAllMods(callback) {
+	this.database.query("SELECT * mods", [], function (err, result) {
+		if (err) {
+			console.log("GETALLMODS DB ERROR", err);
+			callback("Could not get mods. Please contact support.");
+			return;
+		}
+
+		callback(null, result)
+	});
+}
+
 PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid, callback) {
 	this.database.query("SELECT image FROM teams WHERE MONTH(submittime) = MONTH(CURRENT_DATE()) AND YEAR(submittime) = YEAR(CURRENT_DATE()) AND NOT EXISTS (SELECT 1 FROM votes WHERE userid = ? AND votes.image = teams.image)", [userid], function (err, rows) {
 		if (err) {

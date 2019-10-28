@@ -166,3 +166,13 @@ CREATE TABLE IF NOT EXISTS messages (
 	INDEX(toId),
 	INDEX(send)
 );
+
+CREATE TABLE IF NOT EXISTS usermods (
+	title VARCHAR(255) UNIQUE,
+	description TEXT,
+	code TEXT,
+	version VARCHAR(128),
+	made_by INT,
+	date DATETIME,
+	INDEX(title, made_by)
+);
