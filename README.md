@@ -16,7 +16,15 @@ Or use the issues
 
 ## Running
 
-### Instructions
+### Option 1: Docker
+
+#### Login to database
+
+Go to localhost:8080
+
+Enter
+
+### Option 2: Manual
 
 You will need to have node installed for your system. More info: https://nodejs.org/en/
 You will need npm aswell. This normally is included with your node installation.

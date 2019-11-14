@@ -26,3 +26,9 @@ server/imageServer/images/main
 **/dist/**/*.json
 **/dist/**/*.js
 **/dist/**/*.css
+
+# Database mysql
+data/mysql/*
+
+# Keep file
+!.keep
