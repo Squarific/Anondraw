@@ -3014,7 +3014,7 @@ DrawTogether.prototype.createRegionTutorialDom = function createRegionTutorialDo
 	permissionsButtonImage.alt = "Example select button";
 	permissionsButtonImage.title = "Example select button";
 
-	this.regionTutorialContainer.appendChild(document.createTextNode(" tool on the top of your screen. You can make one region at 30+ rep or unlimited with premium."));
+	this.regionTutorialContainer.appendChild(document.createTextNode(" tool on the bottom of your screen. You can make one region at 30+ rep or unlimited with premium."));
 };
 
 DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
