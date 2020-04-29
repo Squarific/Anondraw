@@ -14,7 +14,7 @@ ALTER TABLE users ADD COLUMN register_datetime DATETIME;
 ALTER TABLE users ADD COLUMN headerImage VARCHAR(128);
 ALTER TABLE users ADD COLUMN profileImage VARCHAR(128);
 
-CREATE TABLE teams (
+CREATE TABLE IF NOT EXISTS teams (
 	id INT UNSIGNED AUTO_INCREMENT,
 	submittime DATETIME,
 	image VARCHAR(128),
@@ -24,13 +24,13 @@ CREATE TABLE teams (
 	INDEX(submittime, image)
 );
 
-CREATE TABLE members (
+CREATE TABLE IF NOT EXISTS members (
 	teamid INT UNSIGNED,
 	name VARCHAR(32),
 	social VARCHAR(128)
 );
 
-CREATE TABLE votes (
+CREATE TABLE IF NOT EXISTS votes (
 	userid INT UNSIGNED,
 	votetime DATETIME,
 	weight INT,
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reputations (
 	source INT UNSIGNED DEFAULT 0,
 	weight DECIMAL(5, 2) DEFAULT 1,
     PRIMARY KEY (id),
-    INDEX(to_id, from_id)
+    INDEX(to_id, from_id),
     INDEX(from_id, to_id)
 );
 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS clickableareas (
 	INDEX(owner, room)
 );
 
-CREATE TABLE imageposts (
+CREATE TABLE IF NOT EXISTS imageposts (
 	userid INT UNSIGNED,
 	image VARCHAR(128),
 	story TEXT,
@@ -113,11 +113,6 @@ CREATE TABLE IF NOT EXISTS ipbans (
     INDEX (ip, enddate)
 );
 
---alter table regions add id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST; 
---ALTER TABLE regions ADD minRepAllowed int UNSIGNED
-
---Need above for the production server when permissions are done^^
-
 CREATE TABLE IF NOT EXISTS regions (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     PRIMARY KEY (id),
@@ -132,7 +127,6 @@ CREATE TABLE IF NOT EXISTS regions (
     INDEX (room),
     INDEX (owner, maxX, minX, maxY, minY, room)
 );
-ALTER TABLE regions ADD COLUMN name VARCHAR(255);
 
 CREATE TABLE IF NOT EXISTS regions_permissions (
     regionId INT UNSIGNED,
@@ -171,4 +165,14 @@ CREATE TABLE IF NOT EXISTS messages (
 	INDEX(fromId),
 	INDEX(toId),
 	INDEX(send)
+);
+
+CREATE TABLE IF NOT EXISTS usermods (
+	title VARCHAR(255) UNIQUE,
+	description TEXT,
+	code TEXT,
+	version VARCHAR(128),
+	made_by INT,
+	date DATETIME,
+	INDEX(title, made_by)
 );
