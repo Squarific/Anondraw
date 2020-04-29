@@ -4,7 +4,7 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "lodash": "^4.16.4",
+    "lodash": "^4.17.13",
     "mustache": "^2.2.1",
     "node-minify": "^3.6.0"
   }
