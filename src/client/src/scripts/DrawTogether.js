@@ -4937,6 +4937,10 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
 };
 
+DrawTogether.prototype.openModWindow = function openModWindow () {
+  
+};
+
 DrawTogether.prototype.openGithub = function openGithub () {
 	window.open("https://github.com/Squarific/anondraw");
 	ga('send', 'event', 'githubcollab', 'open');
@@ -5729,6 +5733,13 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		type: "button",
 		text: "Github",
 		action: this.openGithub.bind(this)
+	});
+  
+  buttonList.push({
+		name: "mods",
+		type: "button",
+		text: "Mods",
+		action: this.openModWindow.bind(this)
 	});
 
 	return buttonList;

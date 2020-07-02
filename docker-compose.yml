@@ -1,12 +1,22 @@
 version: "3.7"
 services:
-  client:
+  clientbuilder:
     build:
       context: ./
       dockerfile: ./src/client/Dockerfile
     restart: always
+    volumes:
+        - "./src/client/dist:/app/dist"
+        - "./src/client/src:/app/src"
+  clientserver:
+    build:
+      context: ./
+      dockerfile: ./src/client/DockerfileServe
+    restart: always
     ports:
-      - "5000:5000"
+        - "4300:5000"
+    volumes:
+        - "./src/client/dist:/app/dist"
   realtime:
     build:
       context: ./
@@ -44,10 +54,10 @@ services:
       MYSQL_ROOT_PASSWORD: yQ25*IwPYS*7
       MYSQL_DATABASE: anondraw
     volumes:
-      - ./data/mysql:/var/lib/mysql
+#      - ./data/mysql:/var/lib/mysql
       - ./data/start:/docker-entrypoint-initdb.d
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 4400:8080

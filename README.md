@@ -18,11 +18,32 @@ Or use the issues
 
 ### Option 1: Docker
 
+##### Running
+
+Install docker.
+Run docker-compose up --build -d in the root folder (where the docker-compose.yml file is)
+To find the url and port go in the docker-compose.yml file.
+
+To get around certificate errors you need to open all the urls yourself and accept the certificates.
+To accept the certificates for the websockets you need to change the url from wss:// to https://
+Example: anondraw.min.js?v=2825593:847 WebSocket connection to 'wss://192.168.99.100:2552/socket.io/?EIO=3&transport=websocket' failed: Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID
+Means goto: https://192.168.99.100:2552 and accept.
+
+If you are not using localhost (for example if you use docker legacy on windows), you need to change the certificates in all Dockerfile to the right ip. (E.g. localhost should be changed to 192.168.99.100 if that is the ip docker gives your virtual machine).
+You also need to change all clienthost in the config.json file to this ip.
+ALTERNATIVLY launch your browser in a way that it ignores certificates (THIS IS UNSAFE, DO NOT USE TO BROWSE EXTERNAL SITES)
+
+##### Clientbuilder
+The clientbuilder uses a volume for /src/client/src and /src/client/dist So changes in these directories are instant and will result in a rebuild. Changes above those directories (package.json, info.json, config.json, ...) are not instantly reflected and require a rebuild of the docker images.
+
+###### Seeing the client build logs
+To see the javascript errors of the build, you can use the following command:
+``` docker-compose logs -t -f clientbuilder ```
+
 #### Login to database
 
-Go to localhost:8080
-
-Enter
+Go to localhost:4400
+The details are in the docker-compose.yml file.
 
 ### Option 2: Manual
 

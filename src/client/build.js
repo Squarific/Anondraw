@@ -4,6 +4,7 @@ let path = require("path");
 let compressor = require("node-minify");
 let mustache = require("mustache")
 let exec = require("child_process").execSync;
+const chokidar = require('chokidar');
 
 var imagefolder = './dist/images/emotes';
 
@@ -16,11 +17,13 @@ emojifiles.forEach(function(filename) {
 	var stats = fs.statSync(filePath);
 	if(stats.isFile()){
 		emojiList.push({"name": filename.slice(0, -4), "path": 'images/emotes/' + filename});
-		console.log('Name:', filename.slice(0, -4), 'directory:', 'images/emotes/' + filename);
+		//console.log('Name:', filename.slice(0, -4), 'directory:', 'images/emotes/' + filename);
 	}
 });
 if (emojiList.length > 0)
 	emojiList[emojiList.length -1].last = 1;
+
+console.log("Read emojis");
 
 let config = _.merge(
 	require("./info.json"), 
@@ -40,29 +43,49 @@ let config = _.merge(
 );
 
 var lastBuild = Date.now();
+var building = 0;
 if (process.argv[2] == "repeat") {
-	fs.watch("src", { recursive: true }, function () {
+	/*fs.watch("src", { recursive: true }, function () {
 		// Don't build too often, changes often happen multiple times
 		// with a lot of text editors even with a single save
 		if (Date.now() - lastBuild > 5000) build();
-	});
+	});*/
+  
+  chokidar.watch('src').on('all', (event, path) => {
+    console.log("Files changed");
+    if (Date.now() - lastBuild > 2000) {
+      build();
+    }
+    else console.log("...but too quickly after the previous one.");
+  });
+
 }
 
 build();
 
 function build() {
+  if (building !== 0) return console.log("ALREADY BUILDING");
+  
+  console.log("=== Starting a build ===");
 	lastBuild = Date.now();
+  building = 3;
+  
 	compressor.minify({
 		compressor: "gcc",
 		input: "src/scripts/**/*.js",
 		output: "dist/anondraw.min.js",
-		options: [ "--language_in=ES5" ],
+		//options: [ "--language_in=ES5" ],
+    options: {
+      languageIn: "ES5",
+      warningLevel: "QUIET"
+    },
 		callback: function(err, min) {
 			if (err) {
 				console.log("[ERROR] Rebuilding scripts failed", err);
 				return;
 			}
 			console.log("Scripts rebuilt.");
+      building--;
 		}
 	});
 
@@ -76,6 +99,7 @@ function build() {
 				return;
 			}
 			console.log("Styles rebuilt.");
+      building--;
 		}
 	});
 
@@ -96,5 +120,6 @@ function build() {
 		}
 
 		console.log("Templates rebuilt.");
+    building--;
 	});
 }

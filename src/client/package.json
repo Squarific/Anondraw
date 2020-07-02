@@ -4,6 +4,7 @@
     "build": "node build.js"
   },
   "dependencies": {
+    "chokidar": "^3.4.0",
     "lodash": "^4.16.4",
     "mustache": "^2.2.1",
     "node-minify": "^3.6.0"
