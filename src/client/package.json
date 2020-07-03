@@ -5,8 +5,10 @@
   },
   "dependencies": {
     "chokidar": "^3.4.0",
+    "clean-css": "^4.2.3",
     "lodash": "^4.16.4",
     "mustache": "^2.2.1",
-    "node-minify": "^3.6.0"
+    "node-minify": "^3.6.0",
+    "uglify-js": "^3.10.0"
   }
 }

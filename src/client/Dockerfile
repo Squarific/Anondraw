@@ -3,19 +3,21 @@ FROM node:current AS build
 
 WORKDIR /app
 
-# Install dependencies
-RUN apt-get update && apt-get install -y default-jdk
+# Install dependencies for GCC
+# RUN apt-get update && apt-get install -y default-jdk
 
-# Copy all files
-COPY ./src/server/common/config.js /app/config.js
-COPY ./src/config.json /app/config.json
-COPY ./src/client/build.js /app/build.js
+# Copy files for npm install
 COPY ./src/client/package.json /app/package.json
 COPY ./src/client/package-lock.json /app/package-lock.json
-COPY ./src/client/info.json /app/info.json
 
 # Install node modules
 RUN npm install
 
+# Copy the build files
+COPY ./src/client/info.json /app/info.json
+COPY ./src/server/common/config.js /app/config.js
+COPY ./src/config.json /app/config.json
+COPY ./src/client/build.js /app/build.js
+
 # Start server
-CMD node build.js repeat
+CMD node --unhandled-rejections=strict build.js repeat

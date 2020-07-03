@@ -51,33 +51,41 @@ if (process.argv[2] == "repeat") {
 		if (Date.now() - lastBuild > 5000) build();
 	});*/
   
-  chokidar.watch('src').on('all', (event, path) => {
-    console.log("Files changed");
+  /*chokidar.watch('src').on('all', (event, path) => {
+    //console.log("Files changed");
+    if (Date.now() - lastBuild > 2000) {
+      console.log("Files changed");
+      build();
+    }
+    //else console.log("...but too quickly after the previous one.");
+  });*/
+  
+  setInterval(function () {
     if (Date.now() - lastBuild > 2000) {
       build();
     }
-    else console.log("...but too quickly after the previous one.");
-  });
+  }, 10000);
 
 }
 
 build();
 
 function build() {
-  if (building !== 0) return console.log("ALREADY BUILDING");
+  lastBuild = Date.now();
+  if (building !== 0) return console.log("ALREADY BUILDING", building);
   
   console.log("=== Starting a build ===");
-	lastBuild = Date.now();
   building = 3;
   
-	compressor.minify({
+	/* compressor.minify({
 		compressor: "gcc",
-		input: "src/scripts/**/*.js",
+		input: "src/scripts/** /*.js", <--- remove space before /
 		output: "dist/anondraw.min.js",
 		//options: [ "--language_in=ES5" ],
     options: {
       languageIn: "ES5",
-      warningLevel: "QUIET"
+      warningLevel: "QUIET",
+      //compilationLevel: "WHITESPACE_ONLY"
     },
 		callback: function(err, min) {
 			if (err) {
@@ -87,9 +95,28 @@ function build() {
 			console.log("Scripts rebuilt.");
       building--;
 		}
-	});
+	});*/
+  
+  compressor.minify({
+		compressor: "uglifyjs",
+		input: "src/scripts/**/*.js",
+		output: "dist/anondraw.min.js",
+    options: {
+      
+    },
+		callback: function(err, min) {
+			if (err) {
+				console.log("[ERROR] Rebuilding scripts failed", err);
+				return;
+			}
+			console.log("Scripts rebuilt.");
+      building--;
+		}
+  });
+  
+  console.log("Submitted script rebuilding job");
 
-	compressor.minify({
+	/*compressor.minify({
 		compressor: "yui-css",
 		input: "src/css/*.css",
 		output: "dist/anondraw.min.css",
@@ -101,7 +128,23 @@ function build() {
 			console.log("Styles rebuilt.");
       building--;
 		}
+	});*/
+  
+  compressor.minify({
+		compressor: "clean-css",
+		input: "src/css/*.css",
+		output: "dist/anondraw.min.css",
+		callback: function(err, min) {
+			if (err) {
+				console.log("[ERROR] Rebuilding styles failed", err);
+				return;
+			}
+			console.log("Styles rebuilt.");
+      building--;
+		}
 	});
+  
+  console.log("Submitted style rebuilding job");
 
 	fs.readdir("src", function (err, files) {
 		if (err) {
@@ -122,4 +165,6 @@ function build() {
 		console.log("Templates rebuilt.");
     building--;
 	});
+  
+  console.log("Submitted templates rebuilding job");
 }

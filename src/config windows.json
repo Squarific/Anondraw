@@ -28,7 +28,8 @@
             }
         },
         "realtime": {
-            "host": "realtime",
+            "host": "192.168.99.100",
+            "comment": "OTHER SERVER CANT CONNECT WITH THE HOST BEING LOCALHOST",
             "imgur": {
                 "user": "anondraw",
                 "password": "imgur password"
