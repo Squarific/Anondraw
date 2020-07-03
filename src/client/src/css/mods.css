@@ -1,0 +1,25 @@
+.createModWindow {
+  max-width:initial;
+}
+
+.createModWindow h2 {
+  max-width:30em;
+}
+
+.createModWindow h3 {
+  max-width:38em;
+}
+
+.createModWindow textarea.patchnotes,
+.createModWindow textarea.description,
+.createModWindow textarea.modName {
+  width:50em;
+  height:3em;
+  white-space: nowrap;
+}
+
+.createModWindow textarea {
+  width:50em;
+  height:10em;
+  white-space: nowrap;
+}

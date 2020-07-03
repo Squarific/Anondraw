@@ -48,10 +48,12 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.bindSocketHandlers();
 	this.emotesHash = emotesHash;
 
-	// Initialize the dom elements
+	
+  this.mods = new Mods(this);
+  
+  // Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
-
 	this.updateInk();
 
 	// Ask the player what to do or connect to the server
@@ -4937,10 +4939,6 @@ DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
 	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
 };
 
-DrawTogether.prototype.openModWindow = function openModWindow () {
-  
-};
-
 DrawTogether.prototype.openGithub = function openGithub () {
 	window.open("https://github.com/Squarific/anondraw");
 	ga('send', 'event', 'githubcollab', 'open');
@@ -5739,7 +5737,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "mods",
 		type: "button",
 		text: "Mods",
-		action: this.openModWindow.bind(this)
+		action: this.mods.openModWindow.bind(this.mods)
 	});
 
 	return buttonList;
