@@ -6,7 +6,7 @@ Source code of <http://www.anondraw.com>
 
 Are you just getting started and want to try to contribute? Check out the starter issues: https://github.com/Squarific/Anondraw/issues?q=is%3Aissue+is%3Aopen+label%3AStarter
 
-They are easier problems wich should be solveable by people starting out. Still too hard? Feel free to message me and I'll work on it with you.
+They are easier problems which should be solveable by people starting out. Still too hard? Feel free to message me and I'll work on it with you.
 
 ## Questions
 
