@@ -14,8 +14,7 @@ var options = {
 	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
-// var privateKey = fs.readFileSync(config.permfolder + 'jwtsignkey.key');
-var privateKey = "fs.readFileSync(config.permfolder + 'jwtsignkey.key');"
+var privateKey = fs.readFileSync('./jwtsignkey.key');
 
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
