@@ -15,7 +15,7 @@ var REPSOURCES = {
 	BOUNTY: 3
 };
 
-function PlayerDatabase (database) {
+function PlayerDatabase(database) {
 	this.database = database;
 }
 
@@ -23,7 +23,7 @@ function PlayerDatabase (database) {
 //	  enddate: enddate,
 //    reason: reason
 // })
-function isBannedHandler (callback, err, rows) {
+function isBannedHandler(callback, err, rows) {
 	if (err) {
 		callback(err);
 		return;
@@ -40,46 +40,46 @@ function isBannedHandler (callback, err, rows) {
 	});
 }
 
-PlayerDatabase.prototype.getUUID = function getUUID (userid, callback) {
-  this.database.query("SELECT UuidFromBin(uuid) FROM users WHERE id = ?", [userid], function (err, result) {
-    if (err) {
+PlayerDatabase.prototype.getUUID = function getUUID(userid, callback) {
+	this.database.query("SELECT UuidFromBin(uuid) AS uuid FROM users WHERE id = ?", [userid], function (err, result) {
+		if (err) {
 			console.log("GETUUID DB ERROR", err, userid);
 			callback("Getting UUID failed");
 			return;
 		}
-		
-		callback(null, result[0].uuid);
-  });
+
+		callback(null, result[0].uuid.toString());
+	});
 };
 
-PlayerDatabase.prototype.getProfile = function getProfile (userId, callback) {
+PlayerDatabase.prototype.getProfile = function getProfile(userId, callback) {
 	this.database.query();
 };
 
 // Callback see isbannedhandler
-PlayerDatabase.prototype.isIpBanned = function isIpBanned (ip, callback) {
+PlayerDatabase.prototype.isIpBanned = function isIpBanned(ip, callback) {
 	this.database.query("SELECT enddate, reason FROM ipbans WHERE ip = ? AND enddate > ?", [ip, new Date()], isBannedHandler.bind(this, callback));
 };
 
 // Callback see isbannedhandler
-PlayerDatabase.prototype.isIdBanned = function isIdBanned (id, callback) {
+PlayerDatabase.prototype.isIdBanned = function isIdBanned(id, callback) {
 	this.database.query("SELECT enddate, reason FROM accountbans WHERE userid = ? AND enddate > ?", [id, new Date()], isBannedHandler.bind(this, callback));
 };
 
-PlayerDatabase.prototype.getName = function getName (id, callback) {
+PlayerDatabase.prototype.getName = function getName(id, callback) {
 	this.database.query("SELECT last_username FROM users WHERE id = ?", [id], function (err, rows) {
 		callback(err, rows && rows[0] && rows[0].last_username);
 	});
 };
 
-PlayerDatabase.prototype.setBio = function setBio (id, bio, callback) {
+PlayerDatabase.prototype.setBio = function setBio(id, bio, callback) {
 	this.database.query("UPDATE users SET bio = ? WHERE id = ?", [bio, id], function (err) {
 		if (err) {
 			console.log("SETBIO DB ERROR", err, id, bio);
 			callback("Database error.");
 			return;
 		}
-		
+
 		callback(null);
 	});
 };
@@ -96,42 +96,42 @@ PlayerDatabase.prototype.getAllMods = function getAllMods(callback) {
 	});
 }
 
-PlayerDatabase.prototype.getContestEntries = function getContestEntries (userid, callback) {
+PlayerDatabase.prototype.getContestEntries = function getContestEntries(userid, callback) {
 	this.database.query("SELECT image FROM teams WHERE MONTH(submittime) = MONTH(CURRENT_DATE()) AND YEAR(submittime) = YEAR(CURRENT_DATE()) AND NOT EXISTS (SELECT 1 FROM votes WHERE userid = ? AND votes.image = teams.image)", [userid], function (err, rows) {
 		if (err) {
 			console.log("GETCONTESTENTRIES DB ERROR", err, userid);
 			callback("Could not get entries. Please contact support.");
 			return;
 		}
-		
+
 		callback(null, rows);
 	});
 };
 
-PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, callback) {
+PlayerDatabase.prototype.getFullEntries = function getFullEntries(month, year, callback) {
 	this.database.query("SELECT image, name, social FROM teams JOIN members ON teams.id = members.teamid WHERE MONTH(submittime) = ? AND YEAR(submittime) = ? ORDER BY (SELECT SUM(weight) FROM votes WHERE votes.image = teams.image), image DESC", [month, year], function (err, rows) {
 		if (err) {
 			console.log("GETFULLENTRIES DB ERROR", err, month, year);
 			callback("Could not get entries. Please contact support.");
 			return;
 		}
-		
+
 		rows = rows || [];
 		var teams = [];
-		
+
 		// This code expects members to be sorted by score and then by image
 		// We loop trough all the members
 		for (var k = 0; k < rows.length; k++) {
 
 			// If the current last team is the one we are in, just push ourselves into the member list
 			if (teams[teams.length - 1] && teams[teams.length - 1].image == rows[k].image) {
-				teams[teams.length - 1].members.push({ name: rows[k].name, social: rows[k].social});
+				teams[teams.length - 1].members.push({ name: rows[k].name, social: rows[k].social });
 
-			// Otherwise we create a new team, with us as only member
+				// Otherwise we create a new team, with us as only member
 			} else {
 				teams.push({
 					image: rows[k].image,
-					members: [{name: rows[k].name, social: rows[k].social}]
+					members: [{ name: rows[k].name, social: rows[k].social }]
 				});
 			}
 		}
@@ -140,19 +140,19 @@ PlayerDatabase.prototype.getFullEntries = function getFullEntries (month, year, 
 	});
 };
 
-PlayerDatabase.prototype.getClickableAreas = function getClickableAreas (room, callback) {
+PlayerDatabase.prototype.getClickableAreas = function getClickableAreas(room, callback) {
 	this.database.query("SELECT * FROM clickableareas WHERE room = ?", [room], function (err, rows) {
 		if (err) {
 			console.log("GETCLICKABLEAREAS DB ERROR", err, room);
 			callback("Could not get clickable areas; DB error");
 			return;
 		}
-		
+
 		callback(null, rows);
 	});
 };
 
-PlayerDatabase.prototype.deleteClickableArea = function deleteClickableArea (room, areaId, userId, callback) {
+PlayerDatabase.prototype.deleteClickableArea = function deleteClickableArea(room, areaId, userId, callback) {
 	this.database.query("DELETE FROM clickableareas WHERE room = ? AND id = ? and owner = ?", [room, areaId, userId], function (err, rows) {
 		if (err) {
 			console.log("GETCLICKABLEAREASDEL DB ERROR", err, room);
@@ -164,26 +164,26 @@ PlayerDatabase.prototype.deleteClickableArea = function deleteClickableArea (roo
 	});
 };
 
-PlayerDatabase.prototype.createClickableArea = function createClickableArea (userid, room, x, y, width, height, url, callback) {
+PlayerDatabase.prototype.createClickableArea = function createClickableArea(userid, room, x, y, width, height, url, callback) {
 	this.database.query("select count(*) as amountOfAreas from clickableareas left join premium on userid=owner where owner = ? AND userid is null AND room = ?", [userid, room], function (err, rows) {
 		if (err) {
 			console.log("Createclickablearea db error on countcheck", err, room, userid);
 			callback("Could not create clickable area");
 			return;
 		}
-		
+
 		if (rows[0].amountOfAreas > 0) {
 			callback("Having more than one clickable area is premium only.");
 			return;
 		}
-		
+
 		this.database.query("INSERT INTO clickableareas (owner, x, y, width, height, url, room) VALUES (?, ?, ?, ?, ?, ?, ?)", [userid, x, y, width, height, url, room], function (err) {
 			if (err) {
 				console.log("CREATECLICKABLEAREA DB ERROR", err, userid, x, y, width, height, url, room);
 				callback("Could not create clickable area because of a database issue. Please contact an admin.");
 				return;
 			}
-			
+
 			callback(null);
 		});
 	}.bind(this));
@@ -191,38 +191,38 @@ PlayerDatabase.prototype.createClickableArea = function createClickableArea (use
 
 // Don't allow two votes
 // Weight with reputation
-PlayerDatabase.prototype.vote = function vote (userid, imageid, callback) {
+PlayerDatabase.prototype.vote = function vote(userid, imageid, callback) {
 	this.database.query("INSERT INTO votes (SELECT ?, ?, (SELECT count(*) FROM users INNER JOIN reputations AS r ON users.id = r.to_id WHERE users.id = ? GROUP BY users.id), ?)", [userid, new Date(), userid, imageid], function (err) {
 		if (err) {
 			console.log("VOTE DB ERROR", err, userid, imageid);
 			callback("Voting failed, did you vote for this image already?");
 			return;
 		}
-		
+
 		callback(null);
 	});
 };
 
-PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callback) {
+PlayerDatabase.prototype.getProfileData = function getProfileData(userid, callback) {
 	this.database.query("SELECT last_username, bio, last_online, register_datetime as registered, headerImage, profileImage, (SELECT COALESCE(SUM(weight),0) FROM reputations WHERE to_id = ?) as reputation FROM users WHERE id = ?", [userid, userid], function (err, rows) {
 		if (err) {
 			console.log("GETPROFILEDATA DB ERROR", err, userid);
 			callback("Database error, couldn't get profile.");
 			return;
 		}
-		
+
 		if (!rows || !rows[0]) {
 			callback("Profile not found!");
 			return;
 		}
-		
+
 		this.database.query("SELECT * FROM imageposts WHERE userid = ? ORDER BY created DESC", [userid], function (err, storyRows) {
 			if (err) {
 				console.log("GETPROFILEDATA DB ERROR", err, userid);
 				callback("Database error, couldn't get profile stories.");
 				return;
 			}
-			
+
 			storyRows = storyRows || [];
 			rows[0].stories = storyRows;
 			callback(null, rows[0]);
@@ -230,23 +230,23 @@ PlayerDatabase.prototype.getProfileData = function getProfileData (userid, callb
 	}.bind(this));
 };
 
-PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, team, callback) {
+PlayerDatabase.prototype.enterContest = function enterContest(userid, imageid, team, callback) {
 	var query = "INSERT INTO teams (submittime, image, owner) VALUES (?, ?, ?)";
 	var queryArgs = [new Date(), imageid, userid];
-	
+
 	this.database.query(query, queryArgs, function (err, result) {
 		if (err) {
 			callback("Couldn't save team, a database error occured.");
 			console.log("SAVE TEAM DB ERROR", err, userid, imageid, team);
 			return;
 		}
-			
+
 		var teamId = result.insertId;
-		
+
 		var members = [];
 		for (var k = 0; k < team.length; k++)
 			members.push([teamId, team[k].name, team[k].social]);
-		
+
 		var query = "INSERT INTO members (teamid, name, social) VALUES ?";
 		this.database.query(query, [members], function (err, result) {
 			if (err) {
@@ -254,16 +254,16 @@ PlayerDatabase.prototype.enterContest = function enterContest (userid, imageid, 
 				console.log("SAVE MEMBER DB ERROR", err, userid, imageid, team);
 				return;
 			}
-			
+
 			callback(null);
 		});
 	}.bind(this));
 };
 
-PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, story, type, callback) {
+PlayerDatabase.prototype.sharePicture = function sharePicture(userid, postid, story, type, callback) {
 	var query = "INSERT INTO imageposts (userid, image, story, created) VALUES (?, ?, ?, ?);";
 	var queryargs = [userid, postid, story, new Date()];
-	
+
 	if (type == "header") {
 		query += "UPDATE users SET headerImage = ? WHERE id = ?;";
 		queryargs.push(postid);
@@ -273,31 +273,31 @@ PlayerDatabase.prototype.sharePicture = function sharePicture (userid, postid, s
 		queryargs.push(postid);
 		queryargs.push(userid);
 	}
-	
+
 	this.database.query(query, queryargs, function (err) {
 		if (err) {
 			callback("Couldn't share picture, a database error occured.");
 			console.log("SHAREPICTURE DB ERROR", err, userid, postid, story);
 			return;
 		}
-		
+
 		callback(null);
 	});
 };
 
-PlayerDatabase.prototype.getPictureStories = function getPictureStories (callback) {
+PlayerDatabase.prototype.getPictureStories = function getPictureStories(callback) {
 	this.database.query("SELECT userid, last_username, image, story, created FROM imageposts JOIN users ON imageposts.userid = users.id ORDER BY created DESC LIMIT 50", function (err, rows) {
 		if (err) {
 			callback("Database error #GP1");
 			console.log("GETPICTURESSTORIES DB ERR", err);
 			return;
 		}
-		
+
 		callback(null, rows);
 	});
 };
 
-PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
+PlayerDatabase.prototype.forgot = function forgot(email, ip, code, callback) {
 	this.database.query("INSERT INTO forgotkeys (email, ip, code, created, active) VALUES (?, ?, ?, ?, 1)", [email, ip, code, new Date()], function (err, result) {
 		if (err) console.log("Forgot DB error:", err);
 		callback(err ? "Database error" : null);
@@ -310,7 +310,7 @@ PlayerDatabase.prototype.forgot = function forgot (email, ip, code, callback) {
 	
 	Callback(err, id, email)
 */
-PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
+PlayerDatabase.prototype.reset = function reset(code, pass, callback) {
 	// SET PASS, DISABLE CODE
 	this.database.query("SELECT id, users.email FROM users JOIN forgotkeys ON users.email = forgotkeys.email WHERE code = ? AND active = 1 AND created > ? - INTERVAL 1 DAY; UPDATE forgotkeys SET active = 0 WHERE code = ?", [code, new Date(), code], function (err, results) {
 		if (err) {
@@ -318,21 +318,21 @@ PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
 			callback("Reset database error #1");
 			return;
 		}
-		
+
 		var rows = results[0];
-		
+
 		if (!rows || rows.length < 1) {
 			callback("Code does not exist or has already been used!");
 			return;
 		}
-				
+
 		this.setPassword(rows[0].id, pass, function (err) {
 			if (err) {
 				console.log("[RESET] DB ERROR 2:", err);
 				callback("Reset database error #2");
 				return;
 			}
-			
+
 			callback(null, rows[0].id, rows[0].email);
 		});
 	}.bind(this));
@@ -341,11 +341,11 @@ PlayerDatabase.prototype.reset = function reset (code, pass, callback) {
 /*
 	Takes an unencrypted password and puts the hash as the password for the given user
 */
-PlayerDatabase.prototype.setPassword = function setPassword (id, pass, callback) {
+PlayerDatabase.prototype.setPassword = function setPassword(id, pass, callback) {
 	this.database.query("UPDATE users SET pass = ? WHERE id = ?", [SHA256(pass).toString(), id], callback);
 };
 
-PlayerDatabase.prototype.banIp = function banIp (ip, by, minutes, reason, callback) {
+PlayerDatabase.prototype.banIp = function banIp(ip, by, minutes, reason, callback) {
 	var startdate = new Date();
 	var enddate = new Date(Date.now() + parseInt(minutes) * 60 * 1000);
 
@@ -354,7 +354,7 @@ PlayerDatabase.prototype.banIp = function banIp (ip, by, minutes, reason, callba
 	});
 };
 
-PlayerDatabase.prototype.banId = function banId (id, by, minutes, reason, callback) {
+PlayerDatabase.prototype.banId = function banId(id, by, minutes, reason, callback) {
 	var startdate = new Date();
 	var enddate = new Date(Date.now() + parseInt(minutes) * 60 * 1000);
 
@@ -365,7 +365,7 @@ PlayerDatabase.prototype.banId = function banId (id, by, minutes, reason, callba
 };
 
 // callback(err, id)
-PlayerDatabase.prototype.login = function login (email, pass, callback) {
+PlayerDatabase.prototype.login = function login(email, pass, callback) {
 	var query = "select id, email, max(enddate) as endban, reason";
 	query += " from users left join accountbans";
 	query += " on users.id = accountbans.userid";
@@ -393,7 +393,7 @@ PlayerDatabase.prototype.login = function login (email, pass, callback) {
 	});
 };
 
-PlayerDatabase.prototype.register = function register (email, pass, referral, callback) {
+PlayerDatabase.prototype.register = function register(email, pass, referral, callback) {
 	this.database.query("INSERT INTO users (email, pass, referral, register_datetime) VALUES (?, ?, ?, ?)", [email, SHA256(pass).toString(), referral, new Date()], function (err, result) {
 		if (err) {
 			if (err.code == "ER_DUP_ENTRY") {
@@ -410,7 +410,7 @@ PlayerDatabase.prototype.register = function register (email, pass, referral, ca
 	}.bind(this));
 };
 
-PlayerDatabase.prototype.getReputation = function getReputation (userid, callback) {
+PlayerDatabase.prototype.getReputation = function getReputation(userid, callback) {
 	this.database.query("SELECT COALESCE(SUM(weight),0) as reputation FROM reputations WHERE to_id = ?", [userid], function (err, rows) {
 		if (err) {
 			callback("Database error (#1) while getting reputation.");
@@ -428,7 +428,7 @@ PlayerDatabase.prototype.getReputation = function getReputation (userid, callbac
 	});
 };
 
-PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId, callback) {
+PlayerDatabase.prototype.giveReputation = function giveReputation(fromId, toId, callback) {
 	this.database.query("SELECT id FROM reputations WHERE from_id = ? AND to_id = ?", [fromId, toId], function (err, rows) {
 		if (err) {
 			callback("Database error (#1) trying to give reputation.");
@@ -465,7 +465,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 					this.checkReferralRep();
 				}.bind(this));
 			}.bind(this));
-		}.bind(this));		
+		}.bind(this));
 	}.bind(this));
 };
 
@@ -474,7 +474,7 @@ PlayerDatabase.prototype.giveReputation = function giveReputation (fromId, toId,
 	REFERRAL_CONFIRMED_REP and has not yet gotten a rep for that user.
 	Should be run every time someone has gotten rep.
 */
-PlayerDatabase.prototype.checkReferralRep = function checkReferralRep () {
+PlayerDatabase.prototype.checkReferralRep = function checkReferralRep() {
 	console.log("Checking referral rep");
 	var query = "";
 	query += "INSERT INTO ";
@@ -495,22 +495,22 @@ PlayerDatabase.prototype.checkReferralRep = function checkReferralRep () {
 	query += "            AND to_id = triggereduser.referral ";
 	query += "            AND source = 2 ";
 	query += "    )";
-	
+
 	this.database.query(query, function (err, result) {
 		if (err) console.log("[CHECKREFERRALREP] DBError", err);
 		console.log(result);
 	});
 };
 
-PlayerDatabase.prototype.setName = function setName (id, name) {
+PlayerDatabase.prototype.setName = function setName(id, name) {
 	this.database.query("UPDATE users SET last_username = ?, last_online = ? WHERE id = ?", [name, new Date(), id]);
 };
 
-PlayerDatabase.prototype.setOnline = function setOnline (id) {
+PlayerDatabase.prototype.setOnline = function setOnline(id) {
 	this.database.query("UPDATE users SET last_online = ? WHERE id = ?", [new Date(), id]);
 };
 
-PlayerDatabase.prototype.friendList = function friendList (id, callback) {
+PlayerDatabase.prototype.friendList = function friendList(id, callback) {
 	// TODO: reputation and premium level
 	var query = "SELECT u.last_username, u.last_online FROM friendlist ";
 	query += "JOIN users u ON to_id = u.id ";
@@ -520,11 +520,11 @@ PlayerDatabase.prototype.friendList = function friendList (id, callback) {
 };
 
 // Get reputation, premium level
-PlayerDatabase.prototype.getUserInfo = function getUserInfo (id, callback) {
+PlayerDatabase.prototype.getUserInfo = function getUserInfo(id, callback) {
 	var query = "";
 };
 
-PlayerDatabase.prototype.reputationList = function reputationList (id, callback) {
+PlayerDatabase.prototype.reputationList = function reputationList(id, callback) {
 	var query = "SELECT u.last_username, u.last_online FROM reputations ";
 	query += "JOIN users u ON to_id = u.id ";
 	query += "WHERE from_id = ?";
@@ -532,28 +532,28 @@ PlayerDatabase.prototype.reputationList = function reputationList (id, callback)
 	this.database.query(query, id, callback);
 };
 
-PlayerDatabase.prototype.setPermission = function setPermission (roomid, userid, level, callback) {
+PlayerDatabase.prototype.setPermission = function setPermission(roomid, userid, level, callback) {
 	this.database.query("SELECT roomid FROM permissions WHERE roomid = ? AND userid = ?",
-	                    [roomid, userid], function (err, rows) {
-		if (err) {
-			callback(err);
-			return;
-		}
+		[roomid, userid], function (err, rows) {
+			if (err) {
+				callback(err);
+				return;
+			}
 
-		if (rows.length > 1) {
-			console.log("PERMISSION ERROR: Too many rows", roomid, userid);
-			callback("An internal error occured. (Too many rows)");
-		} else if (rows.length == 1) {
-			this.database.query("UPDATE premissions SET level = ? WHERE roomid = ? AND userid = ?",
-			                    [level, roomid, userid], callback);
-		} else {
-			this.database.query("INSERT INTO permissions VALUES (?, ?, ?)",
-			                    [roomid, userid, level], callback);
-		}
-	});
+			if (rows.length > 1) {
+				console.log("PERMISSION ERROR: Too many rows", roomid, userid);
+				callback("An internal error occured. (Too many rows)");
+			} else if (rows.length == 1) {
+				this.database.query("UPDATE premissions SET level = ? WHERE roomid = ? AND userid = ?",
+					[level, roomid, userid], callback);
+			} else {
+				this.database.query("INSERT INTO permissions VALUES (?, ?, ?)",
+					[roomid, userid, level], callback);
+			}
+		});
 };
 
-PlayerDatabase.prototype.getPermissionList = function getPermissionList (roomid, callback) {
+PlayerDatabase.prototype.getPermissionList = function getPermissionList(roomid, callback) {
 	this.database.query(
 		"SELECT last_username, last_online, level FROM permissions JOIN users ON id = userid WHERE roomid = ?",
 		[roomid],
@@ -561,7 +561,7 @@ PlayerDatabase.prototype.getPermissionList = function getPermissionList (roomid,
 	);
 };
 
-PlayerDatabase.prototype.getPermission = function getPermission (roomid, userid, callback) {
+PlayerDatabase.prototype.getPermission = function getPermission(roomid, userid, callback) {
 	this.database.query(
 		"SELECT level FROM permissions WHERE roomid = ? AND userid = ?",
 		[roomid, userid],
@@ -571,15 +571,15 @@ PlayerDatabase.prototype.getPermission = function getPermission (roomid, userid,
 	);
 };
 
-PlayerDatabase.prototype.getMemberLevel = function getMemberLevel (userid, callback) {
+PlayerDatabase.prototype.getMemberLevel = function getMemberLevel(userid, callback) {
 	this.database.query("SELECT level FROM premium WHERE userid = ?", [userid], function (err, rows) {
 		callback(err, rows && rows[0] && rows[0].level);
 	});
 };
-PlayerDatabase.prototype.setCoordFavorite = function setCoordFavorite (userid, newX, newY, x, y, name, room, callback) {
+PlayerDatabase.prototype.setCoordFavorite = function setCoordFavorite(userid, newX, newY, x, y, name, room, callback) {
 	this.database.query("UPDATE favorites SET x = ?, y = ? WHERE room = ? AND owner = ? AND x = ? AND y = ?",
 		[newX, newY, room, userid, x, y],
-		function (err, rows){
+		function (err, rows) {
 			if (err) {
 				callback("Database error. Please contact an admin. (GETFAVORITES)");
 				console.log("Get favorites database error", err);
@@ -591,11 +591,11 @@ PlayerDatabase.prototype.setCoordFavorite = function setCoordFavorite (userid, n
 	);
 };
 
-PlayerDatabase.prototype.removeFavorite = function removeFavorite (userid, x, y, name, room, callback) {
+PlayerDatabase.prototype.removeFavorite = function removeFavorite(userid, x, y, name, room, callback) {
 	//delete from favorites where room = 'main' and owner = 2 and x = 0 and y = 0;
 	this.database.query("DELETE FROM favorites WHERE room = ? AND owner = ? AND x = ? AND y = ? AND name = ?",
 		[room, userid, x, y, name],
-		function (err, rows){
+		function (err, rows) {
 			if (err) {
 				callback("Database error. Please contact an admin. (GETFAVORITES)");
 				console.log("Get favorites database error", err);
@@ -607,10 +607,10 @@ PlayerDatabase.prototype.removeFavorite = function removeFavorite (userid, x, y,
 	);
 };
 
-PlayerDatabase.prototype.renameFavorite = function renameFavorite (userid, x, y, name, room, callback) {
+PlayerDatabase.prototype.renameFavorite = function renameFavorite(userid, x, y, name, room, callback) {
 	this.database.query("UPDATE favorites SET name = ? WHERE room = ? AND owner = ? AND x = ? AND y = ?",
 		[name, room, userid, x, y],
-		function (err, rows){
+		function (err, rows) {
 			if (err) {
 				callback("Database error. Please contact an admin. (GETFAVORITES)");
 				console.log("Get favorites database error", err);
@@ -622,10 +622,10 @@ PlayerDatabase.prototype.renameFavorite = function renameFavorite (userid, x, y,
 	);
 };
 
-PlayerDatabase.prototype.getFavorites = function getFavorites (userid, room, callback) {
+PlayerDatabase.prototype.getFavorites = function getFavorites(userid, room, callback) {
 	this.database.query("SELECT * FROM favorites WHERE room = ? AND owner = ?",
 		[room, userid],
-		function (err, rows){
+		function (err, rows) {
 			if (err) {
 				callback("Database error. Please contact an admin. (GETFAVORITES)");
 				console.log("Get favorites database error", err);
@@ -637,17 +637,17 @@ PlayerDatabase.prototype.getFavorites = function getFavorites (userid, room, cal
 	);
 };
 
-PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name, room, callback) {
+PlayerDatabase.prototype.addFavorite = function addFavorite(userid, x, y, name, room, callback) {
 	this.database.query("SELECT * FROM favorites WHERE room = ? AND owner = ? AND x = ? AND y = ?",
 		[room, userid, x, y],
-		function (err, rows){
-			if(err) {
+		function (err, rows) {
+			if (err) {
 				callback("Database error. Please contact an admin. (ADDFAVORITEEXIST)");
 				console.log("addFavorite database error", err);
 				return;
 			}
-			if (rows.length > 0){
-				if(rows[0]["name"] !== "")
+			if (rows.length > 0) {
+				if (rows[0]["name"] !== "")
 					callback("You've already created this favorite at " + x + "," + y + " named " + rows[0]["name"]);
 				else
 					callback("You've already created this favorite at " + x + "," + y);
@@ -655,15 +655,15 @@ PlayerDatabase.prototype.addFavorite = function addFavorite (userid, x, y, name,
 			}
 			this.database.query("INSERT INTO favorites (owner, x, y, room, name) VALUES (?, ?, ?, ?, ?)",
 				[userid, x, y, room, name],
-				function (err, rows){
+				function (err, rows) {
 					callback(err);
 					return;
-			});
+				});
 		}.bind(this)
 	);
 };
 
-PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (userid, from, to, room, callback) {
+PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion(userid, from, to, room, callback) {
 	this.database.query("select count(*) as amountOfRegions from regions left join premium on userid=owner where owner = ? AND userid is null AND room = ?",
 		[userid, room],
 		function (err, rows) {
@@ -672,7 +672,7 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 				callback("Could not create protected region, database error. Please contact an admin.");
 				return;
 			}
-			
+
 			if (rows[0].amountOfRegions > 0) { // amountOfRegions always equals 0 when user is premium
 				callback("Having more than one region is premium only!");
 				return;
@@ -686,9 +686,9 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 			var maxY = Math.max(from[1], to[1]);
 
 			var collisionString = "? < maxX AND ";
-			   collisionString += "? > minX AND ";
-			   collisionString += "? < maxY AND ";
-			   collisionString += "? > minY";
+			collisionString += "? > minX AND ";
+			collisionString += "? < maxY AND ";
+			collisionString += "? > minY";
 
 			this.database.query("SELECT * FROM regions WHERE owner != ? AND " + collisionString + " AND room = ?",
 				[userid, minX, maxX, minY, maxY, room],
@@ -721,20 +721,20 @@ PlayerDatabase.prototype.addProtectedRegion = function addProtectedRegion (useri
 
 };
 
-PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions (userid, room, callback) {
+PlayerDatabase.prototype.resetProtectedRegions = function resetProtectedRegions(userid, room, callback) {
 	this.database.query("DELETE FROM regions WHERE owner = ? AND room = ?", [userid, room], function (err) {
 		callback(err);
 	});
 };
 
-PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion (userid, room, regionId, overrideOwner, callback) {
-	if(overrideOwner && PROTECTED_REGIONS_IDS.indexOf(userid) == -1){
+PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion(userid, room, regionId, overrideOwner, callback) {
+	if (overrideOwner && PROTECTED_REGIONS_IDS.indexOf(userid) == -1) {
 		callback("Sorry this is an admin only feature.");
 		return;
 	}
 
 	this.database.query("DELETE FROM regions WHERE (owner = ? OR 1 = ?) AND room = ? AND id = ?", [userid, overrideOwner ? 1 : 0, room, regionId], function (err) {
-		if(err){
+		if (err) {
 			callback(err);
 			console.log("Delete protected region database error", err);
 			return;
@@ -747,57 +747,55 @@ PlayerDatabase.prototype.removeProtectedRegion = function removeProtectedRegion 
 	}.bind(this));
 };
 
-PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions (room, callback) {
+PlayerDatabase.prototype.getProtectedRegions = function getProtectedRegions(room, callback) {
 	this.database.query("SELECT regions.id, name, owner, minX, minY, maxX, maxY, minRepAllowed, users.last_username FROM regions inner join users on users.id = regions.owner WHERE room = ? ORDER BY id;",
-	[room], function (err, rows, fields) {
-		if (err) {
-			callback("Database error. Please contact an admin. (GETPREGION)");
-			console.log("Get protected region database error", err);
-			return;
-		}
-		callback(null, rows);
-
-	}.bind(this));
-};
-
-
-PlayerDatabase.prototype.getProtectedRegionPermissions = function getProtectedRegionPermissions (room, callback) {
-//permissions select
-		this.database.query("SELECT regionId, regions_permissions.userId, users.last_username FROM regions INNER JOIN regions_permissions ON regions.id=regions_permissions.regionId INNER JOIN users ON regions_permissions.userId=users.id WHERE room = ? ORDER BY regionId", [room], function (err, rows, fields){
+		[room], function (err, rows, fields) {
 			if (err) {
-				callback("Database error. Please contact an admin. (GETPREGIONPERM)");
-				console.log("Get protected region permissions database error", err);
+				callback("Database error. Please contact an admin. (GETPREGION)");
+				console.log("Get protected region database error", err);
 				return;
 			}
 			callback(null, rows);
 
-		});
+		}.bind(this));
 };
 
-PlayerDatabase.prototype.getProtectedRegionsAndPermissions = function getProtectedRegionsAndPermissions (room, callback) {
-	this.getProtectedRegions(room, function(err, regions){
-		if(err)
-		{
+
+PlayerDatabase.prototype.getProtectedRegionPermissions = function getProtectedRegionPermissions(room, callback) {
+	//permissions select
+	this.database.query("SELECT regionId, regions_permissions.userId, users.last_username FROM regions INNER JOIN regions_permissions ON regions.id=regions_permissions.regionId INNER JOIN users ON regions_permissions.userId=users.id WHERE room = ? ORDER BY regionId", [room], function (err, rows, fields) {
+		if (err) {
+			callback("Database error. Please contact an admin. (GETPREGIONPERM)");
+			console.log("Get protected region permissions database error", err);
+			return;
+		}
+		callback(null, rows);
+
+	});
+};
+
+PlayerDatabase.prototype.getProtectedRegionsAndPermissions = function getProtectedRegionsAndPermissions(room, callback) {
+	this.getProtectedRegions(room, function (err, regions) {
+		if (err) {
 			callback(err);
 			return;
 		}
-		this.getProtectedRegionPermissions(room, function(err, permissions){
-			if(err)
-			{
+		this.getProtectedRegionPermissions(room, function (err, permissions) {
+			if (err) {
 				callback(err);
 				return;
 			}
-			callback(null, {regions:regions, permissions:permissions});
+			callback(null, { regions: regions, permissions: permissions });
 			return;
 		}.bind(this));
 	}.bind(this));
 
 };
 
-PlayerDatabase.prototype.setNameOfProtectedRegion = function setNameOfProtectedRegion (userid, room, name, regionId, callback){
+PlayerDatabase.prototype.setNameOfProtectedRegion = function setNameOfProtectedRegion(userid, room, name, regionId, callback) {
 	this.database.query("UPDATE regions SET name = ? WHERE room = ? AND owner = ? AND id = ?",
 		[name, room, userid, regionId],
-		function (err, rows){
+		function (err, rows) {
 			if (err) {
 				callback("Database error. Please contact an admin. (setNameOfProtectedRegion)");
 				console.log("Set region name database error", err);
@@ -809,8 +807,8 @@ PlayerDatabase.prototype.setNameOfProtectedRegion = function setNameOfProtectedR
 	);
 };
 
-PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
-	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
+PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProtectedRegion(userid, room, userIdArr, regionId, callback) {
+	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows) {
 		if (rows.length === 0) {
 			callback("You don't own this region!");
 			return;
@@ -819,40 +817,39 @@ PlayerDatabase.prototype.addUsersToMyProtectedRegion = function addUsersToMyProt
 		var sqlText = "INSERT INTO regions_permissions (regionId, userId) VALUES (?, ?)";
 		var isArray = typeof userIdArr != "string";
 
-		if(isArray) // check if userIdArr is actually an array
+		if (isArray) // check if userIdArr is actually an array
 		{
-			for(var i = 0; i < userIdArr.length; i++)
-			{
+			for (var i = 0; i < userIdArr.length; i++) {
 				if (isNaN(userIdArr[i])) {
 					console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(1)", userIdArr, room);
 					return;
 				}
-				values.push([ regionId, userIdArr[i] ]);
+				values.push([regionId, userIdArr[i]]);
 			}
 
 		}
-		else{ // not an array
+		else { // not an array
 			if (isNaN(userIdArr)) {
 				console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(2)", userIdArr, room);
 				return;
 			}
 			values = [[regionId, userIdArr]];
 		}
-		for(var i = 0; i < values.length; i++){
-			this.database.query(sqlText, [values[i][0], values[i][1]], function(err) {
-					if (err) {
-						console.log("Add Users to protected region database error", err);
-						return;
-					}									
-				});
+		for (var i = 0; i < values.length; i++) {
+			this.database.query(sqlText, [values[i][0], values[i][1]], function (err) {
+				if (err) {
+					console.log("Add Users to protected region database error", err);
+					return;
+				}
+			});
 		}
 		callback();
-		
+
 	}.bind(this));
 };
 
-PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersToMyProtectedRegion (userid, room, userIdArr, regionId, callback){
-	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
+PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersToMyProtectedRegion(userid, room, userIdArr, regionId, callback) {
+	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows) {
 		if (rows.length === 0) {
 			callback("You don't own this region!");
 			return;
@@ -861,45 +858,44 @@ PlayerDatabase.prototype.removeUsersToMyProtectedRegion = function removeUsersTo
 		var sqlText = "DELETE FROM regions_permissions WHERE regionId=? AND userId=?";
 		var isArray = typeof userIdArr != "string";
 
-		if(isArray) // check if userIdArr is actually an array
+		if (isArray) // check if userIdArr is actually an array
 		{
-			for(var i = 0; i < userIdArr.length; i++)
-			{
+			for (var i = 0; i < userIdArr.length; i++) {
 				if (isNaN(userIdArr[i])) {
 					console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(1)", userIdArr, room);
 					return;
 				}
-				values.push([ regionId, userIdArr[i] ]);
+				values.push([regionId, userIdArr[i]]);
 			}
 
 		}
-		else{ // not an array
+		else { // not an array
 			if (isNaN(userIdArr)) {
 				console.log("Error: Userid " + userid + " sent nonNumber userId as a permission(2)", userIdArr, room);
 				return;
 			}
 			values = [[regionId, userIdArr]];
 		}
-		for(var i = 0; i < values.length; i++){
-			this.database.query(sqlText, [values[i][0], values[i][1]], function(err) {
-					if (err) {
-						console.log("Remove Users to protected region database error", err);
-						return;
-					}									
-				});
+		for (var i = 0; i < values.length; i++) {
+			this.database.query(sqlText, [values[i][0], values[i][1]], function (err) {
+				if (err) {
+					console.log("Remove Users to protected region database error", err);
+					return;
+				}
+			});
 		}
 		callback();
-		
+
 	}.bind(this));
 };
 
-PlayerDatabase.prototype.setMinimunRepInProtectedRegion = function setMinimunRepInProtectedRegion (userid, room, repAmount, regionId, callback){
-	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows){
+PlayerDatabase.prototype.setMinimunRepInProtectedRegion = function setMinimunRepInProtectedRegion(userid, room, repAmount, regionId, callback) {
+	this.database.query("select * from regions where id = ? and owner = ?", [regionId, userid], function (err, rows) {
 		if (rows.length === 0) {
 			callback("You don't own this region!");
 			return;
 		}
-		this.database.query("update regions set minRepAllowed=? where owner=? and id=? and room=?", [repAmount, userid, regionId, room], function (err, rows2, fields2){
+		this.database.query("update regions set minRepAllowed=? where owner=? and id=? and room=?", [repAmount, userid, regionId, room], function (err, rows2, fields2) {
 			if (err) {
 				callback("Database error. Please contact an admin. (GETPREGION)");
 				console.log("Get protected region databse error", err);
@@ -908,7 +904,7 @@ PlayerDatabase.prototype.setMinimunRepInProtectedRegion = function setMinimunRep
 			callback();
 
 		});
-		
+
 	}.bind(this));
 };
 

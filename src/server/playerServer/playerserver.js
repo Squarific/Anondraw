@@ -9,12 +9,13 @@ var fs = require('fs');
 var jwt = require('jsonwebtoken');
 
 var options = {
-  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
-  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
-  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+	key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+	cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
-var privateKey = fs.readFileSync(config.permfolder + 'jwtsignkey.key');
+// var privateKey = fs.readFileSync(config.permfolder + 'jwtsignkey.key');
+var privateKey = "fs.readFileSync(config.permfolder + 'jwtsignkey.key');"
 
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
@@ -49,14 +50,14 @@ var MB = 1024 * KB;
 
 // Ips from coinbase
 var ALLOWED_PAYMENT_IPS = ["54.243.226.26", "54.175.255.192", "54.175.255.193", "54.175.255.194",
-"54.175.255.195", "54.175.255.196", "54.175.255.197", "54.175.255.198", "54.175.255.199",
-"54.175.255.200", "54.175.255.201", "54.175.255.202", "54.175.255.203", "54.175.255.204",
-"54.175.255.205", "54.175.255.206", "54.175.255.207", "54.175.255.208", "54.175.255.209",
-"54.175.255.210", "54.175.255.211", "54.175.255.212", "54.175.255.213", "54.175.255.214",
-"54.175.255.215", "54.175.255.216", "54.175.255.217", "54.175.255.218", "54.175.255.219",
-"54.175.255.220", "54.175.255.221", "54.175.255.222", "54.175.255.223"];
+	"54.175.255.195", "54.175.255.196", "54.175.255.197", "54.175.255.198", "54.175.255.199",
+	"54.175.255.200", "54.175.255.201", "54.175.255.202", "54.175.255.203", "54.175.255.204",
+	"54.175.255.205", "54.175.255.206", "54.175.255.207", "54.175.255.208", "54.175.255.209",
+	"54.175.255.210", "54.175.255.211", "54.175.255.212", "54.175.255.213", "54.175.255.214",
+	"54.175.255.215", "54.175.255.216", "54.175.255.217", "54.175.255.218", "54.175.255.219",
+	"54.175.255.220", "54.175.255.221", "54.175.255.222", "54.175.255.223"];
 
-function randomString (length) {
+function randomString(length) {
 	var chars = "abcdefghijklmnopqrstuvwxyz1234567890";
 	var string = "";
 
@@ -69,14 +70,14 @@ function randomString (length) {
 var server = https.createServer(options, function (req, res) {
 	var url = require("url");
 	var parsedUrl = url.parse(req.url, true);
-	
+
 	console.log(req.url);
 
 	res.writeHead(200, {
 		"Access-Control-Allow-Origin": "*",
 		"Content-Type": "application/json"
 	});
-	
+
 	if (parsedUrl.pathname == "/setbio") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
@@ -86,12 +87,12 @@ var server = https.createServer(options, function (req, res) {
 			res.end(JSON.stringify({ error: "User not logged in!" }));
 			return;
 		}
-		
+
 		if (bio.length > MAX_STORY_LENGTH) {
-			res.end(JSON.stringify({ error: "Your bio is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  bio.length }));
+			res.end(JSON.stringify({ error: "Your bio is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " + bio.length }));
 			return;
 		}
-		
+
 		playerDatabase.setBio(user.id, bio, function (err) {
 			res.end(JSON.stringify({
 				error: err
@@ -99,10 +100,10 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/getclickableareas") {
 		var room = parsedUrl.query.room;
-		
+
 		playerDatabase.getClickableAreas(room, function (err, data) {
 			res.end(JSON.stringify({
 				error: err,
@@ -112,24 +113,24 @@ var server = https.createServer(options, function (req, res) {
 		return;
 	}
 
-  if (parsedUrl.pathname == "/deleteClickableArea") {
-    var room = parsedUrl.query.room;
-    var areaId = parsedUrl.query.areaId;
-    var uKey = parsedUrl.query.uKey;
-    var user = sessions.getUser("uKey", uKey);
-		
+	if (parsedUrl.pathname == "/deleteClickableArea") {
+		var room = parsedUrl.query.room;
+		var areaId = parsedUrl.query.areaId;
+		var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+
 		if (!user) {
-      console.log(user)
+			console.log(user)
 			res.end(JSON.stringify({ error: "You need to be logged in to delete a clickable area" }));
 			return;
 		}
-    playerDatabase.deleteClickableArea(room, areaId, user.id, function (err) {
-      res.end(JSON.stringify({
-        error: err
-      }));
-    });
-    return;
-  }
+		playerDatabase.deleteClickableArea(room, areaId, user.id, function (err) {
+			res.end(JSON.stringify({
+				error: err
+			}));
+		});
+		return;
+	}
 
 	if (parsedUrl.pathname == "/createclickablearea") {
 		var room = parsedUrl.query.room;
@@ -138,20 +139,20 @@ var server = https.createServer(options, function (req, res) {
 		var width = parsedUrl.query.width;
 		var height = parsedUrl.query.height;
 		var url = parsedUrl.query.url;
-		
+
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
-		
+
 		if (!user) {
 			res.end(JSON.stringify({ error: "You need to be logged in to create a clickable area" }));
 			return;
 		}
-		
+
 		if (width > 500 || height > 500) {
 			res.end(JSON.stringify({ error: "That is a bit big don't you think?" }));
 			return;
 		}
-		
+
 		playerDatabase.createClickableArea(user.id, room, x, y, width, height, url, function (err) {
 			res.end(JSON.stringify({
 				error: err
@@ -159,11 +160,11 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/getFullEntries") {
 		var month = parsedUrl.query.month;
 		var year = parsedUrl.query.year;
-		
+
 		playerDatabase.getFullEntries(month, year, function (err, data) {
 			res.end(JSON.stringify({
 				error: err,
@@ -172,41 +173,43 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-  
-  if (parsedUrl.pathname == "/getJWT") {
-    var uKey = parsedUrl.query.uKey;
+
+	if (parsedUrl.pathname == "/getJWT") {
+		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
-		
+
 		if (!user) {
 			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
 			return;
 		}
-		
-    playerDatabase.getUUID(user.id, function (err, uuid) {
-      if (err) {
-        res.end(JSON.stringify({
-          error: err
-        }));
-        return;
-      }
-      
-      res.end(JSON.stringify({
-        jwt: jwt.sign({ uuid: uuid }, privateKey)
-      }));
-    };
 
-    return;
-  }
-	
+		playerDatabase.getUUID(user.id, function (err, uuid) {
+			if (err) {
+				res.end(JSON.stringify({
+					error: err
+				}));
+				return;
+			}
+
+			console.log(uuid);
+
+			res.end(JSON.stringify({
+				jwt: jwt.sign({ uuid: uuid }, privateKey)
+			}));
+		});
+
+		return;
+	}
+
 	if (parsedUrl.pathname == "/getContestEntries") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
-		
+
 		if (!user) {
 			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
 			return;
 		}
-		
+
 		if (new Date().getDate() <= 21) {
 			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
 			return;
@@ -214,7 +217,7 @@ var server = https.createServer(options, function (req, res) {
 			res.end(JSON.stringify({ error: "A new theme will be announced the first of next month. The 21nd of next month you will be able to vote again. For now, check out the winners!" }));
 			return;
 		}
-		
+
 		playerDatabase.getContestEntries(user.id, function (err, data) {
 			res.end(JSON.stringify({
 				error: err,
@@ -223,17 +226,17 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/vote") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var imageId = parsedUrl.query.image;
-		
+
 		if (!user) {
 			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
 			return;
 		}
-		
+
 		if (new Date().getDate() <= 21) {
 			res.end(JSON.stringify({ error: "Voting will be possible the 21nd of this month." }));
 			return;
@@ -241,7 +244,7 @@ var server = https.createServer(options, function (req, res) {
 			res.end(JSON.stringify({ error: "A new theme will be announced the first of next month. The 21nd of next month you will be able to vote again. For now, check out the winners!" }));
 			return;
 		}
-		
+
 		playerDatabase.vote(user.id, imageId, function (err) {
 			res.end(JSON.stringify({
 				error: err
@@ -249,7 +252,7 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/getprofiledata") {
 		var id = parsedUrl.query.id;
 		playerDatabase.getProfileData(id, function (err, data) {
@@ -260,7 +263,7 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/getpicturestories") {
 		playerDatabase.getPictureStories(function (err, stories) {
 			res.end(JSON.stringify({
@@ -270,53 +273,53 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/entercontest") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var names = parsedUrl.query.names;
 		var socials = parsedUrl.query.socials;
-		
+
 		if (!user) {
 			res.end(JSON.stringify({ error: "User not logged in!" }));
 			return;
 		}
-		
+
 		if (!names || !names.length) {
 			res.end(JSON.stringify({ error: "No names provided." }));
 			return;
 		}
-		
+
 		if (new Date().getDate() > 21) {
 			res.end(JSON.stringify({ error: "You can enter again the first of next month!" }));
 			return;
 		}
-		
+
 		// If only one name or social is provided it will get parsed as a string instead of an array
 		if (!Array.isArray(names)) {
 			names = [names];
 		}
-		
+
 		if (!Array.isArray(socials)) {
 			socials = [socials];
 		}
-		
+
 		var team = [];
 		for (var k = 0; k < names.length; k++) {
-			team.push({ name: names[k], social: socials[k]});
+			team.push({ name: names[k], social: socials[k] });
 		}
-		
+
 		var body = [];
 		req.on('data', function (chunk) {
 			body.push(chunk);
 		}).on('end', function () {
 			body = Buffer.concat(body).toString();
-			
+
 			if (body.length > 15 * MB) {
 				res.end(JSON.stringify({ error: "Image is too large!" }));
 				return;
 			}
-			
+
 			var postId = randomString(48);
 			var data = body.replace(/^data:image\/\w+;base64,/, "");
 			fs.writeFile("images/" + postId + ".png", data, 'base64', function (err) {
@@ -325,22 +328,22 @@ var server = https.createServer(options, function (req, res) {
 					console.log(err);
 					return;
 				}
-			
+
 				playerDatabase.enterContest(user.id, postId, team, function (err) {
 					res.end(JSON.stringify({
 						error: err
 					}));
 				});
 			});
-			
+
 		}).on('error', function (err) {
 			console.error(err);
 			res.end(JSON.stringify({ error: "Something went wrong." }));
 		});
-		
+
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/sharepicture") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
@@ -351,9 +354,9 @@ var server = https.createServer(options, function (req, res) {
 			res.end(JSON.stringify({ error: "User not logged in!" }));
 			return;
 		}
-		
+
 		if (story.length > MAX_STORY_LENGTH) {
-			res.end(JSON.stringify({ error: "Your story is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " +  story.length }));
+			res.end(JSON.stringify({ error: "Your story is too long. Max " + MAX_STORY_LENGTH + " chars. Yours is: " + story.length }));
 			return;
 		}
 
@@ -362,12 +365,12 @@ var server = https.createServer(options, function (req, res) {
 			body.push(chunk);
 		}).on('end', function () {
 			body = Buffer.concat(body).toString();
-			
+
 			if (body.length > 10 * MB) {
 				res.end(JSON.stringify({ error: "Image is too large!" }));
 				return;
 			}
-			
+
 			var id = randomString(48);
 			var data = body.replace(/^data:image\/\w+;base64,/, "");
 			fs.writeFile("images/" + id + ".png", data, 'base64', function (err) {
@@ -376,12 +379,12 @@ var server = https.createServer(options, function (req, res) {
 					console.log(err);
 					return;
 				}
-			
+
 				playerDatabase.sharePicture(user.id, id, story, type, function (err) {
 					res.end(JSON.stringify({ error: err, id: id }));
 				});
 			});
-			
+
 		}).on('error', function (err) {
 			console.error(err);
 			res.end(JSON.stringify({ error: "Something went wrong." }));
@@ -389,7 +392,7 @@ var server = https.createServer(options, function (req, res) {
 
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/profile") {
 		var userId = parsedUrl.query.user;
 
@@ -401,23 +404,23 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/forgot") {
 		var email = parsedUrl.query.email;
-		
+
 		if (forgot[req.connection.remoteAddress] &&
-		    Date.now() - forgot[req.connection.remoteAddress] < 30000) {
+			Date.now() - forgot[req.connection.remoteAddress] < 30000) {
 			res.end(JSON.stringify({ err: "You are doing this too quickly." }));
 			return;
 		}
-		
+
 		if (!email) {
 			res.end(JSON.stringify({ err: "No email provided" }));
 			return;
 		}
-		
+
 		forgot[req.connection.remoteAddress] = Date.now();
-		
+
 		var code = randomString(16);
 		console.log("Forgot pass", req.connection.remoteAddress, email);
 
@@ -437,11 +440,11 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/reset") {
 		var code = parsedUrl.query.code;
 		var pass = parsedUrl.query.pass;
-		
+
 		console.log("Resetting password", code, req.connection.remoteAddress, pass);
 
 		playerDatabase.reset(code, pass, function (err, id, email) {
@@ -449,7 +452,7 @@ var server = https.createServer(options, function (req, res) {
 				res.end('{"err": "' + err + '"}');
 				return;
 			}
-			
+
 			var uKey = sessions.addSession(id, email);
 			playerDatabase.setOnline(id);
 			res.end(JSON.stringify({
@@ -502,7 +505,7 @@ var server = https.createServer(options, function (req, res) {
 			res.end('{"error": "No user or password provided"}');
 			return;
 		}
-		
+
 		if (referral !== referral) referral = 0;
 
 		playerDatabase.isIpBanned(req.connection.remoteAddress, function (err, banned, info) {
@@ -577,11 +580,11 @@ var server = https.createServer(options, function (req, res) {
 
 		playerDatabase.setPermission(roomid, user.id, level, function (err) {
 			if (err) {
-				res.end(JSON.stringify({err: err}));
+				res.end(JSON.stringify({ err: err }));
 				return;
 			}
 
-			res.end(JSON.stringify({success: "Permission set!"}));
+			res.end(JSON.stringify({ success: "Permission set!" }));
 		});
 		return;
 	}
@@ -592,7 +595,7 @@ var server = https.createServer(options, function (req, res) {
 		var user = sessions.getUser("uKey", uKey);
 
 		if (!user) {
-			res.end(JSON.stringify({err: "User not logged in!"}));
+			res.end(JSON.stringify({ err: "User not logged in!" }));
 			return;
 		}
 
@@ -607,7 +610,7 @@ var server = https.createServer(options, function (req, res) {
 
 	if (parsedUrl.pathname == "/getpermissionlist") {
 		var roomid = parsedUrl.query.roomid;
-		
+
 		playerDatabase.getPermissionList(roomid, function (err, list) {
 			res.end(JSON.stringify({
 				err: err,
@@ -616,36 +619,36 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/getname") {
 		var userId = parsedUrl.query.userId;
-		
+
 		playerDatabase.getName(userId, function (err, name) {
 			res.end(JSON.stringify({
 				err: err,
 				name: name
 			}));
 		});
-		
+
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/sendmessage") {
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var to = parsedUrl.query.to;
 		var message = parsedUrl.query.message;
-		
+
 		if (!message) {
 			res.end('{"error": "You need to put something in the message"}');
 			return;
 		}
-		
+
 		if (!to) {
 			res.end('{"error": "You need to specify who you want to send a message to"}');
 			return;
 		}
-		
+
 		if (message.length > 1024) {
 			res.end('{"error": "Messages should not be longer than 1024 characters"}');
 			return;
@@ -662,14 +665,14 @@ var server = https.createServer(options, function (req, res) {
 				err: err,
 				id: id
 			}));
-			
+
 			if (!err && listeners[to])
 				for (var k = 0; k < listeners[to].length; k++)
 					listeners[to][k].emit("message", user.id, to, new Date(), message);
 		});
 		return;
 	}
-	
+
 	/*
 		Returns the list of conversations for a given user
 	*/
@@ -690,7 +693,7 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 	/*
 		Returns the MESSAGES_PER_REQUEST messages before the given message
 		if no message is given, gives the last MESSAGES_PER_REQUEST messages
@@ -700,7 +703,7 @@ var server = https.createServer(options, function (req, res) {
 		var user = sessions.getUser("uKey", uKey);
 		var before = parseInt(parsedUrl.query.before);
 		var partner = parsedUrl.query.partner;
-		
+
 		// If before is NaN, we force it to be undefined
 		if (before !== before) before = undefined;
 
@@ -947,21 +950,21 @@ var server = https.createServer(options, function (req, res) {
 		return;
 	}
 	if (parsedUrl.pathname == "/setcoordfavorite") {
-		var x = parseInt( parsedUrl.query.x || "" );
-		var y = parseInt( parsedUrl.query.y || "" );
-		var newX = parseInt( parsedUrl.query.newX || "" );
-		var newY = parseInt( parsedUrl.query.newY || "" );
+		var x = parseInt(parsedUrl.query.x || "");
+		var y = parseInt(parsedUrl.query.y || "");
+		var newX = parseInt(parsedUrl.query.newX || "");
+		var newY = parseInt(parsedUrl.query.newY || "");
 		var room = parsedUrl.query.room;
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var name = parsedUrl.query.name;
-		if(!user){
+		if (!user) {
 			res.end(JSON.stringify({
 				error: "not logged in"
 			}));
 			return;
 		}
-		if( isNaN(x) || isNaN(y) || isNaN(newX) || isNaN(newY) ){
+		if (isNaN(x) || isNaN(y) || isNaN(newX) || isNaN(newY)) {
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));
@@ -983,19 +986,19 @@ var server = https.createServer(options, function (req, res) {
 		return;
 	}
 	if (parsedUrl.pathname == "/removefavorite") {
-		var x = parseInt( parsedUrl.query.x || "" );
-		var y = parseInt( parsedUrl.query.y || "" );
+		var x = parseInt(parsedUrl.query.x || "");
+		var y = parseInt(parsedUrl.query.y || "");
 		var room = parsedUrl.query.room;
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var name = parsedUrl.query.name;
-		if(!user){
+		if (!user) {
 			res.end(JSON.stringify({
 				error: "not logged in"
 			}));
 			return;
 		}
-		if( isNaN(x) || isNaN(y) ){
+		if (isNaN(x) || isNaN(y)) {
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));
@@ -1017,19 +1020,19 @@ var server = https.createServer(options, function (req, res) {
 		return;
 	}
 	if (parsedUrl.pathname == "/renamefavorite") {
-		var x = parseInt( parsedUrl.query.x || "" );
-		var y = parseInt( parsedUrl.query.y || "" );
+		var x = parseInt(parsedUrl.query.x || "");
+		var y = parseInt(parsedUrl.query.y || "");
 		var room = parsedUrl.query.room;
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
 		var name = parsedUrl.query.name;
-		if(!user){
+		if (!user) {
 			res.end(JSON.stringify({
 				error: "not logged in"
 			}));
 			return;
 		}
-		if( isNaN(x) || isNaN(y) ){
+		if (isNaN(x) || isNaN(y)) {
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));
@@ -1050,12 +1053,12 @@ var server = https.createServer(options, function (req, res) {
 
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/getfavorites") {
 		var room = parsedUrl.query.room;
 		var uKey = parsedUrl.query.uKey;
 		var user = sessions.getUser("uKey", uKey);
-		if(!user){
+		if (!user) {
 			res.end(JSON.stringify({
 				error: "not logged in"
 			}));
@@ -1075,20 +1078,20 @@ var server = https.createServer(options, function (req, res) {
 		return;
 	}
 	if (parsedUrl.pathname == "/createfavorite") {
-		var x = parseInt( parsedUrl.query.x || "" );
-		var y = parseInt( parsedUrl.query.y || "" );
-		var name = parsedUrl.query.name || "";		
+		var x = parseInt(parsedUrl.query.x || "");
+		var y = parseInt(parsedUrl.query.y || "");
+		var name = parsedUrl.query.name || "";
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
-		
+
 		var user = sessions.getUser("uKey", uKey);
-		if(!user){
+		if (!user) {
 			res.end(JSON.stringify({
 				error: "not logged in"
 			}));
 			return;
 		}
-		if( isNaN(x) || isNaN(y) ){
+		if (isNaN(x) || isNaN(y)) {
 			res.end(JSON.stringify({
 				error: "Bad number in x or y!"
 			}));
@@ -1114,9 +1117,9 @@ var server = https.createServer(options, function (req, res) {
 
 	if (parsedUrl.pathname == "/getallmods") {
 		var uKey = parsedUrl.query.uKey;
-		
+
 		var user = sessions.getUser("uKey", uKey);
-		if(!user){
+		if (!user) {
 			res.end(JSON.stringify({
 				error: "not logged in"
 			}));
@@ -1125,7 +1128,7 @@ var server = https.createServer(options, function (req, res) {
 
 		playerDatabase.getAllMods(function (err, mods) {
 			console.log("hier");
-			
+
 			if (err) {
 				console.log('Get all mods database error', err);
 				res.end(JSON.stringify({
@@ -1253,7 +1256,7 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
-	
+
 
 	if (parsedUrl.pathname == "/getprotectedregions") {
 		var room = parsedUrl.query.room;
@@ -1271,7 +1274,7 @@ var server = https.createServer(options, function (req, res) {
 
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/getProtectedRegionsAndPermissions") {
 		var room = parsedUrl.query.room;
 
@@ -1288,12 +1291,12 @@ var server = https.createServer(options, function (req, res) {
 
 		return;
 	}
-	
+
 	if (parsedUrl.pathname == "/setnameofprotectedregion") {
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
 		var name = parsedUrl.query.name;
-		
+
 		var regionId = parsedUrl.query.regionId;
 
 		var user = sessions.getUser("uKey", uKey);
@@ -1313,7 +1316,7 @@ var server = https.createServer(options, function (req, res) {
 				}));
 				return;
 			}
-			
+
 			res.end(JSON.stringify({
 				success: 'Renamed Region'
 			}));
@@ -1325,7 +1328,7 @@ var server = https.createServer(options, function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
 		var userIdArr = parsedUrl.query.userIdArr;
-		 // when userIdArr is only one element it's parsed as just a string of that number. idk why. -intOrFloat
+		// when userIdArr is only one element it's parsed as just a string of that number. idk why. -intOrFloat
 		var regionId = parsedUrl.query.regionId;
 
 		var user = sessions.getUser("uKey", uKey);
@@ -1346,11 +1349,11 @@ var server = https.createServer(options, function (req, res) {
 				return;
 			}
 			var responseStringValue = "1";
-			if(typeof userIdArr !== 'string')
+			if (typeof userIdArr !== 'string')
 				responseStringValue = userIdArr.length;
 
 			res.end(JSON.stringify({
-				success: 'Added '+responseStringValue+' Permissions'
+				success: 'Added ' + responseStringValue + ' Permissions'
 			}));
 		});
 		return;
@@ -1360,7 +1363,7 @@ var server = https.createServer(options, function (req, res) {
 		var uKey = parsedUrl.query.uKey;
 		var room = parsedUrl.query.room;
 		var userIdArr = parsedUrl.query.userIdArr;
-		 // when userIdArr is only one element it's parsed as just a string of that number. idk why. -intOrFloat
+		// when userIdArr is only one element it's parsed as just a string of that number. idk why. -intOrFloat
 		var regionId = parsedUrl.query.regionId;
 
 		var user = sessions.getUser("uKey", uKey);
@@ -1381,11 +1384,11 @@ var server = https.createServer(options, function (req, res) {
 				return;
 			}
 			var responseStringValue = "1";
-			if(typeof userIdArr !== 'string')
+			if (typeof userIdArr !== 'string')
 				responseStringValue = userIdArr.length;
 
 			res.end(JSON.stringify({
-				success: 'removed '+responseStringValue+' Permissions'
+				success: 'removed ' + responseStringValue + ' Permissions'
 			}));
 		});
 		return;
@@ -1437,14 +1440,14 @@ var server = https.createServer(options, function (req, res) {
 
 		var body = '';
 		req.on('data', function (data) {
-		    body += data;
+			body += data;
 
-		    // If the body length is bigger than 1MB
-		    // stop the connection
-		    if (body.length > 1e6) {
-		        req.connection.destroy();
-		        console.log("[PAYMENT] Request too big!");
-		    }
+			// If the body length is bigger than 1MB
+			// stop the connection
+			if (body.length > 1e6) {
+				req.connection.destroy();
+				console.log("[PAYMENT] Request too big!");
+			}
 		});
 
 		req.on('end', function () {
@@ -1455,7 +1458,7 @@ var server = https.createServer(options, function (req, res) {
 				res.end('{"error": "Invalid json!"}');
 				return;
 			}
-			
+
 			if (typeof data.order !== "object" || typeof data.customer !== "object") {
 				console.log("No order or cusomer object", data, body);
 				res.end('{"error": "No order or cusomer object!"}');
@@ -1471,7 +1474,7 @@ var server = https.createServer(options, function (req, res) {
 			res.end('{"success": "Payment applied!"}');
 			return;
 		});
-	    return;
+		return;
 	}
 
 	res.end('{"error": "Unknown command"}');
@@ -1483,21 +1486,21 @@ var fs = require('fs');
 
 app.listen(config.service.messages.port);
 
-function handler (req, res) {
-    res.writeHead(200);
-    res.end("Sup");
+function handler(req, res) {
+	res.writeHead(200);
+	res.end("Sup");
 }
 
 var listeners = {};
 
-function addListener (socket, userid) {
+function addListener(socket, userid) {
 	listeners[userid] = listeners[userid] || [];
 	listeners[userid].push(socket);
 
 	socket.userid = userid;
 }
 
-function removeListener (socket) {
+function removeListener(socket) {
 	if (listeners[socket.userid])
 		while (listeners[socket.userid].indexOf(socket) != -1)
 			listeners[socket.userid].splice(listeners[socket.userid].indexOf(socket), 1);
@@ -1510,13 +1513,13 @@ function removeListener (socket) {
 io.on('connection', function (socket) {
 	socket.on('listen', function (uKey) {
 		removeListener(socket);
-		
+
 		var user = sessions.getUser("uKey", uKey);
 		if (!user) return;
-		
-		addListener(socket, user.id);		
+
+		addListener(socket, user.id);
 	});
-	
+
 	socket.on('disconnect', function () {
 		removeListener(socket);
 	});
