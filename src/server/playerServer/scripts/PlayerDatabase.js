@@ -40,6 +40,18 @@ function isBannedHandler (callback, err, rows) {
 	});
 }
 
+PlayerDatabase.prototype.getUUID = function getUUID (userid, callback) {
+  this.database.query("SELECT UuidFromBin(uuid) FROM users WHERE id = ?", [userid], function (err, result) {
+    if (err) {
+			console.log("GETUUID DB ERROR", err, userid);
+			callback("Getting UUID failed");
+			return;
+		}
+		
+		callback(null, result[0].uuid);
+  });
+};
+
 PlayerDatabase.prototype.getProfile = function getProfile (userId, callback) {
 	this.database.query();
 };

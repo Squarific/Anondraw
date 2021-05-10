@@ -6,12 +6,15 @@ var https = require("https");
 var mysql = require("mysql");
 var mailgun = require('mailgun-send');
 var fs = require('fs');
+var jwt = require('jsonwebtoken');
 
 var options = {
   key: fs.readFileSync(config.permfolder + '/privkey.pem'),
   cert: fs.readFileSync(config.permfolder + '/cert.pem'),
   ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
+
+var privateKey = fs.readFileSync(config.permfolder + 'jwtsignkey.key');
 
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
@@ -169,6 +172,31 @@ var server = https.createServer(options, function (req, res) {
 		});
 		return;
 	}
+  
+  if (parsedUrl.pathname == "/getJWT") {
+    var uKey = parsedUrl.query.uKey;
+		var user = sessions.getUser("uKey", uKey);
+		
+		if (!user) {
+			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
+			return;
+		}
+		
+    playerDatabase.getUUID(user.id, function (err, uuid) {
+      if (err) {
+        res.end(JSON.stringify({
+          error: err
+        }));
+        return;
+      }
+      
+      res.end(JSON.stringify({
+        jwt: jwt.sign({ uuid: uuid }, privateKey)
+      }));
+    };
+
+    return;
+  }
 	
 	if (parsedUrl.pathname == "/getContestEntries") {
 		var uKey = parsedUrl.query.uKey;
