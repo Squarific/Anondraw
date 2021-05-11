@@ -2,7 +2,7 @@
 FROM node:current AS build
 
 # Copy all file
-COPY ./src/server/playerServer /app
+COPY ./src/server/sitePlugins /app
 COPY ./src/server/common /common
 COPY ./src/config.json /config.json
 RUN mkdir -p /etc/letsencrypt/live/direct.anondraw.com
@@ -33,6 +33,5 @@ RUN openssl x509 -req -in csr.pem -CA chain.pem -CAkey my-root-ca.key.pem -CAcre
 WORKDIR /app
 
 # Start server
-CMD node playerserver.js
-EXPOSE 4552
-EXPOSE 2552
+CMD node main.js
+EXPOSE 6552

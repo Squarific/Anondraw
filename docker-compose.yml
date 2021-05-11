@@ -32,6 +32,13 @@ services:
     ports:
       - "0.0.0.0:4552:4552"
       - "0.0.0.0:2552:2552"
+  siteplugins:
+    build:
+      context: ./
+      dockerfile: ./src/server/siteplugins/Dockerfile
+    restart: always
+    ports:
+      - "0.0.0.0:6552:6552"
   loadbalancer:
     build:
       context: ./
