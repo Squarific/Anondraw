@@ -3,7 +3,7 @@
 		change=the status of the ukey changed (logout, register, login, failed check, ...)
 */
 
-function Account (server, uKey) {
+function Account(server, uKey) {
 	this.uKey = uKey || localStorage.getItem("drawtogether-uKey") || "";
 	this.mail = localStorage.getItem("drawtogether-mail");
 	this.lastLoginCheck; //Date.now() that we last checked if we were logged in
@@ -25,19 +25,21 @@ Account.prototype.isLoggedIn = function (callback) {
 		callback(null, !!this.uKey);
 		return;
 	}
-	
+
 	this.checkLogin(callback);
 };
 
-Account.prototype.requestJWT = function requestJWT () {
+Account.prototype.requestJWT = function requestJWT() {
 	this.request("/getJWT", { uKey: this.uKey }, this.parseData.bind(this, function (err, data) {
-		this.JWT = data.jwt;
+		if (err)
+			return console.error(err);
+		this.JWT = data && data.jwt;
 		this.dispatchEvent({ type: "JWT_CHANGED" });
-	}.bind(this)));	
+	}.bind(this)));
 };
 
 // Callback (err)
-Account.prototype.login = function login (email, unhashedPass, callback) {
+Account.prototype.login = function login(email, unhashedPass, callback) {
 	this.loginNoHash(email, CryptoJS.SHA256(unhashedPass).toString(CryptoJS.enc.Base64), callback);
 };
 
@@ -63,47 +65,47 @@ Account.prototype.login = function login (email, unhashedPass, callback) {
 		}
 	}
 */
-Account.prototype.getProfileData = function getProfileData (id, callback) {
+Account.prototype.getProfileData = function getProfileData(id, callback) {
 	this.request("/getprofiledata", { id: id }, this.parseData.bind(this, callback));
 };
 
-Account.prototype.getContestEntries = function getContestEntries (callback) {
+Account.prototype.getContestEntries = function getContestEntries(callback) {
 	this.request("/getContestEntries", {
 		uKey: this.uKey
 	},
-	this.parseData.bind(this, callback));
+		this.parseData.bind(this, callback));
 };
 
-Account.prototype.getAllEntries = function getAllEntries (params, callback) {
+Account.prototype.getAllEntries = function getAllEntries(params, callback) {
 	console.log(params, callback)
 	this.request("/getFullEntries", {
 		month: params.month,
 		year: params.year
 	},
-	this.parseData.bind(this, callback));
+		this.parseData.bind(this, callback));
 };
 
-Account.prototype.vote = function vote (image, callback) {
+Account.prototype.vote = function vote(image, callback) {
 	this.request("/vote", {
 		uKey: this.uKey,
 		image: image
 	},
-	this.parseData.bind(this, callback));
+		this.parseData.bind(this, callback));
 };
 
-Account.prototype.setBio = function setBio (bio, callback) {
+Account.prototype.setBio = function setBio(bio, callback) {
 	this.request("/setbio", {
 		uKey: this.uKey,
 		bio: bio
 	},
-	this.parseData.bind(this, callback));
+		this.parseData.bind(this, callback));
 };
 
-Account.prototype.getPictureStories = function getPictureStories (callback) {
+Account.prototype.getPictureStories = function getPictureStories(callback) {
 	this.request("/getpicturestories", {}, this.parseData.bind(this, callback));
 };
 
-Account.prototype.enterContest = function enterContest (image, team, callback) {
+Account.prototype.enterContest = function enterContest(image, team, callback) {
 	var names = [], socials = [];
 
 	for (var k = 0; k < team.length; k++) {
@@ -121,7 +123,7 @@ Account.prototype.enterContest = function enterContest (image, team, callback) {
 // Takes in a base64 image and story, calls back with an id
 // Types: "profile", "header", "story"
 // If type is profile or header, our profile or header will be updated
-Account.prototype.sharePicture = function sharePicture (image, story, type, callback) {
+Account.prototype.sharePicture = function sharePicture(image, story, type, callback) {
 	if (typeof type == "function") callback = type;
 	this.request("/sharepicture", {
 		uKey: this.uKey,
@@ -200,24 +202,24 @@ Account.prototype.reset = function (code, unhashedPass, callback) {
 			callback(err);
 			return;
 		}
-		
+
 		this.uKey = data.uKey;
 		this.id = data.id;
 		this.mail = data.email;
 		this.lastLoginCheck = Date.now();
-		
+
 		localStorage.setItem("drawtogether-uKey", data.uKey);
 		localStorage.setItem("drawtogether-mail", data.email);
 		localStorage.setItem("drawtogether-pass", pass);
-		
+
 		this.dispatchEvent({ type: "change" });
-		
+
 		callback(null, data);
 	}.bind(this)));
 };
 
 // Callback (err)
-Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
+Account.prototype.loginNoHash = function loginNoHash(email, pass, callback) {
 	var req = new XMLHttpRequest();
 
 	req.addEventListener("readystatechange", function (event) {
@@ -225,7 +227,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 			var data = JSON.parse(req.responseText);
 
 			if (data.error) {
-				callback(data.error)						
+				callback(data.error)
 				return;
 			}
 
@@ -248,7 +250,7 @@ Account.prototype.loginNoHash = function loginNoHash (email, pass, callback) {
 };
 
 // Callback(err)
-Account.prototype.register = function register (email, pass, callback) {
+Account.prototype.register = function register(email, pass, callback) {
 	var req = new XMLHttpRequest();
 	var pass = CryptoJS.SHA256(pass).toString(CryptoJS.enc.Base64);
 	var ref = localStorage.getItem("drawtogether-referrer");
@@ -258,7 +260,7 @@ Account.prototype.register = function register (email, pass, callback) {
 			var data = JSON.parse(req.responseText);
 
 			if (data.error) {
-				callback(data.error)						
+				callback(data.error)
 				return;
 			}
 
@@ -280,7 +282,7 @@ Account.prototype.register = function register (email, pass, callback) {
 	req.send();
 };
 
-Account.prototype.logout = function logout (callback) {
+Account.prototype.logout = function logout(callback) {
 	var req = new XMLHttpRequest();
 
 	req.addEventListener("readystatechange", function (event) {
@@ -288,7 +290,7 @@ Account.prototype.logout = function logout (callback) {
 			var data = JSON.parse(req.responseText);
 
 			if (data.error) {
-				callback("There was an error trying to logout: " + data.error)						
+				callback("There was an error trying to logout: " + data.error)
 				return;
 			}
 
@@ -318,8 +320,8 @@ Account.prototype.logout = function logout (callback) {
 // if that fails returns (err, false)
 // if there is no email/pass stored returns (null, false)
 // Callback (err, loggedIn)
-Account.prototype.checkLogin = function checkLogin (callback) {
-	callback = callback || function () {};
+Account.prototype.checkLogin = function checkLogin(callback) {
+	callback = callback || function () { };
 
 	if (!this.uKey && localStorage.getItem("drawtogether-mail") && localStorage.getItem("drawtogether-pass")) {
 		this.loginNoHash(localStorage.getItem("drawtogether-mail"), localStorage.getItem("drawtogether-pass"), function (err) {
@@ -354,19 +356,19 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 						});
 						return;
 					}
-					
+
 					// Our uKey expired and we don't have the email/pass in localstorage
 					callback(null, false);
 					this.dispatchEvent({ type: "change" });
 					return;
 				}
-				callback(data.error);			
+				callback(data.error);
 				return;
 			}
 
 			this.id = data.id;
 			this.lastLoginCheck = Date.now();
-			
+
 			// Our uKey is still valid
 			setTimeout(function () {
 				callback(null, true)
@@ -384,7 +386,7 @@ Account.prototype.checkLogin = function checkLogin (callback) {
 // Callback gives (err, data) where err is a string with an http error  or
 // the error returned by the server in the parsed data object (data.error || data.err)
 // data = the parsed json response text
-Account.prototype.getReputationList = function getReputationList (callback) {
+Account.prototype.getReputationList = function getReputationList(callback) {
 	this.request("/getreputationlist", {}, this.parseData.bind(this, function (err, data) {
 		if (err || !data || data.error || data.err) {
 			callback(err || data.error || data.err, data);
@@ -401,12 +403,12 @@ Account.prototype.getReputationList = function getReputationList (callback) {
 // Request is the XMLHttpRequest with readyState == 4
 // Two valid calls: request(path, options, callback) or request(path, options, body, callback)
 // where callback has to be a function
-Account.prototype.request = function request (path, options, body, callback) {
+Account.prototype.request = function request(path, options, body, callback) {
 	if (!callback && typeof body == "function") {
 		callback = body;
 		body = null;
 	}
-	
+
 	var req = new XMLHttpRequest();
 
 	// Build the get parameter string
@@ -437,7 +439,7 @@ Account.prototype.request = function request (path, options, body, callback) {
 };
 
 // Returns "key=value&" or for arrays "key=value1&key=value2&"
-Account.prototype.encodeURIValue = function encodeURIValue (key, value) {
+Account.prototype.encodeURIValue = function encodeURIValue(key, value) {
 	if (Array.isArray(value)) {
 		var returnString = "";
 		for (var k = 0; k < value.length; k++)
@@ -451,7 +453,7 @@ Account.prototype.encodeURIValue = function encodeURIValue (key, value) {
 // Parses the server returned data as a JSON object
 // Callback gives err if err was already defined or if the JSON parsing failed
 // Callback (err, data)
-Account.prototype.parseData = function parseData (callback, err, request ) {
+Account.prototype.parseData = function parseData(callback, err, request) {
 	if (err) {
 		callback(err);
 		return;
@@ -462,12 +464,12 @@ Account.prototype.parseData = function parseData (callback, err, request ) {
 	} catch (e) {
 		err = "JSON Parse error. Server response was: " + request.responseText;
 	}
-	
+
 	if (data.error) {
-		callback(data.error)						
+		callback(data.error)
 		return;
 	}
-	
+
 	if (data.err) {
 		callback(data.err);
 		return;
@@ -483,13 +485,13 @@ Account.prototype.parseData = function parseData (callback, err, request ) {
  * @author mrdoob / http://mrdoob.com/
  */
 
-var EventDispatcher = function () {}
+var EventDispatcher = function () { }
 
 EventDispatcher.prototype = {
 
 	constructor: EventDispatcher,
 
-	apply: function ( object ) {
+	apply: function (object) {
 
 		object.addEventListener = EventDispatcher.prototype.addEventListener;
 		object.hasEventListener = EventDispatcher.prototype.hasEventListener;
@@ -498,33 +500,33 @@ EventDispatcher.prototype = {
 
 	},
 
-	addEventListener: function ( type, listener ) {
+	addEventListener: function (type, listener) {
 
-		if ( this._listeners === undefined ) this._listeners = {};
+		if (this._listeners === undefined) this._listeners = {};
 
 		var listeners = this._listeners;
 
-		if ( listeners[ type ] === undefined ) {
+		if (listeners[type] === undefined) {
 
-			listeners[ type ] = [];
+			listeners[type] = [];
 
 		}
 
-		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+		if (listeners[type].indexOf(listener) === - 1) {
 
-			listeners[ type ].push( listener );
+			listeners[type].push(listener);
 
 		}
 
 	},
 
-	hasEventListener: function ( type, listener ) {
+	hasEventListener: function (type, listener) {
 
-		if ( this._listeners === undefined ) return false;
+		if (this._listeners === undefined) return false;
 
 		var listeners = this._listeners;
 
-		if ( listeners[ type ] !== undefined && listeners[ type ].indexOf( listener ) !== - 1 ) {
+		if (listeners[type] !== undefined && listeners[type].indexOf(listener) !== - 1) {
 
 			return true;
 
@@ -534,20 +536,20 @@ EventDispatcher.prototype = {
 
 	},
 
-	removeEventListener: function ( type, listener ) {
+	removeEventListener: function (type, listener) {
 
-		if ( this._listeners === undefined ) return;
+		if (this._listeners === undefined) return;
 
 		var listeners = this._listeners;
-		var listenerArray = listeners[ type ];
+		var listenerArray = listeners[type];
 
-		if ( listenerArray !== undefined ) {
+		if (listenerArray !== undefined) {
 
-			var index = listenerArray.indexOf( listener );
+			var index = listenerArray.indexOf(listener);
 
-			if ( index !== - 1 ) {
+			if (index !== - 1) {
 
-				listenerArray.splice( index, 1 );
+				listenerArray.splice(index, 1);
 
 			}
 
@@ -555,29 +557,29 @@ EventDispatcher.prototype = {
 
 	},
 
-	dispatchEvent: function ( event ) {
-			
-		if ( this._listeners === undefined ) return;
+	dispatchEvent: function (event) {
+
+		if (this._listeners === undefined) return;
 
 		var listeners = this._listeners;
-		var listenerArray = listeners[ event.type ];
+		var listenerArray = listeners[event.type];
 
-		if ( listenerArray !== undefined ) {
+		if (listenerArray !== undefined) {
 
 			event.target = this;
 
 			var array = [];
 			var length = listenerArray.length;
 
-			for ( var i = 0; i < length; i ++ ) {
+			for (var i = 0; i < length; i++) {
 
-				array[ i ] = listenerArray[ i ];
+				array[i] = listenerArray[i];
 
 			}
 
-			for ( var i = 0; i < length; i ++ ) {
+			for (var i = 0; i < length; i++) {
 
-				array[ i ].call( this, event );
+				array[i].call(this, event);
 
 			}
 
