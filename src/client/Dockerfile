@@ -11,7 +11,7 @@ COPY ./src/client/package.json /app/package.json
 COPY ./src/client/package-lock.json /app/package-lock.json
 
 # Install node modules
-RUN npm install
+RUN npm ci
 
 # Copy the build files
 COPY ./src/client/info.json /app/info.json
