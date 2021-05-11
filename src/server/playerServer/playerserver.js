@@ -194,7 +194,7 @@ var server = https.createServer(options, function (req, res) {
 			console.log(uuid);
 
 			res.end(JSON.stringify({
-				jwt: jwt.sign({ uuid: uuid }, privateKey)
+				jwt: jwt.sign({ uuid: uuid }, privateKey, { expiresIn: '1d' })
 			}));
 		});
 
