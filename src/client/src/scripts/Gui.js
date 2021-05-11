@@ -185,3 +185,11 @@ Gui.prototype.createWindow = function createWindow (settings) {
 
 	return windowContainer;
 };
+
+Gui.prototype.createButton = function createButton (text, callback) {
+    var button = document.createElement("div");
+        button.classList = "pluginstore-button";
+        button.appendChild(document.createTextNode(text));
+    button.addEventListener("click", callback);
+    return button;
+};

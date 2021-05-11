@@ -47,14 +47,17 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.account = account || new Account(this.settings.accountServer);
 	this.bindSocketHandlers();
 	this.emotesHash = emotesHash;
-
-	
-  this.mods = new Mods(this);
   
-  // Initialize the dom elements
+	// Initialize the dom elements
 	this.initDom();
 	this.gui = new Gui(container);
 	this.updateInk();
+
+	this.mods = new SitePlugins(this.gui, { url: this.settings.sitePluginsServer });
+	this.account.addEventListener("JWT_CHANGE", function () {
+		console.log("JWT Changed", this.account.JWT);
+		this.mods.setJWT(this.account.JWT);
+	}.bind(this));
 
 	// Ask the player what to do or connect to the server
 	if (this.settings.mode == "ask") {
@@ -5737,7 +5740,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		name: "mods",
 		type: "button",
 		text: "Mods",
-		action: this.mods.openModWindow.bind(this.mods)
+		action: this.mods.openStore.bind(this.mods)
 	});
 
 	return buttonList;

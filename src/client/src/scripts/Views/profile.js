@@ -48,7 +48,7 @@ Anondraw.prototype.createProfileHeaderImage = function createProfileHeaderImage 
 	if (!data.headerImage) {
 		img.src = "images/profile/header.png";
 	} else {
-		img.src = "https://anondraw.com/userimages/" + data.headerImage + ".png";
+		img.src = "https://www.anondraw.com/userimages/" + data.headerImage + ".png";
 	}
 	
 	img.alt = data.last_username + " header";
@@ -68,7 +68,7 @@ Anondraw.prototype.createProfilePicture = function createProfilePicture (data, c
 	if (!data.profileImage) {
 		img.src = "images/profile/profile.png";
 	} else {
-		img.src = "https://anondraw.com/userimages/" + data.profileImage + ".png";
+		img.src = "https://www.anondraw.com/userimages/" + data.profileImage + ".png";
 	}
 	
 	img.alt = data.last_username + " profile picture";

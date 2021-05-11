@@ -212,11 +212,11 @@ Anondraw.prototype.view.contest.createWinner = function createWinner (place, tea
 	var classes = ["first", "second", "third"];
 	
 	var bigger = container.appendChild(document.createElement("a"));
-	bigger.href = "https://anondraw.com/userimages/" + team.image + ".png";;
+	bigger.href = "https://www.anondraw.com/userimages/" + team.image + ".png";;
 	bigger.target = "_blank";
 	
 	var img = bigger.appendChild(document.createElement("img"));
-	img.src = "https://anondraw.com/userimages/" + team.image + ".png";
+	img.src = "https://www.anondraw.com/userimages/" + team.image + ".png";
 	img.className = classes[place - 1];
 	
 	var podiumPiece = container.appendChild(document.createElement("div"));

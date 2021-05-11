@@ -9,6 +9,11 @@ function Account (server, uKey) {
 	this.lastLoginCheck; //Date.now() that we last checked if we were logged in
 	this.server = server;
 	setInterval(this.checkLogin.bind(this), 30 * 60 * 1000);
+
+	this.requestJWT();
+	this.addEventListener("change", function () {
+		this.requestJWT();
+	}.bind(this));
 }
 
 // Amount of time that we will assume we are logged in
@@ -22,6 +27,13 @@ Account.prototype.isLoggedIn = function (callback) {
 	}
 	
 	this.checkLogin(callback);
+};
+
+Account.prototype.requestJWT = function requestJWT () {
+	this.request("/getJWT", { uKey: this.uKey }, this.parseData.bind(this, function (err, data) {
+		this.JWT = data.jwt;
+		this.dispatchEvent({ type: "JWT_CHANGED" });
+	}.bind(this)));	
 };
 
 // Callback (err)
