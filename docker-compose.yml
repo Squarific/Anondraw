@@ -62,8 +62,9 @@ services:
       MYSQL_DATABASE: anondraw
     volumes:
 #      - ./data/mysql:/var/lib/mysql
+      - ./data/configs:/etc/mysql/conf.d
       - ./data/start:/docker-entrypoint-initdb.d
-      - ./data/mysql/configs:/etc/mysql/conf.d
+
   adminer:
     image: adminer
     restart: always
