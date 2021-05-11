@@ -14,6 +14,7 @@ var options = {
 	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
+// fix to use config
 var privateKey = fs.readFileSync('./jwtsignkey.key');
 
 var kickbancode = config.service.player.password.kickban;

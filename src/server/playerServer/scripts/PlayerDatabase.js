@@ -41,7 +41,7 @@ function isBannedHandler(callback, err, rows) {
 }
 
 PlayerDatabase.prototype.getUUID = function getUUID(userid, callback) {
-	this.database.query("SELECT UuidFromBin(uuid) AS uuid FROM users WHERE id = ?", [userid], function (err, result) {
+	this.database.query("SELECT BIN_TO_UUID(uuid) AS uuid FROM users WHERE id = ?", [userid], function (err, result) {
 		if (err) {
 			console.log("GETUUID DB ERROR", err, userid);
 			callback("Getting UUID failed");
