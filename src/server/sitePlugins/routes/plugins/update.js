@@ -4,8 +4,7 @@ const fs = require('fs');
 var path = require('path');
 const jwt = require('jsonwebtoken');
 
-const privateKeyPath = path.join(__dirname, '..', '..', 'jwtsignkey.key');
-const privateKey = fs.readFileSync(privateKeyPath);
+const privateKey = fs.readFileSync("/etc/letsencrypt/live/direct.anondraw.com/private.key");
 
 const UPDATE_QUERY = "UPDATE `plugins` SET name = ?, description = ? WHERE uuid = UUID_TO_BIN(?) AND useruuid = UUID_TO_BIN(?)";
 const GENERIC_DB_ERROR = {

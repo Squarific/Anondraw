@@ -4,8 +4,7 @@ const fs = require('fs');
 var path = require('path');
 const jwt = require('jsonwebtoken');
 
-const privateKeyPath = path.join(__dirname, '..', '..', 'jwtsignkey.key');
-const privateKey = fs.readFileSync(privateKeyPath);
+const privateKey = fs.readFileSync("/etc/letsencrypt/live/direct.anondraw.com/private.key");
 
 const SELECT_QUERY = "SELECT BIN_TO_UUID(uuid) as uuid, BIN_TO_UUID(useruuid) as useruuid, name, description, creation, updatedatetime from  `plugins` WHERE useruuid = UUID_TO_BIN(?)";
 

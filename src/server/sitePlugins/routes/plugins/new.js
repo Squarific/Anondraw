@@ -5,8 +5,7 @@ const fs = require('fs');
 var path = require('path');
 const jwt = require('jsonwebtoken');
 
-const privateKeyPath = path.join(__dirname, '..', '..', 'jwtsignkey.key');
-const privateKey = fs.readFileSync(privateKeyPath);
+const privateKey = fs.readFileSync("/etc/letsencrypt/live/direct.anondraw.com/private.key");
 
 const INSERT_QUERY_PLUGIN = "INSERT INTO `plugins` (uuid, useruuid, name, description) VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?)";
 const INSERT_QUERY_VERSION = "INSERT INTO `versions` (pluginuuid, major, minor, patch, releasenotes, source) VALUES (UUID_TO_BIN(?), ?, ?, ?, ?, ?)";
