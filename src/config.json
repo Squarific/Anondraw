@@ -39,6 +39,10 @@
             "host": "playerserver",
             "clienthost": "localhost",
             "port": 2552
+        },
+        "siteplugins": {
+            "clienthost": "localhost",
+            "port": 6552
         }
     },
     "permfolder": "/etc/letsencrypt/live/direct.anondraw.com",

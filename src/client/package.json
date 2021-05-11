@@ -4,11 +4,11 @@
     "build": "node build.js"
   },
   "dependencies": {
+    "@node-minify/clean-css": "^6.2.0",
+    "@node-minify/core": "^6.2.0",
+    "@node-minify/uglify-es": "^6.2.0",
     "chokidar": "^3.4.0",
-    "clean-css": "^4.2.3",
     "lodash": "^4.16.4",
-    "mustache": "^2.2.1",
-    "node-minify": "^3.6.0",
-    "uglify-js": "^3.10.0"
+    "mustache": "^2.2.1"
   }
 }
