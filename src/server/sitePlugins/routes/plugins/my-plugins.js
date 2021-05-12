@@ -22,7 +22,7 @@ const JWT_ERROR = {
 
 module.exports = (database) => {
     router.get('/', [
-        header('bearer'),
+        header('authorization'),
     ], async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -31,8 +31,12 @@ module.exports = (database) => {
 
         let useruuid
         try {
+            console.log(req.headers.authorization)
+            console.log(req.headers.authorization.split(' '))
+            console.log(privateKey)
             useruuid = jwt.verify(req.headers.authorization.split(' ')[1], privateKey)
         } catch (error) {
+            console.log(error)
             return res.status(401).json(JWT_ERROR);
         }
 

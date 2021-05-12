@@ -37,6 +37,7 @@ module.exports = (database) => {
         try {
             useruuid = jwt.verify(req.body.bearer, privateKey)
         } catch (error) {
+            console.log(error)
             return res.status(401).json(JWT_ERROR);
         }
 
