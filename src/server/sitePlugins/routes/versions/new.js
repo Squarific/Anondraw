@@ -51,6 +51,7 @@ module.exports = (database) => {
         try {
             useruuid = jwt.verify(req.body.bearer, privateKey)
         } catch (error) {
+            console.log(error)
             return res.status(401).json(JWT_ERROR);
         }
 
@@ -63,7 +64,7 @@ module.exports = (database) => {
             if (!result || !result[0] || !result[0][0] || result[0][0].useruuid != useruuid.uuid) {
                 return res.status(400).json(PLUGIN_NOT_FOUND_ERROR);
             }
-            
+
             const dbVersion = result[1] && result[1][0];
             const VERSION_ZERO = { major: 0, minor: 0, patch: 0 };
             newVersion = calculateNextVersion(dbVersion || VERSION_ZERO, req.body.changetype);

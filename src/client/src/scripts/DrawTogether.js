@@ -1,4 +1,4 @@
-function DrawTogether (container, settings, emotesHash, account, router, pms) {
+function DrawTogether(container, settings, emotesHash, account, router, pms) {
 	// Normalize settings, set container
 	this.container = container;
 	this.router = router;
@@ -8,7 +8,7 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.userSettings = QuickSettings.create(0, 0, "settings");
 	this.userSettings.setDraggable(false);
 	this.userSettings.setCollapsible(false);
-	
+
 	this.videoExportSettings = QuickSettings.create(50, 50, "Video export settings");
 	this.videoExportSettings.hide();
 
@@ -39,7 +39,7 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this._forceFollow;      // The playerid that should be followed
 	this._autoMoveScreen;   // Boolean, should we move the screen automatically?
 	this._followingPlayer;  // The player the view is currently following
-	
+
 	this.favoritesContainer = null;
 	this.regionsContainer = null;
 
@@ -48,15 +48,16 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.bindSocketHandlers();
 	this.emotesHash = emotesHash;
 
-	
+
 	this.gui = new Gui(container);
 
 	this.mods = new SitePlugins(this.gui, { url: this.settings.sitePluginsServer });
+	this.mods.setJWT(this.account.JWT);
 	this.account.addEventListener("JWT_CHANGED", function () {
 		console.log("JWT Changed", this.account.JWT);
 		this.mods.setJWT(this.account.JWT);
 	}.bind(this));
-  
+
 	// Initialize the dom elements
 	this.initDom();
 	this.updateInk();
@@ -80,11 +81,11 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 			ga("send", "event", "autojoin", "public");
 		}
 		this.changeRoom(this.settings.room,
-		                undefined,
-		                this.settings.leftTopX,
-		                this.settings.leftTopY,
-		                true);
-	} else  if (this.settings.mode == "private") {
+			undefined,
+			this.settings.leftTopX,
+			this.settings.leftTopY,
+			true);
+	} else if (this.settings.mode == "private") {
 		this.settings.room = "private_" + Math.random().toString(36).substr(2, 5); // Random 5 letter room;
 		this.changeRoom(this.settings.room, undefined, 0, 0, true);
 	} else if (this.settings.mode == "member") {
@@ -110,28 +111,28 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 			this.advancedOptions.toggleVisibility();
 		}
 	}.bind(this));
-	
+
 	window.addEventListener("popstate", this.gotoHash.bind(this));
 
 	setInterval(this.displayTip.bind(this), 5 * 60 * 1000);
 	setTimeout(this.autoMoveScreen.bind(this), 0);
-	
-	
+
+
 	setInterval(function () {
 		if (!this.memberlevel) {
 			// Fix for the ad that sometimes appears randomly
 			var prevAd = document.getElementById("amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d");
 			prevAd.parentNode.removeChild()
-			
+
 			// Amazon ad code
 			var div = document.createElement("div");
 			var ad = div.appendChild(document.createElement("div"));
 			ad.id = "amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d";
-			
+
 			var script = div.appendChild(document.createElement("script"));
 			script.src = "//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US&adInstanceId=123acff2-6857-4569-a250-fd703f6a941d";
 			this.chat.addElementAsMessage(div);
-			
+
 			// Fix for adding multiple ads with the same id
 			setTimeout(function () {
 				ad.id = "";
@@ -173,82 +174,82 @@ DrawTogether.prototype.defaultSettings = {
 };
 
 DrawTogether.prototype.defaultUserSettings = [{
-		title: "Mute chat",
-		type: "boolean",
-		value: false
-	}, {
-		title: "Show tips",
-		type: "boolean",
-		value: true
-	}, {
-		title: "Show welcome",
-		type: "boolean",
-		value: true
-	}, {
-		title: "Direct teleporting",
-		type: "boolean",
-		value: false
-	}];
+	title: "Mute chat",
+	type: "boolean",
+	value: false
+}, {
+	title: "Show tips",
+	type: "boolean",
+	value: true
+}, {
+	title: "Show welcome",
+	type: "boolean",
+	value: true
+}, {
+	title: "Direct teleporting",
+	type: "boolean",
+	value: false
+}];
 
 DrawTogether.prototype.defaultVideoExportSettings = [{
-		title: "framerate",
-		type: "range",
-		min: 1,
-		max: 144,
-		step: 1,
-		value: 10
-	}, {
-		title: "format",
-		type: "dropdown",
-		items: ["gif", "webm"],
-		value: 0
-	}, {
-		title: "quality",
-		type: "range",
-		min: 0,
-		max: 100,
-		step: 1,
-		value: 100
-	}, {
-		title: "motionBlurFrames",
-		type: "range",
-		min: 1,
-		max: 10,
-		step: 1,
-		value: 1
-	}, {
-		title: "verbose",
-		type: "boolean"
-	}, {
-		title: "display",
-		type: "boolean"
-	}, {
-		title: "timeLimit",
-		type: "range",
-		min: 10,
-		max: 3600,
-		step: 10,
-		value: 600
-	}, {
-		title: "autoSaveTime",
-		type: "range",
-		min: 30,
-		max: 1800,
-		step: 10,
-		value: 600
-	}, {
-		title: "startTime",
-		type: "range",
-		min: 0,
-		max: 3600,
-		step: 1,
-		value: 0
+	title: "framerate",
+	type: "range",
+	min: 1,
+	max: 144,
+	step: 1,
+	value: 10
+}, {
+	title: "format",
+	type: "dropdown",
+	items: ["gif", "webm"],
+	value: 0
+}, {
+	title: "quality",
+	type: "range",
+	min: 0,
+	max: 100,
+	step: 1,
+	value: 100
+}, {
+	title: "motionBlurFrames",
+	type: "range",
+	min: 1,
+	max: 10,
+	step: 1,
+	value: 1
+}, {
+	title: "verbose",
+	type: "boolean"
+}, {
+	title: "display",
+	type: "boolean"
+}, {
+	title: "timeLimit",
+	type: "range",
+	min: 10,
+	max: 3600,
+	step: 10,
+	value: 600
+}, {
+	title: "autoSaveTime",
+	type: "range",
+	min: 30,
+	max: 1800,
+	step: 10,
+	value: 600
+}, {
+	title: "startTime",
+	type: "range",
+	min: 0,
+	max: 3600,
+	step: 1,
+	value: 0
 }];
 
 DrawTogether.prototype.drawingTypes = ["line", "brush", "block"];
-DrawTogether.prototype.drawingTypesByName = {"line": 0, "brush": 1, "block": 2};
+DrawTogether.prototype.drawingTypesByName = { "line": 0, "brush": 1, "block": 2 };
 
-DrawTogether.prototype.drawLoop = function drawLoop () {
+DrawTogether.prototype.drawLoop = function drawLoop() {
 	// Draw all user interactions of the last 2 seconds
 	if (this.needsClear) {
 		this.userCtx.clearRect(0, 0, this.userCtx.canvas.width, this.userCtx.canvas.height);
@@ -269,25 +270,25 @@ DrawTogether.prototype.drawLoop = function drawLoop () {
 	requestAnimationFrame(this.drawLoop.bind(this));
 };
 
-DrawTogether.prototype.paintMoved = function paintMoved (event) {
+DrawTogether.prototype.paintMoved = function paintMoved(event) {
 	this.updateClickableAreas(event);
 };
 
 DrawTogether.prototype.setupClickableAreas = function () {
 	while (this.clickableAreasContainer.firstChild)
 		this.clickableAreasContainer.removeChild(this.clickableAreasContainer.firstChild);
-	
+
 	for (var k = 0; k < this.clickableAreas.length; k++) {
 		this.clickableAreas[k].element = document.createElement("div")
 		this.clickableAreasContainer.appendChild(this.clickableAreas[k].element);
 		this.clickableAreas[k].element.className = "clickableArea";
 		this.clickableAreas[k].element.addEventListener("click", this.clickClickableArea.bind(this, k));
 	}
-	
+
 	this.updateClickableAreas();
 };
 
-DrawTogether.prototype.updateClickableAreas = function updateClickableAreas () {
+DrawTogether.prototype.updateClickableAreas = function updateClickableAreas() {
 	for (var k = 0; k < this.clickableAreas.length; k++) {
 		this.clickableAreas[k].element.style.left = (this.clickableAreas[k].x - this.paint.public.leftTopX) * this.paint.public.zoom + "px";
 		this.clickableAreas[k].element.style.top = (this.clickableAreas[k].y - this.paint.public.leftTopY) * this.paint.public.zoom + "px";
@@ -296,18 +297,18 @@ DrawTogether.prototype.updateClickableAreas = function updateClickableAreas () {
 	}
 };
 
-DrawTogether.prototype.clickClickableArea = function clickClickableArea (index, event) {
+DrawTogether.prototype.clickClickableArea = function clickClickableArea(index, event) {
 	var coords = this.clickableAreas[index].url.split(",");
 
-	if(event.shiftKey){ // Delete
+	if (event.shiftKey) { // Delete
 		var myUserId = this.account.id;
 		var ownerId = this.clickableAreas[index].owner;
-		if(myUserId == ownerId){
+		if (myUserId == ownerId) {
 			this.gui.prompt("You are about to delete your button. Are you sure you want to do that?", ["Yes", "No"], function (answer) {
 				if (answer == "Yes") this.deleteClickableArea(index);
 			}.bind(this));
 		}
-		else{
+		else {
 			this.chat.addMessage("You can only delete buttons you own");
 		}
 		return;
@@ -322,51 +323,51 @@ DrawTogether.prototype.clickClickableArea = function clickClickableArea (index, 
 	}
 };
 
-DrawTogether.prototype.deleteClickableArea = function deleteClickableArea (index) {
+DrawTogether.prototype.deleteClickableArea = function deleteClickableArea(index) {
 	this.network.socket.emit("deleteclickablearea", index, function (err) {
-	  if (err) {
-	    this.gui.prompt(err, ["Ok"]);
-	  }
+		if (err) {
+			this.gui.prompt(err, ["Ok"]);
+		}
 	}.bind(this));
 };
 
-DrawTogether.prototype.handleGoto = function handleGoto (x, y) {
+DrawTogether.prototype.handleGoto = function handleGoto(x, y) {
 	this.paint.goto(x, y);
 };
 
-DrawTogether.prototype.handleGotoAndCenter = function handleGotoAndCenter (x, y) {
+DrawTogether.prototype.handleGotoAndCenter = function handleGotoAndCenter(x, y) {
 	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-	                  this.paint.public.canvas.height / this.paint.public.zoom];
+	this.paint.public.canvas.height / this.paint.public.zoom];
 
 	var targetPosEnd = [x - screenSize[0] / 2,
-	                    y - screenSize[1] / 2];
+	y - screenSize[1] / 2];
 	this.handleGoto(targetPosEnd[0], targetPosEnd[1]);
 };
 
-DrawTogether.prototype.gotoHash = function gotoHash () {
+DrawTogether.prototype.gotoHash = function gotoHash() {
 	var urlInfo = location.hash.substr(1, location.hash.length).split(",");
 
 	var room = urlInfo[0];
 	var x = parseInt(urlInfo[1]);
 	var y = parseInt(urlInfo[2]);
-	
+
 	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-	                  this.paint.public.canvas.height / this.paint.public.zoom];
-	
+	this.paint.public.canvas.height / this.paint.public.zoom];
+
 	if (room !== this.current_room) {
 		this.changeRoom(room, undefined, x, y, true);
 	} else if ((this.paint.public.leftTopX + screenSize[0] / 2).toFixed() !== x.toFixed() ||
-	           (this.paint.public.leftTopY + screenSize[1] / 2).toFixed() !== y.toFixed()) {
+		(this.paint.public.leftTopY + screenSize[1] / 2).toFixed() !== y.toFixed()) {
 		this.handleGotoAndCenter(x, y);
 	}
 };
 
-DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
+DrawTogether.prototype.handleMoveQueue = function handleMoveQueue() {
 	if (this.moveQueue.length > 0) {
 		if (Date.now() - this.lastScreenMove >= this.moveQueue[0].duration) {
 			this.lastScreenMove = Date.now();
 			this.lastScreenMoveStartPosition = this.moveQueue[0].position;
-			
+
 			this.handleGoto(this.moveQueue[0].position[0], this.moveQueue[0].position[1]);
 			this.moveQueue.shift();
 			return;
@@ -375,14 +376,14 @@ DrawTogether.prototype.handleMoveQueue = function handleMoveQueue () {
 		var delta = Date.now() - this.lastScreenMove;
 		var relativeDistance = delta / this.moveQueue[0].duration;
 		var distances = [relativeDistance * (this.moveQueue[0].position[0] - this.lastScreenMoveStartPosition[0]),
-		                 relativeDistance * (this.moveQueue[0].position[1] - this.lastScreenMoveStartPosition[1])];
+		relativeDistance * (this.moveQueue[0].position[1] - this.lastScreenMoveStartPosition[1])];
 
 		this.handleGoto(distances[0] + this.lastScreenMoveStartPosition[0],
-		                distances[1] + this.lastScreenMoveStartPosition[1]);
+			distances[1] + this.lastScreenMoveStartPosition[1]);
 	}
 };
 
-DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
+DrawTogether.prototype.autoMoveScreen = function autoMoveScreen() {
 	if (this._forceFollow) {
 
 		this.moveScreenTo(this._forceFollow);
@@ -396,7 +397,7 @@ DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
 		}
 
 		var viewDeductionDelta = Date.now() - this.lastViewDeduction;
-		
+
 		for (var k = 0; k < this.playerList.length; k++) {
 			if (this.playerList[k].id == this._followingPlayer) {
 				this.playerList[k].viewScore -= viewDeductionDelta;
@@ -420,7 +421,7 @@ DrawTogether.prototype.autoMoveScreen = function autoMoveScreen () {
 // If the player is close (1 screen difference in every direction) we just move to it
 // If the player is farther we start moving in its direction for half a second
 // then jump close (.5 screen) to him and then move from the close point to the player
-DrawTogether.prototype.moveScreenTo = function moveScreenTo (playerid) {
+DrawTogether.prototype.moveScreenTo = function moveScreenTo(playerid) {
 	var player = this.playerFromId(playerid);
 	if (!player || !player.lastPosition || !player.lastPosition.pos) return;
 	if (this.userSettings.getBoolean("Direct teleporting")) {
@@ -428,42 +429,42 @@ DrawTogether.prototype.moveScreenTo = function moveScreenTo (playerid) {
 		return;
 	}
 	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-	                  this.paint.public.canvas.height / this.paint.public.zoom];
+	this.paint.public.canvas.height / this.paint.public.zoom];
 
 	var targetPosEnd = [player.lastPosition.pos[0] - screenSize[0] / 2,
-	                    player.lastPosition.pos[1] - screenSize[1] / 2];
+	player.lastPosition.pos[1] - screenSize[1] / 2];
 
 	var distances = [targetPosEnd[0] - this.paint.public.leftTopX,
-	                 targetPosEnd[1] - this.paint.public.leftTopY];
+	targetPosEnd[1] - this.paint.public.leftTopY];
 
 	// If we are still well on the screen lets just not move
 	if (Math.abs(distances[0]) < screenSize[0] * 0.35 &&
-	    Math.abs(distances[1]) < screenSize[1] * 0.35) {
+		Math.abs(distances[1]) < screenSize[1] * 0.35) {
 		return;
 	}
 
 	// If we are only like a screen away, lets move quickly
 	if (Math.abs(distances[0]) < screenSize[0] &&
-	    Math.abs(distances[1]) < screenSize[1]) {
+		Math.abs(distances[1]) < screenSize[1]) {
 		this.moveScreenToPosition(targetPosEnd, 3500);
 		return;
 	}
 
 	var targetPosStart = [this.paint.public.leftTopX + 0.15 * distances[0],
-	                      this.paint.public.leftTopY + 0.15 * distances[1]];
+	this.paint.public.leftTopY + 0.15 * distances[1]];
 
 	var targetPosMiddle = [targetPosEnd[0] - distances[0] * 0.15,
-	                       targetPosEnd[1] - distances[1] * 0.15];
+	targetPosEnd[1] - distances[1] * 0.15];
 
 	this.moveScreenToPosition(targetPosStart, 500);
 	this.moveScreenToPosition(targetPosMiddle, 0);
 	this.moveScreenToPosition(targetPosEnd, 500);
 };
 
-DrawTogether.prototype.moveScreenToPosition = function moveScreenToPosition (position, duration) {
+DrawTogether.prototype.moveScreenToPosition = function moveScreenToPosition(position, duration) {
 	if (!this.lastScreenMoveStartPosition || this.moveQueue.length == 0) {
 		this.lastScreenMoveStartPosition = [this.paint.public.leftTopX,
-		                                    this.paint.public.leftTopY];
+		this.paint.public.leftTopY];
 		this.lastScreenMove = Date.now();
 	}
 
@@ -479,7 +480,7 @@ DrawTogether.prototype.moveScreenToPosition = function moveScreenToPosition (pos
 };
 
 // Returns the playerid with the biggest viewscore
-DrawTogether.prototype.getMaxViewScorePlayer = function getMaxViewScorePlayer () {
+DrawTogether.prototype.getMaxViewScorePlayer = function getMaxViewScorePlayer() {
 	if (this.playerList.length < 1) return null;
 
 	var maxViewScore = -Infinity;
@@ -495,18 +496,18 @@ DrawTogether.prototype.getMaxViewScorePlayer = function getMaxViewScorePlayer ()
 	return maxId;
 };
 
-DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction (name, position) {
+DrawTogether.prototype.drawPlayerInteraction = function drawPlayerInteraction(name, position) {
 	this.userCtx.font = "12px monospace";
-    this.userCtx.lineWidth = 3;
+	this.userCtx.lineWidth = 3;
 
 	this.userCtx.strokeStyle = 'black';
-    this.userCtx.strokeText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
+	this.userCtx.strokeText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
 
-    this.userCtx.fillStyle = 'white';
-    this.userCtx.fillText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
+	this.userCtx.fillStyle = 'white';
+	this.userCtx.fillText(name, (position[0] - this.userCtx.canvas.leftTopX) * this.paint.public.zoom, (position[1] - this.userCtx.canvas.leftTopY) * this.paint.public.zoom - 40);
 };
 
-DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
+DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers() {
 	// Bind all socket events
 	var self = this;
 
@@ -569,7 +570,7 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 			self.paint.addPath(id, paths[id]);
 		}
 	});
-	
+
 	this.network.on("clickableareas", function (areas) {
 		self.clickableAreas = areas;
 		self.setupClickableAreas();
@@ -680,16 +681,16 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	// chat events
 	this.network.on("chatmessage", function (data) {
 		var data = data || {};
-		if(localStorage.getItem("ban") && !data.extraPayload) { // we have a record of ban but server doesnt
+		if (localStorage.getItem("ban") && !data.extraPayload) { // we have a record of ban but server doesnt
 			var banInfo = JSON.parse(localStorage.getItem("ban"));
 			self.network.socket.emit("isMyOldIpBanned", banInfo.arg2);
 		}
-		if(data.extraPayload){
+		if (data.extraPayload) {
 			localStorage.setItem(data.extraPayload.type, JSON.stringify(data.extraPayload));
 		}
 		self.chat.addMessage(data.user, data.message, data.userid, data.id);
 	});
-	
+
 	this.network.on("chatanimation", function (data) {
 		var data = data || {};
 		self.chat.addAnimationMessage(data.animation, data.user, self);
@@ -740,12 +741,12 @@ DrawTogether.prototype.bindSocketHandlers = function bindSocketHandlers () {
 	});
 };
 
-DrawTogether.prototype.sendMessage = function sendMessage (message) {
+DrawTogether.prototype.sendMessage = function sendMessage(message) {
 	// Send a chat message
 	this.network.socket.emit("chatmessage", message);
 };
 
-DrawTogether.prototype.displayMessage = function displayMessage (message, time) {
+DrawTogether.prototype.displayMessage = function displayMessage(message, time) {
 	// Display the given message and disappear after time
 	// If no time set, at least 3 seconds but longer based on message length
 	this.messageDom.style.display = "block";
@@ -765,7 +766,7 @@ DrawTogether.prototype.displayMessage = function displayMessage (message, time) 
 	}.bind(this), time || Math.max(Math.ceil(message.length / 10) * 1000, 3000));
 };
 
-DrawTogether.prototype.displayTip = function displayTip () {
+DrawTogether.prototype.displayTip = function displayTip() {
 	if (!this.userSettings.getBoolean("Show tips")) return;
 
 	/*var tips = [
@@ -786,7 +787,7 @@ DrawTogether.prototype.displayTip = function displayTip () {
 		"If you click on someones name you will jump to their last draw position!",
 		"Pressing the eye next to someones name will make your screen follow the player."
 	];*/
-	
+
 	var tips = [
 		"We organize a contest, check it out in the left menu.",
 		"Hold alt for color picking",
@@ -807,14 +808,14 @@ DrawTogether.prototype.displayTip = function displayTip () {
 };
 
 // Get the current spawn point for a given room
-DrawTogether.prototype.getSpawn = function getSpawn (room) {
+DrawTogether.prototype.getSpawn = function getSpawn(room) {
 	if (room.indexOf("main") !== 0) return [0, 0];
-	
+
 	var base = [311111, 338360];
 	var baseTime = 1508155169891;
 	var weeks = Math.floor((Date.now() - baseTime) / (2 * 7 * 24 * 60 * 60 * 1000));
 	var width = 3840;
-	
+
 	return [base[0] + weeks * width, base[1]];
 };
 
@@ -824,7 +825,7 @@ DrawTogether.prototype.getSpawn = function getSpawn (room) {
 // If you make the third parameter true we will tell the server we really want
 // to join that particular room and the fourth is a "secret" override that 
 // ignores if a room is full
-DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, specific, override) {
+DrawTogether.prototype.changeRoom = function changeRoom(room, number, x, y, specific, override) {
 	// Change the room to room + number, if not possible try to join
 	// room + (number + 1), if not possible repeat
 	if (room === this.current_room) {
@@ -838,7 +839,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 	var changingRoomTimeout = setTimeout(function () {
 		this.changingRoom = false;
 	}.bind(this), 2000);
-	
+
 	number = number || "";
 	this.network.loadRoom(room + number, specific, override, function (err, drawings, clickableAreas) {
 		this.changingRoom = false;
@@ -858,8 +859,8 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 			this.paint.changeTool("grab");
 			this.paint.addPublicDrawings(this.decodeDrawings(drawings));
 			this.chat.addMessage("Invite people", "https://www.anondraw.com/#" + room + number);
-			
-			
+
+
 			setTimeout(function () {
 				if (!this.memberlevel) {
 					// Fix for the ad that sometimes appears randomly
@@ -877,28 +878,28 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 					}, 1000);
 				}
 			}.bind(this), 15000);
-			
-			if(this.account.uKey) {
+
+			if (this.account.uKey) {
 				this.getFavorites();
 				this.getMyProtectedRegions();
 			}
-			
+
 			// If we are new show the welcome window
 			// Currently disabled
 			if (this.userSettings.getBoolean("Show welcome") && false) {
 				this.openWelcomeWindow();
 
-			// We are not new, check if we already saw all the awesome new features
+				// We are not new, check if we already saw all the awesome new features
 			} else if (parseInt(localStorage.getItem("newfeaturewindowversion")) !== this.CLIENT_VERSION) {
 				this.openNewFeatureWindow();
-			
-			// Premium window it is
+
+				// Premium window it is
 			} else if (!localStorage.getItem("wasPremium") && (!localStorage.getItem("premium_window")
 				|| Date.now() - parseInt(localStorage.getItem("premium_window")) > this.PREMIUM_WINDOW_EVERY)) {
 				localStorage.setItem("premium_window", Date.now());
 				this.openPremiumBuyWindow();
-			
-			// Ha lets just self promote scuttlers then
+
+				// Ha lets just self promote scuttlers then
 			} else if (!localStorage.getItem("scuttlers_released")
 				|| Date.now() - parseInt(localStorage.getItem("scuttlers_released")) > this.SCUTTLERS_MESSAGE_EVERY) {
 				localStorage.setItem("scuttlers_released", Date.now());
@@ -914,7 +915,7 @@ DrawTogether.prototype.changeRoom = function changeRoom (room, number, x, y, spe
 	this.setLoading(room);
 };
 
-DrawTogether.prototype.joinGame = function joinGame () {
+DrawTogether.prototype.joinGame = function joinGame() {
 	ga("send", "event", "modeselector", "publicgame");
 	this.network.joinGame(this.controls.byName.name.input.value == "Uberlord", function (err, room, drawings) {
 		if (err && err.indexOf("Too many users") !== -1) {
@@ -935,9 +936,9 @@ DrawTogether.prototype.joinGame = function joinGame () {
 			this.paint.drawDrawings("public", this.decodeDrawings(drawings));
 			this.chat.addMessage("Welcome to anondraw, enjoy your game!");
 			this.chat.addMessage("Invite friends:", "https://www.anondraw.com/#" + room);
-			
+
 			this.chat.addMessage("Check out my upcoming game scuttlers", "https://www.youtube.com/watch?v=pE737MO-8YQ");
-			
+
 			if (this.account.uKey) {
 				this.getFavorites();
 				this.getMyProtectedRegions();
@@ -951,7 +952,7 @@ DrawTogether.prototype.joinGame = function joinGame () {
 	this.chat.addMessage("Looking for game to join ...");
 };
 
-DrawTogether.prototype.createPrivateGame = function createPrivateGame () {
+DrawTogether.prototype.createPrivateGame = function createPrivateGame() {
 	ga("send", "event", "modeselector", "newprivategame");
 	this.changeRoom("private_game_" + Math.random().toString(36).substr(2, 5));
 };
@@ -960,7 +961,7 @@ DrawTogether.prototype.createPrivateGame = function createPrivateGame () {
 // 	this.socket.emit("joinprivaterandom");
 // };
 
-DrawTogether.prototype.setLoading = function setLoading (room) {
+DrawTogether.prototype.setLoading = function setLoading(room) {
 	// Adds the word loading above the canvasses
 	// Gets removed when 'drawings' are received
 	if (this.loading) return;
@@ -976,7 +977,7 @@ DrawTogether.prototype.removeLoading = function () {
 	delete this.loading;
 };
 
-DrawTogether.prototype.changeName = function changeName (name) {
+DrawTogether.prototype.changeName = function changeName(name) {
 	// Try to change the name
 	if (!name) {
 		name = this.controls.byName.name.input.value;
@@ -998,7 +999,7 @@ DrawTogether.prototype.changeNameDelayed = function () {
 	this.changeNameTimeout = setTimeout(this.changeName.bind(this), 1650);
 };
 
-DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
+DrawTogether.prototype.updatePlayerList = function updatePlayerList() {
 	var isCatMeow = this.account.id === 3196;
 	// Update the playerlist to reflect the current local list
 	while (this.playerListDom.firstChild)
@@ -1009,12 +1010,12 @@ DrawTogether.prototype.updatePlayerList = function updatePlayerList () {
 	plTitle.className = "drawtogether-pl-title";
 
 	for (var k = 0; k < this.playerList.length; k++) {
-		if(isCatMeow && this.playerList[k].userid === 2518) continue;
+		if (isCatMeow && this.playerList[k].userid === 2518) continue;
 		this.playerListDom.appendChild(this.createPlayerDom(this.playerList[k]));
 	}
 };
 
-DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, position, time) {
+DrawTogether.prototype.setPlayerPosition = function setPlayerPosition(id, position, time) {
 	for (var k = 0; k < this.playerList.length; k++) {
 		if (this.playerList[k].id == id) {
 			this.playerList[k].lastPosition = this.playerList[k].lastPosition || {};
@@ -1028,7 +1029,7 @@ DrawTogether.prototype.setPlayerPosition = function setPlayerPosition (id, posit
 	}
 };
 
-DrawTogether.prototype.updateInk = function updateInk () {
+DrawTogether.prototype.updateInk = function updateInk() {
 	// Remove the previous text
 	while (this.inkDom.firstChild) this.inkDom.removeChild(this.inkDom.firstChild);
 	this.inkDom.appendChild(document.createTextNode("Ink: " + Math.floor(this.ink) + "/200000"));
@@ -1053,16 +1054,16 @@ DrawTogether.prototype.updateInk = function updateInk () {
 		this.inkDom.classList.remove("drawtogether-ink-middle");
 		this.inkDom.classList.remove("drawtogether-ink-low");
 	}
-	
+
 	this.previousInk = this.ink;
 };
 
-DrawTogether.prototype.sendDrawing = function sendDrawing (drawing, callback) {
+DrawTogether.prototype.sendDrawing = function sendDrawing(drawing, callback) {
 	if (!this.network.socket) return;
 	this.network.socket.emit("drawing", this.encodeDrawing(drawing), callback);
 };
 
-DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
+DrawTogether.prototype.encodeDrawing = function encodeDrawing(drawing) {
 	var newDrawing = {};
 
 	for (var k in drawing) {
@@ -1071,10 +1072,10 @@ DrawTogether.prototype.encodeDrawing = function encodeDrawing (drawing) {
 
 	newDrawing.color = drawing.color.toHex8();
 
-	return newDrawing; 
+	return newDrawing;
 };
 
-DrawTogether.prototype.decodeDrawings = function decodeDrawings (drawings) {
+DrawTogether.prototype.decodeDrawings = function decodeDrawings(drawings) {
 	for (var dKey = 0; dKey < drawings.length; dKey++) {
 		drawings[dKey].color = tinycolor(drawings[dKey].color);
 	}
@@ -1082,7 +1083,7 @@ DrawTogether.prototype.decodeDrawings = function decodeDrawings (drawings) {
 	return drawings;
 };
 
-DrawTogether.prototype.setName = function setName (name) {
+DrawTogether.prototype.setName = function setName(name) {
 	// Set the input field to our username, mention in chat and save to storage
 	this.controls.byName.name.input.value = name;
 	this.chat.addMessage("SERVER", "Name set to '" + name + "'");
@@ -1091,29 +1092,29 @@ DrawTogether.prototype.setName = function setName (name) {
 
 // After joining a room, make sure everything reflects
 // that we joined the given room
-DrawTogether.prototype.setRoom = function setRoom (room) {
+DrawTogether.prototype.setRoom = function setRoom(room) {
 	this.current_room = room;
 	this.roomInput.value = room;
-	
+
 	var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-	                  this.paint.public.canvas.height / this.paint.public.zoom];
-	
+	this.paint.public.canvas.height / this.paint.public.zoom];
+
 	location.hash = room + "," +
-	                (this.paint.public.leftTopX + screenSize[0] / 2).toFixed() + "," +
-	                (this.paint.public.leftTopY + screenSize[1] / 2).toFixed();
+		(this.paint.public.leftTopX + screenSize[0] / 2).toFixed() + "," +
+		(this.paint.public.leftTopY + screenSize[1] / 2).toFixed();
 };
 
-DrawTogether.prototype.openSettingsWindow = function openSettingsWindow () {
+DrawTogether.prototype.openSettingsWindow = function openSettingsWindow() {
 	this.settingsWindow.style.display = "block";
 	ga("send", "event", "openwindow", "settings");
 };
 
-DrawTogether.prototype.openChatFilterWindow = function openChatFilterWindow () {
+DrawTogether.prototype.openChatFilterWindow = function openChatFilterWindow() {
 	this.chatFilterOptions.style.display = "block";
 	ga("send", "event", "openwindow", "chatFilter");
 };
 
-DrawTogether.prototype.openShareWindow = function openShareWindow () {
+DrawTogether.prototype.openShareWindow = function openShareWindow() {
 	this.shareWindow.style.display = "block";
 	ga("send", "event", "openwindow", "share");
 
@@ -1125,14 +1126,14 @@ DrawTogether.prototype.openShareWindow = function openShareWindow () {
 	ctx.drawImage(this.paint.public.canvas, 0, 0, this.preview.width, this.preview.height);
 };
 
-DrawTogether.prototype.openExplainShareWindow = function openExplainShareWindow () {
+DrawTogether.prototype.openExplainShareWindow = function openExplainShareWindow() {
 	this.shareWindow.style.display = "block";
 	ga("send", "event", "openwindow", "explainshare");
 
-	
+
 };
 
-DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
+DrawTogether.prototype.openRoomWindow = function openRoomWindow() {
 	this.roomWindow.style.display = "block";
 	ga("send", "event", "openwindow", "rooms");
 
@@ -1154,28 +1155,28 @@ DrawTogether.prototype.openRoomWindow = function openRoomWindow () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.openAccountWindow = function openAccountWindow () {
+DrawTogether.prototype.openAccountWindow = function openAccountWindow() {
 	this.accWindow.style.display = "block";
 	ga("send", "event", "openwindow", "account");
 };
 
-DrawTogether.prototype.openModeSelector = function openModeSelector () {
+DrawTogether.prototype.openModeSelector = function openModeSelector() {
 	this.selectWindow.style.display = "flex";
 };
 
-DrawTogether.prototype.closeChatFilterWindow = function closeChatFilterWindow () {
+DrawTogether.prototype.closeChatFilterWindow = function closeChatFilterWindow() {
 	this.chatFilterOptions.style.display = "";
 };
 
-DrawTogether.prototype.closeSettingsWindow = function closeSettingsWindow () {
+DrawTogether.prototype.closeSettingsWindow = function closeSettingsWindow() {
 	this.settingsWindow.style.display = "";
 };
 
-DrawTogether.prototype.closeShareWindow = function closeShareWindow () {
+DrawTogether.prototype.closeShareWindow = function closeShareWindow() {
 	this.shareWindow.style.display = "";
 };
 
-DrawTogether.prototype.closeAccountWindow = function closeAccountWindow () {
+DrawTogether.prototype.closeAccountWindow = function closeAccountWindow() {
 	this.accWindow.style.display = "";
 };
 
@@ -1183,7 +1184,7 @@ DrawTogether.prototype.closeRoomWindow = function () {
 	this.roomWindow.style.display = "";
 };
 
-DrawTogether.prototype.initDom = function initDom () {
+DrawTogether.prototype.initDom = function initDom() {
 	// Create the chat, drawzone and controls
 	this.createChat();
 	this.createRoomInformation();
@@ -1199,7 +1200,7 @@ DrawTogether.prototype.initDom = function initDom () {
 	this.createSettingsWindow();
 };
 
-DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid (socketid) {
+DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid(socketid) {
 	for (var k = 0; k < this.playerList.length; k++) {
 		if (this.playerList[k].id == socketid) {
 			return this.playerList[k].name;
@@ -1209,7 +1210,7 @@ DrawTogether.prototype.usernameFromSocketid = function usernameFromSocketid (soc
 	return "[Not found]";
 };
 
-DrawTogether.prototype.playerFromUserId = function playerFromUserId (id) {
+DrawTogether.prototype.playerFromUserId = function playerFromUserId(id) {
 	for (var k = 0; k < this.playerList.length; k++) {
 		if (this.playerList[k].userid == id) {
 			return this.playerList[k];
@@ -1219,7 +1220,7 @@ DrawTogether.prototype.playerFromUserId = function playerFromUserId (id) {
 	return null;
 };
 
-DrawTogether.prototype.playerFromId = function playerFromId (id) {
+DrawTogether.prototype.playerFromId = function playerFromId(id) {
 	for (var k = 0; k < this.playerList.length; k++) {
 		if (this.playerList[k].id == id) {
 			return this.playerList[k];
@@ -1229,18 +1230,18 @@ DrawTogether.prototype.playerFromId = function playerFromId (id) {
 	return null;
 };
 
-DrawTogether.prototype.createPermissionChatMessageWithTimeout = function createPermissionChatMessageWithTimeout(messageFromServer){
-	if(this.insideProtectedRegionWarningTimeout != null) {
+DrawTogether.prototype.createPermissionChatMessageWithTimeout = function createPermissionChatMessageWithTimeout(messageFromServer) {
+	if (this.insideProtectedRegionWarningTimeout != null) {
 		window.clearTimeout(this.insideProtectedRegionWarningTimeout);
 	}
 
-	this.insideProtectedRegionWarningTimeout = window.setTimeout(function(){
+	this.insideProtectedRegionWarningTimeout = window.setTimeout(function () {
 		this.chat.addElementAsMessage(this.createPermissionChatMessage(messageFromServer));
 		this.insideProtectedRegionWarningTimeout = null
 	}.bind(this), 2000);
 };
 
-DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer){
+DrawTogether.prototype.createPermissionChatMessage = function createPermissionChatMessage(messageFromServer) {
 	var PermissionDom = document.createElement("div");
 	PermissionDom.className = "drawtogether-player";
 
@@ -1258,28 +1259,28 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 	var messageText = document.createElement("span");
 	messageText.className = "drawtogether-player-name";
 
-	
+
 
 	var owner = this.playerFromUserId(messageFromServer.ownerid) || messageFromServer;//messageFromServer.name can be outdated
-				var ownerPermissionSentence = "";
-				var reputationSentence = "";
-				var loggedInSentence = "";
+	var ownerPermissionSentence = "";
+	var reputationSentence = "";
+	var loggedInSentence = "";
 
-	if(!this.account.uKey)
+	if (!this.account.uKey)
 		loggedInSentence = "You have to be logged in to draw in protected regions."
-	else if(this.reputation < messageFromServer.minRepAllowed && messageFromServer.minRepAllowed <= this.MAX_REP_TO_DISPLAY)
+	else if (this.reputation < messageFromServer.minRepAllowed && messageFromServer.minRepAllowed <= this.MAX_REP_TO_DISPLAY)
 		reputationSentence = "This region requires at least " + messageFromServer.minRepAllowed + " Reputation.";
 
-	if(owner)
+	if (owner)
 		ownerPermissionSentence = "You can ask for permission from " + owner.name + ".";
 	else
-	ownerPermissionSentence = "The region owner is offline.";
-	
+		ownerPermissionSentence = "The region owner is offline.";
+
 
 	var messageToUser = "This is a protected region. "
-						+ loggedInSentence + " " 
-						+ reputationSentence + " "
-						+ ownerPermissionSentence;
+		+ loggedInSentence + " "
+		+ reputationSentence + " "
+		+ ownerPermissionSentence;
 
 	messageText.appendChild(document.createTextNode(messageToUser))
 
@@ -1288,7 +1289,7 @@ DrawTogether.prototype.createPermissionChatMessage = function createPermissionCh
 	return PermissionDom;
 };
 
-DrawTogether.prototype.createRegionProtectedWindow = function createRegionProtectedWindow () {
+DrawTogether.prototype.createRegionProtectedWindow = function createRegionProtectedWindow() {
 	if (this.regionProtectedWindowTimeout && Date.now() - this.regionProtectedWindowTimeout < 15000) return;
 	this.regionProtectedWindowTimeout = Date.now();
 
@@ -1297,16 +1298,16 @@ DrawTogether.prototype.createRegionProtectedWindow = function createRegionProtec
 	var protectedWindow = this.gui.createWindow({
 		title: "Permission denied"
 	});
-	
+
 	var content = protectedWindow.appendChild(document.createElement("div"));
 	content.classList.add("content");
-	
+
 	var title = content.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Sorry, but you can't draw here."));
-	
+
 	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("To prevent grief, this region has been protected. We can find you an empty spot though. There you can draw and build up reputation."));
-	
+
 	var button = content.appendChild(document.createElement("div"));
 	button.classList = "drawtogether-button";
 	button.appendChild(document.createTextNode("Go to a random location"));
@@ -1317,7 +1318,7 @@ DrawTogether.prototype.createRegionProtectedWindow = function createRegionProtec
 	}.bind(this));
 };
 
-DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (player, appendedText) {
+DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom(player, appendedText) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player";
 
@@ -1336,7 +1337,7 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
-	
+
 	var messageButton = document.createElement("span");
 	messageButton.className = "drawtogether-player-button drawtogether-upvote-button fa fa-envelope";
 
@@ -1365,15 +1366,15 @@ DrawTogether.prototype.createPlayerChatDom = function createPlayerChatDom (playe
 	return playerDom;
 };
 
-DrawTogether.prototype.createPlayerDrewInAreaDom = function createPlayerDrewInAreaDom (player) {
+DrawTogether.prototype.createPlayerDrewInAreaDom = function createPlayerDrewInAreaDom(player) {
 	return this.createPlayerChatDom(player, " drew in this area.");
 };
 
-DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom (player) {
+DrawTogether.prototype.createPlayerLeftDom = function createPlayerLeftDom(player) {
 	return this.createPlayerChatDom(player, " has left.");
 };
 
-DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
+DrawTogether.prototype.createPlayerDom = function createPlayerDom(player) {
 	var playerDom = document.createElement("div");
 	playerDom.className = "drawtogether-player " + (player.currentPlayer ? "currentplayer" : "");
 
@@ -1407,7 +1408,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	upvoteButton.addEventListener("click", function (playerid, event) {
 		this.network.socket.emit("upvote", playerid);
 	}.bind(this, player.id));
-	
+
 	if (player.userid) {
 		var messageButton = document.createElement("span");
 		messageButton.className = "drawtogether-player-button fa fa-envelope";
@@ -1450,7 +1451,7 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	nameText.appendChild(document.createTextNode(player.name + rep + score + drawing))
 
 	playerDom.appendChild(upvoteButton);
-	
+
 	if (messageButton)
 		playerDom.appendChild(messageButton);
 
@@ -1464,27 +1465,27 @@ DrawTogether.prototype.createPlayerDom = function createPlayerDom (player) {
 	return playerDom;
 };
 
-DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom (playerName) {
+DrawTogether.prototype.createSnapshotChatDom = function createSnapshotChatDom(playerName) {
 	var snapshotDom = document.createElement("div");
-	
+
 	var proofImgWindow = document.createElement("span");
 	proofImgWindow.className = "drawtogether-player-button";
 	proofImgWindow.textContent = "View image before/after proof";
 	proofImgWindow.addEventListener("click", function (e) {
 		this.exportImageFromSrc("Proof of grief by " + playerName + " (right click to save)", this.lastBanSnapshot);
 	}.bind(this));
-	
+
 	snapshotDom.appendChild(proofImgWindow);
 	return snapshotDom;
 };
 
-DrawTogether.prototype.kickban = function kickban (playerid) {
+DrawTogether.prototype.kickban = function kickban(playerid) {
 	var player = this.playerFromId(playerid);
 	var personText = "this person";
-	if(player && player.name) {
+	if (player && player.name) {
 		personText = player.name;
 	}
-	this.gui.prompt("How long do you want to kickban "+ personText +" for? (minutes)", ["freepick", "10 year", "1 year", "1 month", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
+	this.gui.prompt("How long do you want to kickban " + personText + " for? (minutes)", ["freepick", "10 year", "1 year", "1 month", "1 week", "1 day", "1 hour", "5 minutes", "1 minute", "Cancel"], function (minutes) {
 		if (minutes == "Cancel") return;
 		if (minutes == "10 year") minutes = 10 * 356 * 24 * 60;
 		if (minutes == "1 year") minutes = 356 * 24 * 60;
@@ -1511,10 +1512,10 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 						ctx.drawImage(this.paint.background.canvas, 0, 0, canvasWidth, canvasHeight);
 						ctx.drawImage(this.paint.public.canvas, 0, 0, canvasWidth, canvasHeight);
 						this.lastBanSnapshot;
-						
+
 						this.network.socket.emit("kickban", [playerid, minutes, type, reason], function (data) {
 							this.chat.addMessage("SERVER", data.error || data.success);
-							if(data.success) {
+							if (data.success) {
 								this.takeSnapshotTimeout = setTimeout(function () {
 									ctx.drawImage(this.paint.background.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
 									ctx.drawImage(this.paint.public.canvas, 0, canvasHeight, canvasWidth, canvasHeight);
@@ -1532,7 +1533,7 @@ DrawTogether.prototype.kickban = function kickban (playerid) {
 	}.bind(this));
 };
 
-DrawTogether.prototype.createChat = function createChat () {
+DrawTogether.prototype.createChat = function createChat() {
 	var chatContainer = this.container.appendChild(document.createElement("div"));
 	chatContainer.className = "drawtogether-chat-container";
 	this.chat = new Chat(chatContainer, this.sendMessage.bind(this), this.userSettings, this.emotesHash);
@@ -1540,7 +1541,7 @@ DrawTogether.prototype.createChat = function createChat () {
 	this.chat.addMessage("Welcome to anondraw, the free interactive group drawing app.");
 };
 
-DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
+DrawTogether.prototype.setLoadImage = function setLoadImage(loadTime) {
 	loadTime = loadTime || 5000;
 	var loadImage = new Image();
 
@@ -1555,7 +1556,7 @@ DrawTogether.prototype.setLoadImage = function setLoadImage (loadTime) {
 	loadImage.src = "images/loadingChunk.png";
 };
 
-DrawTogether.prototype.createDrawZone = function createDrawZone () {
+DrawTogether.prototype.createDrawZone = function createDrawZone() {
 	var drawContainer = this.container.appendChild(document.createElement("div"));
 	drawContainer.className = "drawtogether-paint-container";
 	this.paintContainer = drawContainer;
@@ -1564,22 +1565,22 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.userCtx = this.paint.newCanvasOnTop("userinteraction").getContext("2d");
 	this.setLoadImage();
 
-	this.paint.background.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback, time) {
+	this.paint.background.requestUserChunk = function requestUserChunk(chunkX, chunkY, callback, time) {
 		var image = new Image();
 		var time = time || 0;
 		time += 5000 * Math.random() + 2500;
 
-		image.onload = function onChunkImageLoad (event) {
+		image.onload = function onChunkImageLoad(event) {
 			callback(image);
 		};
 
-		image.onerror = function onChunkImageError (event) {
+		image.onerror = function onChunkImageError(event) {
 			console.error("Failed to load chunk ", chunkX, chunkY, " retrying in " + Math.round(time / 1000) + " seconds");
 			setTimeout(function () {
 				this.paint.background.requestUserChunk(chunkX, chunkY, callback, time);
 			}.bind(this), time);
 		}.bind(this);
-		
+
 		var room = encodeURIComponent(this.current_room);
 		chunkX = encodeURIComponent(chunkX);
 		chunkY = encodeURIComponent(chunkY);
@@ -1594,8 +1595,8 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("userdrawing", function (event) {
 		if ((this.current_room.indexOf("game_") === 0 ||
-		    this.current_room.indexOf("private_game_") === 0) &&
-		    !this.weAreCurrentPlayer) {
+			this.current_room.indexOf("private_game_") === 0) &&
+			!this.weAreCurrentPlayer) {
 			this.displayMessage("Not your turn!");
 			event.removeDrawing();
 			return;
@@ -1607,7 +1608,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			&& (this.reputation || 0) < this.IGNORE_INK_REP && !this.memberlevel) {
 
 			if (!(this.reputation >= this.BIG_BRUSH_MIN_REP) &&
-			    ((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
+				((event.drawing.size > 20 && typeof event.drawing.text == "undefined") || event.drawing.size > 20)) {
 				if (Date.now() - this.lastBrushSizeWarning > 5000) {
 					this.chat.addMessage("Brush sizes above 20 and text sizes above 20 require an account with " + this.BIG_BRUSH_MIN_REP + " reputation! Registering is free and easy. You don't even need to confirm your email!");
 					this.lastBrushSizeWarning = Date.now();
@@ -1648,7 +1649,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		// Send the drawing to the server and remove from the local
 		// layer once we got a confirmation from the server
 		this.sendDrawing(event.drawing, function (success) {
-			if(typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed){
+			if (typeof success !== 'undefined' && typeof success.isAllowed !== 'undefined' && !success.isAllowed) {
 				this.createPermissionChatMessageWithTimeout(success);
 				this.createRegionProtectedWindow();
 			}
@@ -1666,7 +1667,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("startuserpath", function (event) {
 		// start path
-        this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size, event.props.captype);
+		this.network.socket.emit("sp", event.props.color.toHex8(), event.props.size, event.props.captype);
 		this.lastPathSize = event.props.size;
 		this.lastPathPoint = undefined;
 	}.bind(this));
@@ -1682,13 +1683,13 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	this.paint.addEventListener("select", this.handlePaintSelection.bind(this));
 
-	function setHash () {
+	function setHash() {
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-	                  this.paint.public.canvas.height / this.paint.public.zoom];
-		
+		this.paint.public.canvas.height / this.paint.public.zoom];
+
 		location.hash = this.current_room + "," +
-		                (this.paint.public.leftTopX + screenSize[0] / 2).toFixed() + "," +
-		                (this.paint.public.leftTopY + screenSize[1] / 2).toFixed();
+			(this.paint.public.leftTopX + screenSize[0] / 2).toFixed() + "," +
+			(this.paint.public.leftTopY + screenSize[1] / 2).toFixed();
 	}
 
 	var hashTimeout;
@@ -1698,9 +1699,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		clearTimeout(hashTimeout);
 		hashTimeout = setTimeout(boundSetHash, 100);
 	});
-	
+
 	this.paint.addEventListener("move", this.paintMoved.bind(this));
-	
+
 	// Insert the clicableareascontainer right after the last canvas
 	// Noob trap: lastcanvas is actually the second last canvas
 	this.clickableAreasContainer = document.createElement("div");
@@ -1708,11 +1709,11 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	this.paint.lastCanvas.parentNode.insertBefore(this.clickableAreasContainer, this.paint.lastCanvas.nextSibling.nextSibling);
 
 	this.paint.changeTool("grab");
-	
+
 	//Spawn button 
 	var spawnButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	spawnButton.className = "control-button spawn-button";
-	
+
 	var spawnButtonImage = spawnButton.appendChild(document.createElement("img"));
 	spawnButtonImage.src = "images/icons/home.png";
 	spawnButtonImage.alt = "Goto spawn";
@@ -1721,17 +1722,17 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 		var spawn = this.getSpawn(this.current_room);
 		this.handleGotoAndCenter(spawn[0], spawn[1]);
 	}.bind(this));
-	
+
 	//Favorites button 
 	var favoritesButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	favoritesButton.className = "control-button favorites-button";
-	
+
 	var favoritesButtonImage = favoritesButton.appendChild(document.createElement("img"));
 	favoritesButtonImage.src = "images/icons/locations.png";
 	favoritesButtonImage.alt = "Open Favorites Menu";
 	favoritesButtonImage.title = "Open Favorites Menu";
 	favoritesButton.addEventListener("click", function () {
-		if($(".favorites-window").is(":visible")) {
+		if ($(".favorites-window").is(":visible")) {
 			$(".favorites-window").hide();
 		} else {
 			this.updateFavoriteDom();
@@ -1741,31 +1742,31 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 			$(".favorites-window").show();
 		}
 	}.bind(this));
-	
+
 	var favoritesWindow = this.paint.container.appendChild(document.createElement("div"));
 	favoritesWindow.className = "coords-window favorites-window";
-	
+
 	this.favoritesContainer = favoritesWindow.appendChild(document.createElement("div"));
-	this.favoritesContainer.className = "favorites-container";	
+	this.favoritesContainer.className = "favorites-container";
 
 	//Regions button
 	var regionsButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	regionsButton.className = "control-button regions-button";
 	regionsButton.addEventListener("click", function () {
-		if($(".regions-window").is(":visible")) {
+		if ($(".regions-window").is(":visible")) {
 			$(".regions-window").hide();
 			this.getMyProtectedRegions();
 		} else {
-			this.getMyProtectedRegions(function(){
+			this.getMyProtectedRegions(function () {
 				$(".favorites-window").hide();
 				this.animationsWindow.classList.remove("show");
 				//this.framesWindow.classList.remove("show");
 				$(".regions-window").show();
 
-				if(!this.myRegions || this.myRegions.length === 0){
+				if (!this.myRegions || this.myRegions.length === 0) {
 					this.displayRegionTutorial(true);
 				}
-			}.bind(this));			
+			}.bind(this));
 		}
 	}.bind(this));
 
@@ -1776,14 +1777,14 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 
 	var regionsWindow = this.paint.container.appendChild(document.createElement("div"));
 	regionsWindow.className = "coords-window regions-window";
-	
+
 	this.regionTutorialContainer = regionsWindow.appendChild(document.createElement("div"));
 	this.regionTutorialContainer.className = "region-tutorial";
 	this.createRegionTutorialDom();
-	
+
 	this.regionsContainer = regionsWindow.appendChild(document.createElement("div"));
 	this.regionsContainer.className = "regions-container";
-	
+
 	var animationsButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	animationsButton.className = "control-button anim-manager-button";
 	animationsButton.addEventListener("click", this.toggleAnimationManager.bind(this));
@@ -1792,9 +1793,9 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	animationButtonImage.src = "images/icons/frames.png";
 	animationButtonImage.alt = "Open Animation Manager";
 	animationButtonImage.title = "Open Animation Manager";
-	
+
 	this.createAnimationManager();
-	
+
 	var mapButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	mapButton.className = "control-button tilesmap-button";
 	mapButton.addEventListener("click", this.openTilesMap.bind(this));
@@ -1803,7 +1804,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	mapButtonImage.src = "images/icons/map.png";
 	mapButtonImage.alt = "Open the tile map";
 	mapButtonImage.title = "Open the tile map";
-	
+
 	this.clickableAreaButton = this.paint.coordDiv.appendChild(document.createElement("div"));
 	this.clickableAreaButton.className = "control-button clickablearea-button activated";
 	this.clickableAreaButton.addEventListener("click", this.toggleClickableArea.bind(this));
@@ -1812,7 +1813,7 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	clickableAreaButtonImage.src = "images/icons/clickable.png";
 	clickableAreaButtonImage.alt = "Toggle the canvas buttons";
 	clickableAreaButtonImage.title = "Toggle the canvas buttons";
-	
+
 	var popout = this.paint.container.appendChild(document.createElement("img"));
 	popout.className = "popout-button";
 	popout.src = "images/icons/popout.png";
@@ -1821,35 +1822,35 @@ DrawTogether.prototype.createDrawZone = function createDrawZone () {
 	popout.addEventListener('click', this.toggleFullscreen.bind(this));
 };
 
-DrawTogether.prototype.toggleClickableArea = function toggleClickableArea () {
+DrawTogether.prototype.toggleClickableArea = function toggleClickableArea() {
 	var hidden = this.clickableAreasContainer.classList.toggle("hide");
 	this.clickableAreaButton.classList.toggle("activated", !hidden);
 };
 
-DrawTogether.prototype.toggleFullscreen = function toggleFullscreen () {
+DrawTogether.prototype.toggleFullscreen = function toggleFullscreen() {
 	this.paint.container.classList.toggle("fullscreen");
 	this.paint.resize();
 	ga("send", "event", "fullscreen", "toggle");
 };
 
-DrawTogether.prototype.openTilesMap = function openTilesMap () {
+DrawTogether.prototype.openTilesMap = function openTilesMap() {
 	var tileWindow = this.gui.createWindow({ title: "TileMap for room " + this.current_room });
-	
+
 	var content = tileWindow.appendChild(document.createElement("div"));
 	content.classList.add("content");
-	
+
 	var canvas = new RoomTileCanvas(this.favList);
 	var mapCanvas = content.appendChild(canvas.container);
 	canvas.resize();
 	canvas.addEventListener("click", function (event) {
 		this.handleGotoAndCenter(event.position[0], event.position[1]);
 	}.bind(this));
-	
+
 	canvas.tiledCanvas.goto(
 		this.paint.public.leftTopX / this.paint.public.settings.chunkSize * canvas.settings.tileSize,
 		this.paint.public.leftTopY / this.paint.public.settings.chunkSize * canvas.settings.tileSize
 	);
-	
+
 	this.tiles = this.tiles || {};
 	if (this.tiles[this.current_room]) {
 		canvas.useTiles(this.tiles[this.current_room]);
@@ -1862,7 +1863,7 @@ DrawTogether.prototype.openTilesMap = function openTilesMap () {
 	}
 };
 
-DrawTogether.prototype.createFramesManager = function createFramesManager () {
+DrawTogether.prototype.createFramesManager = function createFramesManager() {
 	this.framesWindow = this.paint.container.appendChild(document.createElement("div"));
 	this.framesWindow.className = "coords-window frames-window";
 	this.updateFramesManager();
@@ -1872,16 +1873,16 @@ DrawTogether.prototype.createFramesManager = function createFramesManager () {
 	Adds the current frames to the manager and
 	show location and options (disable/enable, delete, ...)
 */
-DrawTogether.prototype.updateFramesManager = function updateFramesManager () {
+DrawTogether.prototype.updateFramesManager = function updateFramesManager() {
 	while (this.framesWindow.firstChild) this.framesWindow.removeChild(this.framesWindow.firstChild);
-	
+
 	var container = this.framesWindow.appendChild(document.createElement("div"));
 	container.className = "container";
-	
+
 	if (this.paint.frames.length === 0) {
 		container.appendChild(document.createTextNode("You haven't made any frames."));
 	}
-	
+
 	for (var k = 0; k < this.paint.frames.length; k++) {
 		container.appendChild(this.buildFrameButtons(this.paint.frames[k]));
 	}
@@ -1891,25 +1892,25 @@ DrawTogether.prototype.updateFramesManager = function updateFramesManager () {
 	Returns a div containing buttons bounded with eventlisteners
 	that control the given frame
 */
-DrawTogether.prototype.buildFrameButtons = function buildFrameButtons (frame) {
+DrawTogether.prototype.buildFrameButtons = function buildFrameButtons(frame) {
 	var container = document.createElement("div");
-	
+
 	var gotoButton = container.appendChild(document.createElement("div"));
 	gotoButton.className = "coords-button position-button";
 	gotoButton.appendChild(document.createTextNode(frame.leftTop[0] + ", " + frame.leftTop[1]));
 	gotoButton.addEventListener("click", this.frameGotoHandler.bind(this, frame));
-	
+
 	container.appendChild(this.buildFrameOnOffButton(frame));
 	container.appendChild(this.buildFrameRemoveButton(frame));
-	
+
 	return container;
 };
 
-DrawTogether.prototype.frameGotoHandler = function frameGotoHandler (frame, event) {
+DrawTogether.prototype.frameGotoHandler = function frameGotoHandler(frame, event) {
 	this.handleGoto(frame.leftTop[0], frame.leftTop[1]);
 };
 
-DrawTogether.prototype.frameOnOffHandler = function frameOnOffHandler (frame, event) {
+DrawTogether.prototype.frameOnOffHandler = function frameOnOffHandler(frame, event) {
 	frame.disabled = !frame.disabled;
 	this.paint.redrawFrames();
 	this.updateFramesManager();
@@ -1918,16 +1919,16 @@ DrawTogether.prototype.frameOnOffHandler = function frameOnOffHandler (frame, ev
 DrawTogether.prototype.buildFrameOnOffButton = function buildFrameOnOffButton(frame) {
 	var button = document.createElement("div");
 	button.classList.add("coords-button");
-	
+
 	var image = document.createElement("img");
 	image.src = frame.disabled ? "images/icons/hidden.png" : "images/icons/visible.png";
 	button.appendChild(image);
-	
+
 	button.addEventListener("click", this.frameOnOffHandler.bind(this, frame));
 	return button;
 };
 
-DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, button, event) {
+DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler(frame, button, event) {
 	if (button.classList.contains("confirm")) {
 		for (var k = 0; k < this.paint.frames.length; k++) {
 			if (this.paint.frames[k] == frame) {
@@ -1939,7 +1940,7 @@ DrawTogether.prototype.frameRemoveHandler = function frameRemoveHandler (frame, 
 		}
 	} else {
 		button.classList.add("confirm");
-		
+
 		setTimeout(function () {
 			button.classList.remove("confirm");
 		}, 3000);
@@ -1958,7 +1959,7 @@ DrawTogether.prototype.buildFrameRemoveButton = function buildFrameRemoveButton(
 	return button;
 };
 
-DrawTogether.prototype.toggleFramesManager = function toggleFramesManager () {
+DrawTogether.prototype.toggleFramesManager = function toggleFramesManager() {
 	if (this.framesWindow.classList.contains("show")) {
 		this.framesWindow.classList.remove("show");
 	} else {
@@ -1969,75 +1970,75 @@ DrawTogether.prototype.toggleFramesManager = function toggleFramesManager () {
 	}
 };
 
-DrawTogether.prototype.getAnimationsFromCookie = function getAnimationsFromCookie () {
+DrawTogether.prototype.getAnimationsFromCookie = function getAnimationsFromCookie() {
 	var temp = localStorage.getItem('myAnimations');
-	if(temp)
+	if (temp)
 		return JSON.parse(temp);
 	else
 		return [];
 };
-DrawTogether.prototype.updateAnimationsCookieDelay = function updateAnimationsCookieDelay () {
-	if(this.updateAnimationsCookieDelayTimeout)
+DrawTogether.prototype.updateAnimationsCookieDelay = function updateAnimationsCookieDelay() {
+	if (this.updateAnimationsCookieDelayTimeout)
 		clearTimeout(this.updateAnimationsCookieDelayTimeout);
-	
+
 	this.updateAnimationsCookieDelayTimeout = setTimeout(this.updateAnimationsCookie.bind(this), 2000);
-	
+
 };
 
-DrawTogether.prototype.updateAnimationsCookie = function updateAnimationsCookie () {
+DrawTogether.prototype.updateAnimationsCookie = function updateAnimationsCookie() {
 	localStorage.setItem('myAnimations', JSON.stringify(this.myAnimations));
 };
 
-DrawTogether.prototype.createAnimationManager = function createAnimationManager () {
+DrawTogether.prototype.createAnimationManager = function createAnimationManager() {
 	this.animationsWindow = this.paint.container.appendChild(document.createElement("div"));
 	this.animationsWindow.className = "coords-window animation-window";
 	this.updateAnimationManager();
 };
 
-DrawTogether.prototype.updateAnimationManager = function updateAnimationManager () {
+DrawTogether.prototype.updateAnimationManager = function updateAnimationManager() {
 	while (this.animationsWindow.firstChild) this.animationsWindow.removeChild(this.animationsWindow.firstChild);
-	
+
 	var container = this.animationsWindow.appendChild(document.createElement("div"));
 	container.className = "container";
-	
+
 	if (this.myAnimations.length === 0) {
 		container.appendChild(document.createTextNode("You haven't made any animations."));
 	}
-	
+
 	for (var k = 0; k < this.myAnimations.length; k++) {
 		container.appendChild(this.buildAnimationButtons(this.myAnimations[k], k));
 	}
 };
 //keyframes, name(coords if empty), pencil, export, cloud icon, remove
 
-DrawTogether.prototype.buildAnimationButtons = function buildAnimationButtons (myAnimation, index) {
+DrawTogether.prototype.buildAnimationButtons = function buildAnimationButtons(myAnimation, index) {
 	var container = document.createElement("div");
-	
+
 	var keyframeManagerButton = container.appendChild(document.createElement("div"));
 	keyframeManagerButton.className = "coords-button";
 	keyframeManagerButton.appendChild(document.createTextNode("Keyframe Manager"));
 	keyframeManagerButton.addEventListener("click", this.openKeyframeManager.bind(this, myAnimation, index));
-	
-	
+
+
 	var gotoButton = container.appendChild(document.createElement("div"));
 	gotoButton.className = "coords-button position-button";
 	var gototext = myAnimation.name || (myAnimation.leftTop[0] + ", " + myAnimation.leftTop[1]);
 	gotoButton.appendChild(document.createTextNode(gototext));
 	gotoButton.addEventListener("click", this.animationGotoHandler.bind(this, myAnimation));
-	
+
 	var sendToChatButton = container.appendChild(document.createElement("div"));
 	sendToChatButton.className = "coords-button";
 	sendToChatButton.appendChild(document.createTextNode("send to chat->"));
 	sendToChatButton.addEventListener("click", this.sendAnimationToChat.bind(this, myAnimation));
-	
+
 	var exportButton = container.appendChild(document.createElement("div"));
 	exportButton.className = "coords-button";
-	
+
 	exportButton.appendChild(document.createTextNode("export"));
 	exportButton.addEventListener("click", this.exportMyAnimation.bind(this, myAnimation, index));
-	
+
 	container.appendChild(this.buildAnimationRemoveButton(myAnimation));
-	
+
 	return container;
 };
 
@@ -2045,64 +2046,64 @@ DrawTogether.prototype.sendAnimationToChat = function sendAnimationToChat(myAnim
 	this.network.socket.emit("chatanimation", JSON.stringify(myAnimation));
 };
 
-DrawTogether.prototype.buildKeyframe = function buildKeyframe (i, frameType, totalCount, hasBufferFrames) {
+DrawTogether.prototype.buildKeyframe = function buildKeyframe(i, frameType, totalCount, hasBufferFrames) {
 	var labelBar = this.keyframeManager.keyframeNumberLabelBar.appendChild(document.createElement("div"));
-	if( totalCount % 5 == 0)
+	if (totalCount % 5 == 0)
 		labelBar.appendChild(document.createTextNode(totalCount));
 	else
 		labelBar.appendChild(document.createTextNode('\u00A0')); //space character
 	labelBar.className = "keyframe-labelbar";
-	
+
 	var dividerBorders = labelBar.appendChild(document.createElement("div"));
 	dividerBorders.className = "keyframe-labelbar-digit-divider";
-	
+
 	var keyFrame = this.keyframeManager.keyframeBar.appendChild(document.createElement("div"));
-	
+
 	keyFrame.className = "keyframe-unit " + frameType + (hasBufferFrames ? " keyframe-hasBufferFrames" : "");
-	if(frameType != '')
-	keyFrame.addEventListener("click", function keyframeclick(e) {
-		var element = e.srcElement || e.target;
-		if(element.classList.contains("keyframe-selected")){
-			element.classList.remove("keyframe-selected");
-		}
-		else {
-			element.classList.add("keyframe-selected");
-			this.keyframeGoto(this.myAnimations[this.keyframeManager.animationIndex], i);
-		}
-	}.bind(this));
-	
-	
-	
+	if (frameType != '')
+		keyFrame.addEventListener("click", function keyframeclick(e) {
+			var element = e.srcElement || e.target;
+			if (element.classList.contains("keyframe-selected")) {
+				element.classList.remove("keyframe-selected");
+			}
+			else {
+				element.classList.add("keyframe-selected");
+				this.keyframeGoto(this.myAnimations[this.keyframeManager.animationIndex], i);
+			}
+		}.bind(this));
+
+
+
 };
-DrawTogether.prototype.keyframeGoto = function keyframeGoto (myAnimation, keyframeindex) {
+DrawTogether.prototype.keyframeGoto = function keyframeGoto(myAnimation, keyframeindex) {
 	var offset = keyframeindex * myAnimation.sqwidth + keyframeindex * myAnimation.gutter;
 	this.handleGotoAndCenter(myAnimation.leftTop[0] + offset, myAnimation.leftTop[1]);
 };
-DrawTogether.prototype.openKeyframeManager = function openKeyframeManager (myAnimation, index, event) {
-	if(!this.keyframeManager) this.createKeyframeManager();
+DrawTogether.prototype.openKeyframeManager = function openKeyframeManager(myAnimation, index, event) {
+	if (!this.keyframeManager) this.createKeyframeManager();
 	//this.keyframeManager.window.hidden = true;
 	$(".keyframe-number-labelbar-container .keyframe-labelbar").remove();
-	
+
 	while (this.keyframeManager.keyframeBar.firstChild)
 		this.keyframeManager.keyframeBar.removeChild(this.keyframeManager.keyframeBar.firstChild);
-	
+
 	var totalCount = 0;
-	
-	for(var i = 0; i < myAnimation.squares + 20; i++) {
+
+	for (var i = 0; i < myAnimation.squares + 20; i++) {
 		var frameType = ''; // non-allocated frame
-		if(i < myAnimation.squares) 
+		if (i < myAnimation.squares)
 			frameType = 'keyframe-full keyframe-full-keyed'; // keyframe
 		var hasBufferFrames = myAnimation.bufferFrames && typeof myAnimation.bufferFrames[i] == "number" && myAnimation.bufferFrames[i] > 0;
-		
+
 		this.buildKeyframe(i, frameType, ++totalCount, hasBufferFrames);
-		if(hasBufferFrames)
-			for(var x = 0; x < myAnimation.bufferFrames[i]; x++){
+		if (hasBufferFrames)
+			for (var x = 0; x < myAnimation.bufferFrames[i]; x++) {
 				this.buildKeyframe(i, "keyframe-full", ++totalCount); // buffer frame
-				
+
 			}
-		
+
 	}
-	
+
 	this.keyframeManager.fpsInput.value = myAnimation.fps;
 	this.keyframeManager.window.hidden = false;
 	this.keyframeManager.animationIndex = index;
@@ -2113,23 +2114,23 @@ DrawTogether.prototype.openKeyframeManager = function openKeyframeManager (myAni
 // 1  2  3  4  5
 //[o][ ][o][o][o] //four frames with one blank filler frame
 //
-DrawTogether.prototype.createKeyframeManager = function createKeyframeManager () {
+DrawTogether.prototype.createKeyframeManager = function createKeyframeManager() {
 	this.keyframeManager = {
-		window: this.gui.createWindow({ 
+		window: this.gui.createWindow({
 			title: "Keyframe Manager", thinTitlebar: true,
 			isModal: true,
 			onclose: function closemanager(ctx) { ctx.hidden = true }
 		})
 	};
 	this.keyframeManager.window.hidden = true;
-	
+
 	var topControlsContainer = this.keyframeManager.window.appendChild(document.createElement("div"));
 	topControlsContainer.className = "keyframe-top-control-container";
-	
+
 	var fpsLabel = topControlsContainer.appendChild(document.createElement("div"));
 	fpsLabel.appendChild(document.createTextNode("fps:"));
 	fpsLabel.className = "keyframe-control keyframe-control-label";
-	
+
 	var fpsInput = topControlsContainer.appendChild(document.createElement("input"));
 	fpsInput.className = "keyframe-control keyframe-fps-input";
 	fpsInput.type = "number";
@@ -2141,15 +2142,15 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 		this.updateAnimationsCookieDelay();
 	}.bind(this));
 	this.keyframeManager.fpsInput = fpsInput;
-	
+
 	var onionButton = topControlsContainer.appendChild(document.createElement("div"));
 	onionButton.className = "keyframe-control control-button";
 	onionButton.appendChild(document.createTextNode("🌰"));
 	this.keyframeManager.onionButton = onionButton;
-	
-	onionButton.addEventListener("click", function (){
-		if(onionButton.classList.contains("keyframe-onion-toggle")){
-			if(onionButton.classList.contains("keyframe-onion-toggle-loop")){
+
+	onionButton.addEventListener("click", function () {
+		if (onionButton.classList.contains("keyframe-onion-toggle")) {
+			if (onionButton.classList.contains("keyframe-onion-toggle-loop")) {
 				onionButton.classList.remove("keyframe-onion-toggle-loop");
 				onionButton.classList.remove("keyframe-onion-toggle");
 				onionSliderLeft.style.display = "none";
@@ -2158,162 +2159,162 @@ DrawTogether.prototype.createKeyframeManager = function createKeyframeManager ()
 				this.paint.frames = [];
 				this.paint.redrawFrames();
 			}
-			else{
+			else {
 				onionButton.classList.add("keyframe-onion-toggle-loop");
 				this.keyframeManager.onionLoop = true;
 				this.onionLoopLastFrame();
 			}
 		}
-		else{
+		else {
 			onionButton.classList.add("keyframe-onion-toggle");
 			onionSliderLeft.style.display = "";
 			onionSliderRight.style.display = "";
 			this.slideSuccessful();
 		}
-			
+
 	}.bind(this));
-	
+
 	var fpsLabel = topControlsContainer.appendChild(document.createElement("div"));
 	fpsLabel.appendChild(document.createTextNode("Blank Keyframe:"));
 	fpsLabel.className = "keyframe-control keyframe-fps-label";
-	
+
 	var plusButton = topControlsContainer.appendChild(document.createElement("div"));
 	plusButton.className = "control-button keyframe-control keyframe-updown-button";
 	plusButton.appendChild(document.createTextNode("+"));
 	plusButton.addEventListener("click", this.addRemoveBufferFrames.bind(this, "add"))
-	
+
 	var minusButton = topControlsContainer.appendChild(document.createElement("div"));
 	minusButton.className = "control-button keyframe-control keyframe-updown-button";
 	minusButton.appendChild(document.createTextNode("-"));
 	minusButton.addEventListener("click", this.addRemoveBufferFrames.bind(this, "remove"))
-	
+
 	var bottomControls = this.keyframeManager.window.appendChild(document.createElement("div"));
 	bottomControls.className = "keyframe-bottom-control-container";
 	var keyframeNumberLabelBar = bottomControls.appendChild(document.createElement("div"));
 	keyframeNumberLabelBar.className = "keyframe-number-labelbar-container";
 
 	this.keyframeManager.keyframeNumberLabelBar = keyframeNumberLabelBar;
-	
+
 	var onionSliderLeft = keyframeNumberLabelBar.appendChild(document.createElement("div"));
 	onionSliderLeft.className = "keyframe-onion-slider keyframe-onion-slider-left";
-	
+
 	var leftTriangleTop = onionSliderLeft.appendChild(document.createElement("div"));
 	leftTriangleTop.className = "keyframe-onion-triangle keyframe-onion-left-top-triangle";
-	
+
 	var leftTriangleBottom = onionSliderLeft.appendChild(document.createElement("div"));
 	leftTriangleBottom.className = "keyframe-onion-triangle keyframe-onion-left-bottom-triangle";
-	
+
 	var onionSliderLeftBall = onionSliderLeft.appendChild(document.createElement("div"));
 	onionSliderLeftBall.className = "keyframe-onion-slider-ball";
-	
+
 	var onionSliderRight = keyframeNumberLabelBar.appendChild(document.createElement("div"));
 	onionSliderRight.className = "keyframe-onion-slider keyframe-onion-slider-right";
-	
+
 	var rightTriangleTop = onionSliderRight.appendChild(document.createElement("div"));
 	rightTriangleTop.className = "keyframe-onion-triangle keyframe-onion-right-top-triangle";
-	
+
 	var rightTriangleBottom = onionSliderRight.appendChild(document.createElement("div"));
 	rightTriangleBottom.className = "keyframe-onion-triangle keyframe-onion-right-bottom-triangle";
-	
+
 	var onionSliderRightBall = onionSliderRight.appendChild(document.createElement("div"));
 	onionSliderRightBall.className = "keyframe-onion-slider-ball";
-	
+
 	this.makeSliderDraggable([onionSliderLeftBall], onionSliderLeft, bottomControls, true
-	, function boundsCheck (newLeft) {
-		var respectingOtherSlider = newLeft < (onionSliderRight.offsetLeft - 2);
-		var respectingContainerLeft = newLeft >= 0;
-		var respectingContainerRight = newLeft < bottomControls.getBoundingClientRect().width + bottomControls.scrollLeft;
-		return respectingOtherSlider && respectingContainerLeft && respectingContainerRight;
-	}, this.slideSuccessful.bind(this));
+		, function boundsCheck(newLeft) {
+			var respectingOtherSlider = newLeft < (onionSliderRight.offsetLeft - 2);
+			var respectingContainerLeft = newLeft >= 0;
+			var respectingContainerRight = newLeft < bottomControls.getBoundingClientRect().width + bottomControls.scrollLeft;
+			return respectingOtherSlider && respectingContainerLeft && respectingContainerRight;
+		}, this.slideSuccessful.bind(this));
 
 	this.makeSliderDraggable([onionSliderRightBall], onionSliderRight, bottomControls, true
-	, function bounds(newLeft){
-		var respectingOtherSlider = newLeft > (onionSliderLeft.offsetLeft + 2);;
-		var respectingContainerLeft = newLeft > 0;
-		var respectingContainerRight = newLeft < bottomControls.getBoundingClientRect().width + bottomControls.scrollLeft;
-		return respectingOtherSlider && respectingContainerLeft && respectingContainerRight;
-	}, this.slideSuccessful.bind(this));
-	
+		, function bounds(newLeft) {
+			var respectingOtherSlider = newLeft > (onionSliderLeft.offsetLeft + 2);;
+			var respectingContainerLeft = newLeft > 0;
+			var respectingContainerRight = newLeft < bottomControls.getBoundingClientRect().width + bottomControls.scrollLeft;
+			return respectingOtherSlider && respectingContainerLeft && respectingContainerRight;
+		}, this.slideSuccessful.bind(this));
+
 	onionSliderLeft.style.display = "none";
 	onionSliderRight.style.display = "none";
-	
+
 	var keyframeBar = bottomControls.appendChild(document.createElement("div"));
 	keyframeBar.className = "keyframe-bar";
-	
+
 	this.keyframeManager.keyframeBar = keyframeBar;
 	this.keyframeManager.onionSliderRight = onionSliderRight;
 	this.keyframeManager.onionSliderLeft = onionSliderLeft;
 	this.keyframeManager.onionLoop = false;
 };
-DrawTogether.prototype.onionLoopLastFrame = function onionLoopLastFrame(){
+DrawTogether.prototype.onionLoopLastFrame = function onionLoopLastFrame() {
 	var anim = this.myAnimations[this.keyframeManager.animationIndex];
-	var lastFrame = anim.squares -1;
+	var lastFrame = anim.squares - 1;
 	var from = [anim.leftTop[0], anim.leftTop[1]];
-	
-	var step = (anim.sqwidth+anim.gutter) * lastFrame;
-	
+
+	var step = (anim.sqwidth + anim.gutter) * lastFrame;
+
 	var toOffsetX = anim.sqwidth * lastFrame;
 	toOffsetX += anim.gutter * lastFrame - 1;
 	var to = [anim.leftTop[0] + toOffsetX, anim.leftTop[1] + anim.sqheight];
 	//this.paint.frames = [];
-	
+
 	this.paint.addFrame(from, to, frames, 0.3, anim.gutter, step, anim.sqwidth);
 };
-DrawTogether.prototype.slideSuccessful = function slideSuccessful (){
+DrawTogether.prototype.slideSuccessful = function slideSuccessful() {
 	var keyframes = $(".keyframe-full-keyed");
 	var leftSlidersKeyframeIndex = 0;
 	var rightSlidersKeyframeIndex = 0;
-	for(var i = 0; i < keyframes.length; i++){
-		if(keyframes[i].offsetLeft <= this.keyframeManager.onionSliderLeft.offsetLeft) {
+	for (var i = 0; i < keyframes.length; i++) {
+		if (keyframes[i].offsetLeft <= this.keyframeManager.onionSliderLeft.offsetLeft) {
 			leftSlidersKeyframeIndex = i;
 		}
-		if(keyframes[i].offsetLeft <= this.keyframeManager.onionSliderRight.offsetLeft) {
+		if (keyframes[i].offsetLeft <= this.keyframeManager.onionSliderRight.offsetLeft) {
 			rightSlidersKeyframeIndex = i;
 		}
 	}
 	var frames = rightSlidersKeyframeIndex - leftSlidersKeyframeIndex;
-	if(frames <= 0){
+	if (frames <= 0) {
 		return;
 	}
 	//console.log(leftSlidersKeyframeIndex, rightSlidersKeyframeIndex)
-	
+
 	var anim = this.myAnimations[this.keyframeManager.animationIndex];
 	var fromOffsetX = (anim.sqwidth + anim.gutter) * leftSlidersKeyframeIndex;
-	
+
 	//fromOffsetX -= anim.gutter * frames;
 	//console.log("fromOffsetX",fromOffsetX)
 	var from = [anim.leftTop[0] + fromOffsetX, anim.leftTop[1]];
-	
+
 	var toOffsetX = anim.sqwidth * rightSlidersKeyframeIndex;
 	toOffsetX += anim.gutter * rightSlidersKeyframeIndex - 1;
-	
-	
+
+
 	var to = [anim.leftTop[0] + toOffsetX, anim.leftTop[1] + anim.sqheight];
 	this.paint.frames = [];
-	this.paint.addFrame(from, to, frames, 0.3, anim.gutter, anim.sqwidth+ anim.gutter);
-	
-	if(this.keyframeManager.onionLoop)
+	this.paint.addFrame(from, to, frames, 0.3, anim.gutter, anim.sqwidth + anim.gutter);
+
+	if (this.keyframeManager.onionLoop)
 		this.onionLoopLastFrame();
 };
 
 DrawTogether.prototype.makeSliderDraggable = function makeSliderDraggable(handleElements, elementToMove, container, step, boundsCheckFunction, successfulDragFunction) {
 	//var offset = this.keyframeManager.window.offsetLeft;
-	var handler = function handler (handleElement, targetElement){
+	var handler = function handler(handleElement, targetElement) {
 		if (!handleElement) handleElement = targetElement;
 
 		var startPos = [];
 		var elementStartPos = [];
 		var dragging = false;
 
-		function handleStart (event) {
+		function handleStart(event) {
 			dragging = true;
 			var offset = this.keyframeManager.window.offsetLeft - $(".keyframe-bottom-control-container")[0].scrollLeft;
-			
+
 			startPos = [event.clientX || 0, event.clientY || 0];
-			
+
 			if (event.changedTouches && event.changedTouches[0])
 				startPos = [event.changedTouches[0].clientX - offset || 0,
-							event.changedTouches[0].clientY || 0]
+				event.changedTouches[0].clientY || 0]
 
 			var boundingRect = targetElement.getBoundingClientRect();
 			elementStartPos = [boundingRect.left, boundingRect.top];
@@ -2321,16 +2322,16 @@ DrawTogether.prototype.makeSliderDraggable = function makeSliderDraggable(handle
 			event.preventDefault();
 		}
 
-		function handleMove (event) {
+		function handleMove(event) {
 			if (dragging) {
 				var offset = this.keyframeManager.window.offsetLeft - $(".keyframe-bottom-control-container")[0].scrollLeft;
-				if(step)
+				if (step)
 					var stepWidth = $(".keyframe-labelbar")[0].getBoundingClientRect().width
 				//targetElement.style.left = elementStartPos[0] - startPos[0] + (event.clientX - offset || event.changedTouches[0].clientX  - offset) + "px";
-				var newLeft = elementStartPos[0] - startPos[0] + (event.clientX || event.changedTouches[0].clientX ) - offset;
+				var newLeft = elementStartPos[0] - startPos[0] + (event.clientX || event.changedTouches[0].clientX) - offset;
 				newLeft -= newLeft % stepWidth; //snap
 				newLeft -= 2;
-				if(boundsCheckFunction(newLeft)){
+				if (boundsCheckFunction(newLeft)) {
 					targetElement.style.left = newLeft + "px";
 					successfulDragFunction();
 				}
@@ -2345,67 +2346,66 @@ DrawTogether.prototype.makeSliderDraggable = function makeSliderDraggable(handle
 		document.addEventListener("mousemove", handleMove.bind(this));
 		document.addEventListener("touchmove", handleMove.bind(this));
 
-		function endDrag () {
+		function endDrag() {
 			dragging = false;
-			
+
 		}
 		handleElement.addEventListener("mouseup", endDrag);
 		handleElement.addEventListener("touchend", endDrag);
 		container.addEventListener("mouseup", endDrag);
 		container.addEventListener("touchend", endDrag);
 	}.bind(this);
-	for(var i = 0; i < handleElements.length; i++){
+	for (var i = 0; i < handleElements.length; i++) {
 		handler(handleElements[i], elementToMove);
 	}
-	
+
 };
 
 DrawTogether.prototype.addRemoveBufferFrames = function addRemoveBufferFrames(operation) {
 	var fullFrames = $(this.keyframeManager.keyframeBar).children(".keyframe-full");
 	var valueToAdd = 1;
-	if(operation == "remove")
+	if (operation == "remove")
 		valueToAdd = -1;
 	//check for selectedIndexes
 	var trueIndex = 0; // only count keyframes not buffers
-	
+
 	var selectedIndexes = new Array(this.myAnimations[this.keyframeManager.animationIndex].squares);
-	for(var i = 0; i < fullFrames.length; i++){
-		if(fullFrames[i].classList.contains("keyframe-full-keyed"))
-			if(i != 0)
+	for (var i = 0; i < fullFrames.length; i++) {
+		if (fullFrames[i].classList.contains("keyframe-full-keyed"))
+			if (i != 0)
 				trueIndex++;
-		if(fullFrames[i].classList.contains("keyframe-selected")){
-			if(typeof selectedIndexes[trueIndex] != "number")
+		if (fullFrames[i].classList.contains("keyframe-selected")) {
+			if (typeof selectedIndexes[trueIndex] != "number")
 				selectedIndexes[trueIndex] = 0;
 			selectedIndexes[trueIndex]++;
-			
-			var bufferFramesAmt = this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex];
-			
 
-			if(isNaN(parseFloat(bufferFramesAmt))){
+			var bufferFramesAmt = this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex];
+
+
+			if (isNaN(parseFloat(bufferFramesAmt))) {
 				bufferFramesAmt = 0;
 				this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex] = 0;
 			}
 			bufferFramesAmt += valueToAdd * selectedIndexes[trueIndex];
 			bufferFramesAmt = Math.max(0, bufferFramesAmt);
 			this.myAnimations[this.keyframeManager.animationIndex].bufferFrames[trueIndex] = bufferFramesAmt;
-			
+
 		}
 	}
 	this.refreshAnimationManager(selectedIndexes);
 };
 
-DrawTogether.prototype.refreshAnimationManager = function refreshAnimationManager(selectedIndexes){
+DrawTogether.prototype.refreshAnimationManager = function refreshAnimationManager(selectedIndexes) {
 	$(".keyframe-unit").removeClass("keyframe-selected");
-	this.openKeyframeManager(this.myAnimations[this.keyframeManager.animationIndex],this.keyframeManager.animationIndex);
-	for(var i = 0; i < selectedIndexes.length; i++)
-	{
-		if(selectedIndexes[i] > 0)
+	this.openKeyframeManager(this.myAnimations[this.keyframeManager.animationIndex], this.keyframeManager.animationIndex);
+	for (var i = 0; i < selectedIndexes.length; i++) {
+		if (selectedIndexes[i] > 0)
 			$(".keyframe-full-keyed").eq(i).addClass("keyframe-selected")
 	}
 	this.updateAnimationsCookieDelay();
 }
 
-DrawTogether.prototype.animationRemoveHandler = function animationRemoveHandler (myAnimation, button, event) {
+DrawTogether.prototype.animationRemoveHandler = function animationRemoveHandler(myAnimation, button, event) {
 	if (button.classList.contains("confirm")) {
 		for (var k = 0; k < this.myAnimations.length; k++) {
 			if (this.myAnimations[k] == myAnimation) {
@@ -2417,7 +2417,7 @@ DrawTogether.prototype.animationRemoveHandler = function animationRemoveHandler 
 		}
 	} else {
 		button.classList.add("confirm");
-		
+
 		setTimeout(function () {
 			button.classList.remove("confirm");
 		}, 3000);
@@ -2436,11 +2436,11 @@ DrawTogether.prototype.buildAnimationRemoveButton = function buildAnimationRemov
 	return button;
 };
 
-DrawTogether.prototype.animationGotoHandler = function animationGotoHandler (myAnimation, event) {
+DrawTogether.prototype.animationGotoHandler = function animationGotoHandler(myAnimation, event) {
 	this.handleGoto(myAnimation.leftTop[0], myAnimation.leftTop[1]);
 };
 
-DrawTogether.prototype.toggleAnimationManager = function toggleAnimationManager () {
+DrawTogether.prototype.toggleAnimationManager = function toggleAnimationManager() {
 	if (this.animationsWindow.classList.contains("show")) {
 		this.animationsWindow.classList.remove("show");
 	} else {
@@ -2451,10 +2451,10 @@ DrawTogether.prototype.toggleAnimationManager = function toggleAnimationManager 
 	}
 };
 
-DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint (event) {
+DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPoint(event) {
 	if ((this.current_room.indexOf("game_") === 0 ||
-	    this.current_room.indexOf("private_game_") === 0) &&
-	    !this.weAreCurrentPlayer) {
+		this.current_room.indexOf("private_game_") === 0) &&
+		!this.weAreCurrentPlayer) {
 		this.displayMessage("Not your turn!");
 		event.removePathPoint();
 		return;
@@ -2502,24 +2502,24 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 		this.ink -= usage;
 		this.updateInk();
 	}
-	
+
 	this.network.socket.emit("pp", event.point, timeoutCallback(function (success, timeOut) {
 
 
-		if (typeof success === 'boolean' ? !success : !success.isAllowed){ 
+		if (typeof success === 'boolean' ? !success : !success.isAllowed) {
 			event.removePathPoint();
 
-			if(typeof success.isAllowed !== 'undefined'){
+			if (typeof success.isAllowed !== 'undefined') {
 				this.createPermissionChatMessageWithTimeout(success);
 				this.outlineProtectedRegion(success, true);
 				this.createRegionProtectedWindow();
 			} else if (typeof success.inSpawnArea !== 'undefined') {
 				this.createRegionProtectedWindow();
 			}
-			
-			if(typeof timeOut !== 'undefined' && timeOut){
+
+			if (typeof timeOut !== 'undefined' && timeOut) {
 				var curr_time = Date.now();
-				if(curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS){
+				if (curr_time - this.lastTimeoutError > this.TIME_BETWEEN_TIMEOUT_WARNINGS) {
 					this.chat.addMessage("The server took longer than " + Math.round(this.SOCKET_TIMEOUT / 1000) + " seconds to respond. You should probably refresh your page.");
 					this.lastTimeoutError = curr_time;
 				}
@@ -2530,7 +2530,7 @@ DrawTogether.prototype.handlePaintUserPathPoint = function handlePaintUserPathPo
 	this.lastPathPoint = event.point;
 };
 
-DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (event) {
+DrawTogether.prototype.handlePaintSelection = function handlePaintSelection(event) {
 	this.gui.prompt("What do you want to do with your selection?", [
 		{
 			text: "Share to feed",
@@ -2586,40 +2586,40 @@ DrawTogether.prototype.handlePaintSelection = function handlePaintSelection (eve
 	}.bind(this));
 };
 
-DrawTogether.prototype.createClickableArea = function createClickableArea (from, to) {
+DrawTogether.prototype.createClickableArea = function createClickableArea(from, to) {
 	this.gui.prompt("Where should this button take you?", ["A website", "A location on the canvas", "Cancel"], function (type) {
 		if (type == "Cancel") return;
 		var question = "Enter the coords (for example: 500,600)";
 		if (type == "A website") question = "Enter the url, start with http(s)://";
-		
+
 		this.gui.prompt(question, ["freepick", "Cancel"], function (url) {
 			if (url == "Cancel") return;
-			
+
 			if (!url) {
 				this.gui.prompt("You need or provide a url or a location", ["Ok"]);
 				return;
 			}
-			
+
 			var pos = [
 				Math.min(from[0], to[0]),
 				Math.min(from[1], to[1])
 			];
-			
+
 			var size = [
 				Math.max(from[0], to[0]) - pos[0],
 				Math.max(from[1], to[1]) - pos[1]
 			];
-			
+
 			this.network.socket.emit("createclickablearea", from, size, url, function (err, data) {
 				if (err) {
 					this.gui.prompt(err, ["Ok"]);
 				}
 			}.bind(this));
-		}.bind(this));		
+		}.bind(this));
 	}.bind(this));
 };
 
-DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
+DrawTogether.prototype.showVideoFrames = function showVideoFrames(from, to) {
 	var generationSettings = QuickSettings.create(50, 50, "Frame settings");
 	generationSettings.addControl({
 		type: "range",
@@ -2629,7 +2629,7 @@ DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
 		value: 5,
 		step: 1
 	});
-	
+
 	generationSettings.addControl({
 		type: "range",
 		title: "Opacity",
@@ -2638,7 +2638,7 @@ DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
 		value: 0.5,
 		step: 0.05
 	});
-	
+
 	generationSettings.addButton("Show", function () {
 		var frames = generationSettings.getRangeValue("Frames");
 		var opacity = generationSettings.getRangeValue("Opacity");
@@ -2646,7 +2646,7 @@ DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
 		this.updateFramesManager();
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
 	}.bind(this));
-	
+
 	generationSettings.addButton("Cancel", function () {
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
 	});
@@ -2654,18 +2654,18 @@ DrawTogether.prototype.showVideoFrames = function showVideoFrames (from, to) {
 
 // Send null for unchanging value
 DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFavoriteDom(newX, newY, newName, newOwner, element) {
-	if(newX !== null)
+	if (newX !== null)
 		element.dataset.x = newX;
-	if(newY !== null)
+	if (newY !== null)
 		element.dataset.y = newY;
-	if(newName !== null)
+	if (newName !== null)
 		element.dataset.name = newName;
-	if(newOwner !== null)
+	if (newOwner !== null)
 		element.dataset.owner = newOwner;
-	
+
 	var coordinateButton = element.getElementsByClassName("fav-coor-button")[0];
 	var inputRename = element.getElementsByClassName("rename-input")[0];
-	if ( (newName || element.dataset.name) === ""){
+	if ((newName || element.dataset.name) === "") {
 		inputRename.value = "";
 		coordinateButton.textContent = (newX || element.dataset.x) + "," + (newY || element.dataset.y);
 		coordinateButton.title = "";
@@ -2676,30 +2676,30 @@ DrawTogether.prototype.updateIndividualFavoriteDom = function updateIndividualFa
 	}
 };
 
-DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDeleteButton () {
+DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDeleteButton() {
 	var favoriteMinusButton = document.createElement("div");
 	favoriteMinusButton.className = "coords-button fav-delete-button";
 	favoriteMinusButton.textContent = "X";
 	favoriteMinusButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
-		if(element.classList.contains("fav-button-confirmation")){
+		if (element.classList.contains("fav-button-confirmation")) {
 			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 			coord.dataset.tempConf = coord.innerHTML;
 			element.classList.remove("fav-button-confirmation");
-			
+
 			var curFavContainer = element.parentNode;
-			
+
 			var x = curFavContainer.dataset.x;
 			var y = curFavContainer.dataset.y;
 			var name = curFavContainer.dataset.name;
-			this.removeFavorite(x, y, name, curFavContainer);			
+			this.removeFavorite(x, y, name, curFavContainer);
 		}
 		else {
 			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 			coord.dataset.tempConf = coord.innerHTML;
 			coord.innerHTML = "Click again to delete";
 			element.classList.add("fav-button-confirmation");
-			setTimeout(function() {
+			setTimeout(function () {
 				var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 				coord.innerHTML = coord.dataset.tempConf;
 				element.classList.remove("fav-button-confirmation");
@@ -2710,23 +2710,23 @@ DrawTogether.prototype.createFavoriteDeleteButton = function createFavoriteDelet
 	return favoriteMinusButton;
 };
 
-DrawTogether.prototype.createSetPositionButton = function createSetPositionButton () {
+DrawTogether.prototype.createSetPositionButton = function createSetPositionButton() {
 	var favoritePlusButton = document.createElement("div");
 	favoritePlusButton.className = "coords-button fav-move-button";
 	favoritePlusButton.textContent = "Set pos";
-	
+
 	favoritePlusButton.addEventListener("click", function (e) {
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		this.paint.public.canvas.height / this.paint.public.zoom];
 
 		var element = e.srcElement || e.target;
 		var x = element.parentNode.dataset.x;
 		var y = element.parentNode.dataset.y;
 		var name = element.parentNode.dataset.name;
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
-		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);   
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);
 
-		if(element.classList.contains("fav-button-confirmation")){
+		if (element.classList.contains("fav-button-confirmation")) {
 			var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
 			coord.innerHTML = coord.dataset.tempConf;
 			coord.dataset.tempConf = "5215random_string_tempconf5152";
@@ -2738,9 +2738,9 @@ DrawTogether.prototype.createSetPositionButton = function createSetPositionButto
 			coord.dataset.tempConf = coord.innerHTML;
 			coord.innerHTML = "Change to " + centerX + "," + centerY + "?";
 			element.classList.add("fav-button-confirmation");
-			setTimeout(function() {
+			setTimeout(function () {
 				var coord = element.parentNode.getElementsByClassName("fav-coor-button")[0];
-				if(coord.dataset.tempConf !== "5215random_string_tempconf5152")
+				if (coord.dataset.tempConf !== "5215random_string_tempconf5152")
 					coord.innerHTML = coord.dataset.tempConf;
 				element.classList.remove("fav-button-confirmation");
 			}.bind(this), 2000);
@@ -2749,10 +2749,10 @@ DrawTogether.prototype.createSetPositionButton = function createSetPositionButto
 
 	favoritePlusButton.addEventListener("mouseover", function (e) {
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		this.paint.public.canvas.height / this.paint.public.zoom];
 		var element = e.srcElement || e.target;
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
-		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);                   
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);
 		element.title = "Change to " + centerX + "," + centerY + " ?";
 	}.bind(this));
 
@@ -2772,30 +2772,30 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 	favoriteCoorButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		this.paint.public.canvas.height / this.paint.public.zoom];
 
 		var x = parseInt(element.parentNode.dataset.x - screenSize[0] / 2);
 		var y = parseInt(element.parentNode.dataset.y - screenSize[1] / 2);
 
-		this.moveScreenToPosition([x,y],0);
+		this.moveScreenToPosition([x, y], 0);
 	}.bind(this));
-	
+
 	var favoritePencilButton = favoriteContainer.appendChild(document.createElement("div"));
 	favoritePencilButton.className = "coords-button fav-pencil-button";
 	favoritePencilButton.textContent = "✎";
-	
+
 	var favoriteRenameContainer = favoriteContainer.appendChild(document.createElement("div"));
 	favoriteRenameContainer.className = "rename-container";
-	
+
 	var favoriteRenameInput = favoriteRenameContainer.appendChild(document.createElement("input"));
 	favoriteRenameInput.className = "rename-input";
 	favoriteRenameInput.type = "text";
 	favoriteRenameInput.placeholder = "Rename"
-	
+
 	var _favoriteRenameDelayTimeout;
 	favoriteRenameInput.addEventListener("input", function (e) {
 		var element = e.srcElement || e.target;
-		if(_favoriteRenameDelayTimeout !== undefined)
+		if (_favoriteRenameDelayTimeout !== undefined)
 			clearTimeout(_favoriteRenameDelayTimeout);
 		_favoriteRenameDelayTimeout = setTimeout(function () {
 			var newName = element.value;
@@ -2828,8 +2828,8 @@ DrawTogether.prototype.insertOneFavorite = function insertOneFavorite(x, y, name
 			favoriteRenameInput.setSelectionRange(0, favoriteRenameInput.value.length);
 		}
 	}.bind(this));
-	
-	if(name.length > 0){ 
+
+	if (name.length > 0) {
 		favoriteCoorButton.textContent = name;
 		favoriteCoorButton.title = x + "," + y;
 		favoriteRenameInput.value = name;
@@ -2859,16 +2859,16 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionPositionButton.addEventListener("click", function (e) {
 		var element = e.srcElement || e.target;
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		this.paint.public.canvas.height / this.paint.public.zoom];
 
 		var x = parseInt(minX - screenSize[0] / 2);
 		var y = parseInt(minY - screenSize[1] / 2);
 
-		this.moveScreenToPosition([x,y],0);
-	
-	}.bind(this));	
-	
-	
+		this.moveScreenToPosition([x, y], 0);
+
+	}.bind(this));
+
+
 	regionPositionButton.addEventListener("mouseover", function (e) {
 		var region = {
 			minX: minX,
@@ -2877,33 +2877,33 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 			maxY: maxY
 		};
 		this.outlineProtectedRegion(region);
-	
+
 	}.bind(this));
-	
+
 	var regionRenameContainer = regionContainer.appendChild(document.createElement("div"));
 	regionRenameContainer.className = "rename-container";
-	
+
 	var regionRenameInput = regionRenameContainer.appendChild(document.createElement("input"));
 	regionRenameInput.className = "rename-input";
 	regionRenameInput.type = "text";
 	regionRenameInput.placeholder = "Rename"
-	
+
 	var regionPencilButton = regionContainer.appendChild(document.createElement("div"));
 	regionPencilButton.className = "coords-button reg-pencil-button";
 	regionPencilButton.textContent = "✎";
-	
-	if(name.length > 0){ 
+
+	if (name.length > 0) {
 		regionPositionButton.textContent = name;
 		regionPositionButton.title = minX + ", " + minY;
 		regionRenameInput.value = name;
 	} else {
 		regionPositionButton.textContent = minX + ", " + minY;
 	}
-	
+
 	var _regionRenameDelayTimeout;
 	regionRenameInput.addEventListener("input", function (e) {
 		var element = e.srcElement || e.target;
-		if(_regionRenameDelayTimeout !== undefined)
+		if (_regionRenameDelayTimeout !== undefined)
 			clearTimeout(_regionRenameDelayTimeout);
 		_regionRenameDelayTimeout = setTimeout(function () {
 			var newName = element.value;
@@ -2913,11 +2913,11 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 
 			regionRenameContainer.style.visibility = "";
 			regionRenameContainer.style.opacity = 0;
-			
+
 			this.setNameOfProtectedRegion(newName, regionId, curRegContainer);
 		}.bind(this), 2500);
 	}.bind(this));
-	
+
 	regionPencilButton.addEventListener("click", function (e) {
 		if (regionRenameContainer.style.visibility == "visible") {
 			regionRenameContainer.style.visibility = "";
@@ -2927,7 +2927,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 			var newName = associatedInputBox.value;
 			var curRegContainer = regionContainer;
 			var regionId = this.myRegions[index].regionId;
-			
+
 			clearTimeout(_regionRenameDelayTimeout);
 			this.setNameOfProtectedRegion(newName, regionId, curRegContainer);
 		} else {
@@ -2937,7 +2937,7 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 			regionRenameInput.select();
 			regionRenameInput.setSelectionRange(0, regionRenameInput.value.length);
 		}
-		
+
 	}.bind(this));
 
 	var regionEditPermissionsButton = regionContainer.appendChild(document.createElement("div"));
@@ -2946,23 +2946,23 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 	regionEditPermissionsButton.addEventListener("click", function (e) {
 		var regionListIndex = regionEditPermissionsButton.parentNode.dataset.index;
 
-		if(regionListIndex){
-			if(typeof this.regionPermissionsWindow === "undefined")
+		if (regionListIndex) {
+			if (typeof this.regionPermissionsWindow === "undefined")
 				this.createRegionPermissionsWindow(regionListIndex);
 			else
 				this.regionPermissionsWindow.regionIndex = regionListIndex;
 			this.regionPermissionsWindow.reload();
 			this.regionPermissionsWindow.show();
 		}
-	
+
 	}.bind(this));
 	var permissionCounter = regionEditPermissionsButton.appendChild(document.createElement("div"));
-	
-	if(permissions.length > 0){
+
+	if (permissions.length > 0) {
 		permissionCounter.className = "reg-editpermissions-button-counter";
 		permissionCounter.textContent = '\uD83D\uDC64' + permissions.length.toString(); //👤 BUST IN SILHOUETTE symbol
 	}
-	else if(this.myRegions[index].minRepAllowed < 300){
+	else if (this.myRegions[index].minRepAllowed < 300) {
 		permissionCounter.className = "reg-editpermissions-button-counter";
 		permissionCounter.textContent = this.myRegions[index].minRepAllowed + 'R+';
 	}
@@ -2979,36 +2979,36 @@ DrawTogether.prototype.insertOneRegionToDom = function insertOneRegionToDom(owne
 		var element = e.srcElement || e.target;
 		var regionListIndex = element.parentNode.dataset.index;
 
-		if(element.classList.contains("reg-button-confirmation")){
+		if (element.classList.contains("reg-button-confirmation")) {
 			element.classList.remove("reg-button-confirmation");
-			this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);		
+			this.removeProtectedRegion(this.myRegions[regionListIndex].regionId, element.parentNode);
 		}
 		else {
 			var coord = element.parentNode.getElementsByClassName("reg-position-button")[0];
 			coord.dataset.tempConf = coord.innerHTML;
 			coord.innerHTML = "Click again to delete";
 			element.classList.add("reg-button-confirmation");
-			setTimeout(function() {
+			setTimeout(function () {
 				var coord = element.parentNode.getElementsByClassName("reg-position-button")[0];
 				coord.innerHTML = coord.dataset.tempConf;
 				element.classList.remove("reg-button-confirmation");
 			}.bind(this), 4000);
 		}
-	
+
 	}.bind(this));
 };
 
-DrawTogether.prototype.permissionWindowVisibilityDom = function permissionWindowVisibilityDom(makeVisible){
-	if(this.regionPermissionsWindow){
-		if(makeVisible)
+DrawTogether.prototype.permissionWindowVisibilityDom = function permissionWindowVisibilityDom(makeVisible) {
+	if (this.regionPermissionsWindow) {
+		if (makeVisible)
 			this.regionPermissionsWindow.show();
-		else 
+		else
 			this.regionPermissionsWindow.hide();
 	}
 };
 
-DrawTogether.prototype.displayRegionTutorial = function displayRegionTutorial(makeVisible){
-	if(makeVisible)
+DrawTogether.prototype.displayRegionTutorial = function displayRegionTutorial(makeVisible) {
+	if (makeVisible)
 		this.regionTutorialContainer.style.display = "block";
 	else
 		this.regionTutorialContainer.style.display = "none";
@@ -3030,7 +3030,7 @@ DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
 
 	this.displayRegionTutorial(this.myRegions.length === 0);
 
-	for(var k = this.myRegions.length - 1; k >= 0; k--) {
+	for (var k = this.myRegions.length - 1; k >= 0; k--) {
 		this.insertOneRegionToDom(this.myRegions[k]['owner'], this.myRegions[k]['name'], this.myRegions[k]['permissions'], this.myRegions[k]['minX'], this.myRegions[k]['minY'], this.myRegions[k]['maxX'], this.myRegions[k]['maxY'], k);
 	}
 
@@ -3039,22 +3039,22 @@ DrawTogether.prototype.updateRegionsDom = function updateRegionsDom() {
 DrawTogether.prototype.updateFavoriteDom = function updateFavoriteDom() {
 	while (this.favoritesContainer.firstChild)
 		this.favoritesContainer.removeChild(this.favoritesContainer.firstChild)
-	
+
 	var addNewFavoriteElementButton = this.favoritesContainer.appendChild(document.createElement("div"));
 	addNewFavoriteElementButton.className = "coords-button fav-add-new-fav";
 	addNewFavoriteElementButton.textContent = "Add location";
 	addNewFavoriteElementButton.title = "Add new Favorite."
 	addNewFavoriteElementButton.addEventListener("click", function (e) {
 		var screenSize = [this.paint.public.canvas.width / this.paint.public.zoom,
-		                  this.paint.public.canvas.height / this.paint.public.zoom];
+		this.paint.public.canvas.height / this.paint.public.zoom];
 
 		var centerX = parseInt(this.paint.public.leftTopX + screenSize[0] / 2);
-		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2); 
+		var centerY = parseInt(this.paint.public.leftTopY + screenSize[1] / 2);
 
 		this.createFavorite(centerX, centerY, "");
-	
+
 	}.bind(this));
-	for(var k = this.favList.length - 1; k >= 0; k--) {
+	for (var k = this.favList.length - 1; k >= 0; k--) {
 		this.insertOneFavorite(this.favList[k]['x'], this.favList[k]['y'], this.favList[k]['name'], this.favList[k]['owner'])
 	}
 };
@@ -3079,10 +3079,10 @@ DrawTogether.prototype.removeFavorite = function (x, y, name, element) {
 			this.chat.addMessage("Removing Favorite", "Error: " + err);
 			return;
 		}
-		if(result.success){
+		if (result.success) {
 			element.remove();
 			this.getFavorites();
-			}
+		}
 		return;
 	}.bind(this));
 };
@@ -3093,7 +3093,7 @@ DrawTogether.prototype.renameFavorite = function (x, y, name, element) {
 			return;
 		}
 
-		if(result.success) {
+		if (result.success) {
 			this.updateIndividualFavoriteDom(null, null, name, null, element);
 			this.getFavorites();
 		}
@@ -3106,11 +3106,11 @@ DrawTogether.prototype.getFavorites = function () {
 			this.chat.addMessage("Getting Favorites", "Error: " + err);
 			return;
 		}
-		if(result){
+		if (result) {
 			// sort favorites alphabetically
-			this.favList = result.sort(function sortMyFavorites(a, b){ 
-				if(a.name.toUpperCase() < b.name.toUpperCase()) return 1;
-				if(a.name.toUpperCase() > b.name.toUpperCase()) return -1;
+			this.favList = result.sort(function sortMyFavorites(a, b) {
+				if (a.name.toUpperCase() < b.name.toUpperCase()) return 1;
+				if (a.name.toUpperCase() > b.name.toUpperCase()) return -1;
 				return 0;
 			});
 		}
@@ -3120,11 +3120,11 @@ DrawTogether.prototype.getFavorites = function () {
 };
 
 DrawTogether.prototype.createFavorite = function (x, y, name) {
-	if (!this.account.uKey){
+	if (!this.account.uKey) {
 		this.chat.addMessage("You must login to save or create favorites!");
 		return;
 	}
-		
+
 	if (!this.memberlevel && this.favList.length >= 5) {
 		this.chat.addMessage("Buy premium to create more than 5 favorite locations.");
 		return;
@@ -3135,7 +3135,7 @@ DrawTogether.prototype.createFavorite = function (x, y, name) {
 			this.chat.addMessage("Favorite", "Error: " + err);
 			return;
 		}
-		
+
 		if (result.success) {
 			this.chat.addMessage("Favorite added", result.success);
 			this.insertOneFavorite(x, y, name, result.owner);
@@ -3152,89 +3152,29 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 
 	var peopleWhoDrewInTheAreaHash = new Object();
 	peopleWhoDrewInTheAreaHash.length = 0;
-	for(var i = this.paint.publicdrawings.length - 1; i >= 0; i--) {
+	for (var i = this.paint.publicdrawings.length - 1; i >= 0; i--) {
 		var socketid = this.paint.publicdrawings[i].id || this.paint.publicdrawings[i].socketid;
 
-		if(peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
-		
-		if(!this.paint.publicdrawings[i].points) {
-			if(this.paint.publicdrawings[i].type === 'line') {
-				if (( this.paint.publicdrawings[i].x >= minX
+		if (peopleWhoDrewInTheAreaHash[socketid]) continue; //already found user in region
+
+		if (!this.paint.publicdrawings[i].points) {
+			if (this.paint.publicdrawings[i].type === 'line') {
+				if ((this.paint.publicdrawings[i].x >= minX
 					&& this.paint.publicdrawings[i].x <= maxX
 					&& this.paint.publicdrawings[i].y >= minY
-					&& this.paint.publicdrawings[i].y <= maxY )
-					|| 
-					( this.paint.publicdrawings[i].x1 >= minX
-					&& this.paint.publicdrawings[i].x1 <= maxX
-					&& this.paint.publicdrawings[i].y1 >= minY
-					&& this.paint.publicdrawings[i].y1 <= maxY )) {
-						var player = this.playerFromId(socketid);
-						peopleWhoDrewInTheAreaHash[socketid] = true;
-						peopleWhoDrewInTheAreaHash.length++;
-						if(player){
-							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
-						}
-						else{
-							this.network.socket.emit("playerfromsocketid", socketid, function (result) {
-								if (result.error) {
-									this.chat.addMessage("Inspect tool", "Error: " + result.error);
-									return;
-								}
-								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
-							}.bind(this));
-						}
-					}
-				continue;
-			} 
-			else if(this.paint.publicdrawings[i].type === 'text') {
-				if (( this.paint.publicdrawings[i].x >= minX
-					&& this.paint.publicdrawings[i].x <= maxX
-					&& this.paint.publicdrawings[i].y >= minY
-					&& this.paint.publicdrawings[i].y <= maxY )
-					|| 
-					( this.paint.publicdrawings[i].x1 >= minX
-					&& this.paint.publicdrawings[i].x1 <= maxX
-					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size >= minY
-					&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size <= maxY )) {
-						var player = this.playerFromId(socketid);
-							peopleWhoDrewInTheAreaHash[socketid] = true;
-							peopleWhoDrewInTheAreaHash.length++;
-							if(player){
-								this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
-							}
-							else{
-								this.network.socket.emit("playerfromsocketid", socketid, function (result) {
-									if (result.error) {
-										this.chat.addMessage("Inspect tool", "Error: " + result.error);
-										return;
-									}
-									this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
-								}.bind(this));
-							}
-				}
-				continue;
-			}
-			
-		}
-		
-		
-
-		var pointsamt = this.paint.publicdrawings[i].points.length || 0;
-		
-		//var checkEveryX = Math.round(pointsamt / 5);
-
-		for (var k = pointsamt - 1; k >= 0; k--){//i -= checkEveryX){
-			if (this.paint.publicdrawings[i].points[k][0] >= minX
-				&& this.paint.publicdrawings[i].points[k][0] <= maxX
-				&& this.paint.publicdrawings[i].points[k][1] >= minY
-				&& this.paint.publicdrawings[i].points[k][1] <= maxY) {
+					&& this.paint.publicdrawings[i].y <= maxY)
+					||
+					(this.paint.publicdrawings[i].x1 >= minX
+						&& this.paint.publicdrawings[i].x1 <= maxX
+						&& this.paint.publicdrawings[i].y1 >= minY
+						&& this.paint.publicdrawings[i].y1 <= maxY)) {
 					var player = this.playerFromId(socketid);
 					peopleWhoDrewInTheAreaHash[socketid] = true;
 					peopleWhoDrewInTheAreaHash.length++;
-					if(player){
+					if (player) {
 						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
 					}
-					else{
+					else {
 						this.network.socket.emit("playerfromsocketid", socketid, function (result) {
 							if (result.error) {
 								this.chat.addMessage("Inspect tool", "Error: " + result.error);
@@ -3243,18 +3183,78 @@ DrawTogether.prototype.whoDrewInThisArea = function (from, to) {
 							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
 						}.bind(this));
 					}
-					break;
+				}
+				continue;
+			}
+			else if (this.paint.publicdrawings[i].type === 'text') {
+				if ((this.paint.publicdrawings[i].x >= minX
+					&& this.paint.publicdrawings[i].x <= maxX
+					&& this.paint.publicdrawings[i].y >= minY
+					&& this.paint.publicdrawings[i].y <= maxY)
+					||
+					(this.paint.publicdrawings[i].x1 >= minX
+						&& this.paint.publicdrawings[i].x1 <= maxX
+						&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size >= minY
+						&& this.paint.publicdrawings[i].y + this.paint.publicdrawings[i].size <= maxY)) {
+					var player = this.playerFromId(socketid);
+					peopleWhoDrewInTheAreaHash[socketid] = true;
+					peopleWhoDrewInTheAreaHash.length++;
+					if (player) {
+						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+					}
+					else {
+						this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+							if (result.error) {
+								this.chat.addMessage("Inspect tool", "Error: " + result.error);
+								return;
+							}
+							this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+						}.bind(this));
+					}
+				}
+				continue;
+			}
+
+		}
+
+
+
+		var pointsamt = this.paint.publicdrawings[i].points.length || 0;
+
+		//var checkEveryX = Math.round(pointsamt / 5);
+
+		for (var k = pointsamt - 1; k >= 0; k--) {//i -= checkEveryX){
+			if (this.paint.publicdrawings[i].points[k][0] >= minX
+				&& this.paint.publicdrawings[i].points[k][0] <= maxX
+				&& this.paint.publicdrawings[i].points[k][1] >= minY
+				&& this.paint.publicdrawings[i].points[k][1] <= maxY) {
+				var player = this.playerFromId(socketid);
+				peopleWhoDrewInTheAreaHash[socketid] = true;
+				peopleWhoDrewInTheAreaHash.length++;
+				if (player) {
+					this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(player));
+				}
+				else {
+					this.network.socket.emit("playerfromsocketid", socketid, function (result) {
+						if (result.error) {
+							this.chat.addMessage("Inspect tool", "Error: " + result.error);
+							return;
+						}
+						this.chat.addElementAsMessage(this.createPlayerDrewInAreaDom(result));
+					}.bind(this));
+				}
+				break;
 			}
 		}
 	}
 
-	if(peopleWhoDrewInTheAreaHash.length === 0) {
+	if (peopleWhoDrewInTheAreaHash.length === 0) {
 		this.chat.addMessage("Inspect tool", "No recently drawn lines found in this area.");
 	}
 };
 
 DrawTogether.prototype.createProtectedRegion = function (from, to) {
-	if (!this.account.uKey) { 
+	if (!this.account.uKey) {
 		this.chat.addMessage("You must be logged in to create protected regions.");
 		return;
 	}
@@ -3262,8 +3262,8 @@ DrawTogether.prototype.createProtectedRegion = function (from, to) {
 
 	if (!this.memberlevel) {
 		if (this.reputation < this.REGION_MIN_REP) {
-			
-			this.chat.addMessage("You must have at least "+ this.REGION_MIN_REP +" rep!");
+
+			this.chat.addMessage("You must have at least " + this.REGION_MIN_REP + " rep!");
 			return;
 		}
 		if (typeof this.myRegions !== 'undefined' && typeof this.myRegions.length === 'number') {
@@ -3308,8 +3308,8 @@ DrawTogether.prototype.removeProtectedRegion = function (regionId, element, over
 			this.chat.addMessage("Regions", "Reset Error: " + err);
 			return;
 		}
-		if(element){
-			if($('.region-container').length <= 1){
+		if (element) {
+			if ($('.region-container').length <= 1) {
 				this.displayRegionTutorial(true);
 			}
 			element.style.display = "none";
@@ -3330,15 +3330,15 @@ DrawTogether.prototype.getMyProtectedRegions = function (callback) {
 		if (err) {
 			this.chat.addMessage("Getting Protected Regions", "Error: " + err);
 		}
-		if(result){
-			this.myRegions = result.sort(function sortMyRegionsById(a, b){
+		if (result) {
+			this.myRegions = result.sort(function sortMyRegionsById(a, b) {
 				return b.regionId - a.regionId;
 			});
 		}
 		else
 			this.myRegions = [];
 
-		if(typeof callback == "function")
+		if (typeof callback == "function")
 			callback();
 		this.updateRegionsDom();
 	}.bind(this));
@@ -3350,10 +3350,10 @@ DrawTogether.prototype.addUsersToMyProtectedRegion = function (userIdArr, region
 			this.chat.addMessage("Adding users to protected region", "Error: " + err);
 			return;
 		}
-		setTimeout(function(){
+		setTimeout(function () {
 			this.getMyProtectedRegions(callback);
 		}.bind(this), 1000);
-		
+
 		this.chat.addMessage("Regions", result.success);
 	}.bind(this));
 };
@@ -3364,7 +3364,7 @@ DrawTogether.prototype.removeUsersFromMyProtectedRegion = function (userIdArr, r
 			this.chat.addMessage("Remove users to protected region", "Error: " + err);
 			return;
 		}
-		setTimeout(function(){
+		setTimeout(function () {
 			this.getMyProtectedRegions(callback);
 		}.bind(this), 1000);
 
@@ -3379,13 +3379,13 @@ DrawTogether.prototype.setNameOfProtectedRegion = function (newName, regionId, c
 			return;
 		}
 		curRegContainer.dataset.name = newName;
-		
+
 		var coordinateButton = curRegContainer.getElementsByClassName("reg-position-button")[0];
 		var inputRename = curRegContainer.getElementsByClassName("rename-input")[0];
 		inputRename.value = newName;
 		coordinateButton.textContent = newName;
-		
-		setTimeout(function(){
+
+		setTimeout(function () {
 			this.getMyProtectedRegions();
 		}.bind(this), 1000);
 
@@ -3399,7 +3399,7 @@ DrawTogether.prototype.setMinimumRepInProtectedRegion = function (repAmount, reg
 			this.chat.addMessage("Set minimum rep", "Error: " + err);
 			return;
 		}
-		setTimeout(function(){
+		setTimeout(function () {
 			this.getMyProtectedRegions();
 		}.bind(this), 1000);
 
@@ -3412,59 +3412,59 @@ DrawTogether.prototype.enterTheContest = function (from, to) {
 	var imageBase64 = this.paint.exportImage(from, to);
 	img.src = imageBase64;
 	img.alt = "Exported image";
-	
+
 	ga("send", "event", "openwindow", "enterTheContest");
-	
+
 	var exportwindow = this.gui.createWindow({ title: "Enter the monthly contest" });
 	exportwindow.classList.add("contestwindow");
-	
+
 	var content = exportwindow.appendChild(document.createElement("div"));
 	content.className = "content";
-	
+
 	var imageContainer = content.appendChild(document.createElement("div"));
 	imageContainer.className = "imagecontainer";
 	imageContainer.appendChild(img);
-	
+
 	var form = content.appendChild(document.createElement("div"));
 	form.classList.add("form");
-	
+
 	var status = form.appendChild(document.createElement("div"));
 	status.classList.add("status");
-	
+
 	var infoInputs = [];
 	for (var k = 0; k < 5; k++) {
 		var memberInput = form.appendChild(document.createElement("input"));
 		memberInput.placeholder = "Member " + (k + 1);
-		
+
 		var socialInput = form.appendChild(document.createElement("input"));
 		socialInput.placeholder = "Twitch/FB/profile url";
-		
-		infoInputs.push({name: memberInput, social: socialInput});
+
+		infoInputs.push({ name: memberInput, social: socialInput });
 	}
-	
+
 	var button = form.appendChild(document.createElement("div"));
 	button.classList = "drawtogether-button share-to-feed";
 	button.appendChild(document.createTextNode("Enter"));
-	
+
 	button.addEventListener("click", function () {
 		form.classList.add("disabled");
 		var team = [];
 		for (var k = 0; k < infoInputs.length; k++) {
 			if (!infoInputs[k].name.value && !infoInputs[k].social.value) continue;
-			team.push({name: infoInputs[k].name.value, social: infoInputs[k].social.value});
+			team.push({ name: infoInputs[k].name.value, social: infoInputs[k].social.value });
 		}
 		this.account.enterContest(imageBase64, team, function (err) {
 			form.classList.remove("disabled");
 			while (status.firstChild) status.removeChild(status.firstChild);
-			
+
 			if (err) {
 				status.appendChild(document.createTextNode(err));
 				status.classList.add("error");
 				return;
 			}
-			
+
 			status.classList.remove("error");
-			
+
 			for (var k = 0; k < infoInputs.length; k++) {
 				infoInputs[k].name.parentNode.removeChild(infoInputs[k].name);
 				infoInputs[k].social.parentNode.removeChild(infoInputs[k].social);
@@ -3481,45 +3481,45 @@ DrawTogether.prototype.exportImage = function (from, to) {
 	var imageBase64 = this.paint.exportImage(from, to);
 	img.src = imageBase64;
 	img.alt = "Exported image";
-	
-	
+
+
 	ga("send", "event", "openwindow", "exportImageShare");
-	
+
 	var exportwindow = this.gui.createWindow({ title: "Share image to feed" });
 	exportwindow.classList.add("exportwindow");
-	
+
 	var content = exportwindow.appendChild(document.createElement("div"));
 	content.className = "content";
-	
+
 	var imageContainer = content.appendChild(document.createElement("div"));
 	imageContainer.className = "imagecontainer";
 	imageContainer.appendChild(img);
-	
+
 	var form = content.appendChild(document.createElement("div"));
 	form.classList.add("form");
-	
+
 	var status = form.appendChild(document.createElement("div"));
 	status.classList.add("status");
-	
+
 	var textarea = form.appendChild(document.createElement("textarea"));
 	textarea.placeholder = "Share your thoughts";
-	
+
 	var button = form.appendChild(document.createElement("div"));
 	button.classList = "drawtogether-button share-to-feed";
 	button.appendChild(document.createTextNode("Post"));
-	
+
 	button.addEventListener("click", function () {
 		form.classList.add("disabled");
 		this.account.sharePicture(imageBase64, textarea.value, function (err) {
 			form.classList.remove("disabled");
 			while (status.firstChild) status.removeChild(status.firstChild);
-			
+
 			if (err) {
 				status.appendChild(document.createTextNode(err));
 				status.classList.add("error");
 				return;
 			}
-			
+
 			status.classList.remove("error");
 			textarea.parentNode.removeChild(textarea);
 			button.parentNode.removeChild(button);
@@ -3532,100 +3532,100 @@ DrawTogether.prototype.exportImageFromSrc = function (title, src) {
 	var img = document.createElement("img");
 	img.src = src
 	img.alt = "Exported image";
-	
+
 	var exportwindow = this.gui.createWindow({ title: title });
 	exportwindow.classList.add("exportwindow");
 	exportwindow.appendChild(img);
 };
 
 DrawTogether.prototype.exportVideoRender = function (fileName, from, to, leftTop, squares, sqwidth, sqheight, gutter, bufferFrames) {
-	
+
 	var start = leftTop || [
 		Math.min(from[0], to[0]),
 		Math.min(from[1], to[1])
 	];
 	start[0] = Math.floor(start[0]);
 	start[1] = Math.floor(start[1]);
-	
+
 	var endY = 0;
-	if(leftTop)
+	if (leftTop)
 		endY = leftTop[1] + sqheight;
 	else
 		endY = Math.max(from[1], to[1]);
-	
+
 	endY = Math.ceil(endY);
-	
+
 	var exportFuncs = {
-			boolean: "getBoolean",
-			range: "getRangeValue",
-			dropdown: "getDropDownValue"
-		};
-	
+		boolean: "getBoolean",
+		range: "getRangeValue",
+		dropdown: "getDropDownValue"
+	};
+
 	var captureSettings = {
 		name: fileName,
 		workersPath: ''
 	};
-	
+
 	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
 		var funcName = exportFuncs[this.defaultVideoExportSettings[k].type];
 		var value = this.videoExportSettings[funcName](this.defaultVideoExportSettings[k].title)
 		if (typeof value == "object") value = value.value;
 		captureSettings[this.defaultVideoExportSettings[k].title] = value;
 	}
-	
+
 	console.log("CaptureSettings:", captureSettings);
-	
+
 	var capturer = new CCapture(captureSettings);
 	capturer.start();
-	
+
 	var frames = squares;
 	var gutter = gutter || 0;
-	
+
 	var frameWidth = 0;
 	if (sqwidth)
 		frameWidth = sqwidth
 	else
 		frameWidth = Math.abs(Math.abs(to[0] - from[0]) - ((frames - 1) * gutter)) / frames;
-	
+
 	frameWidth = Math.floor(frameWidth);
-	
+
 	for (var k = 0; k < frames; k++) {
 		var tempFrom = [
 			start[0] + frameWidth * k + k * gutter,
 			start[1]
 		];
-		
+
 		var tempTo = [
 			tempFrom[0] + frameWidth,
 			endY
 		];
-		
+
 		if (captureSettings.verbose) {
 			console.log("Capturing frame", k + 1, "of", frames, "Region", tempFrom, tempTo);
 		}
 		capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
-		if(bufferFrames && !isNaN(bufferFrames[k])){
+		if (bufferFrames && !isNaN(bufferFrames[k])) {
 			var bufferFramesAmtAtKeyframe = bufferFrames[k];
-			for(var m = 0; m < bufferFramesAmtAtKeyframe; m++){
+			for (var m = 0; m < bufferFramesAmtAtKeyframe; m++) {
 				capturer.capture(this.paint.exportImage(tempFrom, tempTo, true));
 			}
 		}
 	}
 
 	capturer.stop();
-	if(captureSettings.format === "webm") 
+	if (captureSettings.format === "webm")
 		capturer.save(); //directly save webm format
 	else
-		capturer.save( function( blob ) {
+		capturer.save(function (blob) {
 			var exportwindow = this.gui.createWindow({ title: "Exported animation (right click to save)" });
 
 			var img = document.createElement("img");
 			img.src = URL.createObjectURL(blob);
 			img.alt = "Exported image";
-		
+
 			exportwindow.classList.add("exportwindow");
 			exportwindow.appendChild(img);
-		}.bind(this) );
+		}.bind(this));
 };
 
 DrawTogether.prototype.renderMyAnimation = function (myAnimation) {
@@ -3652,17 +3652,17 @@ DrawTogether.prototype.exportMyAnimation = function (myAnimation, index) {
 };
 
 DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwidth, sqheight, gutter, myAnimationIndex) {
-	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to)});
-	
+	var exportVideoWindow = this.gui.createWindow({ title: "Export to video region: " + JSON.stringify(from) + JSON.stringify(to) });
+
 	var settings = QuickSettings.create(0, 0, "Specific settings");
-	var title =  "Your title";
-	if(typeof myAnimationIndex == "number" && this.myAnimations[myAnimationIndex].name) 
+	var title = "Your title";
+	if (typeof myAnimationIndex == "number" && this.myAnimations[myAnimationIndex].name)
 		title = this.myAnimations[myAnimationIndex].name;
 	var timeout = null;
-	settings.addText("Name", title, function (value){
-		if(typeof myAnimationIndex == "number"){
+	settings.addText("Name", title, function (value) {
+		if (typeof myAnimationIndex == "number") {
 			this.myAnimations[myAnimationIndex].name = value;
-			if(timeout)
+			if (timeout)
 				clearTimeout(timeout)
 			timeout = setTimeout(this.updateAnimationManager.bind(this), 2000);
 			this.updateAnimationsCookieDelay();
@@ -3670,8 +3670,8 @@ DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwid
 	}.bind(this));
 	settings.addRange("Frames", 1, squares || 200, squares || 10, 1);
 	settings.addRange("Gutter", 0, 200, gutter || 0, 1);
-	
-	if(typeof myAnimationIndex == "number"){
+
+	if (typeof myAnimationIndex == "number") {
 		settings._controls.Frames.container.style.display = "none"
 		settings._controls.Gutter.container.style.display = "none"
 		var fps = this.myAnimations[myAnimationIndex].fps;
@@ -3679,17 +3679,17 @@ DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwid
 		this.videoExportSettings._controls.framerate.control.value = fps;
 	}
 	exportVideoWindow.appendChild(settings._panel);
-	
+
 	var container = exportVideoWindow.appendChild(document.createElement("div"))
 	container.className = "content";
-	
+
 	var renderButton = container.appendChild(document.createElement("div"));
 	renderButton.appendChild(document.createTextNode("Render"));
 	renderButton.className = "drawtogether-button";
 	renderButton.addEventListener("click", function () {
-		this.exportVideoRender(settings.getText("Name"), from, to, leftTop, settings.getRangeValue("Frames"), sqwidth, sqheight, settings.getRangeValue("Gutter"), this.myAnimations[myAnimationIndex].bufferFrames);		
+		this.exportVideoRender(settings.getText("Name"), from, to, leftTop, settings.getRangeValue("Frames"), sqwidth, sqheight, settings.getRangeValue("Gutter"), this.myAnimations[myAnimationIndex].bufferFrames);
 	}.bind(this));
-	
+
 	var settingsButton = container.appendChild(document.createElement("div"));
 	settingsButton.appendChild(document.createTextNode("General export settings"));
 	settingsButton.className = "drawtogether-button";
@@ -3698,19 +3698,19 @@ DrawTogether.prototype.exportVideo = function (from, to, leftTop, squares, sqwid
 	}.bind(this));
 };
 
-DrawTogether.prototype.createMessage = function createMessage () {
+DrawTogether.prototype.createMessage = function createMessage() {
 	this.messageDom = this.container.appendChild(document.createElement("div"));
 	this.messageDom.className = "drawtogether-general-message";
 };
 
 // Returns the inkusage for a pathpoint
 // (point1, point2, size) or (point1, undefined, size)
-DrawTogether.prototype.inkUsageFromPath = function inkUsageFromPath (point1, point2, size) {
+DrawTogether.prototype.inkUsageFromPath = function inkUsageFromPath(point1, point2, size) {
 	var length = size + (point2 ? this.utils.distance(point1[0], point1[1], point2[0], point2[1]) : 0);
 	return Math.ceil(size * length / 25);
 };
 
-DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawing) {
+DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing(drawing) {
 	// If its a brush the ink usage is (size * size)
 	// If it is a line the ink usage is (size * length)
 	var length = drawing.size;
@@ -3724,7 +3724,7 @@ DrawTogether.prototype.inkUsageFromDrawing = function inkUsageFromDrawing (drawi
 	return Math.ceil(drawing.size * length / 25);
 };
 
-DrawTogether.prototype.createRoomInformation = function createRoomInformation () {
+DrawTogether.prototype.createRoomInformation = function createRoomInformation() {
 	var infoContainer = this.container.appendChild(document.createElement("div"));
 	infoContainer.className = "drawtogether-info-container";
 	this.infoContainer = infoContainer;
@@ -3740,13 +3740,13 @@ DrawTogether.prototype.createRoomInformation = function createRoomInformation ()
 	this.playerListDom.className = "drawtogether-info-playerlist";
 };
 
-DrawTogether.prototype.createGameInformation = function createGameInformation () {
+DrawTogether.prototype.createGameInformation = function createGameInformation() {
 	var gameInfoContainer = this.container.appendChild(document.createElement("div"));
 	gameInfoContainer.className = "drawtogether-gameinfo-container";
 	this.gameInfoContainer = gameInfoContainer;
 };
 
-DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPermissionsWindow (regionIndex) {
+DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPermissionsWindow(regionIndex) {
 	var regionPermissionsWindow = QuickSettings.create(30, 10, "Region Permissions");
 	regionPermissionsWindow.hide();
 
@@ -3766,31 +3766,31 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 	var clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
 
-	for(var i = 0; i < clonedPlayerList.length; i++) {
+	for (var i = 0; i < clonedPlayerList.length; i++) {
 		var option = document.createElement("option");
 		option.label = clonedPlayerList[i].name;
 		regionListBox1.add(option);
 	};
-	
+
 	var buttonContainers = regionListContainer.appendChild(document.createElement("div"));
 	buttonContainers.className = "region-button-container";
-	
+
 	var regionAddButton = buttonContainers.appendChild(document.createElement("div"));
 	regionAddButton.className = "region-window-permission-button";
 	regionAddButton.textContent = "Add to permissions >";
 	regionAddButton.addEventListener("click", function (e) {
 		var temparr = [];
-		for(var i = 0; i < regionListBox1.length; i++){
-			if(regionListBox1.options[i].selected){
-				var loggedIn = typeof clonedPlayerList[i].userid !=='undefined';
+		for (var i = 0; i < regionListBox1.length; i++) {
+			if (regionListBox1.options[i].selected) {
+				var loggedIn = typeof clonedPlayerList[i].userid !== 'undefined';
 
-				if(!loggedIn)
+				if (!loggedIn)
 					this.chat.addMessage("Regions", "User " + clonedPlayerList[i].name + " isn't logged in! Can't add permission.");
 
 				var alreadyInPermissions = false;
 
-				for(var x = 0; x < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; x++){
-					if(clonedPlayerList[i].userid == this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[x].id )
+				for (var x = 0; x < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; x++) {
+					if (clonedPlayerList[i].userid == this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[x].id)
 						alreadyInPermissions = true;
 				}
 
@@ -3798,18 +3798,18 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 				var notAddingMyself = clonedPlayerList[i].userid != this.myRegions[this.regionPermissionsWindow.regionIndex].owner;
 
 				var readyToPush = loggedIn && (!alreadyInPermissions || thereAreNoPermissionsYet) && notAddingMyself;
-				if(readyToPush){
+				if (readyToPush) {
 					temparr.push(clonedPlayerList[i].userid);
 				}
 			}
 		}
-		if(temparr.length > 0){
-			this.addUsersToMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function(){
+		if (temparr.length > 0) {
+			this.addUsersToMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function () {
 				//regionlist should be updated
-				for(var i = regionListBox2.length - 1; i >= 0 ; i--)
+				for (var i = regionListBox2.length - 1; i >= 0; i--)
 					regionListBox2.options.remove(i);
-				
-				for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
+
+				for (var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 					var option = document.createElement("option");
 					option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 					option.textContent = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
@@ -3818,27 +3818,27 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 			}.bind(this));
 		}
-		for(var i = regionListBox1.length - 1; i >= 0 ; i--)
+		for (var i = regionListBox1.length - 1; i >= 0; i--)
 			regionListBox1.options.remove(i);
 		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
 
-		for(var i = 0; i < clonedPlayerList.length; i++) {
+		for (var i = 0; i < clonedPlayerList.length; i++) {
 			var option = document.createElement("option");
 			option.label = clonedPlayerList[i].name;
 			regionListBox1.add(option);
 		};
 
 	}.bind(this));
-	
+
 
 
 	var regionListBox2 = regionListContainer.appendChild(document.createElement("select"));
 	regionListBox2.className = "region-listbox";
 	regionListBox2.multiple = true;
 
-	
 
-	for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
+
+	for (var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 		var option = document.createElement("option");
 		option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 		option.textContent = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
@@ -3851,55 +3851,55 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 	regionRemoveButton.addEventListener("click", function (e) {
 		var temparr = [];
-		for(var i = 0; i < regionListBox2.length; i++){
-			if(regionListBox2.options[i].selected){
+		for (var i = 0; i < regionListBox2.length; i++) {
+			if (regionListBox2.options[i].selected) {
 				temparr.push(this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].id);
 			}
 		}
-		if(temparr.length > 0){
-			this.removeUsersFromMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function(){
+		if (temparr.length > 0) {
+			this.removeUsersFromMyProtectedRegion(temparr, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId, function () {
 				//regionlist should be updated
-				for(var i = 0; i < temparr.length; i++)
+				for (var i = 0; i < temparr.length; i++)
 					regionListBox2.remove(this.myRegions[this.regionPermissionsWindow.regionIndex][temparr[i]]);
 			}.bind(this));
 		}
 	}.bind(this));
 
-	regionPermissionsWindow.addElement("",regionPermissionsContainer);
+	regionPermissionsWindow.addElement("", regionPermissionsContainer);
 
 	var rep = (this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed <= this.MAX_REP_TO_DISPLAY) ? this.myRegions[this.regionPermissionsWindow.regionIndex].minRepAllowed : this.MAX_REP_TO_DISPLAY;
 
 	regionPermissionsWindow.addRange("Minimum Rep Allowed", 0, this.MAX_REP_TO_DISPLAY, rep, 1, function (value) {
 
-		if(regionPermissionsWindow.minRepTimeout)
+		if (regionPermissionsWindow.minRepTimeout)
 			clearTimeout(regionPermissionsWindow.minRepTimeout);
 
-		regionPermissionsWindow.minRepTimeout = setTimeout(function(){
-			this.setMinimumRepInProtectedRegion(value, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId);			
+		regionPermissionsWindow.minRepTimeout = setTimeout(function () {
+			this.setMinimumRepInProtectedRegion(value, this.myRegions[this.regionPermissionsWindow.regionIndex].regionId);
 		}.bind(this), 2000)
-		
+
 	}.bind(this));
 
 	regionPermissionsWindow.addButton("Close", function () {
 		regionPermissionsWindow.hide();
 	}.bind(this));
 
-	regionPermissionsWindow.reload = function(){
-		for(var i = regionListBox1.length - 1; i >= 0 ; i--)
+	regionPermissionsWindow.reload = function () {
+		for (var i = regionListBox1.length - 1; i >= 0; i--)
 			regionListBox1.options.remove(i);
-		for(var i = regionListBox2.length - 1; i >= 0 ; i--)
+		for (var i = regionListBox2.length - 1; i >= 0; i--)
 			regionListBox2.options.remove(i);
 
 		clonedPlayerList = JSON.parse(JSON.stringify(this.playerList)); //static playerlist
 
-		for(var i = 0; i < clonedPlayerList.length; i++) {
+		for (var i = 0; i < clonedPlayerList.length; i++) {
 			var option = document.createElement("option");
 			option.label = clonedPlayerList[i].name;
 			option.textContent = clonedPlayerList[i].name;
 			regionListBox1.add(option);
 		};
 
-		for(var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
+		for (var i = 0; i < this.myRegions[this.regionPermissionsWindow.regionIndex].permissions.length; i++) {
 			var option = document.createElement("option");
 			option.label = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
 			option.textContent = this.myRegions[this.regionPermissionsWindow.regionIndex].permissions[i].oldName;
@@ -3911,7 +3911,7 @@ DrawTogether.prototype.createRegionPermissionsWindow = function createRegionPerm
 
 };
 
-DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
+DrawTogether.prototype.createSettingsWindow = function createSettingsWindow() {
 	if (this.settingsWindow)
 		this.settingsWindow.parentNode.removeChild(this.settingsWindow);
 
@@ -3925,7 +3925,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	for (var k = 0; k < this.defaultUserSettings.length; k++) {
 		this.userSettings.addControl(this.defaultUserSettings[k]);
 	}
-	
+
 	this.userSettings.addControl({
 		title: "Loaded chunks",
 		type: "range",
@@ -3938,14 +3938,14 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			this.paint.background.settings.maxLoadedChunks = chunks;
 		}.bind(this)
 	});
-	
+
 	this.paint.public.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
 	this.paint.background.settings.maxLoadedChunks = this.userSettings.getRangeValue("Loaded chunks");
-	
+
 	for (var k = 0; k < this.defaultVideoExportSettings.length; k++) {
 		this.videoExportSettings.addControl(this.defaultVideoExportSettings[k]);
 	}
-	
+
 	this.videoExportSettings.addButton("Close", function () {
 		this.videoExportSettings.hide();
 	}.bind(this));
@@ -3972,8 +3972,8 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	advancedOptions.addBoolean("Flip vertical (k)", false, function (value) {
 		this.paint.setVerticalMirror(value);
 	}.bind(this));
-	
-	var blurOnZoomCallback = function blurOnZoomCallback (val) {
+
+	var blurOnZoomCallback = function blurOnZoomCallback(val) {
 		this.paint.public.settings.blurOnZoom = val;
 		this.paint.background.settings.blurOnZoom = val;
 		this.paint.local.settings.blurOnZoom = val;
@@ -3981,17 +3981,17 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.background.relativeZoom(1);
 		this.paint.local.relativeZoom(1);
 	}.bind(this);
-	
+
 	// addControl persistently remembers last state 
 	advancedOptions.addControl({
-        type: "boolean",
-        title: "Blur on zoom",
-        value: false,
+		type: "boolean",
+		title: "Blur on zoom",
+		value: false,
 		callback: blurOnZoomCallback.bind(this)
-    });
-	
-	blurOnZoomCallback(this.advancedOptions.getBoolean("Blur on zoom"));	
-	
+	});
+
+	blurOnZoomCallback(this.advancedOptions.getBoolean("Blur on zoom"));
+
 	var zoomLevelCallback = function (val) {
 		this.paint.public.settings.zoomLevelToPixelate = val;
 		this.paint.background.settings.zoomLevelToPixelate = val;
@@ -4000,32 +4000,32 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.paint.background.relativeZoom(1);
 		this.paint.local.relativeZoom(1);
 	}.bind(this);
-	
+
 	advancedOptions.addControl({
-        type: "range",
-        title: "The zoom-in level where it becomes pixelated",
-        value: 3,
+		type: "range",
+		title: "The zoom-in level where it becomes pixelated",
+		value: 3,
 		step: 1,
 		min: 1,
 		max: 30,
 		callback: zoomLevelCallback.bind(this)
-    });
-	
+	});
+
 	zoomLevelCallback(this.advancedOptions.getRangeValue("The zoom-in level where it becomes pixelated"));
 
-    advancedOptions.addBoolean("Use block brush", false, function (value) {
-        this.paint.setCaptype(value ? 'square' : 'round' );
-    }.bind(this));
+	advancedOptions.addBoolean("Use block brush", false, function (value) {
+		this.paint.setCaptype(value ? 'square' : 'round');
+	}.bind(this));
 
 	advancedOptions.addButton("Generate grid", function () {
 		this.openGenerateGridWindow();
 		advancedOptions.hide();
 	}.bind(this));
-	
+
 	advancedOptions.addButton("Toggle auto camera", function () {
 		this.toggleFollow()
 	}.bind(this));
-	
+
 	advancedOptions.addButton("Close (a)", function () {
 		advancedOptions.hide();
 	});
@@ -4047,7 +4047,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		this.closeSettingsWindow();
 		advancedOptions.show();
 	}.bind(this));
-	
+
 	var videoExportSettingsButton = settingsContainer.appendChild(document.createElement("div"));
 	videoExportSettingsButton.appendChild(document.createTextNode("Open video export settings"));
 	videoExportSettingsButton.className = "drawtogether-button";
@@ -4073,15 +4073,15 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	var chatBeepVolumeSlider = ChatFilterListContainer.appendChild(document.createElement("input"));
 	chatBeepVolumeSlider.type = "range";
 	chatBeepVolumeSlider.className = "chat-filter-visibility";
-	if(localStorage.getItem("chatBeepVolume"))
+	if (localStorage.getItem("chatBeepVolume"))
 		chatBeepVolumeSlider.value = localStorage.getItem("chatBeepVolume") * 100;
 	else
 		chatBeepVolumeSlider.value = 100;
-	chatBeepVolumeSlider.addEventListener("change", function (e) {		
+	chatBeepVolumeSlider.addEventListener("change", function (e) {
 		localStorage.setItem("chatBeepVolume", chatBeepVolumeSlider.value * 0.01);
 	}.bind(this));
 
-	
+
 
 	//var muteNewPeopleCheckbox = muteNewPeopleLabel.appendChild(document.createElement("input"));
 	//muteNewPeopleCheckbox.type = "checkbox";
@@ -4095,7 +4095,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 
 	var chatFilterByWordsTable = chatFilterByWordsTableWrapper.appendChild(document.createElement("table"));
 	chatFilterByWordsTable.className = "chat-filter-table";
-	
+
 	var chatFilterByWordsHeaderRow = chatFilterByWordsTable.appendChild(document.createElement("tr"));
 
 	chatFilterByWordsHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Word/Phrase")).parentNode);
@@ -4128,7 +4128,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			chatFilterByWordsArr[k].mute,
 			chatFilterByWordsArr[k].globalNotification,
 			chatFilterByWordsArr[k].overrideMute
-			);
+		);
 	}
 
 	chatFilterByWordsAddRowButton.addEventListener("click", function (e) {
@@ -4140,15 +4140,15 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		var index = chatFilterByWordsArr.length - 1;
 
 		this.createFilterByWordRow(
-				newWordRow,
-				index,
-				chatFilterByWordsArr[index].inputText,
-				chatFilterByWordsArr[index].looseMatch,
-				chatFilterByWordsArr[index].visibility,
-				chatFilterByWordsArr[index].mute,
-				chatFilterByWordsArr[index].globalNotification,
-				chatFilterByWordsArr[index].overrideMute
-				);
+			newWordRow,
+			index,
+			chatFilterByWordsArr[index].inputText,
+			chatFilterByWordsArr[index].looseMatch,
+			chatFilterByWordsArr[index].visibility,
+			chatFilterByWordsArr[index].mute,
+			chatFilterByWordsArr[index].globalNotification,
+			chatFilterByWordsArr[index].overrideMute
+		);
 
 		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
 	}.bind(this));
@@ -4162,7 +4162,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 
 	var chatFilterByPlayerTable = chatFilterByPlayerTableWrapper.appendChild(document.createElement("table"));
 	chatFilterByPlayerTable.className = "chat-filter-table chat-filter-player-table";
-	
+
 	var chatFilterByPlayerHeaderRow = chatFilterByPlayerTable.appendChild(document.createElement("tr"));
 
 	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Name")).parentNode);
@@ -4171,7 +4171,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Global notification")).parentNode);
 	chatFilterByPlayerHeaderRow.appendChild(document.createElement("th").appendChild(document.createTextNode("Override Mute Chat")).parentNode);
 
-	chatFilterOptions.addElement("",ChatFilterListContainer);
+	chatFilterOptions.addElement("", ChatFilterListContainer);
 
 	chatFilterOptions.reload = function chatFilterOptionsReload() { //naming just for stack trace
 		while (chatFilterByPlayerTable.children.length > 1) {
@@ -4191,8 +4191,8 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 			var overrideMute = false;
 			var socketid = clonedPlayerList[i].id;
 
-			for(var k = 0; k < chatFilterByPlayerArr.length; k++){
-				if(chatFilterByPlayerArr[k].userid === clonedPlayerList[i].userid){ // found 
+			for (var k = 0; k < chatFilterByPlayerArr.length; k++) {
+				if (chatFilterByPlayerArr[k].userid === clonedPlayerList[i].userid) { // found 
 					nameInput += "(" + chatFilterByPlayerArr[k].name + ")";
 					visibility = chatFilterByPlayerArr[k].visibility;
 					mute = chatFilterByPlayerArr[k].mute;
@@ -4202,7 +4202,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 				}
 			}
 			var row = chatFilterByPlayerTable.appendChild(document.createElement("tr"));
-			
+
 			this.createFilterByPlayerRow(
 				row,
 				userid,
@@ -4212,7 +4212,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 				globalNotification,
 				overrideMute,
 				socketid
-				);
+			);
 		}
 
 		for (var v = 0; v < chatFilterByPlayerArr.length; v++) {
@@ -4232,7 +4232,7 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 				mute,
 				globalNotification,
 				overrideMute
-				);
+			);
 		}
 	}.bind(this);
 
@@ -4251,62 +4251,62 @@ DrawTogether.prototype.createSettingsWindow = function createSettingsWindow () {
 		chatFilterOptions.reload();
 		chatFilterOptions.show();
 	}.bind(this));
-	
+
 	var close = settingsContainer.appendChild(document.createElement("div"));
 	close.appendChild(document.createTextNode("Close settings window"))
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.addEventListener("click", this.closeSettingsWindow.bind(this));
 };
 
-DrawTogether.prototype.getFilterByPlayerArr = function getFilterByPlayerArr (playerlist) {
+DrawTogether.prototype.getFilterByPlayerArr = function getFilterByPlayerArr(playerlist) {
 	var chatFilterByPlayerArrStringified = localStorage.getItem("chatFilterByPlayerArr");
 	var chatFilterByPlayerArr = JSON.parse(chatFilterByPlayerArrStringified);
 	var changed = false;
 
-	if(!chatFilterByPlayerArr || !chatFilterByPlayerArr.length || chatFilterByPlayerArr.length < 1 || typeof chatFilterByPlayerArr[0] !== "object"){
+	if (!chatFilterByPlayerArr || !chatFilterByPlayerArr.length || chatFilterByPlayerArr.length < 1 || typeof chatFilterByPlayerArr[0] !== "object") {
 		chatFilterByPlayerArr = [];
 		changed = true;
 	}
-	if(playerlist)
-	for (var i = 0; i < chatFilterByPlayerArr.length; i++){
-		if (!chatFilterByPlayerArr[i].userid) {
-			var found = false;
-			for (var k = 0; k < playerlist.length; k++) {
-				if(chatFilterByPlayerArr[i].socketid == playerlist[k].id)
-					found = true;
-			}
-			if(!found){
-				chatFilterByPlayerArr.splice(i, 1);
-				changed = true;
+	if (playerlist)
+		for (var i = 0; i < chatFilterByPlayerArr.length; i++) {
+			if (!chatFilterByPlayerArr[i].userid) {
+				var found = false;
+				for (var k = 0; k < playerlist.length; k++) {
+					if (chatFilterByPlayerArr[i].socketid == playerlist[k].id)
+						found = true;
+				}
+				if (!found) {
+					chatFilterByPlayerArr.splice(i, 1);
+					changed = true;
+				}
 			}
 		}
-	}
-	if(changed)
+	if (changed)
 		localStorage.setItem("chatFilterByPlayerArr", JSON.stringify(chatFilterByPlayerArr));
 	return chatFilterByPlayerArr;
 };
 
-DrawTogether.prototype.searchForPlayerInFilterArr = function searchForPlayerInFilterArr (arr, userid, socketid) {
-	for(var i = 0; i < arr.length; i++) {
-		if(socketid && arr[i].socketid == socketid)
+DrawTogether.prototype.searchForPlayerInFilterArr = function searchForPlayerInFilterArr(arr, userid, socketid) {
+	for (var i = 0; i < arr.length; i++) {
+		if (socketid && arr[i].socketid == socketid)
 			return i;
-		if( arr[i].userid == userid )
+		if (arr[i].userid == userid)
 			return i
 	}
 	return -1;
 }
 
-DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr (addEmptyObjectToEnd){
+DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr(addEmptyObjectToEnd) {
 	var chatFilterByWordsArrStringified = localStorage.getItem("chatFilterByWordsArr");
 	var chatFilterByWordsArr = [];
 
 	chatFilterByWordsArr = JSON.parse(chatFilterByWordsArrStringified);
-	if(!chatFilterByWordsArr || !chatFilterByWordsArr.length || chatFilterByWordsArr.length < 1 || typeof chatFilterByWordsArr[0] !== "object"){
+	if (!chatFilterByWordsArr || !chatFilterByWordsArr.length || chatFilterByWordsArr.length < 1 || typeof chatFilterByWordsArr[0] !== "object") {
 		chatFilterByWordsArr = []; // reset array
 		addEmptyObjectToEnd = true
 	}
 
-	if(addEmptyObjectToEnd){
+	if (addEmptyObjectToEnd) {
 		chatFilterByWordsArr.push({
 			inputText: "",
 			looseMatch: true,
@@ -4316,15 +4316,15 @@ DrawTogether.prototype.getFilterByWordsArr = function getFilterByWordsArr (addEm
 			overrideMute: false
 		});
 
-	localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr)); // resanitize array
+		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr)); // resanitize array
 	}
 
 	return chatFilterByWordsArr;
 };
 
-DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRow (newPlayerRow, userid, name, visibility, mute, globalNotification, overrideMute, socketid ) {
+DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRow(newPlayerRow, userid, name, visibility, mute, globalNotification, overrideMute, socketid) {
 	newPlayerRow.dataset.userid = userid;
-	if(socketid)
+	if (socketid)
 		newPlayerRow.dataset.socketid = socketid;
 
 	var nameRowData1 = newPlayerRow.appendChild(document.createElement("td"));
@@ -4336,11 +4336,10 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	visibilitySlider.type = "range";
 	visibilitySlider.className = "chat-filter-visibility";
 	visibilitySlider.value = visibility || 100;
-	visibilitySlider.addEventListener("change", function (e) {		
+	visibilitySlider.addEventListener("change", function (e) {
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
 		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
-		if(indexOfPlayer == -1)
-		{
+		if (indexOfPlayer == -1) {
 			//create and push player object
 			var playerObject = {
 				userid: userid,
@@ -4366,11 +4365,10 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	muteCheckbox.type = "checkbox";
 	muteCheckbox.className = "chat-filter-mute";
 	muteCheckbox.checked = !mute;
-	muteCheckbox.addEventListener("change", function (e) {		
+	muteCheckbox.addEventListener("change", function (e) {
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
 		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
-		if(indexOfPlayer == -1)
-		{
+		if (indexOfPlayer == -1) {
 			//create and push player object
 			var playerObject = {
 				userid: userid,
@@ -4396,11 +4394,10 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	globalNotificationCheckbox.type = "checkbox";
 	globalNotificationCheckbox.className = "chat-filter-globalNotification";
 	globalNotificationCheckbox.checked = globalNotification;
-	globalNotificationCheckbox.addEventListener("change", function (e) {		
+	globalNotificationCheckbox.addEventListener("change", function (e) {
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
 		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
-		if(indexOfPlayer == -1)
-		{
+		if (indexOfPlayer == -1) {
 			//create and push player object
 			var playerObject = {
 				userid: userid,
@@ -4428,11 +4425,10 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	overrideMuteChatCheckbox.type = "checkbox";
 	overrideMuteChatCheckbox.className = "chat-filter-overrideMute";
 	overrideMuteChatCheckbox.checked = overrideMute;
-	overrideMuteChatCheckbox.addEventListener("change", function (e) {		
+	overrideMuteChatCheckbox.addEventListener("change", function (e) {
 		var chatFilterByPlayerArr = this.getFilterByPlayerArr();
 		var indexOfPlayer = this.searchForPlayerInFilterArr(chatFilterByPlayerArr, userid, socketid)
-		if(indexOfPlayer == -1)
-		{
+		if (indexOfPlayer == -1) {
 			//create and push player object
 			var playerObject = {
 				userid: userid,
@@ -4454,7 +4450,7 @@ DrawTogether.prototype.createFilterByPlayerRow = function createFilterByPlayerRo
 	}.bind(this));
 };
 
-DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (newWordRow, index, inputText, looseMatch, visibility, mute, globalNotification, overrideMute) {
+DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow(newWordRow, index, inputText, looseMatch, visibility, mute, globalNotification, overrideMute) {
 	newWordRow.dataset.index = index;
 
 	var newWordRowData1 = newWordRow.appendChild(document.createElement("td"));
@@ -4479,7 +4475,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 		chatFilterByWordsArr[index].looseMatch = looseMatchCheckbox.checked;
 		localStorage.setItem("chatFilterByWordsArr", JSON.stringify(chatFilterByWordsArr));
 	}.bind(this));
-	
+
 
 	var newWordRowData3 = newWordRow.appendChild(document.createElement("td"));
 	var newWordVisibilitySlider = newWordRowData3.appendChild(document.createElement("input"));
@@ -4535,7 +4531,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	removeRowButton.addEventListener("click", function (e) {
 		var chatFilterByWordsArr = this.getFilterByWordsArr();
 		chatFilterByWordsArr.splice(index, 1);
-		if(chatFilterByWordsArr.length < 1){
+		if (chatFilterByWordsArr.length < 1) {
 			var addEmptyObjectToEnd = true;
 			chatFilterByWordsArr = this.getFilterByWordsArr(addEmptyObjectToEnd);
 		}
@@ -4544,7 +4540,7 @@ DrawTogether.prototype.createFilterByWordRow = function createFilterByWordRow (n
 	}.bind(this));
 };
 
-DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
+DrawTogether.prototype.createAccountWindow = function createAccountWindow() {
 	if (this.accWindow) {
 		this.accWindow.parentNode.removeChild(this.accWindow);
 	}
@@ -4596,7 +4592,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 			resetButton.addEventListener("click", function () {
 				this.resetProtectedRegions();
 			}.bind(this));
-			
+
 			var referralButton = formContainer.appendChild(document.createElement("div"));
 			referralButton.appendChild(document.createTextNode("Referral"));
 			referralButton.className = "drawtogether-button";
@@ -4612,7 +4608,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 				this.closeAccountWindow();
 				this.openPremiumBuyWindow();
 			}.bind(this));
-			
+
 			var bountiesButton = formContainer.appendChild(document.createElement("div"));
 			bountiesButton.appendChild(document.createTextNode("Bounties"));
 			bountiesButton.className = "drawtogether-button";
@@ -4635,11 +4631,11 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 					this.network.socket.emit("uKey", this.account.uKey);
 				}.bind(this));
 			}.bind(this));
-			
+
 			this.getFavorites();
 			this.getMyProtectedRegions();
 		}
-		
+
 		var close = formContainer.appendChild(document.createElement("div"));
 		close.appendChild(document.createTextNode("Close account window"));
 		close.className = "drawtogether-button drawtogether-close-button";
@@ -4647,7 +4643,7 @@ DrawTogether.prototype.createAccountWindow = function createAccountWindow () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
+DrawTogether.prototype.createRoomWindow = function createRoomWindow() {
 	this.roomWindow = this.container.appendChild(document.createElement("div"));
 	this.roomWindow.className = "drawtogether-window drawtogether-roomwindow";
 
@@ -4669,7 +4665,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	this.roomInput = roomWindowConentContainer.appendChild(document.createElement("input"));
 	this.roomInput.type = "text";
 	this.roomInput.placeholder = "Room name";
-	
+
 	var roomButton = roomWindowConentContainer.appendChild(document.createElement("div"));
 	roomButton.appendChild(document.createTextNode("Create public room"));
 	roomButton.className = "drawtogether-button";
@@ -4680,7 +4676,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 			this.changeRoom(this.roomInput.value);
 		this.closeRoomWindow();
 	}.bind(this));
-	
+
 	var roomButton = roomWindowConentContainer.appendChild(document.createElement("div"));
 	roomButton.appendChild(document.createTextNode("Create private room"));
 	roomButton.className = "drawtogether-button create-private-room";
@@ -4695,7 +4691,7 @@ DrawTogether.prototype.createRoomWindow = function createRoomWindow () {
 	close.addEventListener("click", this.closeRoomWindow.bind(this));
 };
 
-DrawTogether.prototype.createControls = function createControls () {
+DrawTogether.prototype.createControls = function createControls() {
 	var controlContainer = this.container.appendChild(document.createElement("div"));
 	controlContainer.className = "drawtogether-control-container";
 	this.controls = new Controls(controlContainer, this.createControlArray());
@@ -4705,7 +4701,7 @@ DrawTogether.prototype.createControls = function createControls () {
 	sharediv.className = "addthis_sharing_toolbox";
 };
 
-DrawTogether.prototype.formLogin = function formLogin () {
+DrawTogether.prototype.formLogin = function formLogin() {
 	// Login using the data of the account form
 	var email = this.emailInput.value;
 	var pass = this.passInput.value;
@@ -4724,7 +4720,7 @@ DrawTogether.prototype.formLogin = function formLogin () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.formRegister = function formRegister () {
+DrawTogether.prototype.formRegister = function formRegister() {
 	var email = this.emailInput.value;
 	var pass = this.passInput.value;
 
@@ -4744,7 +4740,7 @@ DrawTogether.prototype.formRegister = function formRegister () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.accountError = function accountError (msg) {
+DrawTogether.prototype.accountError = function accountError(msg) {
 	while (this.loginMessage.firstChild)
 		this.loginMessage.removeChild(this.loginMessage.firstChild);
 
@@ -4755,7 +4751,7 @@ DrawTogether.prototype.accountError = function accountError (msg) {
 	err.appendChild(document.createTextNode(msg));
 };
 
-DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
+DrawTogether.prototype.accountSuccess = function accountSuccess(success) {
 	while (this.loginMessage.firstChild)
 		this.loginMessage.removeChild(this.loginMessage.firstChild);
 
@@ -4766,12 +4762,12 @@ DrawTogether.prototype.accountSuccess = function accountSuccess (success) {
 	msg.appendChild(document.createTextNode(success));
 };
 
-DrawTogether.prototype.uploadImage = function uploadImage (album) {
+DrawTogether.prototype.uploadImage = function uploadImage(album) {
 	// Remove the previous url
 	while (this.imgurUrl.firstChild) {
 		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
 	}
-	if(!album) album = "main";
+	if (!album) album = "main";
 	this.showShareMessage("Uploading...");
 	// Let the server upload the drawing to imgur and give us the url back
 	this.network.socket.emit("uploadimage", this.preview.toDataURL().split(",")[1], album, function (data) {
@@ -4784,9 +4780,9 @@ DrawTogether.prototype.uploadImage = function uploadImage (album) {
 	}.bind(this));
 };
 
-DrawTogether.prototype.uploadBanImage = function uploadBanImage () {
+DrawTogether.prototype.uploadBanImage = function uploadBanImage() {
 	var album = "ban";
-	
+
 	this.network.socket.emit("uploadimage", this.lastBanSnapshot.split(",")[1], album, function (data) {
 		if (data.error) {
 			console.log("ban image error", data.error);
@@ -4795,7 +4791,7 @@ DrawTogether.prototype.uploadBanImage = function uploadBanImage () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.showShareError = function showShareError (error) {
+DrawTogether.prototype.showShareError = function showShareError(error) {
 	while (this.shareError.firstChild) {
 		this.shareError.removeChild(this.shareError.firstChild);
 	}
@@ -4805,7 +4801,7 @@ DrawTogether.prototype.showShareError = function showShareError (error) {
 	errorMessage.className = "drawtogether-error drawtogether-share-error";
 };
 
-DrawTogether.prototype.showShareMessage = function showShareMessage (msg) {
+DrawTogether.prototype.showShareMessage = function showShareMessage(msg) {
 	while (this.imgurUrl.firstChild) {
 		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
 	}
@@ -4815,7 +4811,7 @@ DrawTogether.prototype.showShareMessage = function showShareMessage (msg) {
 	urlMessage.className = "drawtogether-share-url";
 };
 
-DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
+DrawTogether.prototype.showImgurUrl = function showImgurUrl(url) {
 	while (this.imgurUrl.firstChild) {
 		this.imgurUrl.removeChild(this.imgurUrl.firstChild);
 	}
@@ -4828,7 +4824,7 @@ DrawTogether.prototype.showImgurUrl = function showImgurUrl (url) {
 	this.shareToRedditButton.href = "http://www.reddit.com/r/anondraw/submit?url=" + encodeURIComponent(url);
 };
 
-DrawTogether.prototype.toggleFollow = function toggleFollow () {
+DrawTogether.prototype.toggleFollow = function toggleFollow() {
 	this._autoMoveScreen = !this._autoMoveScreen;
 
 	if (this._autoMoveScreen)
@@ -4839,14 +4835,14 @@ DrawTogether.prototype.toggleFollow = function toggleFollow () {
 	}
 };
 
-DrawTogether.prototype.createScuttlersOverlay = function createScuttlersOverlay () {
+DrawTogether.prototype.createScuttlersOverlay = function createScuttlersOverlay() {
 	var shareWindow = this.container.appendChild(document.createElement("div"));
 	shareWindow.className = "drawtogether-sharewindow";
 	shareWindow.style.display = "block";
 
 	var h1 = shareWindow.appendChild(document.createElement("h1"));
 	h1.appendChild(document.createTextNode("Scuttlers has been released!"));
-	
+
 	var preview = shareWindow.appendChild(document.createElement("div"));
 	preview.style.margin = "3em";
 	preview.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/pE737MO-8YQ" frameborder="0" allowfullscreen></iframe>';
@@ -4856,7 +4852,7 @@ DrawTogether.prototype.createScuttlersOverlay = function createScuttlersOverlay 
 	close.className = "drawtogether-button drawtogether-close-button";
 	close.href = "http://store.steampowered.com/app/689040/Scuttlers/";
 	close.target = "_blank";
-	
+
 	var close = shareWindow.appendChild(document.createElement("div"));
 	close.appendChild(document.createTextNode("No thanks"));
 	close.className = "drawtogether-button drawtogether-close-button";
@@ -4865,14 +4861,14 @@ DrawTogether.prototype.createScuttlersOverlay = function createScuttlersOverlay 
 	});
 };
 
-DrawTogether.prototype.createShareWindow = function createShareWindow () {
+DrawTogether.prototype.createShareWindow = function createShareWindow() {
 	var shareWindow = this.container.appendChild(document.createElement("div"));
 	shareWindow.className = "drawtogether-sharewindow";
 	this.shareWindow = shareWindow;
 
 	var h1 = shareWindow.appendChild(document.createElement("h1"));
 	h1.appendChild(document.createTextNode("A new way of sharing"));
-	
+
 	var preview = shareWindow.appendChild(document.createElement("img"));
 	preview.className = "drawtogether-preview-canvas"
 	preview.src = "images/tutorial/share.gif";
@@ -4883,7 +4879,7 @@ DrawTogether.prototype.createShareWindow = function createShareWindow () {
 	close.addEventListener("click", this.closeShareWindow.bind(this));
 };
 
-DrawTogether.prototype.createModeSelector = function createModeSelector () {
+DrawTogether.prototype.createModeSelector = function createModeSelector() {
 	var selectWindow = this.container.appendChild(document.createElement("div"));
 	selectWindow.className = "drawtogether-selectwindow";
 	this.selectWindow = selectWindow;
@@ -4937,92 +4933,92 @@ DrawTogether.prototype.createModeSelector = function createModeSelector () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.openDiscordWindow = function openDiscordWindow () {
-	var discordWindow = this.gui.createWindow({ title: "Voice chat: Discord"});
+DrawTogether.prototype.openDiscordWindow = function openDiscordWindow() {
+	var discordWindow = this.gui.createWindow({ title: "Voice chat: Discord" });
 
 	var container = discordWindow.appendChild(document.createElement("div"));
-	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';	
+	container.innerHTML = '<iframe src="https://discordapp.com/widget?id=187008981837938689&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>';
 };
 
-DrawTogether.prototype.openGithub = function openGithub () {
+DrawTogether.prototype.openGithub = function openGithub() {
 	window.open("https://github.com/Squarific/anondraw");
 	ga('send', 'event', 'githubcollab', 'open');
 };
 
-DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow () {
-	var scuttlersWindow = this.gui.createWindow({ title: "Scuttlers trailer"});
-	
+DrawTogether.prototype.openScuttlersWindow = function openScuttlersWindow() {
+	var scuttlersWindow = this.gui.createWindow({ title: "Scuttlers trailer" });
+
 	ga("send", "event", "window", "scuttlers");
-	
+
 	var content = scuttlersWindow.appendChild(document.createElement("div"));
 	content.className = "content";
-	
+
 	var title = content.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Scuttlers trailer"));
-	
+
 	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("I'm developing a game called scuttlers. Feel free to check out the trailer and let me know what you think!"));
-	
+
 	var video = content.appendChild(document.createElement("div"));
 	video.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/pE737MO-8YQ" frameborder="0" allowfullscreen></iframe>';
-	
+
 	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("More info: "));
-	
+
 	var a = p.appendChild(document.createElement("a"));
 	a.href = "https://www.playscuttlers.com";
 	a.alt = "Scuttlers official website";
 	a.appendChild(document.createTextNode("https://www.playscuttlers.com"));
 };
 
-DrawTogether.prototype.openScuttlersDateWindow = function openScuttlersDateWindow () {
-	var scuttlersWindow = this.gui.createWindow({ title: "Scuttlers release announcement"});
-	
+DrawTogether.prototype.openScuttlersDateWindow = function openScuttlersDateWindow() {
+	var scuttlersWindow = this.gui.createWindow({ title: "Scuttlers release announcement" });
+
 	ga("send", "event", "window", "scuttlersannouncement");
-	
+
 	var content = scuttlersWindow.appendChild(document.createElement("div"));
 	content.className = "content";
-	
+
 	var title = content.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Scuttlers release announcment"));
-	
+
 	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("We will be releasing 15 september! Our steam store page is also live:"));
-	
+
 	var a = p.appendChild(document.createElement("a"));
 	a.href = "https://store.steampowered.com/app/689040/Scuttlers/";
 	a.alt = "steam store page";
 	a.appendChild(document.createTextNode("Steam store page."));
-	
+
 	var video = content.appendChild(document.createElement("div"));
 	video.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/24KaGZwCB8s" frameborder="0" allowfullscreen></iframe>';
 
 	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("More info: "));
-	
+
 	var a = p.appendChild(document.createElement("a"));
 	a.href = "https://www.playscuttlers.com";
 	a.alt = "Scuttlers official website";
 	a.appendChild(document.createTextNode("https://www.playscuttlers.com"));
 };
 
-DrawTogether.prototype.openBountyWindow = function openBountyWindow () {
-	var scuttlersWindow = this.gui.createWindow({ title: "New way to support us"});
-	
+DrawTogether.prototype.openBountyWindow = function openBountyWindow() {
+	var scuttlersWindow = this.gui.createWindow({ title: "New way to support us" });
+
 	ga("send", "event", "window", "bounty");
-	
+
 	var content = scuttlersWindow.appendChild(document.createElement("div"));
 	content.className = "content";
-	
+
 	var title = content.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Introducing bountysource"));
-	
+
 	var title = content.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("How does it work."));
-	
+
 	var p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("You go to "));
-	
+
 	var a = p.appendChild(document.createElement("a"));
 	a.href = "https://www.bountysource.com/trackers/11190661-squarific-anondraw";
 	a.title = "Anondraw bountysource";
@@ -5030,13 +5026,13 @@ DrawTogether.prototype.openBountyWindow = function openBountyWindow () {
 	a.appendChild(document.createTextNode("bountysource"));
 
 	p.appendChild(document.createTextNode(" and put a bounty on whatever feature you want to see. Anyone can then attempt to implement it for the bounty."));
-	
+
 	p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("To reward you in the meantime, putting a bounty also gives you rep. Just send a mail to bounty@anondraw.com with the amount you pledged. (0.5 euro = 1rep)."));
-	
+
 	p = content.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("To add a feature to the bountysource list add an 'issue' to the github here: "));
-	
+
 	var a = p.appendChild(document.createElement("a"));
 	a.href = "https://github.com/Squarific/Anondraw/issues";
 	a.title = "Anondraw github";
@@ -5044,7 +5040,7 @@ DrawTogether.prototype.openBountyWindow = function openBountyWindow () {
 	a.appendChild(document.createTextNode("github issues"));
 };
 
-DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
+DrawTogether.prototype.openReferralWindow = function openReferralWindow() {
 	var referralWindow = this.gui.createWindow({ title: "Referrals" });
 
 	var container = referralWindow.appendChild(document.createElement("div"))
@@ -5055,13 +5051,13 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Want to earn some extra rep and goodies? Why not get your friends to join?"));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("If someone registers via your link they will be marked as your referral. Then if they get 10 rep they will become confirmed and you will get a reward."));
-	
+
 	var title = container.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Rewards"));
-	
+
 	var ol = container.appendChild(document.createElement("ol"));
 
 	var features = ["1: You get an extra rep per confirmed referral (always)", "10: you get a nice referral icon to show off", "50: you'll get an anondraw tshirt (no delivery to the moon)", "100: TBA"];
@@ -5069,13 +5065,13 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 		var li = ol.appendChild(document.createElement("li"));
 		li.appendChild(document.createTextNode(features[k]));
 	}
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("If one of your referrals gets premium, you get it too! (Already have premium? Then you get 10 rep)"));
-	
+
 	var title = container.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Link"));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Your link is: "));
 
@@ -5086,60 +5082,59 @@ DrawTogether.prototype.openReferralWindow = function openReferralWindow () {
 	link.title = "Your referral link";
 };
 
-DrawTogether.prototype.outlineProtectedRegion = function outlineProtectedRegion (region, ignoreTimeout) {
+DrawTogether.prototype.outlineProtectedRegion = function outlineProtectedRegion(region, ignoreTimeout) {
 	//Visible protected areas.
-	if(typeof this.outlineRegionTimeout !== "undefined" && !ignoreTimeout){
+	if (typeof this.outlineRegionTimeout !== "undefined" && !ignoreTimeout) {
 		clearTimeout(this.outlineRegionTimeout);
 	}
 	var startTime = Date.now();
-	var loop = function loop(){
-		if(Date.now() < startTime + 2000 ){
+	var loop = function loop() {
+		if (Date.now() < startTime + 2000) {
 			var width = region.maxX - region.minX;
 			var height = region.maxY - region.minY;
 			var lefttop = [region.minX, region.minY]
-			
+
 			anondraw.collab.paint.previewGrid(lefttop, 1, width, height, 0);
 			this.outlineRegionTimeout = setTimeout(loop.bind(this), 10);
 		}
-		else
-		{
-			anondraw.collab.paint.previewGrid([0,0],0,0,0,0);
+		else {
+			anondraw.collab.paint.previewGrid([0, 0], 0, 0, 0, 0);
 		}
 	};
 	loop.apply(this);
-	
+
 };
 
 DrawTogether.prototype.updateGeneratedGridPreview = function updateGeneratedGridPreview(generationSettings, from, to) {
-	if(generationSettings == "Clear Grid Preview"){
-		this.paint.previewGrid([0,0],0,0,0,0);
+	if (generationSettings == "Clear Grid Preview") {
+		this.paint.previewGrid([0, 0], 0, 0, 0, 0);
 		return;
 	}
 	var squares = generationSettings.getRangeValue("Squares");
 	var gutter = generationSettings.getRangeValue("Gutter");
 
-	var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
-	if(gutter>maxgutter) gutter=maxgutter;
-	var guttertotal=gutter*(squares-1);
-	var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
+	var maxgutter = Math.ceil((Math.abs(to[0] - from[0]) - squares * 2) / (squares - 1));
+	if (gutter > maxgutter) gutter = maxgutter;
+	var guttertotal = gutter * (squares - 1);
+	var totalWidth = Math.floor(Math.abs(to[0] - from[0] - guttertotal) / (squares)) * squares + guttertotal;
 
-	var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+	var leftMargin = Math.floor((Math.abs(to[0] - from[0]) - totalWidth) / 2);
 
 	var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 	var sqheight = Math.abs(to[1] - from[1]);
-	
-	var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
-	
+
+	var leftTop = [Math.min(from[0], to[0]) + leftMargin, Math.min(from[1], to[1])];
+
 	this.paint.previewGrid(
-			leftTop,
-			squares,
-			sqwidth,
-			sqheight,
-			gutter
-		);
+		leftTop,
+		squares,
+		sqwidth,
+		sqheight,
+		gutter
+	);
 };
 
-DrawTogether.prototype.createGridInSelection = function createGridInSelection (from, to) {
+DrawTogether.prototype.createGridInSelection = function createGridInSelection(from, to) {
 	var generationSettings = QuickSettings.create(50, 50, "Grid settings");
 	generationSettings.addControl({
 		type: "range",
@@ -5150,7 +5145,7 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		step: 1,
 		callback: this.updateGeneratedGridPreview.bind(this, generationSettings, from, to)
 	});
-	
+
 	generationSettings.addControl({
 		type: "range",
 		title: "Gutter",
@@ -5160,21 +5155,21 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		step: 1,
 		callback: this.updateGeneratedGridPreview.bind(this, generationSettings, from, to)
 	});
-	generationSettings.addButton("Save for animation manager", function() {
+	generationSettings.addButton("Save for animation manager", function () {
 		var squares = generationSettings.getRangeValue("Squares");
 		var gutter = generationSettings.getRangeValue("Gutter");
-		
-		var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
-		if(gutter>maxgutter) gutter=maxgutter;
-		var guttertotal=gutter*(squares-1);
-		var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
 
-		var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+		var maxgutter = Math.ceil((Math.abs(to[0] - from[0]) - squares * 2) / (squares - 1));
+		if (gutter > maxgutter) gutter = maxgutter;
+		var guttertotal = gutter * (squares - 1);
+		var totalWidth = Math.floor(Math.abs(to[0] - from[0] - guttertotal) / (squares)) * squares + guttertotal;
+
+		var leftMargin = Math.floor((Math.abs(to[0] - from[0]) - totalWidth) / 2);
 
 		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 		var sqheight = Math.abs(to[1] - from[1]);
-		
-		var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
+
+		var leftTop = [Math.min(from[0], to[0]) + leftMargin, Math.min(from[1], to[1])];
 		this.myAnimations.push({
 			name: null,
 			fps: 16,
@@ -5189,24 +5184,24 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 		this.updateAnimationManager();
 		//
 	}.bind(this));
-	
+
 	generationSettings.addButton("Generate", function () {
 		var squares = generationSettings.getRangeValue("Squares");
 		var gutter = generationSettings.getRangeValue("Gutter");
-		
 
-		var maxgutter=Math.ceil((Math.abs(to[0] - from[0])-squares*2)/(squares-1));
-		if(gutter>maxgutter) gutter=maxgutter;
-		var guttertotal=gutter*(squares-1);
-		var totalWidth = Math.floor(Math.abs(to[0] - from[0]-guttertotal)/(squares))*squares+guttertotal;
 
-		var leftMargin = Math.floor((Math.abs(to[0] - from[0])-totalWidth)/2);
+		var maxgutter = Math.ceil((Math.abs(to[0] - from[0]) - squares * 2) / (squares - 1));
+		if (gutter > maxgutter) gutter = maxgutter;
+		var guttertotal = gutter * (squares - 1);
+		var totalWidth = Math.floor(Math.abs(to[0] - from[0] - guttertotal) / (squares)) * squares + guttertotal;
+
+		var leftMargin = Math.floor((Math.abs(to[0] - from[0]) - totalWidth) / 2);
 
 		var sqwidth = (totalWidth - gutter * (squares - 1)) / squares;
 		var sqheight = Math.abs(to[1] - from[1]);
-		
-		var leftTop = [Math.min(from[0], to[0])+leftMargin, Math.min(from[1], to[1])];
-		
+
+		var leftTop = [Math.min(from[0], to[0]) + leftMargin, Math.min(from[1], to[1])];
+
 		if (this.reputation >= 5 || (totalWidth > 1000 || sqwidth > 200)) {
 			console.log("Generating grid", squares, sqwidth, sqheight);
 			this.paint.generateGrid(
@@ -5220,33 +5215,33 @@ DrawTogether.prototype.createGridInSelection = function createGridInSelection (f
 			this.chat.addMessage("Grids wider than 1000 pixels or higher than 200 are limited to users with 5+ reputation.");
 		}
 	}.bind(this));
-	
+
 	generationSettings.addButton("Cancel", function () {
 		clearTimeout(this.updateGridPreviewTimeout);
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
 		this.updateGeneratedGridPreview("Clear Grid Preview");
 	}.bind(this));
-	
-	var loop = function loop(){
+
+	var loop = function loop() {
 		this.updateGeneratedGridPreview(generationSettings, from, to);
 		this.updateGridPreviewTimeout = setTimeout(loop.bind(this), 300);
-	};	
+	};
 	loop.apply(this);
 };
 
-DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow () {
+DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow() {
 	var generationSettings = QuickSettings.create(50, 50, "Generate grid");
 
 	generationSettings.addInfo("How to use", "The size of the lines is determined by your brush size. The color by the brush color.");
 	generationSettings.addInfo("Sizes", "The width and height are per square.");
-	
+
 	generationSettings.addText("Left top x", Math.round(this.paint.public.leftTopX));
 	generationSettings.addText("Left top y", Math.round(this.paint.public.leftTopY));
-	
+
 	generationSettings.addRange("Squares", 1, 30, 5, 1);
 	generationSettings.addRange("Width", 1, 500, 100, 1);
 	generationSettings.addRange("Height", 1, 500, 100, 1);
-	
+
 	generationSettings.addControl({
 		type: "range",
 		title: "Gutter",
@@ -5255,12 +5250,12 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 		value: 0,
 		step: 1
 	});
-	
+
 	generationSettings.addButton("Generate", function () {
 		var squares = generationSettings.getRangeValue("Squares");
 		var sqwidth = generationSettings.getRangeValue("Width");
 		var sqheight = generationSettings.getRangeValue("Height");
-		
+
 		if (this.reputation >= 5 || (squares <= 5 && sqwidth <= 200 && sqheight <= 200)) {
 			console.log("Generating grid", squares, sqwidth, sqheight);
 			this.paint.generateGrid(
@@ -5274,13 +5269,13 @@ DrawTogether.prototype.openGenerateGridWindow = function openGenerateGridWindow 
 			this.chat.addMessage("Grids with more than 6 squares or squares bigger than 200 pixels are limited to users with 5+ reputation.");
 		}
 	}.bind(this));
-	
+
 	generationSettings.addButton("close", function () {
 		generationSettings._panel.parentNode.removeChild(generationSettings._panel);
 	});
 };
 
-DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
+DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow() {
 	var premiumBuyWindow = this.gui.createWindow({ title: "Premium" });
 	premiumBuyWindow.classList.add("premiumwindow");
 
@@ -5289,7 +5284,7 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 
 	var title = container.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Support us: getting premium"));
-	
+
 	var ol = container.appendChild(document.createElement("ol"));
 
 	var features = [
@@ -5312,18 +5307,18 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 		{ icon: "brush", feature: "Custom brush *" },
 		{ icon: "noads", feature: "No more random ads" }
 	];
-	
+
 	for (var k = 0; k < features.length; k++) {
 		var li = ol.appendChild(document.createElement("li"));
 		var img = li.appendChild(document.createElement("img"));
 		img.src = "images/icons/premium/" + features[k].icon + ".png";
 		li.appendChild(document.createTextNode(features[k].feature));
 	}
-	
+
 	container.appendChild(document.createTextNode("* Coming soon"));
 	container.appendChild(document.createElement("br"));
 	container.appendChild(document.createElement("br"));
-	
+
 	var span = container.appendChild(document.createElement('span'));
 	span.style.fontStyle = 'italic';
 	span.appendChild(document.createTextNode("For the low price of 100 euro you get to give unlimited reputation."));
@@ -5339,34 +5334,46 @@ DrawTogether.prototype.openPremiumBuyWindow = function openPremiumBuyWindow () {
 		html += '<span class="label">Price:</span> <strong>20 euro</strong><br/>';
 		html += '<span class="label">Duration:</span> <strong>Forever</strong><br/><br/>';
 		html += 'Usually confirmed within 12 hours. Taking longer? Contact premium@anondraw.com <br/><br/>';
-		 
-		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="display:inline-block; margin-right:20%;">';
-	    	html +=	'<input type="hidden" name="cmd" value="_s-xclick">';
-	    	html += '<input type="hidden" name="hosted_button_id" value="RU7EGGG6RH4AG">';
-	    	html += '<table style="display:none;">';
-		    	html += '<tr><td><input type="hidden" name="on0" value="Account/Email">Account/Email</td></tr><tr><td><input type="text" value="' + this.account.mail + '" name="os0" maxlength="200"></td></tr>';
-	    	html += '</table>';
-	    	html += '<input type="image" style="margin-top:0.5em;" src="https://www.paypalobjects.com/en_US/BE/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">';
-	    	html += '<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">';
-	    html += '</form>';
-	    html += '<a class="coinbase-button" data-code="8be6985bf22cfd01ca0877cb6fb97249" data-button-style="custom_small" href="https://www.coinbase.com/checkouts/8be6985bf22cfd01ca0877cb6fb97249">Pay With Bitcoin</a>';
 
-	    html += '<br/><br/><br/>';
-	    html += 'Or via bank transfer: IBAN: BE59 0014 7710 8926<br/>';
-	    html += 'Be sure to include your username/email!<br/>';
-	    html += 'This might take a few days to clear, if you mail to premium@anondraw.com we will clear you faster.';
+		html += '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="display:inline-block; margin-right:20%;">';
+		html += '<input type="hidden" name="cmd" value="_s-xclick">';
+		html += '<input type="hidden" name="hosted_button_id" value="RU7EGGG6RH4AG">';
+		html += '<table style="display:none;">';
+		html += '<tr><td><input type="hidden" name="on0" value="Account/Email">Account/Email</td></tr><tr><td><input type="text" value="' + this.account.mail + '" name="os0" maxlength="200"></td></tr>';
+		html += '</table>';
+		html += '<input type="image" style="margin-top:0.5em;" src="https://www.paypalobjects.com/en_US/BE/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">';
+		html += '<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">';
+		html += '</form>';
+		html += '<a class="coinbase-button" data-code="8be6985bf22cfd01ca0877cb6fb97249" data-button-style="custom_small" href="https://www.coinbase.com/checkouts/8be6985bf22cfd01ca0877cb6fb97249">Pay With Bitcoin</a>';
+
+		html += '<br/><br/><br/>';
+		html += 'Or via bank transfer: IBAN: BE59 0014 7710 8926<br/>';
+		html += 'Be sure to include your username/email!<br/>';
+		html += 'This might take a few days to clear, if you mail to premium@anondraw.com we will clear you faster.';
 	}
 
 	p.innerHTML = html;
 
 	// Coinbase code
-	(function(){var getHost,loadCookie,loadJQuery,main;loadJQuery=function(version,callback){var compatible,d,j,jMajor,jMinor,loaded,ref,script,vMajor,vMinor;ref=[null,null,false],j=ref[0],d=ref[1],loaded=ref[2];if(j=window.jQuery){vMajor=parseInt(version.split('.')[0])||0;vMinor=parseInt(version.split('.')[1])||0;jMajor=parseInt(j.fn.jquery.split('.')[0])||0;jMinor=parseInt(j.fn.jquery.split('.')[1])||0;compatible=(jMajor>vMajor)||(jMajor===vMajor&&jMinor>=vMinor);}
-	if(!j||!compatible){script=document.createElement("script");script.type="text/javascript";script.src="https://code.jquery.com/jquery-1.8.3.min.js";script.onload=script.onreadystatechange=function(){if(!loaded&&(!(d=this.readyState)||d==="loaded"||d==="complete")){callback((j=window.jQuery).noConflict(1));return j(script).remove();}};return(document.getElementsByTagName("head")[0]||document.documentElement).appendChild(script);}else{return callback(j);}};getHost=function(env){if(env==='development'||env==='test'){return document.location.protocol+"//"+ document.location.host;}else if(env==='sandbox'){return"https://sandbox.coinbase.com";}else{return"https://www.coinbase.com";}};loadCookie=function($,callback){var host,script;if(window.coinbaseCookieLoaded){return callback($);}else if(window.coinbaseCookieLoading){return setTimeout((function(){return loadCookie($,callback);}),200);}else{host=getHost($('body').data('env'));window.coinbaseCookieLoading=true;script=document.createElement("script");script.src=host+"/checkouts/get_cookie.js";script.onload=script.onreadystatechange=function(){window.coinbaseCookieLoaded=true;window.coinbaseCookieLoading=false;$(script).remove();return callback($);};return(document.getElementsByTagName("head")[0]||document.documentElement).appendChild(script);}};main=function($){var buttonFrameLoaded,checkoutsFrameLoaded,default_height,default_width,host,receive_message;buttonFrameLoaded=false;checkoutsFrameLoaded=false;host=getHost($('body').data('env'));receive_message=function(e){var buttonId,command,ref;ref=e.data.split('|'),command=ref[0],buttonId=ref[1];buttonId=escape(buttonId);if(e.origin!==host){return;}
-	if(command==="show modal iframe"){return $('#coinbase_modal_iframe_'+ buttonId).show();}else if(command==="coinbase_payment_complete"){$('#coinbase_button_iframe_'+ buttonId).attr('src',host+"/buttons/paid");return $(document).trigger('coinbase_payment_complete',buttonId);}else if(command==="coinbase_payment_mispaid"){return $(document).trigger('coinbase_payment_mispaid',buttonId);}else if(command==='coinbase_payment_expired'){return $(document).trigger('coinbase_payment_expired',buttonId);}else if(command==="hide modal"){$('#coinbase_modal_iframe_'+ buttonId).hide();return $(document).trigger('coinbase_modal_closed',buttonId);}else if(command==="signup redirect"){return document.location=host+"/users/verify";}else if(command==="button frame loaded"){buttonFrameLoaded=true;if(checkoutsFrameLoaded){return $(document).trigger('coinbase_button_loaded',buttonId);}}else if(command==="checkouts frame loaded"){checkoutsFrameLoaded=true;if(buttonFrameLoaded){return $(document).trigger('coinbase_button_loaded',buttonId);}}};default_width=function(button_style){switch(button_style){case'custom_large':return 276;case'custom_small':return 210;case'subscription_large':return 263;case'subscription_small':return 210;case'donation_large':return 189;case'donation_small':return 148;case'buy_now_large':return 211;case'buy_now_small':return 170;default:return 211;}};default_height=function(button_style){switch(button_style){case'custom_large':return 62;case'custom_small':return 48;default:return 46;}};window.addEventListener("message",receive_message,false);$('.coinbase-button').each((function(_this){return function(index,elem){var button,buttonFrame,buttonId,data,height,modalFrame,params,width;button=$(elem);data=button.data();data['referrer']=document.domain;params=$.param(data);buttonId=button.data('code');width=button.data('width')||default_width(button.data('button-style'));height=button.data('height')||default_height(button.data('button-style'));host=getHost(button.data('env'));buttonFrame="<iframe src='"+ host+"/buttons/"+ buttonId+"?"+ params+"' id='coinbase_button_iframe_"+ buttonId+"' name='coinbase_button_iframe_"+ buttonId+"' style='width: "+ width+"px; height: "+ height+"px; border: none; overflow: hidden;' scrolling='no' allowtransparency='true' frameborder='0'></iframe>";modalFrame="<iframe src='"+ host+"/checkouts/"+ buttonId+"/widget?"+ params+"' id='coinbase_modal_iframe_"+ buttonId+"' name='coinbase_modal_iframe_"+ buttonId+"' style='background-color: transparent; border: 0px none transparent; display: none; position: fixed; visibility: visible; margin: 0px; padding: 0px; left: 0px; top: 0px; width: 100%; height: 100%; z-index: 9999;' scrolling='no' allowtransparency='true' frameborder='0'></iframe>";if(button.data('button-style')==='none'){buttonFrameLoaded=true;}else{button.replaceWith(buttonFrame);}
-	return $('body').append(modalFrame);};})(this));return $(document).on('coinbase_show_modal',function(e,buttonId){if($("#coinbase_modal_iframe_"+ buttonId).length>0){$("#coinbase_modal_iframe_"+ buttonId).show();return frames["coinbase_modal_iframe_"+ buttonId].postMessage("show modal|"+ buttonId,host);}});};loadJQuery("1.7",function($){return loadCookie($,main);});}).call(this);
+	(function () {
+		var getHost, loadCookie, loadJQuery, main; loadJQuery = function (version, callback) {
+			var compatible, d, j, jMajor, jMinor, loaded, ref, script, vMajor, vMinor; ref = [null, null, false], j = ref[0], d = ref[1], loaded = ref[2]; if (j = window.jQuery) { vMajor = parseInt(version.split('.')[0]) || 0; vMinor = parseInt(version.split('.')[1]) || 0; jMajor = parseInt(j.fn.jquery.split('.')[0]) || 0; jMinor = parseInt(j.fn.jquery.split('.')[1]) || 0; compatible = (jMajor > vMajor) || (jMajor === vMajor && jMinor >= vMinor); }
+			if (!j || !compatible) { script = document.createElement("script"); script.type = "text/javascript"; script.src = "https://code.jquery.com/jquery-1.8.3.min.js"; script.onload = script.onreadystatechange = function () { if (!loaded && (!(d = this.readyState) || d === "loaded" || d === "complete")) { callback((j = window.jQuery).noConflict(1)); return j(script).remove(); } }; return (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(script); } else { return callback(j); }
+		}; getHost = function (env) { if (env === 'development' || env === 'test') { return document.location.protocol + "//" + document.location.host; } else if (env === 'sandbox') { return "https://sandbox.coinbase.com"; } else { return "https://www.coinbase.com"; } }; loadCookie = function ($, callback) { var host, script; if (window.coinbaseCookieLoaded) { return callback($); } else if (window.coinbaseCookieLoading) { return setTimeout((function () { return loadCookie($, callback); }), 200); } else { host = getHost($('body').data('env')); window.coinbaseCookieLoading = true; script = document.createElement("script"); script.src = host + "/checkouts/get_cookie.js"; script.onload = script.onreadystatechange = function () { window.coinbaseCookieLoaded = true; window.coinbaseCookieLoading = false; $(script).remove(); return callback($); }; return (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(script); } }; main = function ($) {
+			var buttonFrameLoaded, checkoutsFrameLoaded, default_height, default_width, host, receive_message; buttonFrameLoaded = false; checkoutsFrameLoaded = false; host = getHost($('body').data('env')); receive_message = function (e) {
+				var buttonId, command, ref; ref = e.data.split('|'), command = ref[0], buttonId = ref[1]; buttonId = escape(buttonId); if (e.origin !== host) { return; }
+				if (command === "show modal iframe") { return $('#coinbase_modal_iframe_' + buttonId).show(); } else if (command === "coinbase_payment_complete") { $('#coinbase_button_iframe_' + buttonId).attr('src', host + "/buttons/paid"); return $(document).trigger('coinbase_payment_complete', buttonId); } else if (command === "coinbase_payment_mispaid") { return $(document).trigger('coinbase_payment_mispaid', buttonId); } else if (command === 'coinbase_payment_expired') { return $(document).trigger('coinbase_payment_expired', buttonId); } else if (command === "hide modal") { $('#coinbase_modal_iframe_' + buttonId).hide(); return $(document).trigger('coinbase_modal_closed', buttonId); } else if (command === "signup redirect") { return document.location = host + "/users/verify"; } else if (command === "button frame loaded") { buttonFrameLoaded = true; if (checkoutsFrameLoaded) { return $(document).trigger('coinbase_button_loaded', buttonId); } } else if (command === "checkouts frame loaded") { checkoutsFrameLoaded = true; if (buttonFrameLoaded) { return $(document).trigger('coinbase_button_loaded', buttonId); } }
+			}; default_width = function (button_style) { switch (button_style) { case 'custom_large': return 276; case 'custom_small': return 210; case 'subscription_large': return 263; case 'subscription_small': return 210; case 'donation_large': return 189; case 'donation_small': return 148; case 'buy_now_large': return 211; case 'buy_now_small': return 170; default: return 211; } }; default_height = function (button_style) { switch (button_style) { case 'custom_large': return 62; case 'custom_small': return 48; default: return 46; } }; window.addEventListener("message", receive_message, false); $('.coinbase-button').each((function (_this) {
+				return function (index, elem) {
+					var button, buttonFrame, buttonId, data, height, modalFrame, params, width; button = $(elem); data = button.data(); data['referrer'] = document.domain; params = $.param(data); buttonId = button.data('code'); width = button.data('width') || default_width(button.data('button-style')); height = button.data('height') || default_height(button.data('button-style')); host = getHost(button.data('env')); buttonFrame = "<iframe src='" + host + "/buttons/" + buttonId + "?" + params + "' id='coinbase_button_iframe_" + buttonId + "' name='coinbase_button_iframe_" + buttonId + "' style='width: " + width + "px; height: " + height + "px; border: none; overflow: hidden;' scrolling='no' allowtransparency='true' frameborder='0'></iframe>"; modalFrame = "<iframe src='" + host + "/checkouts/" + buttonId + "/widget?" + params + "' id='coinbase_modal_iframe_" + buttonId + "' name='coinbase_modal_iframe_" + buttonId + "' style='background-color: transparent; border: 0px none transparent; display: none; position: fixed; visibility: visible; margin: 0px; padding: 0px; left: 0px; top: 0px; width: 100%; height: 100%; z-index: 9999;' scrolling='no' allowtransparency='true' frameborder='0'></iframe>"; if (button.data('button-style') === 'none') { buttonFrameLoaded = true; } else { button.replaceWith(buttonFrame); }
+					return $('body').append(modalFrame);
+				};
+			})(this)); return $(document).on('coinbase_show_modal', function (e, buttonId) { if ($("#coinbase_modal_iframe_" + buttonId).length > 0) { $("#coinbase_modal_iframe_" + buttonId).show(); return frames["coinbase_modal_iframe_" + buttonId].postMessage("show modal|" + buttonId, host); } });
+		}; loadJQuery("1.7", function ($) { return loadCookie($, main); });
+	}).call(this);
 };
 
-DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
+DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow() {
 	var welcomeWindow = this.gui.createWindow({ title: "Welcome!", close: false });
 	welcomeWindow.classList.add("welcome-window");
 
@@ -5397,28 +5404,28 @@ DrawTogether.prototype.openWelcomeWindow = function openWelcomeWindow () {
 	tutorial.appendChild(document.createTextNode("Tutorial"))
 	tutorial.className = "drawtogether-button";
 	tutorial.addEventListener("click", function () {
-		if (welcomeWindow.parentNode) 
+		if (welcomeWindow.parentNode)
 			welcomeWindow.parentNode.removeChild(welcomeWindow);
 
 		introJs()
-		.setOptions({ 'tooltipPosition': 'auto', 'showProgress': true, 'hideNext': true, 'exitOnOverlayClick': false, 'exitOnEsc': false})
-		.onchange(function () {
-			ga("send", "event", "tutorial", "next");
-		})
-		.onexit(function () {
-			ga("send", "event", "tutorial", "exit");
-			this.openWelcomeWindow();
-		}.bind(this))
-		.oncomplete(function () {
-			ga("send", "event", "tutorial", "complete");
-			this.userSettings.setBoolean("Show welcome", false, true);
-		}.bind(this))
-		.start();
+			.setOptions({ 'tooltipPosition': 'auto', 'showProgress': true, 'hideNext': true, 'exitOnOverlayClick': false, 'exitOnEsc': false })
+			.onchange(function () {
+				ga("send", "event", "tutorial", "next");
+			})
+			.onexit(function () {
+				ga("send", "event", "tutorial", "exit");
+				this.openWelcomeWindow();
+			}.bind(this))
+			.oncomplete(function () {
+				ga("send", "event", "tutorial", "complete");
+				this.userSettings.setBoolean("Show welcome", false, true);
+			}.bind(this))
+			.start();
 	}.bind(this));
 };
 
-DrawTogether.prototype.openFeedbackWindow = function openFeedbackWindow () {
-	var feedbackWindow = this.gui.createWindow({title: "Feedback"});
+DrawTogether.prototype.openFeedbackWindow = function openFeedbackWindow() {
+	var feedbackWindow = this.gui.createWindow({ title: "Feedback" });
 	feedbackWindow.classList.add("feedback-window");
 
 	var container = feedbackWindow.appendChild(document.createElement("div"))
@@ -5449,9 +5456,9 @@ DrawTogether.prototype.openFeedbackWindow = function openFeedbackWindow () {
 	p.appendChild(document.createTextNode("Anondraw Team"));
 };
 
-DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
+DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow() {
 	localStorage.setItem("newfeaturewindowversion", this.CLIENT_VERSION);
-	var featureWindow = this.gui.createWindow({ title: "Some new shiny features!"});
+	var featureWindow = this.gui.createWindow({ title: "Some new shiny features!" });
 
 	featureWindow.classList.add("feature-window");
 
@@ -5460,7 +5467,7 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 
 	var title = container.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Interactivity and special snowflakes"));
-	
+
 	/*var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Ps. don't forget the contest that goes on every month!"));*/
 
@@ -5505,18 +5512,18 @@ DrawTogether.prototype.openNewFeatureWindow = function openNewFeatureWindow () {
 	}.bind(this));
 };
 
-DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcomeWindow () {
+DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcomeWindow() {
 	localStorage.setItem('moderatorwelcomewindowlastopen', Date.now());
-	var moderatorWindow = this.gui.createWindow({ title: "Rules and guidelines"});
+	var moderatorWindow = this.gui.createWindow({ title: "Rules and guidelines" });
 
 	moderatorWindow.classList.add("moderator-window");
 
 	var container = moderatorWindow.appendChild(document.createElement("div"))
 	container.className = "content";
-	
+
 	var title = container.appendChild(document.createElement("h2"));
 	title.appendChild(document.createTextNode("Rules and guidelines"));
-	
+
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("Questions"));
 
@@ -5528,18 +5535,18 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("You give us the non-exclusive, transferable right to display and modify all the content you create using this website. You also give everyone the Creative Commons share alike license for non commercial use. This is needed so everyone is free to collaborate without having to worry about copyright."));
-	
+
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("Griefing"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("Griefing is not allowed. Do not (try to) destroy drawings that other people made. Do not censor drawings. Do not impose your morals on other peoples drawing. Ask before helping. If no one is around and there are no cloud rules, you may assume that you can improve a drawing. Judgement will be made on a case by case basis."));	
-	
+	p.appendChild(document.createTextNode("Griefing is not allowed. Do not (try to) destroy drawings that other people made. Do not censor drawings. Do not impose your morals on other peoples drawing. Ask before helping. If no one is around and there are no cloud rules, you may assume that you can improve a drawing. Judgement will be made on a case by case basis."));
+
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("What is allowed?"));
 
 	var p = container.appendChild(document.createElement("p"));
-	p.appendChild(document.createTextNode("There are no content restrictions other than those imposed by the law. Do not share or create anything that would be illegal inside Belgium."));	
+	p.appendChild(document.createTextNode("There are no content restrictions other than those imposed by the law. Do not share or create anything that would be illegal inside Belgium."));
 
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("Clouds"));
@@ -5549,19 +5556,19 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("When encountering a background that is colored, i.e. not transparent, you have to assume its a cloud with rules."));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("Every cloudowner is allowed to enforce their rules. To do so, they FIRST have to clearly indicate what the rules are somewhere on the cloud. Rules can only be enforced if they were there before the drawing. Altough users ought to assume a cloud is governed by rules, marking it in multiple spaces on the cloud is advised in order for there to be less incidents."));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("To delete a drawing that is breaking the rules; the cloudowner has to leave a message next to the drawing with 'will be removed on DATE' where the given date is at least a week from now."));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("The only exception is when both the owner and the drawer are online, in that case, they should talk with each other. This policy is there to give the drawer time to move over or screenshot their work."));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("After the period has elapsed, the owner can remove the offending drawing. When in doubt, send an email to info@anondraw.com or ask squarific on discord. When a dispute arises, it is advised to first ask an admin. Not doing so might be considered a bad faith action later, resulting in a decision against you."));
-	
+
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("Moderators"));
 
@@ -5570,7 +5577,7 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 
 	var title = container.appendChild(document.createElement("h3"));
 	title.appendChild(document.createTextNode("Ban times"));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("When in doubt, start with a short time period of less than a week and contact info@anondraw.com or squarific on discord."));
 
@@ -5579,7 +5586,7 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("If someone is being annoying, you ought to first use the mute function. This should normally suffice. The only exceptions are when users go around it."));
-	
+
 	var p = container.appendChild(document.createElement("p"));
 	p.appendChild(document.createTextNode("First talk, in a friendly manner, with the person you want to ban and ask them to undo. A kick of less than a minute is allowed if you fear they won't or it will be too late. Be careful of collatoral damage though."));
 
@@ -5589,7 +5596,7 @@ DrawTogether.prototype.openModeratorWelcomeWindow = function openModeratorWelcom
 };
 
 
-DrawTogether.prototype.createFAQDom = function createFAQDom () {
+DrawTogether.prototype.createFAQDom = function createFAQDom() {
 	var faq = document.createElement("div");
 	faq.className = "drawtogether-faq";
 
@@ -5611,7 +5618,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "I want to draw privately with some people, is that possible?",
 		answer: "Yes, in the home screen click on draw with friends and then share the invite url printed in the chat. If you are already in a room, simply click on the room button and then click create private room after giving it a name."
-	},  {
+	}, {
 		question: "How do you play the game?",
 		answer: "It's a drawsomething pictionairy like game. You play the game by drawing the word you get. Then other people have to guess what you draw. The person that guessed the drawing and the drawer get a point."
 	}, {
@@ -5626,14 +5633,14 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	}, {
 		question: "Are 3d party programs allowed?",
 		answer: 'They are as long as they are reasonable. So be cool about it. An example of drawing bots:' +
-		        ' <a href="http://anonbots.bitballoon.com/" alt="Anondraw bot">http://anonbots.bitballoon.com</a>'
+			' <a href="http://anonbots.bitballoon.com/" alt="Anondraw bot">http://anonbots.bitballoon.com</a>'
 	}, {
 		question: "What benefits does reputation give you?",
 		answer: "At " + this.ZOOMED_OUT_MIN_REP + " reputation, you are allowed to draw while zoomed out. \n" +
-		        "At " + this.BIG_BRUSH_MIN_REP + " reputation, you are allowed to use brush sizes bigger than 10. \n" +
-		        "At 7 reputation, you can give upvotes to other people who have less reputation than you. \n" +
-		        "At 15 reputation, you can join the member only rooms and share an ip with other users without affecting your ink. \n" +
-		        "At " + this.KICKBAN_MIN_REP + "+ reputation, you can kickban people for a certain amount of time when they misbehave. \n "
+			"At " + this.BIG_BRUSH_MIN_REP + " reputation, you are allowed to use brush sizes bigger than 10. \n" +
+			"At 7 reputation, you can give upvotes to other people who have less reputation than you. \n" +
+			"At 15 reputation, you can join the member only rooms and share an ip with other users without affecting your ink. \n" +
+			"At " + this.KICKBAN_MIN_REP + "+ reputation, you can kickban people for a certain amount of time when they misbehave. \n "
 	}, {
 		question: "How do I get reputation?",
 		answer: "Other people have to give you an upvote, every upvote is one reputation."
@@ -5667,7 +5674,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 
 		var qText = question.appendChild(document.createElement("div"));
 		qText.className = "drawtogether-question-answer";
-		
+
 		var answerLines = questions[qKey].answer.split("\n");
 		for (var k = 0; k < answerLines.length; k++) {
 			var answerLine = qText.appendChild(document.createElement("div"));
@@ -5678,7 +5685,7 @@ DrawTogether.prototype.createFAQDom = function createFAQDom () {
 	return faq;
 };
 
-DrawTogether.prototype.createControlArray = function createControlArray () {
+DrawTogether.prototype.createControlArray = function createControlArray() {
 	var buttonList = [{
 		name: "name",
 		type: "text",
@@ -5689,7 +5696,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		data: {
 			intro: "This is your current guest name. Change this to something you like!"
 		}*/
-	},{
+	}, {
 		name: "home-button",
 		type: "button",
 		value: "",
@@ -5716,7 +5723,7 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 			action: this.openAccountWindow.bind(this)
 		});
 	}
-	
+
 	buttonList.push({
 		name: "premium",
 		type: "button",
@@ -5730,15 +5737,15 @@ DrawTogether.prototype.createControlArray = function createControlArray () {
 		text: "Discord chat",
 		action: this.openDiscordWindow.bind(this)
 	});
-	
+
 	buttonList.push({
 		name: "github",
 		type: "button",
 		text: "Github",
 		action: this.openGithub.bind(this)
 	});
-  
-  buttonList.push({
+
+	buttonList.push({
 		name: "mods",
 		type: "button",
 		text: "Mods",
@@ -5782,7 +5789,7 @@ DrawTogether.prototype.utils = {
 	distance: function (x1, y1, x2, y2) {
 		// Returns the distance between (x1, y1) and (x2, y2)
 		var xDis = x1 - x2,
-		    yDis = y1 - y2;
+			yDis = y1 - y2;
 		return Math.sqrt(xDis * xDis + yDis * yDis);
 	}
 };

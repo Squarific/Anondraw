@@ -15,7 +15,7 @@ var options = {
 };
 
 // fix to use config
-var privateKey = fs.readFileSync('./jwtsignkey.key');
+var privateKey = fs.readFileSync("/etc/letsencrypt/live/direct.anondraw.com/private.key");
 
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
