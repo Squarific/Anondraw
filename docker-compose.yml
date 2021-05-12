@@ -35,7 +35,7 @@ services:
   siteplugins:
     build:
       context: ./
-      dockerfile: ./src/server/siteplugins/Dockerfile
+      dockerfile: ./src/server/sitePlugins/Dockerfile
     restart: always
     ports:
       - "0.0.0.0:6552:6552"
