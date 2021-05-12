@@ -186,6 +186,21 @@ Gui.prototype.createWindow = function createWindow (settings) {
 	return windowContainer;
 };
 
+Gui.prototype.createSelection = function createSelection (options, defaultOption) {
+	var selectInput = document.createElement("select");
+  
+	for (var k = 0; k < options.length; k++) {
+	  var option = document.createElement("option");
+	  option.value = options[k];
+	  option.appendChild(document.createTextNode(options[k]));
+	  selectInput.add(option);
+	}
+  
+	if (defaultOption) selectInput.selectedIndex = defaultOption;
+  
+	return selectInput;
+};
+
 Gui.prototype.createButton = function createButton (text, callback) {
     var button = document.createElement("div");
         button.classList = "pluginstore-button";
