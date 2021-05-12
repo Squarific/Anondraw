@@ -15,7 +15,7 @@ var options = {
 };
 
 // fix to use config
-var privateKey = fs.readFileSync('./jwtsignkey.key');
+var privateKey = fs.readFileSync(config.permfolder + '/private.key');
 
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
@@ -179,7 +179,7 @@ var server = https.createServer(options, function (req, res) {
 		var user = sessions.getUser("uKey", uKey);
 
 		if (!user) {
-			res.end(JSON.stringify({ error: "You need to be logged in to vote!" }));
+			res.end(JSON.stringify({ error: "You need to be logged in to get a JWT token!" }));
 			return;
 		}
 
