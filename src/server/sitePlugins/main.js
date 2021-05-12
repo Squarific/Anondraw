@@ -1,6 +1,7 @@
 const express = require('express')
 const https = require('https')
 const cors = require('cors')
+const fs = require('fs');
 const app = express()
 
 const config = require("../common/config.js");
