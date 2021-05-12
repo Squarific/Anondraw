@@ -9,12 +9,14 @@ const config = require("../common/config.js");
 const mysql = require('mysql');
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: 'localhost',
-  user: 'pluginmods',
-  password: 'pluginmods',
-  database: 'pluginmods',
+  host: config.mysql.host,
+  user: config.mysql.user,
+  password: config.mysql.password,
+  database: config.mysql.database,
   multipleStatements: true
 });
+
+
 
 const options = {
   key: fs.readFileSync(config.permfolder + '/privkey.pem'),
