@@ -52,7 +52,7 @@ function DrawTogether (container, settings, emotesHash, account, router, pms) {
 	this.gui = new Gui(container);
 
 	this.mods = new SitePlugins(this.gui, { url: this.settings.sitePluginsServer });
-	this.account.addEventListener("JWT_CHANGE", function () {
+	this.account.addEventListener("JWT_CHANGED", function () {
 		console.log("JWT Changed", this.account.JWT);
 		this.mods.setJWT(this.account.JWT);
 	}.bind(this));
@@ -5786,4 +5786,3 @@ DrawTogether.prototype.utils = {
 		return Math.sqrt(xDis * xDis + yDis * yDis);
 	}
 };
-
