@@ -1,0 +1,45 @@
+.pluginstore-button {
+    text-align:center;
+    padding: .5em;
+    border-bottom: 0.2em solid #233445;
+    background-color: #456789;
+    color: #fff;
+    cursor: pointer;
+    margin:.3em;
+    margin-left:.5em;
+    margin-right:.5em;
+    -webkit-transition-duration: 0.1s;
+    -moz-transition-duration: 0.1s;
+    transition-duration: 0.1s;
+    -webkit-transition-property: background-color;
+    -moz-transition-property: background-color;
+    transition-property: background-color;
+}
+
+.pluginstore-button:hover {
+    background-color: #233445;
+}
+
+.newPluginForm textarea {
+    width:500px;
+    height:250px;
+}
+
+.newversion-content textarea {
+    width:500px;
+    height:250px;
+}
+
+.sitepluginserror {
+    background:#c86f6f;
+    color:#430505;
+    margin-bottom:1em;
+    padding:0.5em;
+}
+
+.sitepluginssuccess {
+    background:#77c86f;
+    color:#074305;
+    margin-bottom:1em;
+    padding:0.5em;
+}
