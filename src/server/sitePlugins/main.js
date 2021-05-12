@@ -18,7 +18,7 @@ app.use(cors())
 app.use('/plugins', require('./routes/plugins/_')(pool));
 app.use('/versions', require('./routes/versions/_')(pool));
 
-const PORT = 8755;
+const PORT = 6552;
 app.listen(PORT, '0.0.0.0', () => {
   console.log("Listening on " + PORT + "...");
 });
