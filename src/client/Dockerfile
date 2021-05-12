@@ -20,4 +20,4 @@ COPY ./src/config.json /app/config.json
 COPY ./src/client/build.js /app/build.js
 
 # Start server
-CMD node --unhandled-rejections=strict build.js repeat
+CMD node --unhandled-rejections=strict build.js
