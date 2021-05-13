@@ -19,11 +19,11 @@ COPY ./src/client/info.json ./
 COPY ./src/server/common/config.js ./
 COPY ./src/config.json ./
 COPY ./src/client/build.js ./
-copy ./src/client/dist/ ./dist/
-copy ./src/client/src/ ./src/
+COPY ./src/client/dist/ ./dist/
+COPY ./src/client/src/ ./src/
 
 # Start server
-CMD node --unhandled-rejections=strict build.js
+RUN node --unhandled-rejections=strict build.js
 
 ### STAGE 2: Run ###
 FROM nginx

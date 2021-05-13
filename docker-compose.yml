@@ -16,6 +16,8 @@ services:
     build:
       context: ./
       dockerfile: ./src/server/playerServer/Dockerfile
+    depends_on:
+        - "database"
     ports:
       - "0.0.0.0:4552:4552"
       - "0.0.0.0:2552:2552"
@@ -23,6 +25,8 @@ services:
     build:
       context: ./
       dockerfile: ./src/server/sitePlugins/Dockerfile
+    depends_on:
+      - "database"
     ports:
       - "0.0.0.0:6552:6552"
   loadbalancer:
