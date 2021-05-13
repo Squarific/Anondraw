@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev
-RUN npm install
+RUN npm ci
 
 # Generate self signed certificate
 WORKDIR /etc/letsencrypt/live/direct.anondraw.com
