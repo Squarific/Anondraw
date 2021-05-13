@@ -28,7 +28,7 @@ module.exports = (database) => {
             }
 
             return res.status(200).json({
-                result
+                version: result[0]
             });
         });
 
