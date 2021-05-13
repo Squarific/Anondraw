@@ -1,9 +1,0 @@
-# Base inmage
-FROM node:current AS build
-
-# Install dependencies
-RUN yarn global add serve
-
-# Start server
-CMD serve /app/dist
-EXPOSE 5000
