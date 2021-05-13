@@ -23,7 +23,7 @@ COPY ./src/client/dist/ ./dist/
 COPY ./src/client/src/ ./src/
 
 # Start server
-CMD node --unhandled-rejections=strict build.js
+RUN node --unhandled-rejections=strict build.js
 
 ### STAGE 2: Run ###
 FROM nginx
