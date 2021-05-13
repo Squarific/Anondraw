@@ -1,34 +1,21 @@
 version: "3.7"
 services:
-  clientbuilder:
+  client:
     build:
       context: ./
       dockerfile: ./src/client/Dockerfile
-    restart: always
-    volumes:
-        - "./src/client/dist:/app/dist"
-        - "./src/client/src:/app/src"
-  clientserver:
-    build:
-      context: ./
-      dockerfile: ./src/client/DockerfileServe
-    restart: always
     ports:
-        - "4300:5000"
-    volumes:
-        - "./src/client/dist:/app/dist"
+        - "4300:80"
   realtime:
     build:
       context: ./
       dockerfile: ./src/server/realTime/Dockerfile
-    restart: always
     ports:
       - "0.0.0.0:2556:2556"
   playerserver:
     build:
       context: ./
       dockerfile: ./src/server/playerServer/Dockerfile
-    restart: always
     ports:
       - "0.0.0.0:4552:4552"
       - "0.0.0.0:2552:2552"
@@ -36,27 +23,23 @@ services:
     build:
       context: ./
       dockerfile: ./src/server/sitePlugins/Dockerfile
-    restart: always
     ports:
       - "0.0.0.0:6552:6552"
   loadbalancer:
     build:
       context: ./
       dockerfile: ./src/server/loadBalancer/Dockerfile
-    restart: always
     ports:
       - "0.0.0.0:3552:3552"
   imageserver:
     build:
       context: ./
       dockerfile: ./src/server/imageServer/Dockerfile
-    restart: always
     ports:
       - "0.0.0.0:5552:5552"
   database:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: yQ25*IwPYS*7
       MYSQL_DATABASE: anondraw
@@ -67,6 +50,5 @@ services:
 
   adminer:
     image: adminer
-    restart: always
     ports:
       - 4400:8080
