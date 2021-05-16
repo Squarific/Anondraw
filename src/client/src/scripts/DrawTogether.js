@@ -865,7 +865,8 @@ DrawTogether.prototype.changeRoom = function changeRoom(room, number, x, y, spec
 				if (!this.memberlevel) {
 					// Fix for the ad that sometimes appears randomly
 					var prevAd = document.getElementById("amzn-assoc-ad-123acff2-6857-4569-a250-fd703f6a941d");
-					prevAd.parentNode.removeChild()
+					if(prevAd)
+						prevAd.parentNode.removeChild()
 					// Amazon ad code
 					var div = document.createElement("div");
 					var ad = div.appendChild(document.createElement("div"));
