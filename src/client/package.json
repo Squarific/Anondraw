@@ -1,6 +1,12 @@
 {
+  "name": "client",
+  "version": "1.0.0",
+  "description": "annondraw-client",
+  "main": "build.js",
+  "license": "MIT",
   "scripts": {
-    "build": "node --unhandled-rejections=strict build.js"
+    "build": "node --unhandled-rejections=strict build.js",
+    "watch": "nodemon build.js"
   },
   "dependencies": {
     "@node-minify/clean-css": "^6.2.0",
@@ -10,9 +16,7 @@
     "lodash": "^4.16.4",
     "mustache": "^2.2.1"
   },
-  "name": "client",
-  "version": "1.0.0",
-  "description": "annondraw-client",
-  "main": "build.js",
-  "license": "MIT"
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
 }

@@ -1,11 +1,19 @@
 version: "3.7"
 services:
-  client:
+  # client:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./src/client/Dockerfile
+  #   ports:
+  #       - "4300:80"
+  client-nginx-only:
     build:
       context: ./
-      dockerfile: ./src/client/Dockerfile
+      dockerfile: ./src/client/DockerfileNginxOnly
     ports:
         - "4300:80"
+    volumes:
+      - ./src/client/dist:/usr/share/nginx/html
   realtime:
     build:
       context: ./
