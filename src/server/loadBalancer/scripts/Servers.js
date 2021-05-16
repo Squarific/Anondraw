@@ -3,7 +3,7 @@ var url = require('url');
 var TIMEOUT = 140 * 1000;
 var MAX_GAME_MEMBERS = 8;
 
-var config = require("../../common/config.js");
+var config = require("../../../common/config.js");
 var fs = require('fs');
 
 var options = {

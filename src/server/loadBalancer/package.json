@@ -1,15 +1,13 @@
 {
   "name": "switch",
-  "private": "true",
   "version": "0.0.0",
   "description": "Anondraw switch server",
   "main": "switch.js",
   "dependencies": {
     "external-ip": "^1.3.1"
   },
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "node switch.js"
   },
   "repository": {
     "type": "git",

@@ -4,30 +4,32 @@ FROM node:current AS build
 
 WORKDIR /usr/src/app
 
-# Install dependencies for GCC
-# RUN apt-get update && apt-get install -y default-jdk
+# install yarn
+RUN apt-get install curl
+RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 
-# Copy files for npm install
-COPY ./src/client/package.json ./
-COPY ./src/client/package-lock.json ./
-
-# Install node modules
-RUN npm ci
+# Copy files for yarn
+COPY ./src/client/package.json ./client/
+COPY ./src/client/.yarn/ ./client/.yarn/
+COPY ./src/client/.pnp.js ./client/
+COPY ./src/client/.yarnrc.yml ./client/
+COPY ./src/client/yarn.lock ./client/
 
 # Copy the build files
-COPY ./src/client/info.json ./
-COPY ./src/server/common/config.js ./
-COPY ./src/config.json ./
-COPY ./src/client/build.js ./
-COPY ./src/client/dist/ ./dist/
-COPY ./src/client/src/ ./src/
+COPY ./src/client/info.json ./client/
+COPY ./src/common/configs/config.json ./common/configs/
+COPY ./src/common/config.js ./common/
+COPY ./src/client/build.js ./client/
+COPY ./src/client/dist/ ./client/dist/
+COPY ./src/client/src/ ./client/src/
 
-# Start server
-RUN node --unhandled-rejections=strict build.js
+WORKDIR /usr/src/app/client/
+# Build client
+RUN yarn build
 
-### STAGE 2: Run ###
+### STAGE 2: Serve client ###
 FROM nginx
 COPY docker/nginx.default.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /usr/src/app/dist/ /usr/share/nginx/html
+COPY --from=build /usr/src/app/client/dist/ /usr/share/nginx/html
 
 CMD ["nginx", "-g", "daemon off;"]

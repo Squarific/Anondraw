@@ -12,6 +12,8 @@ services:
       dockerfile: ./src/server/realTime/Dockerfile
     ports:
       - "0.0.0.0:2556:2556"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   playerserver:
     build:
       context: ./
@@ -21,6 +23,8 @@ services:
     ports:
       - "0.0.0.0:4552:4552"
       - "0.0.0.0:2552:2552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   siteplugins:
     build:
       context: ./
@@ -29,18 +33,24 @@ services:
       - "database"
     ports:
       - "0.0.0.0:6552:6552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   loadbalancer:
     build:
       context: ./
       dockerfile: ./src/server/loadBalancer/Dockerfile
     ports:
       - "0.0.0.0:3552:3552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   imageserver:
     build:
       context: ./
       dockerfile: ./src/server/imageServer/Dockerfile
     ports:
       - "0.0.0.0:5552:5552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   database:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

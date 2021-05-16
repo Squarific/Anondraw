@@ -1,4 +1,4 @@
-var config = require("../../common/config.js");
+var config = require("../../../common/config.js");
 var https = require("https");
 var querystring = require("querystring");
 var kickbancode = config.service.player.password.kickban;

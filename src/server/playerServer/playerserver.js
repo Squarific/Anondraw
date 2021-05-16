@@ -1,5 +1,5 @@
-require("../common/nice_console_log.js");
-var config = require("../common/config.js");
+require("../../common/nice_console_log.js");
+var config = require("../../common/config.js");
 var emailTemplate = require("./emailTemplate.js");
 
 var https = require("https");
