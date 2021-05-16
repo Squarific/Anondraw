@@ -21,17 +21,8 @@ COPY ./src/server/loadBalancer/.pnp.js ./server/loadBalancer/
 COPY ./src/server/loadBalancer/.yarnrc.yml ./server/loadBalancer/
 COPY ./src/server/loadBalancer/yarn.lock ./server/loadBalancer/
 
+# # self signed certificate
 RUN mkdir -p /etc/letsencrypt/live/direct.anondraw.com
-
-# # Generate self signed certificate
-# WORKDIR /etc/letsencrypt/live/direct.anondraw.com
-# RUN openssl genrsa -out my-root-ca.key.pem 2048
-# RUN openssl req -x509 -new -nodes -key my-root-ca.key.pem -days 1024 -out chain.pem -subj "/C=BE/ST=Denial/L=Very/O=Anondraw/CN=Localhost"
-# RUN openssl genrsa -out privkey.pem 2048
-# RUN openssl req -new -key privkey.pem -out csr.pem -subj "/C=BE/ST=Denial/L=Very/O=Anondraw/CN=Localhost"
-# RUN openssl x509 -req -in csr.pem -CA chain.pem -CAkey my-root-ca.key.pem -CAcreateserial -out cert.pem -days 500
-# COPY ./src/common/keys/siteplugins_dev.key /etc/letsencrypt/live/direct.anondraw.com/private.key
-
 
 # Go back to app dir
 WORKDIR /usr/src/app/server/playerServer/
