@@ -27,8 +27,8 @@ COPY ./src/server/imageServer/yarn.lock ./server/imageServer/
 # Copy all file
 COPY ./src/server/imageServer/ ./server/imageServer/
 COPY ./src/common/nice_console_log.js ./common/nice_console_log.js
-COPY ./src/common/config.js ./common/config.js
 COPY ./src/common/configs/config.json ./common/configs/config.json
+COPY ./src/common/config.js ./common/config.js
 
 # # Generate self signed certificate
 WORKDIR /etc/letsencrypt/live/direct.anondraw.com
