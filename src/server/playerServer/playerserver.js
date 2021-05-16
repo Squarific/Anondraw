@@ -20,7 +20,8 @@ var privateKey = fs.readFileSync(config.permfolder + '/private.key');
 var kickbancode = config.service.player.password.kickban;
 var statuscode = config.service.player.password.status;
 
-var database = mysql.createConnection({
+var database = mysql.createPool({
+	connectionLimit: 10,
 	host: config.mysql.host,
 	user: config.mysql.user,
 	password: config.mysql.password,
