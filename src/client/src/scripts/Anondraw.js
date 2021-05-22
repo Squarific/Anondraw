@@ -286,7 +286,7 @@ Anondraw.prototype.initCollab = function initCollab () {
 		loadbalancer: this.settings.loadbalancer,
 		imageServer: this.settings.imageServer,
 		accountServer: this.settings.accountServer,
-		sitePluginsServer: this.settings.sitePluginsServer,
+		brightfoxServer: this.settings.brightfoxServer,
 		room: room || "main",
 		mode: (room) ? "join" : "ask",
 		leftTopX: x || 0,

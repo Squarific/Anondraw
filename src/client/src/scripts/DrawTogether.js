@@ -51,7 +51,7 @@ function DrawTogether(container, settings, emotesHash, account, router, pms) {
 
 	this.gui = new Gui(container);
 
-	this.mods = new SitePlugins(this.gui, { url: this.settings.sitePluginsServer });
+	this.mods = new Brightfox(this.gui, { url: this.settings.brightfoxServer });
 	this.mods.setJWT(this.account.JWT);
 	this.account.addEventListener("JWT_CHANGED", function () {
 		console.log("JWT Changed", this.account.JWT);

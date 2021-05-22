@@ -1,0 +1,3 @@
+[submodule "src/server/Brightfox-server"]
+	path = src/server/brightfoxServer/libs/Brightfox-server
+	url = https://github.com/Squarific/Brightfox-server

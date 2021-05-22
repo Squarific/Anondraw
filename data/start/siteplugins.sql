@@ -1,5 +1,5 @@
--- CREATE DATABASE IF NOT EXISTS `siteplugins`;
--- USE `siteplugins`;
+-- CREATE DATABASE IF NOT EXISTS `brightfox`;
+-- USE `brightfox`;
 
 -- DELIMITER //
 

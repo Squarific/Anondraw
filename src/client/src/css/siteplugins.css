@@ -30,14 +30,14 @@
     height:250px;
 }
 
-.sitepluginserror {
+.brightfoxerror {
     background:#c86f6f;
     color:#430505;
     margin-bottom:1em;
     padding:0.5em;
 }
 
-.sitepluginssuccess {
+.brightfoxsuccess {
     background:#77c86f;
     color:#074305;
     margin-bottom:1em;

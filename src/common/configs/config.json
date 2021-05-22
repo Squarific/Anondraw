@@ -40,8 +40,8 @@
             "clienthost": "localhost",
             "port": 2552
         },
-        "siteplugins": {
-            "host": "siteplugins",
+        "brightfox": {
+            "host": "brightfox",
             "clienthost": "localhost",
             "port": 6552
         }

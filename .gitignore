@@ -15,8 +15,8 @@ private/
 **/dist/error
 **/dist/stats
 keys/
-!siteplugins_dev.key
-!siteplugins_dev.key.pub
+!brightfox_dev.key
+!brightfox_dev.key.pub
 
 # Image from the mainroom
 server/imageServer/images/main

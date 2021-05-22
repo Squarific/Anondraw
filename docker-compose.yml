@@ -33,10 +33,10 @@ services:
       - "0.0.0.0:2552:2552"
     volumes:
       - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
-  siteplugins:
+  brightfox:
     build:
       context: ./
-      dockerfile: ./src/server/sitePlugins/Dockerfile
+      dockerfile: ./src/server/brightfoxServer/Dockerfile
     depends_on:
       - "database"
     ports:
