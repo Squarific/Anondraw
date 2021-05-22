@@ -4,7 +4,8 @@
   "description": "The server that orchestrates the SitePluginStore library",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "node ./main.js",
+    "watch": "nodemon mian.js"
   },
   "author": "",
   "license": "ISC",

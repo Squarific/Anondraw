@@ -1,5 +1,5 @@
-require("../common/nice_console_log.js");
-var config = require("../common/config.js");
+require("../../common/nice_console_log.js");
+var config = require("../../common/config.js");
 
 var https = require("https");
 var drawcode = config.service.image.password.draw;
@@ -9,9 +9,9 @@ var TiledCanvas = require("./scripts/TiledCanvas.js");
 var fs = require('graceful-fs');
 
 var options = {
-  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
-  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
-  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+	key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+	cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
 var mkdirp = require('mkdirp');
@@ -25,7 +25,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 	transparent = new Canvas.Image();
 	transparent.src = transparentBytes;
 
-	function newTiledCanvas (room) {
+	function newTiledCanvas(room) {
 		var tiledCanvas = new TiledCanvas();
 
 		tiledCanvas.requestUserChunk = function (x, y, callback) {
@@ -104,20 +104,20 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 			});
 			return;
 		}
-		
+
 		if (parsedUrl.pathname == "/tiles") {
 			var room = parsedUrl.query.room;
-			
+
 			res.writeHead(200, {
 				"Access-Control-Allow-Origin": "*",
 				"Content-Type": "application/json"
 			});
-			
+
 			if (!room_regex.test(room)) {
 				res.end(JSON.stringify({ err: "The room should only contain lowercase alphanumeric characters and _" }));
 				return;
 			}
-			
+
 			fs.readdir("./images/" + room, function (err, items) {
 				if (err && err.code == "ENOENT") {
 					res.end(JSON.stringify({
@@ -126,24 +126,24 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 					}));
 					return;
 				}
-				
+
 				if (err) {
 					console.log("Readdir failed on room", room, err);
 					res.end(JSON.stringify({ err: "Could not load tiles." }));
 					return;
 				}
-				
+
 				var tiles = [];
 				for (var k = 0; k < items.length; k++) {
 					tiles.push(items[k].replace(".png", ""));
 				}
-				
+
 				res.end(JSON.stringify({
 					err: null,
 					tiles: tiles
 				}));
 			});
-			
+
 			return;
 		}
 
@@ -198,7 +198,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 					currentlyDrawing[room] = false;
 					return;
 				}
-				
+
 				mkdirp('./images/' + room, function (err) {
 					if (err) {
 						res.end('{"error": "Faulty directory"}');
@@ -229,7 +229,7 @@ fs.readFile("./images/background.png", function (err, transparentBytes) {
 						}, function () {
 							res.end('{"success": "done"}');
 							currentlyDrawing[room] = false;
-							
+
 							// In case there is a memory leak, this might help
 							tiledCanvas.chunks = {};
 						});

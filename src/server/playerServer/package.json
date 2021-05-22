@@ -1,6 +1,5 @@
 {
   "name": "playerserver",
-  "private": "true",
   "version": "0.0.0",
   "description": "Anondraw player server",
   "main": "playerserver.js",
@@ -11,9 +10,8 @@
     "mysql": "^2.7.0",
     "socket.io": "^2.0.3"
   },
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "node ./playerserver.js"
   },
   "repository": {
     "type": "git",

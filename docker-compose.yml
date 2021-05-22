@@ -1,17 +1,27 @@
 version: "3.7"
 services:
-  client:
+  # client:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./src/client/Dockerfile
+  #   ports:
+  #       - "4300:80"
+  client-nginx-only:
     build:
       context: ./
-      dockerfile: ./src/client/Dockerfile
+      dockerfile: ./src/client/DockerfileNginxOnly
     ports:
         - "4300:80"
+    volumes:
+      - ./src/client/dist:/usr/share/nginx/html
   realtime:
     build:
       context: ./
       dockerfile: ./src/server/realTime/Dockerfile
     ports:
       - "0.0.0.0:2556:2556"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   playerserver:
     build:
       context: ./
@@ -21,6 +31,8 @@ services:
     ports:
       - "0.0.0.0:4552:4552"
       - "0.0.0.0:2552:2552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   siteplugins:
     build:
       context: ./
@@ -29,18 +41,24 @@ services:
       - "database"
     ports:
       - "0.0.0.0:6552:6552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   loadbalancer:
     build:
       context: ./
       dockerfile: ./src/server/loadBalancer/Dockerfile
     ports:
       - "0.0.0.0:3552:3552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   imageserver:
     build:
       context: ./
       dockerfile: ./src/server/imageServer/Dockerfile
     ports:
       - "0.0.0.0:5552:5552"
+    volumes:
+      - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   database:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

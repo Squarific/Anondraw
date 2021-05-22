@@ -1,0 +1,51 @@
+{
+    "service": {
+        "image": {
+            "host": "direct.anondraw.com",
+            "port": 5552,
+            "password": {
+                "draw": "draw password"
+            }
+        },
+        "loadbalancer": {
+            "host": "direct.anondraw.com",
+            "port": 3552,
+            "password": {
+                "join": "join password",
+                "status": "status password"
+            }
+        },
+        "player": {
+            "host": "direct.anondraw.com",
+            "port": 4552,
+            "password": {
+                "kickban": "kickban password",
+                "status": "status password"
+            }
+        },
+        "realtime": {
+            "host": "direct.anondraw.com",
+            "imgur": {
+                "user": "anondraw",
+                "password": "imgur password"
+            }
+        },
+        "messages": {
+            "host": "direct.anondraw.com",
+            "port": 2552
+        }
+    },
+    "permfolder": "/etc/letsencrypt/live/direct.anondraw.com",
+    "mysql": {
+        "host": "database",
+        "database": "anondraw",
+        "user": "root",
+        "password": "yQ25*IwPYS*7"
+    },
+    "mail": {
+        "key": "mailgunkey",
+        "domain": "mg.anondraw.com",
+        "sender": "forgot@anondraw.com",
+        "forgotlink": "https://www.anondraw.com"
+    }
+}

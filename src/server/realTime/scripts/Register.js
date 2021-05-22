@@ -1,15 +1,15 @@
-var config = require("../../common/config.js");
+var config = require("../../../common/config.js");
 var https = require('https');
 var urlParse = require("url");
 var fs = require('fs');
 
 var options = {
-  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
-  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
-  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+	key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+	cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
-function Register (server, key, io, port, listenServer) {
+function Register(server, key, io, port, listenServer) {
 	this.server = server;
 	this.listenServer = listenServer;
 
@@ -46,19 +46,19 @@ function Register (server, key, io, port, listenServer) {
 				if (this.io.nsps['/'].connected[id])
 					this.io.nsps['/'].connected[id].disconnect();
 			}
-			
+
 			// Clear the room
 			delete this.protocol.protectedRegions[room];
 			delete this.protocol.clickableAreas[room];
 			delete this.protocol.gameRooms[room];
-	
+
 			res.end('{"success": "Disconnected all clients in room ' + room + '"}');
 			return;
 		}
 	}.bind(this));
 }
 
-Register.prototype.isOurs = function isOurs (room, callback) {
+Register.prototype.isOurs = function isOurs(room, callback) {
 	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
@@ -85,7 +85,7 @@ Register.prototype.isOurs = function isOurs (room, callback) {
 	req.end();
 };
 
-Register.prototype.register = function register () {
+Register.prototype.register = function register() {
 	var req = https.request({
 		hostname: this.server,
 		port: config.service.loadbalancer.port,
@@ -110,14 +110,14 @@ Register.prototype.register = function register () {
 
 	req.on("error", function (e) {
 		console.log(config.insecure);
-		
+
 		throw e.message;
 	});
 
 	req.end();
 };
 
-Register.prototype.getUserListCount = function getUserListCount (room) {
+Register.prototype.getUserListCount = function getUserListCount(room) {
 	// Returns [{
 	//     id: socketid,
 	//     name: username,
@@ -135,7 +135,7 @@ Register.prototype.getUserListCount = function getUserListCount (room) {
 	return users;
 };
 
-Register.prototype.updatePlayerCount = function updatePlayerCount () {
+Register.prototype.updatePlayerCount = function updatePlayerCount() {
 	var rooms = {};
 
 	for (var id in this.io.sockets.sockets) {

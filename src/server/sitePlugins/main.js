@@ -4,7 +4,7 @@ const cors = require('cors')
 const fs = require('fs');
 const app = express()
 
-const config = require("../common/config.js");
+const config = require("../../common/config.js");
 
 const mysql = require('mysql');
 const pool = mysql.createPool({

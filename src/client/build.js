@@ -29,7 +29,7 @@ console.log("Read emojis");
 
 let config = _.merge(
 	require("./info.json"),
-	require("./config.js"),
+	require("./../common/config.js"),
 	{
 		version: "2825593"
 	},

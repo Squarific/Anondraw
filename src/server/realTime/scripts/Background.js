@@ -1,14 +1,14 @@
-var config = require("../../common/config.js");
+var config = require("../../../common/config.js");
 var https = require("https");
 var fs = require('fs');
 
 var options = {
-  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
-  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
-  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+	key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+	cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
-function Background (server, httpListenServer, drawcode) {
+function Background(server, httpListenServer, drawcode) {
 	this.server = server;
 	this.drawcode = drawcode;
 	this.httpListenServer = httpListenServer;

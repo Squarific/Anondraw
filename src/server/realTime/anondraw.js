@@ -1,13 +1,13 @@
 Error.stackTraceLimit = Infinity;
-require("../common/nice_console_log.js");
-var config = require("../common/config.js");
+require("../../common/nice_console_log.js");
+var config = require("../../common/config.js");
 var https = require('https');
 var fs = require('fs');
 
 var options = {
-  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
-  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
-  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+	key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+	cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
 var port = process.argv[2];
@@ -44,48 +44,48 @@ var protocol = new Protocol(io, drawTogether, imgur, players, register, saveAndS
 
 function roomSavedCallbackSync(rooms, attempts, err) {
 	var currentRoomName = rooms.pop();
-	
-	if(err) {
+
+	if (err) {
 		console.log("ROOM SHUTDOWN ERROR:", currentRoomName, err);
-		if(attempts <= 3){
+		if (attempts <= 3) {
 			rooms.push(currentRoomName);
-			setTimeout(function(){ 
+			setTimeout(function () {
 				background.sendDrawings(currentRoomName, drawTogether.drawings[currentRoomName], roomSavedCallbackSync.bind(this, rooms, ++attempts));
 			}.bind(this), 3000 * attempts);
-			
+
 			return;
 		}
 	}
-	
+
 	console.log("ROOM", currentRoomName, "HAS", (err) ? "NOT" : "", "BEEN SAVED", rooms.length, "ROOMS TO GO");
-	
+
 	if (rooms.length === 0) {
 		process.exit(0);
 		return;
 	}
 	var nextRoomName = rooms[rooms.length - 1];
-	
+
 	console.log("SAVING ROOM", nextRoomName);
 	background.sendDrawings(nextRoomName, drawTogether.drawings[nextRoomName], roomSavedCallbackSync.bind(this, rooms, 0));
-	
+
 }
 
-function warnAboutShutdown () {
+function warnAboutShutdown() {
 	io.emit("chatmessage", {
 		user: "SERVER",
 		message: "SERVER IS RESTARTING IN 1 MINUTE"
 	});
 }
 
-function saveAndShutdown () {
+function saveAndShutdown() {
 	console.log("SAVING AND SHUTTING DOWN");
 	var rooms = Object.keys(drawTogether.drawings);
-	
-	if(rooms.length > 0){
-		rooms.sort(function(roomNameA, roomNameB) {// sorts  greatest to least 10, 5, 4, 1
+
+	if (rooms.length > 0) {
+		rooms.sort(function (roomNameA, roomNameB) {// sorts  greatest to least 10, 5, 4, 1
 			return protocol.getUserCount(roomNameB) - protocol.getUserCount(roomNameA);
 		}.bind(this));
-		
+
 		var lastRoom = rooms[rooms.length - 1];
 		background.sendDrawings(lastRoom, drawTogether.drawings[lastRoom], roomSavedCallbackSync.bind(this, rooms, 0));
 
@@ -101,9 +101,9 @@ function saveAndShutdown () {
 		user: "SERVER",
 		message: "You will automatically reconnect."
 	});
-	
+
 	server.close();
-	
+
 	// If there were no rooms, just shutdown now
 	if (rooms.length === 0) {
 		process.exit(0);
