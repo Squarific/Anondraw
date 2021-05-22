@@ -16,6 +16,8 @@ Or use the issues
 
 ## Running
 
+Start by pulling all the submodules with git submodule update --init --recursive
+
 ### Option 1: Docker
 
 ##### Running
