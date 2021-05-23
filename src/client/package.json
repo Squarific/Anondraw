@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "node --unhandled-rejections=strict build.js",
-    "watch": "nodemon build.js"
+    "watch": "nodemon --ignore 'dist/' build.js"
   },
   "dependencies": {
     "@node-minify/clean-css": "^6.2.0",
