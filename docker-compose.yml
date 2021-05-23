@@ -6,6 +6,8 @@ services:
   #     dockerfile: ./src/client/Dockerfile
   #   ports:
   #       - "4300:80"
+  #   volumes:
+  #     - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   client-nginx-only:
     build:
       context: ./
