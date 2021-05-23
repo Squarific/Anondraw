@@ -3,6 +3,5 @@ const brightfoxServer = require("./libs/Brightfox-server/main-as-module.js");
 brightfoxServer({
   permfolder: config.permfolder,
   mysql: config.mysql,
-  port: config.brightfox.port
+  port: config.service.brightfox.port
 });
-
