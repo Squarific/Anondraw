@@ -12,9 +12,6 @@ RUN apt-get update && apt-get install -y \
     libgif-dev \
     librsvg2-dev
 
-# install yarn
-RUN apt-get install curl
-RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 
 # Copy files for yarn
 COPY ./src/server/imageServer/package.json ./server/imageServer/

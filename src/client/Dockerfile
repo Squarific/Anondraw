@@ -4,9 +4,6 @@ FROM node:current AS build
 
 WORKDIR /usr/src/app
 
-# install yarn
-RUN apt-get install curl
-RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 
 # Copy files for yarn
 COPY ./src/client/package.json ./client/

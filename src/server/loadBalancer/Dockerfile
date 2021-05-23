@@ -1,9 +1,6 @@
 # Base inmage
 FROM node:current AS build
 
-# install yarn
-RUN apt-get install curl
-RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 
 # Copy all file
 WORKDIR /usr/src/app

@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev
-# install yarn
-RUN apt-get install curl
-RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 
 # Copy all file
 COPY ./src/server/realTime/ ./server/realTime/
