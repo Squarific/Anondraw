@@ -25,11 +25,12 @@ COPY ./src/client/src/ ./client/src/
 
 WORKDIR /usr/src/app/client/
 # Build client
-RUN yarn build
+RUN yarn run build
 
 ### STAGE 2: Serve client ###
 FROM nginx
 COPY docker/nginx.default.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /usr/src/app/client/dist/ /usr/share/nginx/html
+WORKDIR /usr/share/nginx/html
+COPY --from=build /usr/src/app/client/dist .
 
 CMD ["nginx", "-g", "daemon off;"]
