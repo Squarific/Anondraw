@@ -1,4 +1,5 @@
-var config = require("../../../common/config.js");
+const environment = require("../environment.js");
+const config = require("../" + environment.config);
 var https = require("https");
 var querystring = require("querystring");
 var kickbancode = config.service.player.password.kickban;
@@ -6,18 +7,18 @@ var kickbancode = config.service.player.password.kickban;
 var fs = require('fs');
 
 var options = {
-  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
-  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
-  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+	key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+	cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
-function Players (server) {
+function Players(server) {
 	this.server = server;
 }
 
 // Kickban the given uKey
 // callback()
-Players.prototype.kickbanAccount = function kickbanAccount (target, by, minutes, reason, callback) {
+Players.prototype.kickbanAccount = function kickbanAccount(target, by, minutes, reason, callback) {
 	this.request("kickban", {
 		target: target,
 		by: by,
@@ -29,7 +30,7 @@ Players.prototype.kickbanAccount = function kickbanAccount (target, by, minutes,
 
 // Kickban the given ip
 // callback()
-Players.prototype.kickbanIp = function kickbanAccount (target, by, minutes, reason, callback) {
+Players.prototype.kickbanIp = function kickbanAccount(target, by, minutes, reason, callback) {
 	this.request("kickban", {
 		ip: target,
 		by: by,
@@ -40,34 +41,34 @@ Players.prototype.kickbanIp = function kickbanAccount (target, by, minutes, reas
 };
 
 // Callback (err, banned, till)
-Players.prototype.isBanned = function isBanned (ip, callback) {
+Players.prototype.isBanned = function isBanned(ip, callback) {
 	this.request("isbanned", {
 		ip: ip
 	}, callback);
 };
 
-Players.prototype.getReputationFromUKey = function getReputationFromUKey (uKey, callback) {
+Players.prototype.getReputationFromUKey = function getReputationFromUKey(uKey, callback) {
 	this.request("getreputation", {
 		uKey: uKey
 	}, callback);
 };
 
-Players.prototype.giveReputation = function giveReputation (fromUkey, toUkey, callback) {
+Players.prototype.giveReputation = function giveReputation(fromUkey, toUkey, callback) {
 	this.request("givereputation", {
 		uKey: fromUkey,
 		uKeyTo: toUkey
 	}, callback);
 };
 
-Players.prototype.setName = function setName (uKey, name, callback) {
+Players.prototype.setName = function setName(uKey, name, callback) {
 	this.request("setname", {
 		uKey: uKey,
 		name: name
 	}, callback);
 };
 
-Players.prototype.request = function request (method, urlArguments, callback) {
-	if (typeof callback !== "function")	callback = function () {};
+Players.prototype.request = function request(method, urlArguments, callback) {
+	if (typeof callback !== "function") callback = function () { };
 
 	var req = https.request({
 		hostname: this.server,

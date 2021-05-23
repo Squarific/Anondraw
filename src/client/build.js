@@ -5,6 +5,7 @@ const minify = require("@node-minify/core");
 const uglifyES = require("@node-minify/uglify-es");
 const cleanCSS = require("@node-minify/clean-css");
 const mustache = require("mustache");
+const environment = require("./environment.js")
 // const exec = require("child_process").execSync;
 // const chokidar = require('chokidar');
 
@@ -29,7 +30,7 @@ console.log("Read emojis");
 
 let config = _.merge(
 	require("./info.json"),
-	require("./../common/config.js"),
+	require(environment.config),
 	{
 		version: "2825593"
 	},

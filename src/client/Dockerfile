@@ -13,12 +13,9 @@ COPY ./src/client/.yarnrc.yml ./client/
 COPY ./src/client/yarn.lock ./client/
 
 # Copy the build files
-COPY ./src/client/info.json ./client/
 COPY ./src/common/configs/config.json ./common/configs/
 COPY ./src/common/config.js ./common/
-COPY ./src/client/build.js ./client/
-COPY ./src/client/dist/ ./client/dist/
-COPY ./src/client/src/ ./client/src/
+COPY ./src/client ./client
 
 WORKDIR /usr/src/app/client/
 # Build client

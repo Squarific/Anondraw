@@ -1,4 +1,5 @@
-const config = require("../../common/config.js");
+const environment = require("./environment.js")
+const config = require(environment.config);
 const brightfoxServer = require("./libs/Brightfox-server/main-as-module.js");
 brightfoxServer({
   permfolder: config.permfolder,

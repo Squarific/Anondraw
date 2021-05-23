@@ -1,6 +1,7 @@
 Error.stackTraceLimit = Infinity;
 require("../../common/nice_console_log.js");
-var config = require("../../common/config.js");
+const environment = require("./environment.js")
+const config = require(environment.config);
 var https = require('https');
 var fs = require('fs');
 

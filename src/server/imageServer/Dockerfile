@@ -11,15 +11,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev
-
-
-# Copy files for yarn
-COPY ./src/server/imageServer/package.json ./server/imageServer/
-COPY ./src/server/imageServer/.yarn ./server/imageServer/.yarn
-COPY ./src/server/imageServer/.pnp.js ./server/imageServer/
-COPY ./src/server/imageServer/.yarnrc.yml ./server/imageServer/
-COPY ./src/server/imageServer/yarn.lock ./server/imageServer/
-
+    
 # Copy all file
 COPY ./src/server/imageServer/ ./server/imageServer/
 COPY ./src/common/nice_console_log.js ./common/nice_console_log.js

@@ -3,13 +3,14 @@ var url = require('url');
 var TIMEOUT = 140 * 1000;
 var MAX_GAME_MEMBERS = 8;
 
-var config = require("../../../common/config.js");
+const environment = require("../environment.js");
+const config = require("../" + environment.config);
 var fs = require('fs');
 
 var options = {
-  key: fs.readFileSync(config.permfolder + '/privkey.pem'),
-  cert: fs.readFileSync(config.permfolder + '/cert.pem'),
-  ca: fs.readFileSync(config.permfolder + '/chain.pem')
+	key: fs.readFileSync(config.permfolder + '/privkey.pem'),
+	cert: fs.readFileSync(config.permfolder + '/cert.pem'),
+	ca: fs.readFileSync(config.permfolder + '/chain.pem')
 };
 
 // Rebalance when the most loaded has this
@@ -18,7 +19,7 @@ var options = {
 var REBALANCE_LOAD = 400;
 var CHECK_REBALANCE_EVERY = 40 * 1000; //ms
 
-function randomString (length) {
+function randomString(length) {
 	var chars = "abcdefghijklmnopqrstuvwxyz1234567890";
 	var string = "";
 
@@ -28,14 +29,14 @@ function randomString (length) {
 	return string;
 }
 
-function Servers (code) {
+function Servers(code) {
 	this.code = code;
 	this.servers = [];
 	setInterval(this.clean.bind(this), TIMEOUT);
 	setInterval(this.rebalance.bind(this), CHECK_REBALANCE_EVERY);
 }
 
-Servers.prototype.getRooms = function getRooms () {
+Servers.prototype.getRooms = function getRooms() {
 	var rooms = {};
 	for (var k = 0; k < this.servers.length; k++) {
 		for (var name in this.servers[k].rooms) {
@@ -49,7 +50,7 @@ Servers.prototype.getRooms = function getRooms () {
 	return rooms;
 };
 
-Servers.prototype.getServer = function getServer (field, value) {
+Servers.prototype.getServer = function getServer(field, value) {
 	for (var k = 0; k < this.servers.length; k++) {
 		if (this.servers[k][field] == value)
 			return this.servers[k];
@@ -60,7 +61,7 @@ Servers.prototype.getServer = function getServer (field, value) {
 
 // Finds a free public gameroom or if none found creates one
 // Returns {server: "url", room: "name"}, serverurl can also be null
-Servers.prototype.getFreePublicGameRoom = function getFreePublicGameRoom () {
+Servers.prototype.getFreePublicGameRoom = function getFreePublicGameRoom() {
 	for (var k = 0; k < this.servers.length; k++) {
 		for (var name in this.servers[k].rooms) {
 			// Discards none game_ rooms and private_game_ rooms
@@ -82,7 +83,7 @@ Servers.prototype.getFreePublicGameRoom = function getFreePublicGameRoom () {
 
 // This function returns an array of all servers that
 // claim to have the given room
-Servers.prototype.getServersFromRoom = function getServersFromRoom (room) {
+Servers.prototype.getServersFromRoom = function getServersFromRoom(room) {
 	var servers = [];
 
 	for (var k = 0; k < this.servers.length; k++) {
@@ -98,7 +99,7 @@ Servers.prototype.getServersFromRoom = function getServersFromRoom (room) {
 // Returns the server with the room or the least loaded
 // If multiple servers have the room, cleans up and returns the real server
 // If no servers available returns null
-Servers.prototype.getServerFromRoom = function getServerFromRoom (room) {
+Servers.prototype.getServerFromRoom = function getServerFromRoom(room) {
 	// Get all servers that have this room
 	var servers = this.getServersFromRoom(room);
 
@@ -113,7 +114,7 @@ Servers.prototype.getServerFromRoom = function getServerFromRoom (room) {
 
 		return target;
 	}
-	
+
 	if (servers.length == 1) return servers[0];
 
 	// Multiple servers have this room, should not happen
@@ -124,7 +125,7 @@ Servers.prototype.getServerFromRoom = function getServerFromRoom (room) {
 
 // Removes the room from all servers and moves it to the least loaded
 // Returns the server that the room will be moved to, null if not enough servers
-Servers.prototype.retargetRoom = function retargetRoom (room) {
+Servers.prototype.retargetRoom = function retargetRoom(room) {
 	var target = this.getLeastLoad();
 	var servers = this.getServersFromRoom(room);
 
@@ -137,13 +138,13 @@ Servers.prototype.retargetRoom = function retargetRoom (room) {
 	return target;
 };
 
-Servers.prototype.sendCloseRoom = function sendCloseRoom (servers, room) {
+Servers.prototype.sendCloseRoom = function sendCloseRoom(servers, room) {
 	for (var k = 0; k < servers.length; k++) {
 		this.sendCloseRoomServer(servers[k], room);
 	}
 };
 
-Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer (server, room) {
+Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer(server, room) {
 	if (server.url.indexOf("http") == -1) server.url = "http://" + server.url;
 	var parsedUrl = url.parse(server.url);
 
@@ -156,7 +157,7 @@ Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer (server, ro
 	}, function (res) {
 		res.on("data", function (chunk) {
 			try {
-				data = JSON.parse(chunk);	
+				data = JSON.parse(chunk);
 			} catch (e) {
 				data = {};
 				data.error = "FAILED TO PARSE JSON. RESPONSE WAS: " + chunk;
@@ -177,7 +178,7 @@ Servers.prototype.sendCloseRoomServer = function sendCloseRoomServer (server, ro
 };
 
 // Removes all servers that have timed out
-Servers.prototype.clean = function clean () {
+Servers.prototype.clean = function clean() {
 	for (var k = 0; k < this.servers.length; k++) {
 		if (Date.now() - this.servers[k].lastUpdate > TIMEOUT) {
 			this.servers.splice(k, 1);
@@ -186,7 +187,7 @@ Servers.prototype.clean = function clean () {
 	}
 };
 
-Servers.prototype.rebalance = function rebalance () {
+Servers.prototype.rebalance = function rebalance() {
 	var least = this.getLeastLoad();
 	var most = this.getMostLoad();
 
@@ -235,7 +236,7 @@ Servers.prototype.setLoad = function (id, rooms) {
 
 // Returns the server with the lowest load
 // returns null if no servers available
-Servers.prototype.getLeastLoad = function getLeastLoad () {
+Servers.prototype.getLeastLoad = function getLeastLoad() {
 	if (this.servers.length < 1) return null;
 
 	var lowestKey = 0;
@@ -250,7 +251,7 @@ Servers.prototype.getLeastLoad = function getLeastLoad () {
 
 // Returns the server with the highest load
 // returns null if no servers available
-Servers.prototype.getMostLoad = function getMostLoad () {
+Servers.prototype.getMostLoad = function getMostLoad() {
 	if (this.servers.length < 1) return null;
 
 	var highestKey = 0;
@@ -264,7 +265,7 @@ Servers.prototype.getMostLoad = function getMostLoad () {
 };
 
 // Adds the server to the list and returns the id
-Servers.prototype.add = function add (url) {
+Servers.prototype.add = function add(url) {
 	var server = this.getServer("url", url);
 
 	// If the server is already in our list, reset the load and rooms
