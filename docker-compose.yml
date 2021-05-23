@@ -69,7 +69,7 @@ services:
       MYSQL_DATABASE: anondraw
     volumes:
 #      - ./data/mysql:/var/lib/mysql
-      - ./data/configs:/etc/mysql/conf.d
+      - ./data/configs:/etc/mysql/conf.d:ro
       - ./data/start:/docker-entrypoint-initdb.d
 
   adminer:
