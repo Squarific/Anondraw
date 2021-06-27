@@ -4,20 +4,12 @@ FROM node:current AS build
 
 WORKDIR /usr/src/app
 
-
-# Copy files for yarn
-COPY ./src/client/package.json ./client/
-COPY ./src/client/.yarn/ ./client/.yarn/
-COPY ./src/client/.pnp.js ./client/
-COPY ./src/client/.yarnrc.yml ./client/
-COPY ./src/client/yarn.lock ./client/
-
 # Copy the build files
-COPY ./src/common/configs/config.json ./common/configs/
-COPY ./src/common/config.js ./common/
+COPY ./src/common/configs/config.json ./common/configs/config.json
+COPY ./src/common/config.js ./common/config.js
 COPY ./src/client ./client
 
-WORKDIR /usr/src/app/client/
+WORKDIR /usr/src/app/client
 # Build client
 RUN yarn run build
 

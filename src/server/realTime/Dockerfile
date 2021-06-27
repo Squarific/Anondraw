@@ -1,7 +1,6 @@
 # Base inmage
 FROM node:current AS build
 
-WORKDIR /usr/src/app
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -10,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev
+
+WORKDIR /usr/src/app
 
 # Copy all file
 COPY ./src/server/realTime/ ./server/realTime/

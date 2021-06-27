@@ -2,7 +2,7 @@ version: "3.7"
 services:
   # client:
   #   build:
-  #     context: ./
+  #     context: ../
   #     dockerfile: ./src/client/Dockerfile
   #   ports:
   #       - "4300:80"
@@ -10,15 +10,15 @@ services:
   #     - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   client-nginx-only:
     build:
-      context: ./
-      dockerfile: ./src/client/DockerfileNginxOnly
+      context: ../
+      dockerfile: ./src/client/Dockerfile.nginx-only
     ports:
         - "4300:80"
     volumes:
       - ./src/client/dist:/usr/share/nginx/html
   realtime:
     build:
-      context: ./
+      context: ../
       dockerfile: ./src/server/realTime/Dockerfile
     ports:
       - "0.0.0.0:2556:2556"
@@ -26,7 +26,7 @@ services:
       - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   playerserver:
     build:
-      context: ./
+      context: ../
       dockerfile: ./src/server/playerServer/Dockerfile
     depends_on:
         - "database"
@@ -37,7 +37,7 @@ services:
       - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   brightfox:
     build:
-      context: ./
+      context: ../
       dockerfile: ./src/server/brightfoxServer/Dockerfile
     depends_on:
       - "database"
@@ -47,7 +47,7 @@ services:
       - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   loadbalancer:
     build:
-      context: ./
+      context: ../
       dockerfile: ./src/server/loadBalancer/Dockerfile
     ports:
       - "0.0.0.0:3552:3552"
@@ -55,7 +55,7 @@ services:
       - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   imageserver:
     build:
-      context: ./
+      context: ../
       dockerfile: ./src/server/imageServer/Dockerfile
     ports:
       - "0.0.0.0:5552:5552"
@@ -68,10 +68,9 @@ services:
       MYSQL_ROOT_PASSWORD: yQ25*IwPYS*7
       MYSQL_DATABASE: anondraw
     volumes:
-#      - ./data/mysql:/var/lib/mysql
-      - ./data/configs:/etc/mysql/conf.d:ro
-      - ./data/start:/docker-entrypoint-initdb.d
-
+#      - ./databases/mysql:/var/lib/mysql
+      - ./databases/configs:/etc/mysql/conf.d:ro
+      - ./databases/start:/docker-entrypoint-initdb.d
   adminer:
     image: adminer
     ports:
