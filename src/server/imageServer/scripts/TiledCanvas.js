@@ -82,7 +82,7 @@ TiledCanvas.prototype.drawFunctions = {
             return;
         }
 
-        context.fillStyle = drawing.color;
+        context.fillStyle = drawing.color.toRgbString();
         context.fillRect(drawing.x, drawing.y, drawing.size, drawing.size);
 
         if (tiledCanvas) {
