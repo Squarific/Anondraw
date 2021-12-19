@@ -14,7 +14,7 @@ Have questions you need answered? Feel free to email filipsmetsbelgium@gmail.com
 Or alternativly join this discord: https://discord.gg/MDXx8qE
 Or use the issues
 
-## Before starting development
+## Starting
 
 Start by pulling all the submodules with: `git submodule update --init --recursive`
 
