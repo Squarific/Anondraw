@@ -14,9 +14,9 @@ Have questions you need answered? Feel free to email filipsmetsbelgium@gmail.com
 Or alternativly join this discord: https://discord.gg/MDXx8qE
 Or use the issues
 
-## Running
+## Before starting development
 
-Start by pulling all the submodules with git submodule update --init --recursive
+Start by pulling all the submodules with: `git submodule update --init --recursive`
 
 ### Option 1: Docker
 
