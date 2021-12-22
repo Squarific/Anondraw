@@ -4,11 +4,15 @@ let path = require("path")
 function readConfig() {
     let dir = __dirname, last;
     let env = process.env.NODE_ENV;
-    let base = "./configs/config.json";
-
+    
+    let baseDir = "./configs/";
+    let base = "config.json";
+    
     if (env) {
         base = env.trim().toLowerCase() + "." + base;
     }
+    
+    base = baseDir + base;
 
     while (dir !== last) {
         let file = path.join(dir, base);
