@@ -2,5 +2,5 @@
 	path = src/server/brightfoxServer/libs/Brightfox-server
 	url = git@github.com:Squarific/Brightfox-server.git
 [submodule "src/server/simpleRealtimeBroadcast"]
-	path = src/server/simpleRealtimeBroadcast
+	path = src/server/simpleBroadcast/libraries/simpleRealtimeBroadcast
 	url = git@github.com:Squarific/simple-realtime-broadcast.git
