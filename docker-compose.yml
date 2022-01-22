@@ -61,6 +61,14 @@ services:
       - "0.0.0.0:5552:5552"
     volumes:
       - ./src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
+  simplerealtimebroadcast:
+    build:
+        context: ./
+        dockerfile: ./src/server/simplerealtimebroadcast
+    ports:
+      - "0.0.0.0:7552:8080"
+    volumes:
+      - /src/common/certs:/etc/letsencrypt/live/direct.anondraw.com
   database:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
