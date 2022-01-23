@@ -64,7 +64,7 @@ services:
   simplerealtimebroadcast:
     build:
         context: ./
-        dockerfile: ./src/server/simplerealtimebroadcast
+        dockerfile: ./src/server/simpleBroadcast/libraries/simpleRealtimeBroadcast/Dockerfile
     ports:
       - "0.0.0.0:7552:8080"
     volumes:
