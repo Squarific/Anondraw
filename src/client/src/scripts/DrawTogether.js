@@ -176,7 +176,7 @@ DrawTogether.prototype.defaultSettings = {
 DrawTogether.prototype.defaultUserSettings = [{
 	title: "Mute chat",
 	type: "boolean",
-	value: false
+	value: true
 }, {
 	title: "Show tips",
 	type: "boolean",
