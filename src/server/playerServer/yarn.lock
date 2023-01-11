@@ -320,21 +320,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonwebtoken@npm:^8.5.1":
-  version: 8.5.1
-  resolution: "jsonwebtoken@npm:8.5.1"
+"jsonwebtoken@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "jsonwebtoken@npm:9.0.0"
   dependencies:
     jws: ^3.2.2
-    lodash.includes: ^4.3.0
-    lodash.isboolean: ^3.0.3
-    lodash.isinteger: ^4.0.4
-    lodash.isnumber: ^3.0.3
-    lodash.isplainobject: ^4.0.6
-    lodash.isstring: ^4.0.1
-    lodash.once: ^4.0.0
+    lodash: ^4.17.21
     ms: ^2.1.1
-    semver: ^5.6.0
-  checksum: ea44bbb7a7abab87eee57711a04093a2a04a5757faa3253f521327b840e07eff751986ed6c20985886c5aaa86245a833aa1eeda6eacb0c3fa9ea4e7074cdb0c3
+    semver: ^7.3.8
+  checksum: 8b2f16708501d17b56e2a12941a0a8963dbdcda4ea5f8329e2bf1ce235e0dc546e2b7ef0c28ba941e7bda3a2b4ee8b3838e6d8c10c269be4dbee8ca1b744c310
   languageName: node
   linkType: hard
 
@@ -366,48 +360,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.includes@npm:^4.3.0":
-  version: 4.3.0
-  resolution: "lodash.includes@npm:4.3.0"
-  checksum: 20d6b1bf7841a4eb21bcb124641a1d5fb368e3c86fb8834d80149ec92caef67f3bf316405e4ec309591f0a83e461cebb7b43b2b57d00fd45d1eb3009fe13be97
-  languageName: node
-  linkType: hard
-
-"lodash.isboolean@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "lodash.isboolean@npm:3.0.3"
-  checksum: e5b7a921f47759773266e66664e4a54f2438cc213fe336c5b96321d4328ebb2785e939bbcd07b29d5a20cdc6140d471abae1e94cdfb25937dc91ddc5150f41a0
-  languageName: node
-  linkType: hard
-
-"lodash.isinteger@npm:^4.0.4":
-  version: 4.0.4
-  resolution: "lodash.isinteger@npm:4.0.4"
-  checksum: a29551cc9aaaf24cc4fdd7ce1734c7a19c748c704f061ef079f6026dc9666ac10e8ae08e4f0cd3aeb6094e20be043a7402c72ce70cbae9ea6ecce67ad997332c
-  languageName: node
-  linkType: hard
-
-"lodash.isnumber@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "lodash.isnumber@npm:3.0.3"
-  checksum: a33b10bf57dd27b32aac0bb4159d3f40db6b294095f42d7ff9f966a004932cdcc12417bf0750a9d3ac0c62690dd020d7d227b05ef486a8c9061963acf2ea3fad
-  languageName: node
-  linkType: hard
-
-"lodash.isplainobject@npm:^4.0.6":
-  version: 4.0.6
-  resolution: "lodash.isplainobject@npm:4.0.6"
-  checksum: 72a114b610ec32a42b8cb47680d1729398caea0ee0631c0b220b97b21e7df19312377cb077acb6593bf6c5abdbdb43c530aa66b440e30d53324986d386808cd0
-  languageName: node
-  linkType: hard
-
-"lodash.isstring@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "lodash.isstring@npm:4.0.1"
-  checksum: 20c46960b74fd63c27b534f1725cd4141ac19b35c7250affee37c8b7899b1a4c5e9820becfafe571a4d48cd4c86206ee03c2e93fe943dbeab82ddd5cab710540
-  languageName: node
-  linkType: hard
-
 "lodash.keyby@npm:^4.6.0":
   version: 4.6.0
   resolution: "lodash.keyby@npm:4.6.0"
@@ -429,17 +381,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.once@npm:^4.0.0":
-  version: 4.1.1
-  resolution: "lodash.once@npm:4.1.1"
-  checksum: 236e00ca5f20304fab5b38aa3aedb034959153dae6edf33d7f9b00406ced8f24ed232a74f1200505d9049165ceea2ce1256199e1683b0a25e9de89091d4b13c2
-  languageName: node
-  linkType: hard
-
 "lodash.partialright@npm:^4.2.1":
   version: 4.2.1
   resolution: "lodash.partialright@npm:4.2.1"
   checksum: 6ccfd047e32f447b736e4cc16e412d12e2c1a3b2762a74ff9c6edc7061f3059231a123811a61fb0a1d9609c82606683286a23cb80dc7ab6d2cf3b4bc1fa90203
+  languageName: node
+  linkType: hard
+
+"lodash@npm:^4.17.21":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21"
+  checksum: 4983720b9abca930a4a46f18db163d7dad8dd00dbed6db0cc7b499b33b717cce69f80928b27bbb1ff2cbd3b19d251ee90669a8b5ea466072ca81c2ebe91e7468
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "lru-cache@npm:6.0.0"
+  dependencies:
+    yallist: ^4.0.0
+  checksum: b8b78353d2391c0f135cdc245c4744ad41c2efb1a6d98f31bc57a2cf48ebf02de96e4876657c3026673576bf1f1f61fc3fdd77ab00ad1ead737537bf17d8019d
   languageName: node
   linkType: hard
 
@@ -568,7 +529,7 @@ __metadata:
   resolution: "playerserver@workspace:."
   dependencies:
     crypto-js: ^3.1.5
-    jsonwebtoken: ^8.5.1
+    jsonwebtoken: ^9.0.0
     mailgun-send: ^1.0.2
     mysql: ^2.7.0
     socket.io: ^2.0.3
@@ -648,12 +609,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^5.6.0":
-  version: 5.7.1
-  resolution: "semver@npm:5.7.1"
+"semver@npm:^7.3.8":
+  version: 7.3.8
+  resolution: "semver@npm:7.3.8"
+  dependencies:
+    lru-cache: ^6.0.0
   bin:
-    semver: ./bin/semver
-  checksum: 06ff0ed753ebf741b7602be8faad620d6e160a2cb3f61019d00d919c8bca141638aa23c34da779b8595afdc9faa3678bfbb5f60366b6a4f65f98cf86605bbcdb
+    semver: bin/semver.js
+  checksum: cfb9c2101dae4ee93c415471f48797c750174d65def4e06ff691bf910194cc6ca92793e597be8302175ceb640100a3da36451e7656320da53b51167eeaf11eb5
   languageName: node
   linkType: hard
 
@@ -799,6 +762,13 @@ __metadata:
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: 37ee522a3e9fb9b143a400c30b21dc122aa8c9c9411c6afae1005a4617dc20a21765c114d544e37a6bb60c2733dd8ee0a44ed9e80d884ac78cccd30b5e0ab0da
+  languageName: node
+  linkType: hard
+
+"yallist@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "yallist@npm:4.0.0"
+  checksum: a2960ef879af6ee67a76cae29bac9d8bffeb6e9e366c217dbd21464e7fce071933705544724f47e90ba5209cf9c83c17d5582dd04415d86747a826b2a231efb8
   languageName: node
   linkType: hard
 
