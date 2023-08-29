@@ -1,5 +1,10 @@
 # Base inmage
-FROM node:current AS build
+FROM node:18 AS build
+# With 'node:current', the build process for the binaries of 'node-canvas' fails.
+# Currently there doesn't seem to be binaries for this version of Linux + Node v20 + node-canvas.
+# The latest release of node-canvas [v2.11.2](https://github.com/Automattic/node-canvas/releases/tag/v2.11.2)
+#   should work, but it doesn't. The binaries can't be built when running the build process in `yarn install`.
+# We will probably get a proper binary for Node v20 later, so for now we'll fallback to Node v18.
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
